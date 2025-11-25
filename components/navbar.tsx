@@ -2,9 +2,9 @@ import Link from "next/link";
 import Image from "next/image";
 
 const navItems = [
-  { label: "[ Home ]", href: "/about#home" },
-  { label: "[ About ]", href: "/about#about" },
-  { label: "[ Work ]", href: "/about#work" },
+  { label: "[ Home ]", href: "/#home" },
+  { label: "[ About ]", href: "/#about" },
+  { label: "[ Work ]", href: "/#work" },
   { label: "[ Contact ]", href: "/contact" },
 ];
 
@@ -14,7 +14,7 @@ export function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-16 py-4">
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/logo.png" // or /logo.png
+            src="/Logo.png"
             alt="Your logo"
             width={42}
             height={42}
