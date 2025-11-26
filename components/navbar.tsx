@@ -19,11 +19,11 @@ export function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-8 md:px-12">
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/Logo.png"
+            src="/Logo.svg"
             alt="Your logo"
             width={40}
             height={40}
-            className="h-10 w-10 rounded-full"
+            className="h-10 w-10"
             priority
           />
           <div className="flex flex-col leading-tight">
