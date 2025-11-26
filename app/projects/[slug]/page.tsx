@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import groq from "groq";
 
-import { Navbar } from "@/components/navbar";
-import { ProjectGallery } from "@/components/project-gallery";
-import type { Project } from "@/components/projects-section";
+import { Navbar } from "@/components/layout/navbar";
+import { ProjectGallery } from "@/components/projects/project-gallery";
+import type { Project } from "@/components/sections/projects-section";
 import { isSanityConfigured, sanityClient } from "@/lib/sanity";
 import { PortableText, type PortableTextReactComponents } from "@portabletext/react";
 import type { PortableTextBlock } from "@portabletext/types";
