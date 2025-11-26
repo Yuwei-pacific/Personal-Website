@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Github, Linkedin, Twitter } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -51,108 +51,55 @@ export function Hero() {
             <Link href="mailto:snowtime200801@gmail.com">Contact me</Link>
           </Button>
         </div>
+      </div>
 
-        <div className="flex flex-col gap-2 border-t border-black/50 pt-6">
-          <div className="flex flex-col gap-1 text-neutral-900 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-1 items-center gap-3">
-              <span className="text-lg font-semibold uppercase tracking-wide">
+      <div className="absolute inset-x-0 bottom-10 mx-auto w-full max-w-6xl">
+        <div className="flex flex-col gap-2 sm:gap-3">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <p className="text-xl font-semibold uppercase tracking-[0.2em] text-neutral-900 sm:text-2xl">
                 Get in touch
-              </span>
-              <svg
-                className="h-4 w-5 text-neutral-800"
-                viewBox="0 0 24 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M1 6H18"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M13 1L18 6L13 11"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span className="hidden flex-1 border-b border-neutral-800 sm:block" />
+              </p>
+              <Image
+                src="/arrow_1.svg"
+                alt="Directional arrow"
+                width={29}
+                height={22}
+                className="h-[18px] w-auto sm:h-[22px]"
+              />
             </div>
-            <div className="flex items-center gap-4 text-black sm:pl-4">
+            <div className="h-px flex-1 bg-neutral-900" />
+            <div className="flex items-center gap-3 sm:gap-4">
               <Link
-                href="https://www.instagram.com"
-                className="transition hover:opacity-70"
-                aria-label="Instagram"
+                href="https://github.com/yuwei-11"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-900/80 text-neutral-900 transition hover:bg-neutral-900 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="4" />
-                  <circle cx="8.5" cy="8.5" r="1.25" fill="currentColor" />
-                  <circle cx="12" cy="12" r="3.5" />
-                </svg>
+                <Github className="h-5 w-5" />
               </Link>
               <Link
-                href="https://www.linkedin.com"
-                className="transition hover:opacity-70"
+                href="https://linkedin.com/in/yuwei-chen-924985243"
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="LinkedIn"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-neutral-900/80 text-neutral-900 transition hover:bg-neutral-900 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <path
-                    d="M8 17V10M8 7.5h.01M12 17v-3.5c0-1.5.75-2.5 2.25-2.5 1.25 0 1.75.75 1.75 2.5V17"
-                    stroke="white"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                  />
-                </svg>
+                <Linkedin className="h-5 w-5" />
               </Link>
               <Link
-                href="mailto:snowtime200801@gmail.com"
-                className="transition hover:opacity-70"
-                aria-label="Email"
+                href="https://twitter.com/yuwei_chen"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Twitter"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-900/80 text-neutral-900 transition hover:bg-neutral-900 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <circle cx="12" cy="12" r="9" />
-                  <path
-                    d="M7.5 10.5 12 13l4.5-2.5"
-                    stroke="white"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M8 9h8"
-                    stroke="white"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                  />
-                </svg>
+                <Twitter className="h-5 w-5" />
               </Link>
             </div>
           </div>
-          <div className="text-sm text-neutral-800">
-            snowtime200801@gmail.com
-          </div>
+          <p className="text-sm text-neutral-700 sm:text-base">snowtime200801@gmail.com</p>
         </div>
       </div>
     </section>
