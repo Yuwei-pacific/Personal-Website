@@ -16,7 +16,7 @@ export function Hero() {
           fill
           priority
           sizes="100vw"
-          className="select-none object-contain object-[50%_10%] opacity-50 blur-md"
+          className="select-none object-contain object-center sm:object-[50%_10%] opacity-50 blur-md"
         />
       </div>
 

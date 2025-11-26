@@ -4,7 +4,7 @@ export function AboutSection() {
   return (
     <section
       id="about"
-      className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-14 sm:gap-8 sm:py-16 scroll-mt-24"
+      className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-12 sm:gap-8 sm:px-6 sm:py-16 scroll-mt-24"
     >
       <div className="flex flex-col gap-3">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">
@@ -19,11 +19,11 @@ export function AboutSection() {
           clarity, rhythm, and small moments of delight.
         </p>
       </div>
-      <div className="flex flex-col gap-4 md:flex-row md:items-start">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
         <div className="w-full md:w-1/3">
-          <div className="rounded-2xl border border-neutral-200 bg-white/70 p-5 shadow-sm backdrop-blur">
-            <p className="text-sm font-semibold text-neutral-900">Portrait</p>
-            <div className="relative mt-3 aspect-[4/5] overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100">
+          <div className="rounded-2xl border border-neutral-200 bg-white/70 p-4 shadow-sm backdrop-blur sm:p-5">
+            {/* <p className="text-sm font-semibold text-neutral-900">Portrait</p> */}
+            <div className="relative aspect-[4/5] overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100">
               <Image
                 src="/Profile_Yuwei.webp"
                 alt="Portrait of Yuwei Li"
@@ -36,7 +36,7 @@ export function AboutSection() {
           </div>
         </div>
         <div className="flex w-full flex-col gap-4 md:w-2/3">
-          <div className="rounded-2xl border border-neutral-200 bg-white/70 p-5 shadow-sm backdrop-blur">
+          <div className="rounded-2xl border border-neutral-200 bg-white/70 p-4 shadow-sm backdrop-blur sm:p-5">
             <div className="flex items-center gap-3">
               <p className="text-base font-semibold uppercase tracking-[0.2em] text-neutral-900">
                 Education
@@ -83,7 +83,7 @@ export function AboutSection() {
               </div>
             </div>
           </div>
-          <div className="rounded-2xl border border-neutral-200 bg-white/70 p-5 shadow-sm backdrop-blur">
+          <div className="rounded-2xl border border-neutral-200 bg-white/70 p-4 shadow-sm backdrop-blur sm:p-5">
             <div className="flex items-center gap-3">
               <p className="text-base font-semibold uppercase tracking-[0.2em] text-neutral-900">
                 EXPERIENCE

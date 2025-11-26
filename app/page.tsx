@@ -14,31 +14,15 @@ export const metadata = {
 const PROJECTS_QUERY = groq`*[_type == "project"] | order(_createdAt desc){
   _id,
   title,
-  role,
-  description
+  summary,
+  year,
+  projectType,
+  description,
+  "slug": slug.current
 }`;
 
 export default async function HomePage() {
-  let projects: Project[] = [
-    {
-      _id: "sample-1",
-      title: "Portfolio Platform",
-      role: "Product design · Frontend build",
-      description: "Responsive experience showcasing design systems, animations, and storytelling.",
-    },
-    {
-      _id: "sample-2",
-      title: "Data Visualization Lab",
-      role: "Interaction design",
-      description: "Experimental visual narratives combining charts, motion, and UI micro-interactions.",
-    },
-    {
-      _id: "sample-3",
-      title: "Learning Toolkit",
-      role: "UX · UI",
-      description: "Modular components for online courses, focused on clarity and retention.",
-    },
-  ];
+  let projects: Project[] = [];
 
   if (isSanityConfigured() && sanityClient) {
     try {
