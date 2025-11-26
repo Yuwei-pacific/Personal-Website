@@ -8,8 +8,11 @@ import { ProjectGallery } from "@/components/project-gallery";
 import type { Project } from "@/components/projects-section";
 import { isSanityConfigured, sanityClient } from "@/lib/sanity";
 import { PortableText, type PortableTextReactComponents } from "@portabletext/react";
+import type { PortableTextBlock } from "@portabletext/types";
 
-type Block = { _type?: string; children?: Array<{ text?: string }> };
+type Block = PortableTextBlock & {
+  children?: Array<{ text?: string }>;
+};
 
 type ProjectDetail = Project & {
   role?: string[];
@@ -74,7 +77,7 @@ const portableComponents: Partial<PortableTextReactComponents> = {
 };
 
 const renderBlocks = (blocks?: Block[]) =>
-  blocks?.length ? <PortableText value={blocks as Block[]} components={portableComponents} /> : null;
+  blocks?.length ? <PortableText value={blocks as PortableTextBlock[]} components={portableComponents} /> : null;
 
 async function fetchProject(rawSlug?: string): Promise<ProjectDetail | null> {
   const slug = rawSlug?.toString().trim();
