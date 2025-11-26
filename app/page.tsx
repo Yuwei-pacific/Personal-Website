@@ -1,7 +1,7 @@
-import { AboutSection } from "@/components/about-section";
-import { Hero } from "@/components/hero";
-import { Navbar } from "@/components/navbar";
-import { ProjectsSection, type Project } from "@/components/projects-section";
+import { AboutSection } from "@/components/sections/about-section";
+import { Hero } from "@/components/sections/hero";
+import { Navbar } from "@/components/layout/navbar";
+import { ProjectsSection, type Project } from "@/components/sections/projects-section";
 import { isSanityConfigured, sanityClient } from "@/lib/sanity";
 import groq from "groq";
 
