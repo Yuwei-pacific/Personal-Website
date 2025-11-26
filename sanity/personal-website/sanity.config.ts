@@ -1,6 +1,5 @@
 import {defineConfig} from 'sanity'
 import {structureTool} from 'sanity/structure'
-import {visionTool} from '@sanity/vision'
 import {schemaTypes} from './schemaTypes'
 
 export default defineConfig({
@@ -10,7 +9,8 @@ export default defineConfig({
   projectId: 'ubdc9y57',
   dataset: 'personal_website',
 
-  plugins: [structureTool(), visionTool()],
+  // Only structure tool is included to avoid pulling in the vision plugin during app build
+  plugins: [structureTool()],
 
   schema: {
     types: schemaTypes,
