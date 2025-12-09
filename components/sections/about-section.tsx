@@ -14,7 +14,7 @@ export function AboutSection() {
           I blend design systems, interaction, and frontend craft.
         </h2>
         <p className="max-w-3xl text-base text-neutral-700 sm:text-lg">
-          Product designer and frontend builder based in Milan. I enjoy shaping expressive, practical
+          Communication Designer and Frontend Developer based in Milan. I enjoy shaping expressive, practical
           experiences—from early concepts and prototyping to polished interfaces that ship. I value
           clarity, rhythm, and small moments of delight.
         </p>
@@ -123,20 +123,25 @@ export function AboutSection() {
         <p className="mt-2 text-sm text-neutral-700">Core design and delivery stack I use across projects.</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {[
-            "Product Design",
-            "Interaction Design",
-            "Design Systems",
-            "Prototyping",
+            "Adove XD",
+            "Adobe Photoshop",
+            "Adobe Illustrator",
+            "Adobe Premiere Pro",
+            "Adobe After Effects",
             "Figma",
             "Protopie",
             "Next.js",
             "React",
             "TypeScript",
             "Tailwind CSS",
-            "shadcn/ui",
-            "Framer Motion",
+            "User Experience Design",
+            "User Interface Design",
+            "Branding Dsign",
+            "Communication Design",
+            "Interaction Design",
+            "Design Systems",
+            "Prototyping",
             "User Research",
-            "Usability Testing",
           ].map((item) => (
             <span
               key={item}
