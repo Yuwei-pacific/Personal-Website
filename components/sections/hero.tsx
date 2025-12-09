@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { ArrowRight, Github, Linkedin, Twitter } from "lucide-react";
+import { ArrowRight, Github, Linkedin, Instagram } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -71,7 +71,7 @@ export function Hero() {
             <div className="h-px flex-1 bg-neutral-900" />
             <div className="flex items-center gap-3 sm:gap-4">
               <Link
-                href="https://github.com/yuwei-11"
+                href="https://github.com/Yuwei-pacific"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub"
@@ -80,7 +80,7 @@ export function Hero() {
                 <Github className="h-5 w-5" />
               </Link>
               <Link
-                href="https://linkedin.com/in/yuwei-chen-924985243"
+                href="https://www.linkedin.com/in/yuwei081/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
@@ -89,17 +89,17 @@ export function Hero() {
                 <Linkedin className="h-5 w-5" />
               </Link>
               <Link
-                href="https://twitter.com/yuwei_chen"
+                href="https://www.instagram.com/yuwei081/"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Twitter"
+                aria-label="Instagram"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-900/80 text-neutral-900 transition hover:bg-neutral-900 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
               >
-                <Twitter className="h-5 w-5" />
+                <Instagram className="h-5 w-5" />
               </Link>
             </div>
           </div>
-          <p className="text-sm text-neutral-700 sm:text-base">snowtime200801@gmail.com</p>
+          <p className="text-sm text-neutral-700 sm:text-base">Mail: snowtime200801@gmail.com</p>
         </div>
       </div>
     </section>
