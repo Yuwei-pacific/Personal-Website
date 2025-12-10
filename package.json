@@ -20,7 +20,8 @@
     "react-dom": "19.2.0",
     "sanity": "^4.18.0",
     "tailwind-merge": "^2.5.5",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "tone": "^15.0.4"
   },
   "devDependencies": {
     "@types/node": "^20",
