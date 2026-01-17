@@ -24,32 +24,51 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   const [activeIndex, setActiveIndex] = useState(-1);
   const [zoom, setZoom] = useState(1);
 
+  // Close modal handler
+  const closeModal = useCallback(() => {
+    setActive(null);
+    setActiveIndex(-1);
+    setZoom(1);
+  }, []);
+
+  // Navigation handlers
+  const handlePrevious = useCallback(() => {
+    if (!items) return;
+    const newIndex = activeIndex === 0 ? items.length - 1 : activeIndex - 1;
+    setActiveIndex(newIndex);
+    setActive(items[newIndex]);
+    setZoom(1);
+  }, [activeIndex, items]);
+
+  const handleNext = useCallback(() => {
+    if (!items) return;
+    const newIndex = activeIndex === items.length - 1 ? 0 : activeIndex + 1;
+    setActiveIndex(newIndex);
+    setActive(items[newIndex]);
+    setZoom(1);
+  }, [activeIndex, items]);
+
+  // Keyboard navigation
   useEffect(() => {
     if (!active || !items) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setActive(null);
-        setActiveIndex(-1);
+        closeModal();
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
-        const newIndex = activeIndex === 0 ? items.length - 1 : activeIndex - 1;
-        setActiveIndex(newIndex);
-        setActive(items[newIndex]);
-        setZoom(1);
+        handlePrevious();
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
-        const newIndex = activeIndex === items.length - 1 ? 0 : activeIndex + 1;
-        setActiveIndex(newIndex);
-        setActive(items[newIndex]);
-        setZoom(1);
+        handleNext();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [active, activeIndex, items]);
+  }, [active, items, closeModal, handlePrevious, handleNext]);
 
+  // Prevent body scroll when modal is open
   useEffect(() => {
     if (active) {
       const original = document.body.style.overflow;
@@ -68,23 +87,9 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
     setZoom(1);
   };
 
-  const handlePrevious = useCallback(() => {
-    const newIndex = activeIndex === 0 ? items.length - 1 : activeIndex - 1;
-    setActiveIndex(newIndex);
-    setActive(items[newIndex]);
-    setZoom(1);
-  }, [activeIndex, items]);
-
-  const handleNext = useCallback(() => {
-    const newIndex = activeIndex === items.length - 1 ? 0 : activeIndex + 1;
-    setActiveIndex(newIndex);
-    setActive(items[newIndex]);
-    setZoom(1);
-  }, [activeIndex, items]);
-
   const gridColsClass = columns === "3"
-    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-    : "grid-cols-1 sm:grid-cols-2";
+    ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+    : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
 
   return (
     <section className={`space-y-4 ${fullWidth ? "w-screen -mx-4 px-4 sm:-mx-6 sm:px-6" : ""}`}>
@@ -93,7 +98,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
         <p className="text-sm text-neutral-400">Click to view details • Use arrow keys to navigate • ESC to close</p>
       </div>
       <div className="h-px w-full bg-gradient-to-r from-transparent via-white/50 to-transparent" />
-      <div className={`grid gap-3 ${gridColsClass}`}>
+      <div className={`grid gap-2 ${gridColsClass}`}>
         {items.map((item, idx) => (
           <figure
             key={idx}
@@ -104,6 +109,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
                 type="button"
                 onClick={() => handleImageClick(item, idx)}
                 className="block w-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
+                aria-label={`View ${item.alt || `image ${idx + 1}`}`}
               >
                 <Image
                   src={item.url}
@@ -111,7 +117,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
                   width={item.width}
                   height={item.height}
                   className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.08]"
-                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                  sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                   priority={idx < 2}
                 />
               </button>
@@ -120,16 +126,14 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
         ))}
       </div>
 
-      {active
+      {active && typeof window !== "undefined"
         ? createPortal(
           <div
             className="fixed inset-0 z-[9999] m-0 flex items-center justify-center bg-black/95 backdrop-blur-md p-4 animate-in fade-in duration-200"
-            onClick={() => {
-              setActive(null);
-              setActiveIndex(-1);
-            }}
+            onClick={closeModal}
             aria-modal="true"
             role="dialog"
+            aria-label="Image gallery modal"
           >
             <div
               className="relative max-h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl bg-neutral-900 shadow-2xl ring-1 ring-white/10 animate-in zoom-in-95 duration-200"
@@ -137,47 +141,46 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
             >
               {/* Header with close button */}
               <div className="flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent px-4 py-3">
-                <div className="flex-1" />
+                {/* Zoom Controls */}
+                <div className="flex items-center gap-2 rounded-full bg-black/50 px-2 py-1 text-white shadow hover:bg-black/70 transition-colors">
+                  <button
+                    type="button"
+                    className="px-2 py-1 text-sm hover:bg-white/10 transition-colors"
+                    onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}
+                    title="Zoom out"
+                    aria-label="Zoom out"
+                  >
+                    −
+                  </button>
+                  <span className="text-xs font-semibold min-w-[45px] text-center">{Math.round(zoom * 100)}%</span>
+                  <button
+                    type="button"
+                    className="px-2 py-1 text-sm hover:bg-white/10 transition-colors"
+                    onClick={() => setZoom((z) => Math.min(3, z + 0.1))}
+                    title="Zoom in"
+                    aria-label="Zoom in"
+                  >
+                    +
+                  </button>
+                  <button
+                    type="button"
+                    className="px-2 py-1 text-xs hover:bg-white/10 transition-colors"
+                    onClick={() => setZoom(1)}
+                    title="Reset zoom"
+                    aria-label="Reset zoom"
+                  >
+                    ↺
+                  </button>
+                </div>
                 <p className="text-sm text-white/80">{activeIndex + 1} / {items.length}</p>
                 <button
                   type="button"
-                  onClick={() => {
-                    setActive(null);
-                    setActiveIndex(-1);
-                  }}
-                  className="rounded-full bg-black/50 hover:bg-black/70 text-white px-3 py-1 ml-4 text-sm font-medium shadow transition-colors"
+                  onClick={closeModal}
+                  className="rounded-full bg-black/50 hover:bg-black/70 text-white px-3 py-1 text-sm font-medium shadow transition-colors"
                   title="Close (ESC)"
+                  aria-label="Close modal"
                 >
                   ✕
-                </button>
-              </div>
-
-              {/* Zoom Controls */}
-              <div className="absolute left-4 top-16 flex items-center gap-2 rounded-full bg-black/50 px-2 py-1 text-white shadow hover:bg-black/70 transition-colors z-10">
-                <button
-                  type="button"
-                  className="px-2 py-1 text-sm hover:bg-white/10 transition-colors"
-                  onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}
-                  title="Zoom out"
-                >
-                  −
-                </button>
-                <span className="text-xs font-semibold min-w-[45px] text-center">{Math.round(zoom * 100)}%</span>
-                <button
-                  type="button"
-                  className="px-2 py-1 text-sm hover:bg-white/10 transition-colors"
-                  onClick={() => setZoom((z) => Math.min(3, z + 0.1))}
-                  title="Zoom in"
-                >
-                  +
-                </button>
-                <button
-                  type="button"
-                  className="px-2 py-1 text-xs hover:bg-white/10 transition-colors"
-                  onClick={() => setZoom(1)}
-                  title="Reset"
-                >
-                  ↺
                 </button>
               </div>
 
@@ -208,6 +211,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
                 onClick={handlePrevious}
                 className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/50 hover:bg-black/70 text-white p-2 shadow transition-all hover:scale-110 hidden sm:flex items-center justify-center"
                 title="Previous (←)"
+                aria-label="Previous image"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -218,6 +222,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
                 onClick={handleNext}
                 className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/50 hover:bg-black/70 text-white p-2 shadow transition-all hover:scale-110 hidden sm:flex items-center justify-center"
                 title="Next (→)"
+                aria-label="Next image"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
