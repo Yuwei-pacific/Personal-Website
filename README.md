@@ -1,16 +1,15 @@
 # Personal Website
 
-A modern personal portfolio website built with **Next.js 16**, **TypeScript**, **Tailwind CSS**, and **Sanity CMS**. Features include a guitar fretboard trainer app and a dynamic project gallery.
-
 ## 🚀 Tech Stack
 
-| Technology | Purpose |
-|------------|---------|
-| [Next.js 16](https://nextjs.org/) | React framework with Turbopack |
-| [TypeScript](https://www.typescriptlang.org/) | Type-safe JavaScript |
-| [Tailwind CSS](https://tailwindcss.com/) | Utility-first CSS framework |
-| [Sanity CMS](https://www.sanity.io/) | Headless content management system |
-| [Tone.js](https://tonejs.org/) | Web audio synthesis (Guitar Trainer) |
+
+| Technology                                    | Purpose                              |
+| --------------------------------------------- | ------------------------------------ |
+| [Next.js 16](https://nextjs.org/)             | React framework with Turbopack       |
+| [TypeScript](https://www.typescriptlang.org/) | Type-safe JavaScript                 |
+| [Tailwind CSS](https://tailwindcss.com/)      | Utility-first CSS framework          |
+| [Sanity CMS](https://www.sanity.io/)          | Headless content management system   |
+| [Tone.js](https://tonejs.org/)                | Web audio synthesis (Guitar Trainer) |
 
 ## 📁 Project Structure
 
@@ -117,7 +116,8 @@ cd sanity/personal-website
 npm run dev
 ```
 
-Open your browser:
+Open browser:
+
 - **Website**: [http://localhost:3000](http://localhost:3000)
 - **Sanity Studio**: [http://localhost:3333](http://localhost:3333)
 
@@ -143,11 +143,13 @@ npm start         # Start production Sanity Studio
 ## 🎨 Components
 
 ### Pages
+
 - **`/`** - Home page with hero, about, and projects sections
 - **`/guitar-fretboard-trainer`** - Interactive guitar learning tool
 - **`/projects/[slug]`** - Dynamic project detail pages
 
 ### Key Components
+
 - **Navbar** - Navigation with responsive menu
 - **Hero Section** - Landing section with call-to-action
 - **About Section** - Personal introduction
@@ -179,11 +181,12 @@ Refer to [Next.js Deployment Documentation](https://nextjs.org/docs/app/building
 
 Required environment variables:
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `NEXT_PUBLIC_SANITY_PROJECT_ID` | Sanity project ID | `ubdc9y57` |
-| `NEXT_PUBLIC_SANITY_DATASET` | Sanity dataset name | `production` |
-| `NEXT_PUBLIC_SANITY_API_VERSION` | Sanity API version | `2024-01-01` |
+
+| Variable                         | Description         | Example      |
+| -------------------------------- | ------------------- | ------------ |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID`  | Sanity project ID   | `ubdc9y57`   |
+| `NEXT_PUBLIC_SANITY_DATASET`     | Sanity dataset name | `production` |
+| `NEXT_PUBLIC_SANITY_API_VERSION` | Sanity API version  | `2024-01-01` |
 
 ## 🛠️ Development Tips
 
@@ -205,8 +208,8 @@ This project is private and for personal use.
 
 ## 👤 Author
 
-**Yuwei**
+**Yuwei Li**
 
-- Portfolio: [Your Website URL]
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
+- Portfolio: [https://yuweili.site](https://yuweili.site)
+- GitHub: [@Yuwei-pacific](https://github.com/Yuwei-pacific)
+- Email: snowtime200801@gmail.com
