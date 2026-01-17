@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 
 type GalleryItem = {
@@ -23,12 +23,26 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   const [active, setActive] = useState<GalleryItem | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [zoom, setZoom] = useState(1);
+  const [offsetX, setOffsetX] = useState(0);
+  const [offsetY, setOffsetY] = useState(0);
+  const [isResettingOffset, setIsResettingOffset] = useState(false);
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+  const lastDistanceRef = useRef<number | null>(null);
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const offsetXRef = useRef(0);
+  const offsetYRef = useRef(0);
+  const dragInitialOffsetRef = useRef({ x: 0, y: 0 });
+  const rafRef = useRef<number | null>(null);
+  const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Close modal handler
   const closeModal = useCallback(() => {
     setActive(null);
     setActiveIndex(-1);
     setZoom(1);
+    setOffsetX(0);
+    setOffsetY(0);
   }, []);
 
   // Navigation handlers
@@ -38,6 +52,8 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
     setActiveIndex(newIndex);
     setActive(items[newIndex]);
     setZoom(1);
+    setOffsetX(0);
+    setOffsetY(0);
   }, [activeIndex, items]);
 
   const handleNext = useCallback(() => {
@@ -46,6 +62,8 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
     setActiveIndex(newIndex);
     setActive(items[newIndex]);
     setZoom(1);
+    setOffsetX(0);
+    setOffsetY(0);
   }, [activeIndex, items]);
 
   // Keyboard navigation
@@ -79,6 +97,225 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
     }
   }, [active]);
 
+  // Wheel zoom handler (trackpad)
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (!active || !imageContainerRef.current?.contains(e.target as Node)) return;
+
+      e.preventDefault();
+      setZoom((z) => {
+        // 使用指数计算使缩放更跟手，deltaY越大，缩放变化越大
+        const scale = Math.exp(-e.deltaY * 0.001);
+        const newZoom = z * scale;
+        return Math.max(0.5, Math.min(3, newZoom));
+      });
+    };
+
+    if (active) {
+      window.addEventListener("wheel", handleWheel, { passive: false });
+      return () => window.removeEventListener("wheel", handleWheel);
+    }
+  }, [active]);
+
+  // Touch zoom handler (pinch on mobile)
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      if (!active || e.touches.length !== 2) {
+        lastDistanceRef.current = null;
+        return;
+      }
+
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY
+      );
+      lastDistanceRef.current = distance;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!active || e.touches.length !== 2 || lastDistanceRef.current === null) return;
+
+      e.preventDefault();
+
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY
+      );
+
+      // 计算距离变化的增量，然后应用到缩放
+      const scale = distance / lastDistanceRef.current;
+      // 使用幂函数使缩放更线性和可控
+      const zoomFactor = Math.pow(scale, 0.5);
+      setZoom((z) => {
+        const newZoom = z * zoomFactor;
+        return Math.max(0.5, Math.min(3, newZoom));
+      });
+
+      lastDistanceRef.current = distance;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!active || e.touches.length !== 0) return;
+      lastDistanceRef.current = null;
+    };
+
+    if (active) {
+      window.addEventListener("touchstart", handleTouchStart, { passive: true });
+      window.addEventListener("touchmove", handleTouchMove, { passive: false });
+      window.addEventListener("touchend", handleTouchEnd, { passive: true });
+      return () => {
+        window.removeEventListener("touchstart", handleTouchStart);
+        window.removeEventListener("touchmove", handleTouchMove);
+        window.removeEventListener("touchend", handleTouchEnd);
+      };
+    }
+  }, [active]);
+
+  // Reset offset when zoom returns to normal
+  useEffect(() => {
+    if (zoom <= 1) {
+      setIsResettingOffset(true);
+      setOffsetX(0);
+      setOffsetY(0);
+      offsetXRef.current = 0;
+      offsetYRef.current = 0;
+      // Remove animation class after transition completes
+      if (resetTimeoutRef.current) {
+        clearTimeout(resetTimeoutRef.current);
+      }
+      resetTimeoutRef.current = setTimeout(() => {
+        setIsResettingOffset(false);
+      }, 200);
+    } else if (zoom > 1) {
+      // When starting to zoom, immediately clear resetting state
+      setIsResettingOffset(false);
+      if (resetTimeoutRef.current) {
+        clearTimeout(resetTimeoutRef.current);
+      }
+    }
+  }, [zoom]);
+
+  // Drag handler for moving zoomed image
+  useEffect(() => {
+    if (!imageContainerRef.current) return;
+
+    const container = imageContainerRef.current;
+    let pendingOffsetX = 0;
+    let pendingOffsetY = 0;
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (zoom <= 1) return;
+
+      isDraggingRef.current = true;
+      dragStartRef.current = { x: e.clientX, y: e.clientY };
+      dragInitialOffsetRef.current = { x: offsetXRef.current, y: offsetYRef.current };
+      pendingOffsetX = offsetXRef.current;
+      pendingOffsetY = offsetYRef.current;
+      container.style.cursor = "grabbing";
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (zoom <= 1 || e.touches.length !== 1) return;
+
+      isDraggingRef.current = true;
+      dragStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      dragInitialOffsetRef.current = { x: offsetXRef.current, y: offsetYRef.current };
+      pendingOffsetX = offsetXRef.current;
+      pendingOffsetY = offsetYRef.current;
+    };
+
+    const updateOffset = () => {
+      offsetXRef.current = pendingOffsetX;
+      offsetYRef.current = pendingOffsetY;
+      setOffsetX(pendingOffsetX);
+      setOffsetY(pendingOffsetY);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current || zoom <= 1) return;
+
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+
+      pendingOffsetX = dragInitialOffsetRef.current.x + dx;
+      pendingOffsetY = dragInitialOffsetRef.current.y + dy;
+
+      // Cancel previous raf if exists
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      // Schedule update
+      rafRef.current = requestAnimationFrame(updateOffset);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDraggingRef.current || zoom <= 1 || e.touches.length !== 1) return;
+
+      e.preventDefault();
+
+      const dx = e.touches[0].clientX - dragStartRef.current.x;
+      const dy = e.touches[0].clientY - dragStartRef.current.y;
+
+      pendingOffsetX = dragInitialOffsetRef.current.x + dx;
+      pendingOffsetY = dragInitialOffsetRef.current.y + dy;
+
+      // Cancel previous raf if exists
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      // Schedule update
+      rafRef.current = requestAnimationFrame(updateOffset);
+    };
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false;
+      container.style.cursor = zoom > 1 ? "grab" : "default";
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      // Final update
+      offsetXRef.current = pendingOffsetX;
+      offsetYRef.current = pendingOffsetY;
+      setOffsetX(pendingOffsetX);
+      setOffsetY(pendingOffsetY);
+    };
+
+    const handleTouchEnd = () => {
+      isDraggingRef.current = false;
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      // Final update
+      offsetXRef.current = pendingOffsetX;
+      offsetYRef.current = pendingOffsetY;
+      setOffsetX(pendingOffsetX);
+      setOffsetY(pendingOffsetY);
+    };
+
+    container.addEventListener("mousedown", handleMouseDown);
+    container.addEventListener("touchstart", handleTouchStart, { passive: true });
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      container.removeEventListener("mousedown", handleMouseDown);
+      container.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("touchend", handleTouchEnd);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, [zoom]);
+
   if (!items?.length) return null;
 
   const handleImageClick = (item: GalleryItem, idx: number) => {
@@ -88,14 +325,14 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   };
 
   const gridColsClass = columns === "3"
-    ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+    ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4"
     : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
 
   return (
     <section className={`space-y-4 ${fullWidth ? "w-screen -mx-4 px-4 sm:-mx-6 sm:px-6" : ""}`}>
       <div className="text-center">
         <h2 className="text-3xl font-bold text-white mb-2">{title}</h2>
-        <p className="text-sm text-neutral-400">Click to view details • Use arrow keys to navigate • ESC to close</p>
+        {/* <p className="text-sm text-neutral-400">Click to view details • Use arrow keys to navigate • ESC to close</p> */}
       </div>
       <div className="h-px w-full bg-gradient-to-r from-transparent via-white/50 to-transparent" />
       <div className={`grid gap-2 ${gridColsClass}`}>
@@ -129,7 +366,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
       {active && typeof window !== "undefined"
         ? createPortal(
           <div
-            className="fixed inset-0 z-[9999] m-0 flex items-center justify-center bg-black/95 backdrop-blur-md p-4 animate-in fade-in duration-200"
+            className="fixed inset-0 z-[9999] m-0 flex items-center justify-center bg-black/95 backdrop-blur-md p-4 animate-in fade-in duration-200 touch-none"
             onClick={closeModal}
             aria-modal="true"
             role="dialog"
@@ -185,17 +422,25 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
               </div>
 
               {/* Main Image */}
-              <div className="flex max-h-[90vh] items-center justify-center overflow-auto bg-black/40 relative">
+              <div
+                ref={imageContainerRef}
+                className="flex md:max-h-[90vh] max-h-[calc(100vh-200px)] items-center justify-center overflow-hidden bg-black/40 relative select-none"
+                style={{
+                  cursor: zoom > 1 ? "grab" : "default",
+                }}
+              >
                 {active.url && active.width && active.height && (
                   <Image
                     src={active.url}
                     alt={active.alt || ""}
                     width={active.width}
                     height={active.height}
-                    className="h-full w-full origin-center object-contain transition-transform duration-200"
+                    className={`h-full w-full origin-center object-contain pointer-events-none ${isResettingOffset ? "transition-transform duration-200" : ""
+                      }`}
                     sizes="90vw"
                     priority
-                    style={{ transform: `scale(${zoom})` }}
+                    draggable={false}
+                    style={{ transform: `scale(${zoom}) translate(${offsetX / zoom}px, ${offsetY / zoom}px)` }}
                   />
                 )}
               </div>

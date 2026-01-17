@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const navItems = [
   { label: "[ Home ]", href: "/#home" },
@@ -13,9 +13,31 @@ const navItems = [
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Show navbar when scrolling up or at the top
+      if (currentScrollY < lastScrollY || currentScrollY < 50) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        // Hide navbar when scrolling down
+        setIsVisible(false);
+        setOpen(false); // Close mobile menu when hiding
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   return (
-    <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
+    <header className={`sticky top-0 z-30 border-b bg-background/80 backdrop-blur transition-transform duration-300 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-8 md:px-12">
         <Link href="/" className="flex items-center gap-2">
           <Image
