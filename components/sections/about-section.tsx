@@ -20,7 +20,7 @@ export function AboutSection() {
         </p>
       </div>
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
-        <div className="w-full md:w-1/3">
+        <div className="scroll-animate w-full md:w-1/3">
           <div className="rounded-2xl border border-neutral-200 bg-white/70 p-4 shadow-sm backdrop-blur sm:p-5">
             {/* <p className="text-sm font-semibold text-neutral-900">Portrait</p> */}
             <div className="relative aspect-[4/5] overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100">
@@ -36,7 +36,7 @@ export function AboutSection() {
           </div>
         </div>
         <div className="flex w-full flex-col gap-4 md:w-2/3">
-          <div className="rounded-2xl border border-neutral-200 bg-white/70 p-4 shadow-sm backdrop-blur sm:p-5">
+          <div className="scroll-animate rounded-2xl border border-neutral-200 bg-white/70 p-4 shadow-sm backdrop-blur sm:p-5">
             <div className="flex items-center gap-3">
               <p className="text-base font-semibold uppercase tracking-[0.2em] text-neutral-900">
                 Education
@@ -83,7 +83,7 @@ export function AboutSection() {
               </div>
             </div>
           </div>
-          <div className="rounded-2xl border border-neutral-200 bg-white/70 p-4 shadow-sm backdrop-blur sm:p-5">
+          <div className="scroll-animate rounded-2xl border border-neutral-200 bg-white/70 p-4 shadow-sm backdrop-blur sm:p-5">
             <div className="flex items-center gap-3">
               <p className="text-base font-semibold uppercase tracking-[0.2em] text-neutral-900">
                 EXPERIENCE
@@ -106,7 +106,7 @@ export function AboutSection() {
           </div>
         </div>
       </div>
-      <div className="rounded-2xl border border-neutral-200 bg-white/70 p-5 shadow-sm backdrop-blur">
+      <div className="scroll-animate rounded-2xl border border-neutral-200 bg-white/70 p-5 shadow-sm backdrop-blur">
         <div className="flex items-center gap-3">
           <p className="text-base font-semibold uppercase tracking-[0.2em] text-neutral-900">
             Skills & Tools
