@@ -21,6 +21,7 @@ type Block = PortableTextBlock & {
 type ProjectDetail = Project & {
   role?: string[]; // 职责列表
   tags?: string[]; // 标签列表
+  contributors?: string[]; // 贡献者列表
   client?: string; // 客户名称
   location?: string; // 项目地点
   links?: { label?: string; url?: string }[]; // 相关链接
@@ -37,6 +38,7 @@ const PROJECT_QUERY = groq`*[_type == "project" && slug.current == $slug][0]{
   summary,
   role,
   tags,
+  contributors,
   description,
   "slug": slug.current,
   year,
@@ -152,7 +154,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
         />
       </div>
 
-      <main className="mx-auto flex w-full max-w-9xl bg-neutral-100 flex-col gap-12 px-4 py-12 sm:px-40 sm:py-16">
+      <main className="mx-auto flex w-full max-w-9xl bg-neutral-100 flex-col gap-12 px-4 py-12 sm:px-40 sm:py-4">
         {/* 顶部浅色信息区 */}
         <section className="flex flex-col gap-4">
           {/* 返回链接：回到项目列表 */}
@@ -194,21 +196,47 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
                 <p className="text-lg leading-7 text-neutral-700">{project.summary || project.description}</p>
               </div>
 
-              {/* 角色与标签：按需渲染为胶囊样式的集合 */}
-              {(project.role?.length || project.tags?.length) && (
-                <div className="flex flex-wrap gap-2 text-xs text-neutral-700">
-                  {project.role?.map((r: string) => (
-                    <span key={r} className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1 font-medium">
-                      {r}
-                    </span>
-                  ))}
-                  {project.tags?.map((tag: string) => (
-                    <span key={tag} className="rounded-full border border-neutral-200 px-3 py-1">
-                      {tag}
-                    </span>
-                  ))}
+              {/* 角色：单独一行列出 */}
+              {project.role?.length ? (
+                <div className="space-y-2 border-t border-neutral-200 pt-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Roles</p>
+                  <div className="flex flex-wrap gap-2">
+                    {project.role.map((r: string) => (
+                      <span key={r} className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1 text-xs font-medium">
+                        {r}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              )}
+              ) : null}
+
+              {/* 技能标签：单独一行列出 */}
+              {project.tags?.length ? (
+                <div className="space-y-2 border-t border-neutral-200 pt-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Skills</p>
+                  <div className="flex flex-wrap gap-2">
+                    {project.tags.map((tag: string) => (
+                      <span key={tag} className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-700">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {/* 贡献者：单独一行列出 */}
+              {project.contributors?.length ? (
+                <div className="space-y-2 border-t border-neutral-200 pt-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Contributors</p>
+                  <div className="flex flex-wrap gap-2">
+                    {project.contributors.map((c: string) => (
+                      <span key={c} className="rounded-full border border-neutral-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </>
           ) : (
             // 查无项目：友好的兜底提示与引导
