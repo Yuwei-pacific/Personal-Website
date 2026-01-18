@@ -3,7 +3,7 @@ import { isSanityConfigured, sanityClient } from '@/lib/sanity'
 import groq from 'groq'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = 'https://yuweili.com'
+    const baseUrl = 'https://yuweili.site'
 
     // 静态页面
     const routes = [
