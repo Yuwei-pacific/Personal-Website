@@ -1,9 +1,11 @@
 "use client";
 
+// 图片画廊组件：支持点击放大、拖拽移动、滚轮/双指缩放、键盘导航
 import Image from "next/image";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 
+// 画廊图片条目类型：包含 URL、替代文本、说明及尺寸
 type GalleryItem = {
   url?: string;
   alt?: string;
@@ -12,6 +14,11 @@ type GalleryItem = {
   height?: number;
 };
 
+// 组件入参：
+// - items：图片列表
+// - title：标题文案
+// - columns：网格列数（2/3）
+// - fullWidth：是否整屏宽度展示
 type ProjectGalleryProps = {
   items?: GalleryItem[];
   title?: string;
@@ -20,12 +27,16 @@ type ProjectGalleryProps = {
 };
 
 export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWidth }: ProjectGalleryProps) {
+  // 模态状态：当前激活图片与索引
   const [active, setActive] = useState<GalleryItem | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
+  // 交互状态：缩放比例与平移偏移量
   const [zoom, setZoom] = useState(1);
   const [offsetX, setOffsetX] = useState(0);
   const [offsetY, setOffsetY] = useState(0);
+  // 是否处于“自动回中心”的过渡动画状态
   const [isResettingOffset, setIsResettingOffset] = useState(false);
+  // 容器与交互辅助引用：避免闭包导致的值不更新
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const lastDistanceRef = useRef<number | null>(null);
   const isDraggingRef = useRef(false);
@@ -37,6 +48,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Close modal handler
+  // 关闭模态：重置状态与位置
   const closeModal = useCallback(() => {
     setActive(null);
     setActiveIndex(-1);
@@ -46,6 +58,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   }, []);
 
   // Navigation handlers
+  // 上一张：循环到最后一张，始终重置缩放与偏移
   const handlePrevious = useCallback(() => {
     if (!items) return;
     const newIndex = activeIndex === 0 ? items.length - 1 : activeIndex - 1;
@@ -56,6 +69,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
     setOffsetY(0);
   }, [activeIndex, items]);
 
+  // 下一张：循环到第一张，始终重置缩放与偏移
   const handleNext = useCallback(() => {
     if (!items) return;
     const newIndex = activeIndex === items.length - 1 ? 0 : activeIndex + 1;
@@ -67,6 +81,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   }, [activeIndex, items]);
 
   // Keyboard navigation
+  // 键盘导航：Esc 关闭、左右方向键切换
   useEffect(() => {
     if (!active || !items) return;
 
@@ -87,6 +102,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   }, [active, items, closeModal, handlePrevious, handleNext]);
 
   // Prevent body scroll when modal is open
+  // 打开模态时禁用 body 滚动，关闭后恢复
   useEffect(() => {
     if (active) {
       const original = document.body.style.overflow;
@@ -98,6 +114,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   }, [active]);
 
   // Wheel zoom handler (trackpad)
+  // 触控板/滚轮缩放：指数缩放更跟手；可根据体验调整系数
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (!active || !imageContainerRef.current?.contains(e.target as Node)) return;
@@ -118,6 +135,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   }, [active]);
 
   // Touch zoom handler (pinch on mobile)
+  // 双指缩放：根据两指距离变化计算缩放比例，并用幂函数平滑处理
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
       if (!active || e.touches.length !== 2) {
@@ -176,6 +194,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   }, [active]);
 
   // Reset offset when zoom returns to normal
+  // 缩放回到 ≤1 时自动将偏移恢复到中心，并短暂启用过渡动画
   useEffect(() => {
     if (zoom <= 1) {
       setIsResettingOffset(true);
@@ -200,6 +219,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   }, [zoom]);
 
   // Drag handler for moving zoomed image
+  // 拖拽处理：使用 requestAnimationFrame 合并更新，避免频繁重渲染；通过 ref 保存最新偏移
   useEffect(() => {
     if (!imageContainerRef.current) return;
 
@@ -318,12 +338,14 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
 
   if (!items?.length) return null;
 
+  // 点击缩略图打开模态并重置缩放
   const handleImageClick = (item: GalleryItem, idx: number) => {
     setActive(item);
     setActiveIndex(idx);
     setZoom(1);
   };
 
+  // 网格列数：在不同断点下的响应式列数
   const gridColsClass = columns === "3"
     ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4"
     : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
@@ -332,7 +354,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
     <section className={`space-y-4 ${fullWidth ? "w-screen -mx-4 px-4 sm:-mx-6 sm:px-6" : ""}`}>
       <div className="text-center">
         <h2 className="text-3xl font-bold text-white mb-2">{title}</h2>
-        {/* <p className="text-sm text-neutral-400">Click to view details • Use arrow keys to navigate • ESC to close</p> */}
+        {/* 交互提示：点击查看详情、方向键切换、ESC关闭（如需显示可取消注释）*/}
       </div>
       <div className="h-px w-full bg-gradient-to-r from-transparent via-white/50 to-transparent" />
       <div className={`grid gap-2 ${gridColsClass}`}>
@@ -377,8 +399,10 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header with close button */}
+              {/* 顶部工具栏：缩放控制、进度显示与关闭按钮 */}
               <div className="flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent px-4 py-3">
                 {/* Zoom Controls */}
+                {/* 缩放按钮：-、+、重置 */}
                 <div className="flex items-center gap-2 rounded-full bg-black/50 px-2 py-1 text-white shadow hover:bg-black/70 transition-colors">
                   <button
                     type="button"
@@ -422,6 +446,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
               </div>
 
               {/* Main Image */}
+              {/* 主图区域：缩放与偏移通过 transform 控制；拖拽绑定在容器上 */}
               <div
                 ref={imageContainerRef}
                 className="flex md:max-h-[90vh] max-h-[calc(100vh-200px)] items-center justify-center overflow-hidden bg-black/40 relative select-none"
@@ -446,11 +471,13 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
               </div>
 
               {/* Caption */}
+              {/* 图片说明：在底部渐变背景上居中显示 */}
               {active.caption && (
                 <p className="bg-gradient-to-t from-black/50 to-transparent px-5 py-3 text-sm text-neutral-200 text-center">{active.caption}</p>
               )}
 
               {/* Navigation Buttons */}
+              {/* 左右导航按钮：显示在中线两侧，支持悬停放大 */}
               <button
                 type="button"
                 onClick={handlePrevious}
