@@ -154,7 +154,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
         />
       </div>
 
-      <main className="mx-auto flex w-full max-w-9xl bg-neutral-100 flex-col gap-12 px-4 py-12 sm:px-40 sm:py-4">
+      <main className="mx-auto flex w-full max-w-9xl bg-neutral-100 flex-col gap-12 px-4 py-12 sm:px-40 sm:py-">
         {/* 顶部浅色信息区 */}
         <section className="flex flex-col gap-4">
           {/* 返回链接：回到项目列表 */}
