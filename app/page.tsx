@@ -9,8 +9,8 @@ import { isSanityConfigured, sanityClient } from "@/lib/sanity";
 
 // 页面元数据：设置首页标题与描述（用于 SEO）
 export const metadata = {
-  title: "Yuwei Li",
-  description: "Portfolio of Yuwei Li.",
+  title: "Home",
+  description: "Welcome to Yuwei Li's portfolio - Explore my design and development projects.",
 };
 
 // GROQ 查询：从 Sanity 获取项目列表，按创建时间倒序
