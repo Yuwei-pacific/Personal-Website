@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd, websiteSchema } from "@/components/seo/json-ld";
+import { AnimationProvider } from "@/components/providers/animation-provider";
 import "./globals.css";
 
 // 配置无衬线字体（Geist Sans）：
@@ -86,8 +87,10 @@ export default function RootLayout({
         // 将两种字体的 CSS 变量应用到 body，并设置全局基础样式
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background text-foreground antialiased`}
       >
-        {/* 页面内容插槽：各路由页面将被渲染到此 */}
-        {children}
+        <AnimationProvider>
+          {/* 页面内容插槽：各路由页面将被渲染到此 */}
+          {children}
+        </AnimationProvider>
         {/* Vercel Analytics 组件：用于监测页面性能与用户行为 */}
         <Analytics />
         {/* Vercel Speed Insights 组件：用于性能分析 */}

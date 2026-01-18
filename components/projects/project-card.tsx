@@ -1,6 +1,7 @@
 // 单个项目卡片：支持无 slug 的静态卡片和有 slug 的可点击卡片
 import Link from "next/link";
 import type { Project } from "./types";
+import { HoverPreview } from "./hover-preview";
 
 type ProjectCardProps = {
     project: Project;
@@ -45,16 +46,19 @@ export function ProjectCard({ project, slug }: ProjectCardProps) {
 
     // 无 slug：返回静态不可点击卡片
     if (!slug) {
-        return <div>{cardContent}</div>;
+        return <div className="scroll-animate">{cardContent}</div>;
     }
 
     // 有 slug：外层 Link 包裹，跳转到项目详情页
     return (
-        <Link
-            href={`/projects/${slug}`}
-        // className="block focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:ring-offset-2 focus:ring-offset-neutral-950"
-        >
-            {cardContent}
-        </Link>
+        <>
+            <HoverPreview project={project} />
+            <Link
+                href={`/projects/${slug}`}
+                className="scroll-animate block"
+            >
+                {cardContent}
+            </Link>
+        </>
     );
 }

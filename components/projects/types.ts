@@ -8,4 +8,11 @@ export type Project = {
     projectType?: string;
     description?: string;
     slug?: { current?: string } | string;
+    coverImage?: {
+        asset?: {
+            _ref?: string;
+            url?: string;
+        };
+        alt?: string;
+    };
 };

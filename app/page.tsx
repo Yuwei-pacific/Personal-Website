@@ -21,7 +21,14 @@ const PROJECTS_QUERY = groq`*[_type == "project"] | order(_createdAt desc){
   year,
   projectType,
   description,
-  "slug": slug.current
+  "slug": slug.current,
+  "coverImage": coverImage{
+    asset->{
+      _ref,
+      url
+    },
+    alt
+  }
 }`;
 
 export default async function HomePage() {
