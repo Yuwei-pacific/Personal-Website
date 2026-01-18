@@ -6,7 +6,7 @@ import groq from "groq";
 
 import { Navbar } from "@/components/layout/navbar";
 import { ProjectGallery } from "@/components/projects/project-gallery";
-import type { Project } from "@/components/sections/projects-section";
+import type { Project } from "@/components/projects/types";
 import { isSanityConfigured, sanityClient } from "@/lib/sanity";
 import { PortableText, type PortableTextReactComponents } from "@portabletext/react";
 import type { PortableTextBlock } from "@portabletext/types";
@@ -196,12 +196,12 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
               {/* 角色与标签：按需渲染为胶囊样式的集合 */}
               {(project.role?.length || project.tags?.length) && (
                 <div className="flex flex-wrap gap-2 text-xs text-neutral-700">
-                  {project.role?.map((r) => (
+                  {project.role?.map((r: string) => (
                     <span key={r} className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1 font-medium">
                       {r}
                     </span>
                   ))}
-                  {project.tags?.map((tag) => (
+                  {project.tags?.map((tag: string) => (
                     <span key={tag} className="rounded-full border border-neutral-200 px-3 py-1">
                       {tag}
                     </span>
@@ -258,7 +258,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
               <section className="space-y-3">
                 <h2 className="text-lg font-semibold text-white">Links</h2>
                 <ul className="space-y-2 text-sm text-neutral-200">
-                  {project.links.map((link, idx) => (
+                  {project.links.map((link: { label?: string; url?: string }, idx: number) => (
                     <li key={idx}>
                       {link.url ? (
                         <a href={link.url} className="text-emerald-300 underline hover:text-emerald-200">

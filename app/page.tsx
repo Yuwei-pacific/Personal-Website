@@ -1,17 +1,17 @@
 // 首页页面：依赖的展示组件与 Sanity 客户端
+import groq from "groq";
 import { AboutSection } from "@/components/sections/about-section";
 import { Hero } from "@/components/sections/hero";
 import { Navbar } from "@/components/layout/navbar";
-import { ProjectsSection, type Project } from "@/components/sections/projects-section";
+import { ProjectsSection } from "@/components/sections/projects-section";
+import type { Project } from "@/components/projects/types";
 import { isSanityConfigured, sanityClient } from "@/lib/sanity";
-import groq from "groq";
 
 // 页面元数据：设置首页标题与描述（用于 SEO）
 export const metadata = {
   title: "Yuwei Li",
   description: "Portfolio of Yuwei Li.",
 };
-
 
 // GROQ 查询：从 Sanity 获取项目列表，按创建时间倒序
 const PROJECTS_QUERY = groq`*[_type == "project"] | order(_createdAt desc){
