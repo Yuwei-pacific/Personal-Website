@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: '/api/',
         },
-        sitemap: 'https://yuweili.com/sitemap.xml',
+        sitemap: 'https://yuweili.site/sitemap.xml',
     }
 }

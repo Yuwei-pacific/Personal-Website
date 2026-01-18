@@ -22,7 +22,7 @@ const geistMono = Geist_Mono({
 
 // 页面默认元数据：用于 SEO 与浏览器/系统图标
 export const metadata: Metadata = {
-  metadataBase: new URL('https://yuweili.com'),
+  metadataBase: new URL('https://yuweili.site'),
   title: {
     default: "Yuwei Li | Designer & Developer Portfolio",
     template: "%s | Yuwei Li",
@@ -34,13 +34,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://yuweili.com",
+    url: "https://yuweili.site",
     title: "Yuwei Li | Designer & Developer Portfolio",
     description: "Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.",
     siteName: "Yuwei Li Portfolio",
     images: [
       {
-        url: "https://yuweili.com/Profile_Yuwei.webp",
+        url: "https://yuweili.site/Profile_Yuwei.webp",
         width: 1200,
         height: 630,
         alt: "Yuwei Li Portfolio",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     title: "Yuwei Li | Designer & Developer Portfolio",
     description: "Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.",
     creator: "@yuweili",
-    images: ["https://yuweili.com/Profile_Yuwei.webp"],
+    images: ["https://yuweili.site/Profile_Yuwei.webp"],
   },
   robots: {
     index: true,
