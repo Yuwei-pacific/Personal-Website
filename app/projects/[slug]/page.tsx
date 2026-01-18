@@ -196,33 +196,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
                 <p className="text-lg leading-7 text-neutral-700">{project.summary || project.description}</p>
               </div>
 
-              {/* 角色：单独一行列出 */}
-              {project.role?.length ? (
-                <div className="space-y-2 border-t border-neutral-200 pt-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Roles</p>
-                  <div className="flex flex-wrap gap-2">
-                    {project.role.map((r: string) => (
-                      <span key={r} className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1 text-xs font-medium">
-                        {r}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-
-              {/* 技能标签：单独一行列出 */}
-              {project.tags?.length ? (
-                <div className="space-y-2 border-t border-neutral-200 pt-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Skills</p>
-                  <div className="flex flex-wrap gap-2">
-                    {project.tags.map((tag: string) => (
-                      <span key={tag} className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-700">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
 
               {/* 贡献者：单独一行列出 */}
               {project.contributors?.length ? (
@@ -266,13 +239,43 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
               </div>
             )}
 
+            {/* 角色：单独一行列出 */}
+            {project.role?.length ? (
+              <div className="space-y-2 border-t border-neutral-700 pt-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Roles</p>
+                <div className="flex flex-wrap gap-2">
+                  {project.role.map((r: string) => (
+                    <span key={r} className="rounded-full border border-neutral-400 px-3 py-1 text-sm font-medium text-neutral-400">
+                      {r}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {/* 技能标签：单独一行列出 */}
+            {project.tags?.length ? (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Skills</p>
+                <div className="flex flex-wrap gap-2">
+                  {project.tags.map((tag: string) => (
+                    <span key={tag} className="rounded-full border border-neutral-400 px-3 py-1 text-sm font-medium text-neutral-400">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             {project.body?.length ? (
               // 项目详情（富文本）：通过 PortableText 渲染，支持标题、列表、加粗、链接等
-              <section className="space-y-3">
-                <h2 className="text-lg font-semibold text-white">Details</h2>
+              <section className="space-y-3 border-t border-neutral-700 pt-3">
+                <h2 className="text-2xl font-semibold text-white">Details:</h2>
                 <div className="space-y-3 text-neutral-400">{renderBlocks(project.body)}</div>
               </section>
             ) : null}
+
+
 
             {project.myContribution?.length ? (
               // 我的贡献（富文本）：与详情同样的渲染配置
