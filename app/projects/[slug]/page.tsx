@@ -13,6 +13,7 @@ import type { PortableTextBlock } from "@portabletext/types";
 
 // PortableText 块类型定义
 type Block = PortableTextBlock & {
+  _type: string; // 确保 _type 不为 undefined
   children?: Array<{ text?: string }>;
 };
 
