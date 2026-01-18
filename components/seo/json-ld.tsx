@@ -30,8 +30,18 @@ export const websiteSchema = {
     name: 'Yuwei Li Portfolio',
     url: 'https://yuweili.com',
     description: 'Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.',
+    image: 'https://yuweili.com/Profile_Yuwei.webp',
+    logo: 'https://yuweili.com/Logo.svg',
     author: {
         '@type': 'Person',
         name: 'Yuwei Li',
+    },
+    publisher: {
+        '@type': 'Organization',
+        name: 'Yuwei Li',
+        logo: {
+            '@type': 'ImageObject',
+            url: 'https://yuweili.com/Logo.svg',
+        },
     },
 }

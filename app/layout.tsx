@@ -38,12 +38,21 @@ export const metadata: Metadata = {
     title: "Yuwei Li | Designer & Developer Portfolio",
     description: "Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.",
     siteName: "Yuwei Li Portfolio",
+    images: [
+      {
+        url: "https://yuweili.com/Profile_Yuwei.webp",
+        width: 1200,
+        height: 630,
+        alt: "Yuwei Li Portfolio",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Yuwei Li | Designer & Developer Portfolio",
     description: "Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.",
     creator: "@yuweili",
+    images: ["https://yuweili.com/Profile_Yuwei.webp"],
   },
   robots: {
     index: true,
