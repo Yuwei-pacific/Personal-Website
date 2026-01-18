@@ -71,6 +71,13 @@ export const project = defineType({
       },
     }),
 
+    defineField({
+      name: "contributors",
+      title: "Contributors",
+      type: "array",
+      of: [{ type: "string" }],
+      options: { layout: "tags" },
+    }),
 
     defineField({
       name: "role",

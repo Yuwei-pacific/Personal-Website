@@ -19,7 +19,7 @@ export function Navbar() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       // Show navbar when scrolling up or at the top
       if (currentScrollY < lastScrollY || currentScrollY < 50) {
         setIsVisible(true);
@@ -28,7 +28,7 @@ export function Navbar() {
         setIsVisible(false);
         setOpen(false); // Close mobile menu when hiding
       }
-      
+
       setLastScrollY(currentScrollY);
     };
 
