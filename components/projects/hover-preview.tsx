@@ -11,8 +11,37 @@ interface HoverPreviewProps {
 export function HoverPreview({ project }: HoverPreviewProps) {
     const [isVisible, setIsVisible] = useState(false);
     const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
+        // 检测是否为移动设备
+        const checkMobile = () => {
+            const isTouchDevice = () => {
+                const nav = navigator as any;
+                return (
+                    (typeof window !== 'undefined' &&
+                        ('ontouchstart' in window ||
+                            (nav.maxTouchPoints || 0) > 0 ||
+                            (nav.msMaxTouchPoints || 0) > 0)) ||
+                    window.matchMedia('(hover: none)').matches
+                );
+            };
+
+            setIsMobile(isTouchDevice());
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => {
+            window.removeEventListener('resize', checkMobile);
+        };
+    }, []);
+
+    useEffect(() => {
+        // 如果是移动设备，不附加事件监听
+        if (isMobile) return;
+
         // 获取所有项目卡片的链接
         const cardLinks = document.querySelectorAll('a[href*="/projects/"]');
 
@@ -53,10 +82,10 @@ export function HoverPreview({ project }: HoverPreviewProps) {
                 link.removeEventListener('mouseleave', handleMouseLeave as EventListener);
             });
         };
-    }, [project.slug]);
+    }, [project.slug, isMobile]);
 
     // 如果没有封面图片或没有 slug，不显示预览
-    if (!project.coverImage?.asset?.url || !project.slug) {
+    if (!project.coverImage?.asset?.url || !project.slug || isMobile) {
         return null;
     }
 
