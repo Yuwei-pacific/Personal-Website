@@ -1,6 +1,7 @@
 // 全局布局：配置字体、默认元数据与基础样式
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 // 配置无衬线字体（Geist Sans）：
@@ -41,6 +42,8 @@ export default function RootLayout({
       >
         {/* 页面内容插槽：各路由页面将被渲染到此 */}
         {children}
+        {/* Vercel Analytics 组件：用于监测页面性能与用户行为 */}
+        <Analytics />
       </body>
     </html>
   );
