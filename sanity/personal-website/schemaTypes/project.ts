@@ -31,23 +31,6 @@ export const project = defineType({
       validation: (Rule) => Rule.max(240),
     }),
 
-    // 正文
-    defineField({
-      name: "body",
-      title: "Description body",
-      type: "array",
-      of: [{ type: "block" }],
-      description: "Full content: context, process, outcome.",
-    }),
-
-    defineField({
-      name: "coverImage",
-      title: "Cover image",
-      type: "image",
-      options: { hotspot: true },
-      validation: (Rule) => Rule.required(),
-    }),
-
     defineField({
       name: "year",
       title: "Year",
@@ -95,6 +78,103 @@ export const project = defineType({
       options: { layout: "tags" },
     }),
 
+
+    defineField({
+      name: "client",
+      title: "Client / Organization",
+      type: "string",
+    }),
+    defineField({
+      name: "location",
+      title: "Location",
+      type: "string",
+    }),
+
+    defineField({
+      name: "coverImage",
+      title: "Cover image",
+      type: "image",
+      options: { hotspot: true },
+      validation: (Rule) => Rule.required(),
+    }),
+
+    defineField({
+      name: "carousel",
+      title: "Carousel",
+      type: "array",
+      of: [
+        {
+          type: "object",
+          fields: [
+            {
+              name: "image",
+              title: "Image",
+              type: "image",
+              options: { hotspot: true },
+            },
+            {
+              name: "alt",
+              title: "Alt text",
+              type: "string",
+            },
+            {
+              name: "caption",
+              title: "Caption",
+              type: "string",
+            },
+          ],
+          preview: {
+            select: { media: "image", title: "caption" },
+          },
+        },
+      ],
+    }),
+
+    // 正文
+    defineField({
+      name: "body",
+      title: "Description body",
+      type: "array",
+      of: [{ type: "block" }],
+      description: "Full content: context, process, outcome.",
+    }),
+
+    defineField({
+      name: "myContribution",
+      title: "My contribution",
+      type: "array",
+      of: [{ type: "block" }],
+    }),
+
+    defineField({
+      name: "isFeatured",
+      title: "Featured project",
+      type: "boolean",
+      initialValue: false,
+    }),
+
+    defineField({
+      name: "order",
+      title: "Manual order",
+      type: "number",
+      description: "Lower numbers appear first in lists.",
+    }),
+
+    defineField({
+      name: "links",
+      title: "Links",
+      type: "array",
+      of: [
+        {
+          type: "object",
+          fields: [
+            { name: "label", title: "Label", type: "string" },
+            { name: "url", title: "URL", type: "url" },
+          ],
+        },
+      ],
+    }),
+
     defineField({
       name: "gallery",
       title: "Gallery",
@@ -127,53 +207,9 @@ export const project = defineType({
       ],
     }),
 
-    defineField({
-      name: "links",
-      title: "Links",
-      type: "array",
-      of: [
-        {
-          type: "object",
-          fields: [
-            { name: "label", title: "Label", type: "string" },
-            { name: "url", title: "URL", type: "url" },
-          ],
-        },
-      ],
-    }),
-
-    defineField({
-      name: "client",
-      title: "Client / Organization",
-      type: "string",
-    }),
-    defineField({
-      name: "location",
-      title: "Location",
-      type: "string",
-    }),
-
-    defineField({
-      name: "myContribution",
-      title: "My contribution",
-      type: "array",
-      of: [{ type: "block" }],
-    }),
-
-    defineField({
-      name: "isFeatured",
-      title: "Featured project",
-      type: "boolean",
-      initialValue: false,
-    }),
-
-    defineField({
-      name: "order",
-      title: "Manual order",
-      type: "number",
-      description: "Lower numbers appear first in lists.",
-    }),
   ],
+
+
 
   preview: {
     select: {
