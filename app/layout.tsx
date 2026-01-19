@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd, websiteSchema } from "@/components/seo/json-ld";
 import { AnimationProvider } from "@/components/providers/animation-provider";
+// @ts-expect-error Next.js handles global CSS side-effect imports
 import "./globals.css";
 
 // 配置无衬线字体（Geist Sans）：

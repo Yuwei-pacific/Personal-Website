@@ -7,6 +7,7 @@
       "esnext"
     ],
     "allowJs": true,
+    "allowArbitraryExtensions": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -30,6 +31,7 @@
   },
   "include": [
     "next-env.d.ts",
+    "**/*.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
