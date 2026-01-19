@@ -154,78 +154,80 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
         />
       </div>
 
-      <main className="mx-auto flex w-full max-w-9xl bg-neutral-100 flex-col gap-12 px-4 py-12 sm:px-40 sm:py-">
-        {/* 顶部浅色信息区 */}
-        <section className="flex flex-col gap-4">
-          {/* 返回链接：回到项目列表 */}
-          <Link href="/" className="text-sm font-medium text-neutral-700 hover:text-neutral-900">
-            ← Back to projects
-          </Link>
+      <main className="w-full bg-neutral-100 px-4 py-12 sm:px-6 sm:py-16">
+        <div className="mx-auto max-w-6xl flex flex-col gap-12">
+          {/* 顶部浅色信息区 */}
+          <section className="flex flex-col gap-4">
+            {/* 返回链接：回到项目列表 */}
+            <Link href="/" className="text-sm font-medium text-neutral-700 hover:text-neutral-900">
+              ← Back to projects
+            </Link>
 
-          {project ? (
-            <>
-              {/* 头部标签：项目类型/年份/地点/客户等元信息 */}
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Project</p>
+            {project ? (
+              <>
+                {/* 头部标签：项目类型/年份/地点/客户等元信息 */}
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Project</p>
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h1 className="text-3xl font-semibold sm:text-4xl">{project.title}</h1>
+                    <div className="flex flex-wrap gap-2 text-xs font-medium text-neutral-800">
+                      {project.projectType && (
+                        <span className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1">
+                          {project.projectType}
+                        </span>
+                      )}
+                      {project.year && (
+                        <span className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1">
+                          Year: {project.year}
+                        </span>
+                      )}
+                      {project.location && (
+                        <span className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1">
+                          Location: {project.location}
+                        </span>
+                      )}
+                      {project.client && (
+                        <span className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1">
+                          Client: {project.client}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {/* 项目摘要：优先使用 summary，无则回退到 description */}
+                  <p className="text-lg leading-7 text-neutral-700">{project.summary || project.description}</p>
+                </div>
+
+
+                {/* 贡献者：单独一行列出 */}
+                {project.contributors?.length ? (
+                  <div className="space-y-2 border-t border-neutral-200 pt-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Contributors</p>
+                    <div className="flex flex-wrap gap-2">
+                      {project.contributors.map((c: string) => (
+                        <span key={c} className="rounded-full border border-neutral-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              // 查无项目：友好的兜底提示与引导
               <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-3">
-                  <h1 className="text-3xl font-semibold sm:text-4xl">{project.title}</h1>
-                  <div className="flex flex-wrap gap-2 text-xs font-medium text-neutral-800">
-                    {project.projectType && (
-                      <span className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1">
-                        {project.projectType}
-                      </span>
-                    )}
-                    {project.year && (
-                      <span className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1">
-                        Year: {project.year}
-                      </span>
-                    )}
-                    {project.location && (
-                      <span className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1">
-                        Location: {project.location}
-                      </span>
-                    )}
-                    {project.client && (
-                      <span className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1">
-                        Client: {project.client}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {/* 项目摘要：优先使用 summary，无则回退到 description */}
-                <p className="text-lg leading-7 text-neutral-700">{project.summary || project.description}</p>
+                <h1 className="text-2xl font-semibold text-neutral-900">Project not found</h1>
+                <p className="text-sm text-neutral-700">
+                  We couldn&apos;t find this project. Try another link or check your Sanity content.
+                </p>
               </div>
-
-
-              {/* 贡献者：单独一行列出 */}
-              {project.contributors?.length ? (
-                <div className="space-y-2 border-t border-neutral-200 pt-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Contributors</p>
-                  <div className="flex flex-wrap gap-2">
-                    {project.contributors.map((c: string) => (
-                      <span key={c} className="rounded-full border border-neutral-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-                        {c}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-            </>
-          ) : (
-            // 查无项目：友好的兜底提示与引导
-            <div className="space-y-3">
-              <h1 className="text-2xl font-semibold text-neutral-900">Project not found</h1>
-              <p className="text-sm text-neutral-700">
-                We couldn&apos;t find this project. Try another link or check your Sanity content.
-              </p>
-            </div>
-          )}
-        </section>
+            )}
+          </section>
+        </div>
       </main>
 
       {/* 底部深色详情区：封面、富文本详情、我的贡献、外链、图片画廊 */}
       {project && (
-        <section className="w-full bg-neutral-950 px-4 pb-16 pt-16 text-white sm:px-6 sm:pb-20 sm:pt-20 scroll-mt-24">
+        <section className="w-full bg-neutral-950 px-4 py-12 text-white sm:px-6 sm:py-16 scroll-mt-24">
           <div className="mx-auto flex max-w-6xl flex-col gap-8">
             {project.coverImage?.url && (
               // 封面图：非 Next/Image，直接使用原始 URL，懒加载
