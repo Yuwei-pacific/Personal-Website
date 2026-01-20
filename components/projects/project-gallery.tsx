@@ -351,7 +351,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
     : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
 
   return (
-    <section className={`space-y-4 ${fullWidth ? "w-screen -mx-4 px-4 sm:-mx-6 sm:px-6" : ""}`}>
+    <section className={`space-y-4 ${fullWidth ? "w-full" : ""}`}>
       <div className="text-center">
         <h2 className="text-3xl font-bold text-white mb-2">{title}</h2>
         {/* 交互提示：点击查看详情、方向键切换、ESC关闭（如需显示可取消注释）*/}

@@ -309,7 +309,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
           </div>
           {project.gallery?.length ? (
             // 图片画廊：支持缩放、拖拽、移动端手势；`columns` 控制列数，`fullWidth` 充满容器
-            <div className="mt-32">
+            <div className="mt-32 -mx-4 sm:-mx-6 px-4 sm:px-10">
               <ProjectGallery items={project.gallery} columns="3" fullWidth />
             </div>
           ) : null}
