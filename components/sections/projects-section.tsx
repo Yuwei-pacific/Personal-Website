@@ -8,11 +8,14 @@ type ProjectsSectionProps = {
 };
 
 export function ProjectsSection({ projects }: ProjectsSectionProps) {
+  // 只显示 visibility 为 true 的项目
+  const visibleProjects = projects.filter(project => project.visibility !== false);
+
   // 是否有可展示的项目
-  const hasProjects = projects && projects.length > 0;
+  const hasProjects = visibleProjects && visibleProjects.length > 0;
 
   // 按年份排序，最近的排在最前面
-  const sortedProjects = [...projects].sort((a, b) => {
+  const sortedProjects = [...visibleProjects].sort((a, b) => {
     const yearA = a.year || 0;
     const yearB = b.year || 0;
     return yearB - yearA;

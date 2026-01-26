@@ -21,6 +21,7 @@ const PROJECTS_QUERY = groq`*[_type == "project"] | order(_createdAt desc){
   year,
   projectType,
   description,
+  visibility,
   "slug": slug.current,
   "coverImage": coverImage{
     asset->{
