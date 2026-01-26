@@ -173,7 +173,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
                     <div className="flex flex-wrap gap-2 text-xs font-medium text-neutral-800">
                       {project.projectType && (
                         <span className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1">
-                          {project.projectType}
+                          Project type: {project.projectType}
                         </span>
                       )}
                       {project.year && (
@@ -188,7 +188,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
                       )}
                       {project.client && (
                         <span className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1">
-                          Client: {project.client}
+                          {project.client}
                         </span>
                       )}
                     </div>

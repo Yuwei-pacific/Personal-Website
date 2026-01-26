@@ -11,6 +11,13 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
   // 是否有可展示的项目
   const hasProjects = projects && projects.length > 0;
 
+  // 按年份排序，最近的排在最前面
+  const sortedProjects = [...projects].sort((a, b) => {
+    const yearA = a.year || 0;
+    const yearB = b.year || 0;
+    return yearB - yearA;
+  });
+
   return (
     // 外层区块：深色背景，带滚动定位锚点 "work"
     <section
@@ -47,7 +54,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
         ) : (
           /* 项目网格：响应式两列起步 */
           <div className="mt-4 grid gap-3 sm:gap-4 sm:grid-cols-2">
-            {projects.map((project, idx) => {
+            {sortedProjects.map((project, idx) => {
               // 兼容 slug 为字符串或 { current } 对象的情况
               const slug =
                 typeof project.slug === "string" ? project.slug : project.slug?.current;
