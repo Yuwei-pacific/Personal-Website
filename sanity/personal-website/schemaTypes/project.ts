@@ -108,18 +108,18 @@ export const project = defineType({
     }),
 
     defineField({
-      name: "isFeatured",
-      title: "Featured project",
+      name: "visibility",
+      title: "Project visibility",
       type: "boolean",
-      initialValue: false,
+      initialValue: true,
     }),
 
-    defineField({
-      name: "order",
-      title: "Manual order",
-      type: "number",
-      description: "Lower numbers appear first in lists.",
-    }),
+    // defineField({
+    //   name: "order",
+    //   title: "Manual order",
+    //   type: "number",
+    //   description: "Lower numbers appear first in lists.",
+    // }),
 
     defineField({
       name: "links",

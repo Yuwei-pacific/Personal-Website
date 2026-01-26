@@ -7,6 +7,7 @@ export type Project = {
     year?: number;
     projectType?: string;
     description?: string;
+    visibility?: boolean;
     slug?: { current?: string } | string;
     coverImage?: {
         asset?: {
