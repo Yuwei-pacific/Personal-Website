@@ -357,17 +357,20 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
         {/* 交互提示：点击查看详情、方向键切换、ESC关闭（如需显示可取消注释）*/}
       </div>
       <div className="h-px w-full bg-gradient-to-r from-transparent via-white/50 to-transparent" />
-      <div className={`grid gap-2 ${gridColsClass}`}>
+      <div className={`grid gap-3 ${gridColsClass}`}>
         {items.map((item, idx) => (
           <figure
             key={idx}
-            className="overflow-hidden rounded-lg bg-neutral-900 group cursor-pointer hover:ring-2 hover:ring-emerald-500/60 transition-all"
+            className="relative overflow-hidden rounded-lg bg-neutral-900 group cursor-pointer hover:ring-2 hover:ring-emerald-500/60 transition-all"
+            style={{
+              aspectRatio: item.width && item.height ? `${item.width} / ${item.height}` : undefined,
+            }}
           >
             {item.url && item.width && item.height && (
               <button
                 type="button"
                 onClick={() => handleImageClick(item, idx)}
-                className="block w-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
+                className="relative block w-full h-full focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
                 aria-label={`View ${item.alt || `image ${idx + 1}`}`}
               >
                 <Image
@@ -375,7 +378,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
                   alt={item.alt || ""}
                   width={item.width}
                   height={item.height}
-                  className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.08]"
+                  className="w-full h-full object-contain transition duration-300 group-hover:scale-[1.01] bg-neutral-950"
                   sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                   priority={idx < 2}
                 />
@@ -395,7 +398,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
             aria-label="Image gallery modal"
           >
             <div
-              className="relative max-h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl bg-neutral-900 shadow-2xl ring-1 ring-white/10 animate-in zoom-in-95 duration-200"
+              className="relative flex h-[90vh] max-h-[90vh] flex-col w-full max-w-6xl overflow-hidden rounded-2xl bg-neutral-900 shadow-2xl ring-1 ring-white/10 animate-in zoom-in-95 duration-200"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header with close button */}
@@ -449,7 +452,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
               {/* 主图区域：缩放与偏移通过 transform 控制；拖拽绑定在容器上 */}
               <div
                 ref={imageContainerRef}
-                className="flex md:max-h-[90vh] max-h-[calc(100vh-200px)] items-center justify-center overflow-hidden bg-black/40 relative select-none"
+                className="relative flex flex-1 min-h-0 items-center justify-center overflow-hidden bg-black/40 select-none p-3"
                 style={{
                   cursor: zoom > 1 ? "grab" : "default",
                 }}
@@ -460,7 +463,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
                     alt={active.alt || ""}
                     width={active.width}
                     height={active.height}
-                    className={`h-full w-full origin-center object-contain pointer-events-none ${isResettingOffset ? "transition-transform duration-200" : ""
+                    className={`h-full w-full max-h-full max-w-full origin-center object-contain pointer-events-none ${isResettingOffset ? "transition-transform duration-200" : ""
                       }`}
                     sizes="90vw"
                     priority
