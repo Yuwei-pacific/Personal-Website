@@ -43,15 +43,8 @@ export const project = defineType({
       name: "projectType",
       title: "Project type",
       type: "string",
-      options: {
-        list: [
-          { title: "Client", value: "client" },
-          { title: "School", value: "school" },
-          { title: "Personal", value: "personal" },
-          { title: "Collaboration", value: "collab" },
-        ],
-        layout: "radio",
-      },
+      description: "Project type or category, e.g. 'Web App', 'Branding', etc.",
+      validation: (Rule) => Rule.max(240),
     }),
 
     defineField({
@@ -96,38 +89,6 @@ export const project = defineType({
       type: "image",
       options: { hotspot: true },
       validation: (Rule) => Rule.required(),
-    }),
-
-    defineField({
-      name: "carousel",
-      title: "Carousel",
-      type: "array",
-      of: [
-        {
-          type: "object",
-          fields: [
-            {
-              name: "image",
-              title: "Image",
-              type: "image",
-              options: { hotspot: true },
-            },
-            {
-              name: "alt",
-              title: "Alt text",
-              type: "string",
-            },
-            {
-              name: "caption",
-              title: "Caption",
-              type: "string",
-            },
-          ],
-          preview: {
-            select: { media: "image", title: "caption" },
-          },
-        },
-      ],
     }),
 
     // 正文
