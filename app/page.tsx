@@ -7,6 +7,9 @@ import { ProjectsSection } from "@/components/sections/projects-section";
 import type { Project } from "@/components/projects/types";
 import { isSanityConfigured, sanityClient } from "@/lib/sanity";
 
+// Incremental Static Regeneration: revalidate home page every 60s
+export const revalidate = 60;
+
 // 页面元数据：设置首页标题与描述（用于 SEO）
 export const metadata = {
   title: "Home",
