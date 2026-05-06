@@ -1,5 +1,5 @@
 // 单个项目卡片：支持无 slug 的静态卡片和有 slug 的可点击卡片
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 import type { Project } from "@/types";
 import { HoverPreview } from "./hover-preview";
 

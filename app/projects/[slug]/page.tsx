@@ -1,7 +1,7 @@
 // 页面依赖：Next.js 组件、Sanity 客户端、PortableText 等
 import Image from "next/image";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 import groq from "groq";
 
 import { Navbar } from "@/components/layout";
@@ -159,7 +159,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
           {/* 顶部浅色信息区 */}
           <section className="flex flex-col gap-4">
             {/* 返回链接：回到项目列表 */}
-            <Link href="/" className="text-sm font-medium text-neutral-700 hover:text-neutral-900">
+            <Link href="/#work" className="text-sm font-medium text-neutral-700 hover:text-neutral-900">
               ← Back to projects
             </Link>
 
