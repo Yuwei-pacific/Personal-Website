@@ -1,6 +1,6 @@
 // 单个项目卡片：支持无 slug 的静态卡片和有 slug 的可点击卡片
 import Link from "next/link";
-import type { Project } from "./types";
+import type { Project } from "@/types";
 import { HoverPreview } from "./hover-preview";
 
 type ProjectCardProps = {

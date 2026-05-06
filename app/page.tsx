@@ -1,10 +1,8 @@
 // 首页页面：依赖的展示组件与 Sanity 客户端
 import groq from "groq";
-import { AboutSection } from "@/components/sections/about-section";
-import { Hero } from "@/components/sections/hero";
-import { Navbar } from "@/components/layout/navbar";
-import { ProjectsSection } from "@/components/sections/projects-section";
-import type { Project } from "@/components/projects/types";
+import { AboutSection, Hero, ProjectsSection } from "@/components/sections";
+import { Navbar } from "@/components/layout";
+import type { Project } from "@/types";
 import { isSanityConfigured, sanityClient } from "@/lib/sanity";
 
 // Incremental Static Regeneration: revalidate home page every 60s
