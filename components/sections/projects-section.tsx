@@ -1,5 +1,5 @@
 // 项目列表区：展示从 CMS 获取的项目卡片
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 import { ProjectCard } from "@/components/projects";
 import type { Project } from "@/types";
 
