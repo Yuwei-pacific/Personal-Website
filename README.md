@@ -13,7 +13,7 @@ A portfolio website built with Next.js, TypeScript, and Sanity CMS.
 
 ## 📂 Project Structure
 
-```
+```text
 Personal-Website/
 ├─ app/
 │  ├─ globals.css              # Global Tailwind styles and CSS variables
@@ -37,8 +37,11 @@ Personal-Website/
 
 ## ⚙️ Setup
 
+
 ### Prerequisites
+
 - Node.js v20+ and npm v10+
+
 
 ### Installation
 
@@ -51,6 +54,7 @@ npm install
 ### Configuration
 
 Create `.env.local`:
+
 ```env
 NEXT_PUBLIC_SANITY_PROJECT_ID=your_project_id
 NEXT_PUBLIC_SANITY_DATASET=production

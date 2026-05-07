@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 import { PortableText, type PortableTextReactComponents } from "@portabletext/react";
 import type { ResumeItem } from "@/types";
 
@@ -43,7 +44,7 @@ export function ResumeList({ items, fallbackData }: ResumeListProps) {
             />
             
             <div className="flex flex-1 flex-col gap-4 sm:flex-row pb-2">
-              {/* 左侧：基础信息 */}
+              {/* Left: basic info */}
               <div className={`flex flex-col ${hasDetails ? 'sm:w-1/2' : 'w-full'}`}>
                 <p className="text-base font-semibold">{edu.institution}</p>
                 <p className="text-sm text-neutral-700">{edu.degree}</p>
@@ -56,19 +57,23 @@ export function ResumeList({ items, fallbackData }: ResumeListProps) {
                     </>
                   )}
                 </div>
-                
-                {/* 移动端提示 / 桌面端无缝过渡提示 */}
-                {hasDetails && (
-                  <div className="mt-2 flex items-center gap-1 text-xs font-medium text-neutral-400 opacity-60 transition-opacity group-hover:opacity-0 sm:hidden">
-                    <span>Hover or tap for details</span>
-                  </div>
-                )}
               </div>
 
-              {/* 右侧：详细信息 (占据右侧固定空间，Hover 时淡入) */}
+              {/* Right: arrow hint fades out, details fade in — same space */}
               {hasDetails && (
-                <div className="sm:w-1/2 text-sm text-neutral-600 opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100 sm:pl-4 sm:border-l sm:border-neutral-200">
-                  <PortableText value={edu.details!} components={portableComponents} />
+                <div className="relative flex flex-1 flex-col sm:w-1/2">
+                  {/* Vertical divider - shows on hover */}
+                  <div className="hidden sm:block absolute inset-y-0 left-0 w-px bg-neutral-200 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  
+                  {/* Arrow hint — visible by default, positioned at bottom right, fades out on hover */}
+                  <div className="absolute bottom-0 right-0 flex items-center gap-1 text-neutral-400 transition-all duration-300 group-hover:opacity-0 group-hover:translate-x-1 group-hover:-translate-y-1">
+                    <ArrowUpRight className="h-6 w-6" />
+                  </div>
+                  
+                  {/* Details — hidden by default, fades in on hover */}
+                  <div className="text-sm text-neutral-600 opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100 sm:pl-4">
+                    <PortableText value={edu.details!} components={portableComponents} />
+                  </div>
                 </div>
               )}
             </div>
