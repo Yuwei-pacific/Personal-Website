@@ -27,6 +27,10 @@ export function Hero() {
           priority
           sizes="100vw"
           className="hero-background select-none object-contain object-center sm:object-[50%_10%] opacity-50 blur-md"
+          style={{
+            animation: "hero-float 6s ease-in-out infinite alternate",
+            willChange: "transform",
+          }}
         />
       </div>
 

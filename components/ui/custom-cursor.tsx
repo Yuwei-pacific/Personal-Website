@@ -86,26 +86,25 @@ export function CustomCursor() {
     <>
       <div
         ref={cursorRef}
-        className="pointer-events-none fixed top-0 left-0 z-[9999] hidden md:flex"
+        className="pointer-events-none fixed top-0 left-0 z-[9999] hidden md:block"
         style={{
-          // Center the cursor exactly on the mouse coordinates
           marginLeft: "-12px",
           marginTop: "-12px",
-          opacity: 0, // start hidden until mouse moves
+          opacity: 0,
           transition: "opacity 0.3s ease",
           willChange: "transform",
-          WebkitBackfaceVisibility: "hidden", // Hardware acceleration for Safari
+          mixBlendMode: "difference",
         }}
       >
         <div
-          className="rounded-full flex items-center justify-center border-[1.5px] border-neutral-900 bg-black/10 backdrop-invert"
           style={{
             width: "24px",
             height: "24px",
-            transition: "transform 0.3s ease-out, background-color 0.3s ease",
+            borderRadius: "50%",
+            backgroundColor: "#ffffff",
+            transition: "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
             transform: isHovering ? "scale(2.666)" : "scale(1)",
             transformOrigin: "center center",
-            backgroundColor: isHovering ? "rgba(0,0,0,0.05)" : "rgba(0,0,0,0.1)",
           }}
         />
       </div>
