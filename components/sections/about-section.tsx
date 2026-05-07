@@ -1,12 +1,18 @@
 import Image from "next/image";
-import type { SkillCategory } from "@/types";
+import { SkillCategory, ResumeItem } from "@/types";
+import { ResumeList } from "./resume-list";
 
 type AboutSectionProps = {
   skillCategories?: SkillCategory[];
+  resumeItems?: ResumeItem[];
 };
 
-export function AboutSection({ skillCategories }: AboutSectionProps) {
-  // 如果 Sanity 没有数据，则使用默认的后备数据
+export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps) {
+  // 分离 Education 和 Experience 数据
+  const educations = resumeItems?.filter(item => item.type === 'education' || !item.type) || [];
+  const experiences = resumeItems?.filter(item => item.type === 'experience') || [];
+
+  // 后备数据
   const categoriesToRender = skillCategories && skillCategories.length > 0
     ? skillCategories
     : [
@@ -72,38 +78,23 @@ export function AboutSection({ skillCategories }: AboutSectionProps) {
                 priority
               />
             </div>
-            <div className="mt-4 space-y-4 text-neutral-800">
-              <div className="flex items-stretch gap-3">
-                <Image
-                  src="/diamond_2.svg"
-                  alt=""
-                  width={20}
-                  height={20}
-                  className="h-full min-h-[72px] w-5 self-stretch"
-                  priority
-                />
-                <div className="space-y-1">
-                  <p className="text-base font-semibold">Politecnico di Milano</p>
-                  <p className="text-sm text-neutral-700">Laurea Magistrale LM, Comunicazione design</p>
-                  <p className="text-sm text-neutral-700">2023 – 2026</p>
-                </div>
-              </div>
-              <div className="flex items-stretch gap-3">
-                <Image
-                  src="/diamond_2.svg"
-                  alt=""
-                  width={20}
-                  height={20}
-                  className="h-full min-h-[72px] w-5 self-stretch"
-                  priority
-                />
-                <div className="space-y-1">
-                  <p className="text-base font-semibold">Accademia di Belle Arti di Firenze</p>
-                  <p className="text-sm text-neutral-700">Visive, decorazione</p>
-                  <p className="text-sm text-neutral-700">2019 – 2023</p>
-                </div>
-              </div>
-            </div>
+            <ResumeList 
+              items={educations} 
+              fallbackData={[
+                {
+                  _id: "edu-default-1",
+                  institution: "Politecnico di Milano",
+                  degree: "Laurea Magistrale LM, Comunicazione design",
+                  period: "2023 – 2026",
+                },
+                {
+                  _id: "edu-default-2",
+                  institution: "Accademia di Belle Arti di Firenze",
+                  degree: "Visive, decorazione",
+                  period: "2019 – 2023",
+                }
+              ]} 
+            />
           </div>
           <div className="scroll-animate rounded-2xl border border-neutral-200 bg-white/70 p-4 shadow-sm backdrop-blur sm:p-5">
             <div className="flex items-center gap-3">
@@ -119,12 +110,23 @@ export function AboutSection({ skillCategories }: AboutSectionProps) {
                 priority
               />
             </div>
-            <p className="mt-2 text-sm text-neutral-700">
-              I have gained experience across design, web development, and team coordination, working on
-              projects that range from corporate events and branding to online learning platforms and IT
-              management. These roles allowed me to combine creative design thinking with technical
-              problem-solving, shaping a versatile practice that bridges creativity and technology.
-            </p>
+            <ResumeList 
+              items={experiences} 
+              fallbackData={[
+                {
+                  _id: "exp-default-1",
+                  institution: "Multi-disciplinary Experience",
+                  degree: "Design, Web Development, Team Coordination",
+                  period: "Past – Present",
+                  details: [
+                    {
+                      _type: "block",
+                      children: [{ text: "I have gained experience across design, web development, and team coordination, working on projects that range from corporate events and branding to online learning platforms and IT management. These roles allowed me to combine creative design thinking with technical problem-solving, shaping a versatile practice that bridges creativity and technology." }]
+                    }
+                  ]
+                }
+              ]} 
+            />
           </div>
         </div>
       </div>
