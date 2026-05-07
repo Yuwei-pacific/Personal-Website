@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { MapPin, Mail, Github, Linkedin } from "lucide-react";
+import { MapPin, Mail, Languages } from "lucide-react";
 import { SkillCategory, ResumeItem } from "@/types";
 import { ResumeList } from "./resume-list";
 
@@ -56,35 +56,54 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
               <div className="relative aspect-[4/5] overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100">
                 <Image
                   src="/Profile_Yuwei.webp"
-                alt="Portrait of Yuwei Li"
-                fill
-                sizes="320px"
-                className="object-cover object-top"
-                priority
-              />
-            </div>
-
-            {/* Basic Info */}
-            <div className="mt-5 space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-neutral-900">Yuwei Li</h3>
-                <p className="text-sm text-neutral-600">Communication Designer & Frontend Developer</p>
+                  alt="Portrait of Yuwei Li"
+                  fill
+                  sizes="320px"
+                  className="object-cover object-top"
+                  priority
+                />
               </div>
 
-              <div className="space-y-2.5 text-sm font-medium text-neutral-600">
-                <div className="flex items-center gap-2.5">
-                  <MapPin className="h-4 w-4 text-neutral-400" />
-                  <span>Milan, Italy</span>
+              {/* Basic Info */}
+              <div className="mt-5 space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-900">Yuwei Li</h3>
+                  <p className="text-sm text-neutral-600">Communication Designer & Frontend Developer</p>
                 </div>
-                <div className="flex items-center gap-2.5">
-                  <Mail className="h-4 w-4 text-neutral-400" />
-                  <a href="mailto:snowtime200801@gmail.com" className="transition-colors hover:text-neutral-900">
-                    snowtime200801@gmail.com
-                  </a>
+
+                <div className="space-y-2.5 text-sm font-medium text-neutral-600">
+                  <div className="flex items-center gap-2.5">
+                    <MapPin className="h-4 w-4 text-neutral-400" />
+                    <span>Milan, Italy</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Mail className="h-4 w-4 text-neutral-400" />
+                    <a href="mailto:snowtime200801@gmail.com" className="transition-colors hover:text-neutral-900">
+                      snowtime200801@gmail.com
+                    </a>
+                  </div>
+                </div>
+
+                {/* Languages */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                    <Languages className="h-3.5 w-3.5" />
+                    <span>Languages</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700">
+                      Chinese — Native
+                    </span>
+                    <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700">
+                      English — B2
+                    </span>
+                    <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700">
+                      Italiano — B2
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
           </div>
         </div>
         <div className="flex w-full flex-col gap-4 md:w-2/3">
@@ -145,9 +164,9 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
                   details: [
                     {
                       _type: "block",
-                      children: [{ 
+                      children: [{
                         _type: "span",
-                        text: "I have gained experience across design, web development, and team coordination, working on projects that range from corporate events and branding to online learning platforms and IT management. These roles allowed me to combine creative design thinking with technical problem-solving, shaping a versatile practice that bridges creativity and technology." 
+                        text: "I have gained experience across design, web development, and team coordination, working on projects that range from corporate events and branding to online learning platforms and IT management. These roles allowed me to combine creative design thinking with technical problem-solving, shaping a versatile practice that bridges creativity and technology."
                       }]
                     }
                   ]
