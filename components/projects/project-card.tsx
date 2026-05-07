@@ -1,5 +1,6 @@
 // 单个项目卡片：支持无 slug 的静态卡片和有 slug 的可点击卡片
 import { Link } from "next-view-transitions";
+import { ArrowUpRight } from "lucide-react";
 import type { Project } from "@/types";
 import { HoverPreview } from "./hover-preview";
 
@@ -36,9 +37,9 @@ export function ProjectCard({ project, slug }: ProjectCardProps) {
                         {project.summary || project.description}
                     </p>
                 </div>
-                <div className="flex items-center justify-end gap-2 pt-2 text-sm font-semibold text-neutral-50">
+                <div className="flex items-center justify-end gap-1.5 pt-2 text-sm font-semibold text-neutral-50">
                     <span className="transition-transform group-hover:translate-x-1">View project</span>
-                    <span aria-hidden className="text-lg transition-transform group-hover:translate-x-1">↗</span>
+                    <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </div>
             </div>
         </div>
