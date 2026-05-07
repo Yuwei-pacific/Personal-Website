@@ -2,7 +2,7 @@
 import groq from "groq";
 import { AboutSection, Hero, ProjectsSection } from "@/components/sections";
 import { Navbar } from "@/components/layout";
-import type { Project } from "@/types";
+import type { Project, SkillCategory } from "@/types";
 import { isSanityConfigured, sanityClient } from "@/lib/sanity";
 
 // Incremental Static Regeneration: revalidate home page every 60s
@@ -33,21 +33,34 @@ const PROJECTS_QUERY = groq`*[_type == "project"] | order(_createdAt desc){
   }
 }`;
 
-export default async function HomePage() {
-  // 初始化项目数据；默认空列表，避免渲染时报错
-  let projects: Project[] = [];
+// GROQ 查询：从 Sanity 获取技能分类列表
+const SKILLS_QUERY = groq`*[_type == "skillCategory"] | order(order asc){
+  _id,
+  title,
+  order,
+  skills
+}`;
 
-  // 在 Sanity 配置完成时请求项目数据
+export default async function HomePage() {
+  // 初始化数据
+  let projects: Project[] = [];
+  let skillCategories: SkillCategory[] = [];
+
+  // 在 Sanity 配置完成时请求数据
   if (isSanityConfigured() && sanityClient) {
     try {
-      // fetch 返回项目数组；有数据则赋值给 projects
-      const result = await sanityClient.fetch<Project[]>(PROJECTS_QUERY);
-      if (result?.length) {
-        projects = result;
+      const [projectsResult, skillsResult] = await Promise.all([
+        sanityClient.fetch<Project[]>(PROJECTS_QUERY),
+        sanityClient.fetch<SkillCategory[]>(SKILLS_QUERY)
+      ]);
+      if (projectsResult?.length) {
+        projects = projectsResult;
+      }
+      if (skillsResult?.length) {
+        skillCategories = skillsResult;
       }
     } catch (error) {
-      // 捕获错误以便在开发环境中调试
-      console.error("Failed to fetch projects from Sanity", error);
+      console.error("Failed to fetch data from Sanity", error);
     }
   }
 
@@ -59,7 +72,7 @@ export default async function HomePage() {
       {/* 首页主视觉区 */}
       <Hero />
       {/* 关于我简介 */}
-      <AboutSection />
+      <AboutSection skillCategories={skillCategories} />
       {/* 项目集合：从 CMS 获取的数据传入 */}
       <ProjectsSection projects={projects} />
     </div>

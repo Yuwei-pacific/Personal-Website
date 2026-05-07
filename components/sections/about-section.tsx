@@ -1,6 +1,28 @@
 import Image from "next/image";
+import type { SkillCategory } from "@/types";
 
-export function AboutSection() {
+type AboutSectionProps = {
+  skillCategories?: SkillCategory[];
+};
+
+export function AboutSection({ skillCategories }: AboutSectionProps) {
+  // 如果 Sanity 没有数据，则使用默认的后备数据
+  const categoriesToRender = skillCategories && skillCategories.length > 0
+    ? skillCategories
+    : [
+      {
+        title: "Design Disciplines",
+        skills: ["User Experience", "User Interface", "Interaction Design", "Communication Design", "Branding Design", "Design Systems", "Prototyping", "User Research"]
+      },
+      {
+        title: "Tools & Software",
+        skills: ["Figma", "Protopie", "Adobe XD", "Photoshop", "Illustrator", "Premiere Pro", "After Effects"]
+      },
+      {
+        title: "Frontend Development",
+        skills: ["Next.js", "React", "TypeScript", "Tailwind CSS", "HTML/CSS", "JavaScript"]
+      }
+    ];
   return (
     <section
       id="about"
@@ -109,7 +131,7 @@ export function AboutSection() {
       <div className="scroll-animate rounded-2xl border border-neutral-200 bg-white/70 p-5 shadow-sm backdrop-blur">
         <div className="flex items-center gap-3">
           <p className="text-base font-semibold uppercase tracking-[0.2em] text-neutral-900">
-            Skills & Tools
+            CAPABILITIES
           </p>
           <Image
             src="/arrow_1.svg"
@@ -120,35 +142,23 @@ export function AboutSection() {
             priority
           />
         </div>
-        <p className="mt-2 text-sm text-neutral-700">Core design and delivery stack I use across projects.</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {[
-            "Adove XD",
-            "Adobe Photoshop",
-            "Adobe Illustrator",
-            "Adobe Premiere Pro",
-            "Adobe After Effects",
-            "Figma",
-            "Protopie",
-            "Next.js",
-            "React",
-            "TypeScript",
-            "Tailwind CSS",
-            "User Experience Design",
-            "User Interface Design",
-            "Branding Dsign",
-            "Communication Design",
-            "Interaction Design",
-            "Design Systems",
-            "Prototyping",
-            "User Research",
-          ].map((item) => (
-            <span
-              key={item}
-              className="rounded-full border border-neutral-300 bg-white/80 px-3 py-1 text-xs font-medium text-neutral-800 shadow-sm"
-            >
-              {item}
-            </span>
+        <p className="mt-2 text-sm text-neutral-700">Everything I use to design, build, and ship.</p>
+
+        <div className="mt-6 flex flex-col gap-6">
+          {categoriesToRender.map((category) => (
+            <div key={category.title || category._id} className="flex flex-col gap-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">{category.title}</p>
+              <div className="flex flex-wrap gap-2">
+                {category.skills?.map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-full border border-neutral-200 bg-white/90 px-3 py-1.5 text-xs font-medium text-neutral-800 shadow-sm transition-colors hover:bg-neutral-50 hover:text-neutral-950"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </div>
