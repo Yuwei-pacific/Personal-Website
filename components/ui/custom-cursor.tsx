@@ -93,6 +93,8 @@ export function CustomCursor() {
           marginTop: "-12px",
           opacity: 0, // start hidden until mouse moves
           transition: "opacity 0.3s ease",
+          willChange: "transform",
+          WebkitBackfaceVisibility: "hidden", // Hardware acceleration for Safari
         }}
       >
         <div

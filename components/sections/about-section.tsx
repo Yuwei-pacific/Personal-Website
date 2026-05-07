@@ -143,7 +143,10 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
                   details: [
                     {
                       _type: "block",
-                      children: [{ text: "I have gained experience across design, web development, and team coordination, working on projects that range from corporate events and branding to online learning platforms and IT management. These roles allowed me to combine creative design thinking with technical problem-solving, shaping a versatile practice that bridges creativity and technology." }]
+                      children: [{ 
+                        _type: "span",
+                        text: "I have gained experience across design, web development, and team coordination, working on projects that range from corporate events and branding to online learning platforms and IT management. These roles allowed me to combine creative design thinking with technical problem-solving, shaping a versatile practice that bridges creativity and technology." 
+                      }]
                     }
                   ]
                 }
