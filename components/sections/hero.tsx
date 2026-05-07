@@ -75,7 +75,7 @@ export function Hero() {
       </div>
 
       {/* 底部社交链接区：绝对定位，固定在视窗底部 */}
-      <div className="absolute inset-x-0 bottom-10 mx-auto w-full max-w-6xl px-6 sm:px-10 md:px-16">
+      <div className="absolute inset-x-0 bottom-10 w-full px-6 sm:px-10 md:px-16">
         <div className="flex flex-col gap-2 sm:gap-3">
           <div className="flex items-center gap-4">
             {/* "Get in touch" 标题与装饰箭头 */}
