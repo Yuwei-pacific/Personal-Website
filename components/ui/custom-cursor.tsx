@@ -86,7 +86,7 @@ export function CustomCursor() {
     <>
       <div
         ref={cursorRef}
-        className="pointer-events-none fixed top-0 left-0 z-[9999] hidden mix-blend-difference md:flex"
+        className="pointer-events-none fixed top-0 left-0 z-[9999] hidden md:flex"
         style={{
           // Center the cursor exactly on the mouse coordinates
           marginLeft: "-12px",
@@ -98,13 +98,14 @@ export function CustomCursor() {
         }}
       >
         <div
-          className={`rounded-full bg-white transition-all duration-300 ease-out flex items-center justify-center ${
-            isHovering ? "h-[64px] w-[64px] opacity-100" : "h-[24px] w-[24px] opacity-100"
-          }`}
+          className="rounded-full flex items-center justify-center border-[1.5px] border-neutral-900 bg-black/10 backdrop-invert"
           style={{
-            // Compensate for the size change to keep it perfectly centered
-            // From 24px to 64px is an increase of 40px, so we need to translate by -20px
-            transform: isHovering ? "translate(-20px, -20px)" : "translate(0, 0)",
+            width: "24px",
+            height: "24px",
+            transition: "transform 0.3s ease-out, background-color 0.3s ease",
+            transform: isHovering ? "scale(2.666)" : "scale(1)",
+            transformOrigin: "center center",
+            backgroundColor: isHovering ? "rgba(0,0,0,0.05)" : "rgba(0,0,0,0.1)",
           }}
         />
       </div>
