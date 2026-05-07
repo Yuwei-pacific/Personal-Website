@@ -74,7 +74,8 @@ export const metadata: Metadata = {
   },
 };
 
-// 应用根布局：定义 <html> 与全局 <body> 样式
+import { AppViewTransitions } from "@/components/providers/view-transitions-provider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -90,11 +91,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background text-foreground antialiased`}
       >
         <AnimationProvider>
-          <ViewTransitions>
+          <AppViewTransitions>
             <CustomCursor />
             {/* 页面内容插槽：各路由页面将被渲染到此 */}
             {children}
-          </ViewTransitions>
+          </AppViewTransitions>
         </AnimationProvider>
         {/* Vercel Analytics 组件：用于监测页面性能与用户行为 */}
         <Analytics />
