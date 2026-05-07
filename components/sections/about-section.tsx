@@ -49,9 +49,9 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
         </p>
       </div>
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
-        <div className="w-full md:w-1/3 md:sticky md:top-32">
+        <div className="w-full md:w-1/3 md:sticky md:top-20">
           <div className="scroll-animate">
-            <div className="rounded-2xl border border-neutral-200 bg-white/95 p-4 shadow-sm sm:p-5">
+            <div className="rounded-2xl border border-neutral-200 bg-white/95 p-4 shadow-sm sm:p-5 max-h-[calc(100vh-5rem)] overflow-y-auto no-scrollbar">
               {/* <p className="text-sm font-semibold text-neutral-900">Portrait</p> */}
               <div className="relative aspect-[4/5] overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100">
                 <Image
