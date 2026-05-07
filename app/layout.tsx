@@ -75,6 +75,7 @@ export const metadata: Metadata = {
 };
 
 import { AppViewTransitions } from "@/components/providers/view-transitions-provider";
+import { OverscrollBackground } from "@/components/ui/overscroll-background";
 
 export default function RootLayout({
   children,
@@ -92,9 +93,12 @@ export default function RootLayout({
       >
         <AnimationProvider>
           <AppViewTransitions>
+            <OverscrollBackground />
             <CustomCursor />
-            {/* 页面内容插槽：各路由页面将被渲染到此 */}
-            {children}
+            {/* 显式给内容区加上背景色，这样 body 背景色变化时只会在过界回弹时露出来，而不会影响页面本身 */}
+            <div className="bg-background min-h-screen w-full relative z-0">
+              {children}
+            </div>
           </AppViewTransitions>
         </AnimationProvider>
         {/* Vercel Analytics 组件：用于监测页面性能与用户行为 */}
