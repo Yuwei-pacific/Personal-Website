@@ -49,11 +49,11 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
         </p>
       </div>
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
-        <div className="w-full md:w-1/3 md:sticky md:top-20">
+        <div className="w-full md:w-1/3 md:sticky md:top-16">
           <div className="scroll-animate">
-            <div className="rounded-2xl border border-neutral-200 bg-white/95 p-4 shadow-sm sm:p-5 max-h-[calc(100vh-5rem)] overflow-y-auto no-scrollbar">
+            <div className="rounded-2xl border border-neutral-200 bg-white/95 p-4 shadow-sm sm:p-5 max-h-[calc(100vh-6rem)] overflow-y-auto no-scrollbar">
               {/* <p className="text-sm font-semibold text-neutral-900">Portrait</p> */}
-              <div className="relative aspect-[4/5] overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100">
+              <div className="relative aspect-[1/1] sm:aspect-[4/5] max-h-[320px] overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100">
                 <Image
                   src="/Profile_Yuwei.webp"
                   alt="Portrait of Yuwei Li"
@@ -65,13 +65,13 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
               </div>
 
               {/* Basic Info */}
-              <div className="mt-5 space-y-4">
+              <div className="mt-4 space-y-3">
                 <div>
                   <h3 className="text-lg font-semibold text-neutral-900">Yuwei Li</h3>
                   <p className="text-sm text-neutral-600">Communication Designer & Frontend Developer</p>
                 </div>
 
-                <div className="space-y-2.5 text-sm font-medium text-neutral-600">
+                <div className="space-y-1.5 text-sm font-medium text-neutral-600">
                   <div className="flex items-center gap-2.5">
                     <MapPin className="h-4 w-4 text-neutral-400" />
                     <span>Milan, Italy</span>
@@ -85,7 +85,7 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
                 </div>
 
                 {/* Languages */}
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">
                     <Languages className="h-3.5 w-3.5" />
                     <span>Languages</span>
