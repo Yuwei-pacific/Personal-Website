@@ -43,9 +43,9 @@ export function ResumeList({ items, fallbackData }: ResumeListProps) {
               priority
             />
             
-            <div className="flex flex-1 flex-col gap-4 sm:flex-row pb-2">
+            <div className="flex flex-1 flex-col sm:flex-row pb-2">
               {/* Left: basic info */}
-              <div className={`flex flex-col ${hasDetails ? 'sm:w-1/2' : 'w-full'}`}>
+              <div className={`flex flex-col ${hasDetails ? 'sm:w-[40%] sm:pr-6' : 'w-full'}`}>
                 <p className="text-base font-semibold">{edu.institution}</p>
                 <p className="text-sm text-neutral-700">{edu.degree}</p>
                 <div className="flex items-center gap-1.5 text-sm text-neutral-700">
@@ -61,18 +61,23 @@ export function ResumeList({ items, fallbackData }: ResumeListProps) {
 
               {/* Right: arrow hint fades out, details fade in — same space */}
               {hasDetails && (
-                <div className="relative flex flex-1 flex-col sm:w-1/2">
-                  {/* Vertical divider - shows on hover */}
-                  <div className="hidden sm:block absolute inset-y-0 left-0 w-px bg-neutral-200 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                  
+                <div className="relative flex flex-1 flex-col sm:w-[60%]">
                   {/* Arrow hint — visible by default, positioned at bottom right, fades out on hover */}
-                  <div className="absolute bottom-0 right-0 flex items-center gap-1 text-neutral-400 transition-all duration-300 group-hover:opacity-0 group-hover:translate-x-1 group-hover:-translate-y-1">
+                  <div className="absolute bottom-0 right-2 flex items-center gap-1 text-neutral-400 transition-all duration-300 group-hover:opacity-0 group-hover:translate-x-1 group-hover:-translate-y-1">
                     <ArrowUpRight className="h-6 w-6" />
                   </div>
                   
-                  {/* Details — hidden by default, fades in on hover */}
-                  <div className="text-sm text-neutral-600 opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100 sm:pl-4">
-                    <PortableText value={edu.details!} components={portableComponents} />
+                  {/* Details & Divider — hidden by default, expands and fades in on hover */}
+                  <div className="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out group-hover:grid-rows-[1fr] group-hover:opacity-100 sm:pl-6 relative">
+                    {/* Vertical divider - shows on hover, inside the grid to control height */}
+                    <div className="hidden sm:block absolute inset-y-0 left-0 w-px bg-neutral-200" />
+                    
+                    <div className="overflow-hidden">
+                      {/* On mobile, add top padding ONLY when content is visible via the grid expansion */}
+                      <div className="text-sm text-neutral-600 pt-4 sm:pt-0">
+                        <PortableText value={edu.details!} components={portableComponents} />
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

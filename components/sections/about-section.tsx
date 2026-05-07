@@ -49,7 +49,7 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
         </p>
       </div>
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
-        <div className="w-full md:w-1/3 md:sticky md:top-16">
+        <div className="w-full md:w-[28%] md:sticky md:top-24">
           <div className="scroll-animate">
             <div className="rounded-2xl border border-neutral-200 bg-white/95 p-4 shadow-sm sm:p-5 max-h-[calc(100vh-6rem)] overflow-y-auto no-scrollbar">
               {/* <p className="text-sm font-semibold text-neutral-900">Portrait</p> */}
@@ -106,7 +106,7 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
             </div>
           </div>
         </div>
-        <div className="flex w-full flex-col gap-4 md:w-2/3">
+        <div className="flex w-full flex-col gap-4 md:w-[72%]">
           <div className="scroll-animate rounded-2xl border border-neutral-200 bg-white/95 p-4 shadow-sm sm:p-5">
             <div className="flex items-center gap-3">
               <p className="text-base font-semibold uppercase tracking-[0.2em] text-neutral-900">
@@ -192,9 +192,11 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
 
             <div className="mt-6 flex flex-col gap-6">
               {categoriesToRender.map((category) => (
-                <div key={category.title || category._id} className="flex flex-col gap-3">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">{category.title}</p>
-                  <div className="flex flex-wrap gap-2">
+                <div key={category.title || category._id} className="flex flex-col gap-3 sm:flex-row sm:gap-6 sm:items-start border-t border-neutral-100 pt-6 first:border-t-0 first:pt-0">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500 sm:w-1/4 sm:pt-1">
+                    {category.title}
+                  </p>
+                  <div className="flex flex-wrap gap-2 sm:w-3/4">
                     {category.skills?.map((item) => (
                       <span
                         key={item}
