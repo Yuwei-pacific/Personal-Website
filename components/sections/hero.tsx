@@ -122,7 +122,7 @@ export function Hero() {
             </div>
           </div>
           {/* 邮箱地址 */}
-          <p className="text-sm text-neutral-700 sm:text-base">Mail: snowtime200801@gmail.com</p>
+          <p className="text-sm text-neutral-700 sm:text-base">Find me via different Social Media Platforms</p>
         </div>
       </div>
     </section>
