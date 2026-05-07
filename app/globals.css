@@ -61,3 +61,14 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 }
+
+/* Hero background float — pure CSS compositor animation, no JS main-thread involvement */
+@keyframes hero-float {
+  0%   { transform: translateY(-20px); }
+  100% { transform: translateY(20px); }
+}
+
+.hero-background {
+  animation: hero-float 6s ease-in-out infinite alternate;
+  will-change: transform;
+}

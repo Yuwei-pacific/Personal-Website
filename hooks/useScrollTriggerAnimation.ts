@@ -96,15 +96,7 @@ export function useScrollTriggerAnimation() {
                                 delay: anime.stagger(100, { start: 1000 }),
                             });
 
-                            // 背景元素缓慢浮动
-                            anime({
-                                targets: ".hero-background",
-                                translateY: [-20, 20],
-                                duration: 6000,
-                                direction: "alternate",
-                                loop: true,
-                                easing: "easeInOutQuad",
-                            });
+                            // NOTE: .hero-background float is now a pure CSS animation in globals.css
                         }
                     });
                 },
