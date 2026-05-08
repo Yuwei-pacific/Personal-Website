@@ -3,6 +3,7 @@
 import { Link } from "next-view-transitions";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 const navItems = [
   { label: "Home", href: "/#home" },
@@ -12,6 +13,22 @@ const navItems = [
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("/#") && pathname === "/") {
+      e.preventDefault();
+      const targetId = href.replace("/#", "");
+      const elem = document.getElementById(targetId);
+      if (elem) {
+        elem.scrollIntoView({ behavior: "smooth" });
+        window.history.pushState(null, "", href);
+        setOpen(false);
+      }
+    } else {
+      setOpen(false);
+    }
+  };
 
   // Close mobile menu on scroll
   useEffect(() => {
@@ -48,6 +65,7 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={(e) => handleNavClick(e, item.href)}
                 className="rounded-full px-4 py-2 text-sm font-medium text-neutral-600 transition-all hover:bg-black/5 hover:text-neutral-950 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
               >
                 {item.label}
@@ -97,8 +115,8 @@ export function Navbar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={(e) => handleNavClick(e, item.href)}
               className="rounded-xl px-4 py-3 text-sm font-medium text-neutral-600 transition-colors hover:bg-black/5 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
-              onClick={() => setOpen(false)}
             >
               {item.label}
             </Link>
