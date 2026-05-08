@@ -102,9 +102,9 @@ export default function RootLayout({
           </AppViewTransitions>
         </AnimationProvider>
         {/* Vercel Analytics 组件：用于监测页面性能与用户行为 */}
-        <Analytics />
+        {process.env.NODE_ENV === "production" && <Analytics />}
         {/* Vercel Speed Insights 组件：用于性能分析 */}
-        <SpeedInsights />
+        {process.env.NODE_ENV === "production" && <SpeedInsights />}
       </body>
     </html>
   );
