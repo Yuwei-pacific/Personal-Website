@@ -39,6 +39,7 @@ export default function GuitarFretboardTrainerPage() {
   
   // Shared state
   const [message, setMessage] = useState("Select a game mode to start!");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const synth = useRef<any>(null);
   const [displayedFrets, setDisplayedFrets] = useState(MAX_FRETS);
   
@@ -167,6 +168,7 @@ export default function GuitarFretboardTrainerPage() {
       <Navbar />
       <div className="container mx-auto px-4 py-12 text-center">
         <h1 className="text-3xl sm:text-5xl font-bold mb-4">Guitar Fretboard Trainer</h1>
+        <p className="text-xl mb-8 font-medium">{message}</p>
         
         <div className="flex justify-center gap-4 mb-8">
           <button onClick={() => setGameMode('find-all')} className={`font-bold py-2 px-4 rounded ${gameMode === 'find-all' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>Find All Notes</button>

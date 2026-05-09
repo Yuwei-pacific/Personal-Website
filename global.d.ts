@@ -18,6 +18,7 @@ declare module "./globals.css" {
 // Anime.js global type declaration
 declare global {
     interface Window {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         anime: any;
     }
 }

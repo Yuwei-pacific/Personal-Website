@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 
 // 在客户端动态加载 anime 库
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let animeLib: any = null;
 
 async function getAnime() {

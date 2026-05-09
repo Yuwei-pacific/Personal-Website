@@ -108,7 +108,7 @@ async function fetchProject(rawSlug?: string): Promise<ProjectDetail | null> {
 
       // 5. 如果查到了项目数据，将其返回
       if (project) return project;
-    } catch (error) {
+    } catch {
       // 实际开发中通常会在这里添加错误日志，例如 console.error("Fetch error:", error);
       return null;
     }
@@ -232,9 +232,10 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
             {project.coverImage?.url && (
               // 封面图：非 Next/Image，直接使用原始 URL，懒加载
               <div className="overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={project.coverImage.url}
-                  alt={project.title}
+                  alt={project.title || "Project Cover"}
                   className="h-full w-full object-cover"
                   loading="lazy"
                 />
