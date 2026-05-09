@@ -197,6 +197,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   // 缩放回到 ≤1 时自动将偏移恢复到中心，并短暂启用过渡动画
   useEffect(() => {
     if (zoom <= 1) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsResettingOffset(true);
       setOffsetX(0);
       setOffsetY(0);

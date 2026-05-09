@@ -1,4 +1,5 @@
 // JSON-LD 结构化数据组件：帮助搜索引擎理解页面内容
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function JsonLd({ data }: { data: Record<string, any> }) {
     return (
         <script

@@ -17,7 +17,10 @@ export function HoverPreview({ project }: HoverPreviewProps) {
         // 检测是否为移动设备
         const checkMobile = () => {
             const isTouchDevice = () => {
-                const nav = navigator as any;
+                const nav = navigator as Navigator & {
+                    maxTouchPoints?: number;
+                    msMaxTouchPoints?: number;
+                };
                 return (
                     (typeof window !== 'undefined' &&
                         ('ontouchstart' in window ||

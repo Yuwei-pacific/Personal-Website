@@ -5,7 +5,6 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd, websiteSchema } from "@/components/seo/json-ld";
 import { AnimationProvider } from "@/components/providers/animation-provider";
-import { ViewTransitions } from "next-view-transitions";
 import { CustomCursor } from "@/components/ui";
 import "./globals.css";
 
