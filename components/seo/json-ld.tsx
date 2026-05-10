@@ -14,7 +14,7 @@ export const personSchema = {
     '@context': 'https://schema.org',
     '@type': 'Person',
     name: 'Yuwei Li',
-    url: 'https://yuweili.site',
+    url: 'https://www.yuweidesign.com',
     sameAs: [
         'https://github.com/yuweili',
         'https://linkedin.com/in/yuweili',
@@ -29,10 +29,10 @@ export const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'Yuwei Li Portfolio',
-    url: 'https://yuweili.site',
+    url: 'https://www.yuweidesign.com',
     description: 'Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.',
-    image: 'https://yuweili.site/Profile_Yuwei.webp',
-    logo: 'https://yuweili.site/Logo.svg',
+    image: 'https://www.yuweidesign.com/Profile_Yuwei.webp',
+    logo: 'https://www.yuweidesign.com/Logo.svg',
     author: {
         '@type': 'Person',
         name: 'Yuwei Li',
@@ -42,7 +42,7 @@ export const websiteSchema = {
         name: 'Yuwei Li',
         logo: {
             '@type': 'ImageObject',
-            url: 'https://yuweili.site/Logo.svg',
+            url: 'https://www.yuweidesign.com/Logo.svg',
         },
     },
 }

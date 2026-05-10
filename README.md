@@ -83,4 +83,4 @@ npm run lint      # ESLint
 
 ## 📄 License & Author
 
-**Yuwei Li** - [Portfolio](https://yuweili.site) | [GitHub](https://github.com/Yuwei-pacific)
+**Yuwei Li** - [Portfolio](https://www.yuweidesign.com) | [GitHub](https://github.com/Yuwei-pacific)
