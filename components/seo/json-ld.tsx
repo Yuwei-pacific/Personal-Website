@@ -28,7 +28,7 @@ export const personSchema = {
 export const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Yuwei Li Portfolio',
+    name: 'Yuwei Design',
     url: 'https://www.yuweidesign.com',
     description: 'Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.',
     image: 'https://www.yuweidesign.com/Profile_Yuwei.webp',
