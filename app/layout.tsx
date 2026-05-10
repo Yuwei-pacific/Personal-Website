@@ -26,8 +26,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.yuweidesign.com'),
   title: {
-    default: "Yuwei Li | Designer & Developer Portfolio",
-    template: "%s | Yuwei Li",
+    default: "Yuwei Design | UX/UI Designer & Creative Developer",
+    template: "%s | Yuwei Design",
   },
   description: "Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.",
   keywords: ["Yuwei Li", "portfolio", "designer", "developer", "creative technologist", "web development", "UI/UX design"],
@@ -37,9 +37,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://www.yuweidesign.com",
-    title: "Yuwei Li | Designer & Developer Portfolio",
+    title: "Yuwei Design | UX/UI Designer & Creative Developer",
     description: "Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.",
-    siteName: "Yuwei Li Portfolio",
+    siteName: "Yuwei Design",
     images: [
       {
         url: "https://www.yuweidesign.com/Profile_Yuwei.webp",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Yuwei Li | Designer & Developer Portfolio",
+    title: "Yuwei Design | UX/UI Designer & Creative Developer",
     description: "Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.",
     creator: "@yuweili",
     images: ["https://www.yuweidesign.com/Profile_Yuwei.webp"],
