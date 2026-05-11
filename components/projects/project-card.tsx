@@ -1,8 +1,12 @@
+"use client";
+
 // 单个项目卡片：支持无 slug 的静态卡片和有 slug 的可点击卡片
 import { Link } from "next-view-transitions";
 import { ArrowUpRight } from "lucide-react";
+import Image from "next/image";
 import type { Project } from "@/types";
 import { HoverPreview } from "./hover-preview";
+import { useRef, useState } from "react";
 
 type ProjectCardProps = {
     project: Project;
@@ -10,23 +14,68 @@ type ProjectCardProps = {
 };
 
 export function ProjectCard({ project, slug }: ProjectCardProps) {
-    // 卡片主体：渐变光晕背景，包含类型标签、标题/年份、摘要与箭头
+    const divRef = useRef<HTMLDivElement>(null);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [opacity, setOpacity] = useState(0);
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!divRef.current) return;
+        const rect = divRef.current.getBoundingClientRect();
+        setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    };
+
+    // 卡片主体：带有鼠标跟随光晕效果，并使用封面图作为背景
     const cardContent = (
-        <div className="group relative overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 p-5 shadow-lg transition hover:-translate-y-1 hover:shadow-xl sm:p-6">
-            <div className="absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100">
-                <div className="absolute -top-16 right-0 h-40 w-40 rotate-12 bg-gradient-to-br from-sky-500/30 via-emerald-400/20 to-purple-500/20 blur-3xl" />
-            </div>
-            <div className="relative flex flex-col gap-3">
+        <div 
+            ref={divRef}
+            onMouseMove={handleMouseMove}
+            onMouseEnter={() => setOpacity(1)}
+            onMouseLeave={() => setOpacity(0)}
+            className="group relative overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 p-5 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:p-6"
+        >
+            {/* 项目封面作为背景 */}
+            {project.coverImage?.asset?.url && (
+                <div className="absolute inset-0 z-0">
+                    <Image
+                        src={project.coverImage.asset.url}
+                        alt={project.coverImage.alt || project.title}
+                        fill
+                        className="object-cover opacity-20 grayscale transition-all duration-500 group-hover:opacity-40 group-hover:grayscale-0"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                    {/* 渐变遮罩层，确保深色模式下文本的可读性 */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/80 to-transparent" />
+                </div>
+            )}
+
+            {/* 鼠标跟随的背景高光 */}
+            <div
+                className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-500 ease-in-out"
+                style={{
+                    opacity,
+                    background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(255,255,255,0.06), transparent 40%)`,
+                }}
+            />
+            {/* 鼠标跟随的彩色光晕 (Vercel 风格带有一点点色彩倾向) */}
+            <div
+                className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-500 ease-in-out"
+                style={{
+                    opacity,
+                    background: `radial-gradient(400px circle at ${position.x}px ${position.y}px, rgba(14, 165, 233, 0.08), transparent 40%)`,
+                }}
+            />
+
+            <div className="relative z-20 flex flex-col gap-3 h-full justify-end min-h-[140px]">
                 <div className="flex items-center gap-2">
                     {project.projectType && (
-                        <span className="rounded-full border border-white/40 bg-white/90 px-3 py-1 text-xs font-semibold uppercase text-neutral-900 ">
+                        <span className="rounded-full border border-white/40 bg-white/90 px-3 py-1 text-xs font-semibold uppercase text-neutral-900 transition-colors group-hover:bg-white group-hover:border-white">
                             {project.projectType}
                         </span>
                     )}
                 </div>
                 <div className="space-y-2">
                     <div className="flex items-center gap-3">
-                        <p className="text-xl font-semibold text-white">{project.title}</p>
+                        <p className="text-xl font-semibold text-white transition-colors">{project.title}</p>
                         {project.year && (
                             <span className="rounded-full border border-neutral-800 bg-neutral-800/80 px-3 py-1 text-xs font-medium text-neutral-100">
                                 {project.year}
