@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { PortableText, type PortableTextReactComponents } from "@portabletext/react";
@@ -24,15 +25,25 @@ type ResumeListProps = {
 
 export function ResumeList({ items, fallbackData }: ResumeListProps) {
   const displayData = items && items.length > 0 ? items : fallbackData;
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const toggleExpand = (id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
 
   return (
     <div className="mt-4 space-y-6 text-neutral-800">
       {displayData.map((edu, idx) => {
         const id = edu._id || `edu-${idx}`;
         const hasDetails = edu.details && edu.details.length > 0;
+        const isExpanded = expandedId === id;
 
         return (
-          <div key={id} className="group relative flex items-stretch gap-3">
+          <div 
+            key={id} 
+            className={`group relative flex items-stretch gap-3 ${hasDetails ? 'cursor-pointer' : ''}`}
+            onClick={() => hasDetails && toggleExpand(id)}
+          >
             {/* The vertical diamond bullet */}
             <Image
               src="/diamond_2.svg"
@@ -62,13 +73,13 @@ export function ResumeList({ items, fallbackData }: ResumeListProps) {
               {/* Right: arrow hint fades out, details fade in — same space */}
               {hasDetails && (
                 <div className="relative flex flex-1 flex-col sm:w-[60%]">
-                  {/* Arrow hint — visible by default, positioned at bottom right, fades out on hover */}
-                  <div className="absolute bottom-0 right-2 flex items-center gap-1 text-neutral-400 transition-all duration-300 group-hover:opacity-0 group-hover:translate-x-1 group-hover:-translate-y-1">
+                  {/* Arrow hint — visible by default, positioned at bottom right, fades out on hover/click */}
+                  <div className={`absolute bottom-0 right-2 flex items-center gap-1 text-neutral-400 transition-all duration-300 ${isExpanded ? 'opacity-0 translate-x-1 -translate-y-1' : 'group-hover:opacity-0 group-hover:translate-x-1 group-hover:-translate-y-1'}`}>
                     <ArrowUpRight className="h-6 w-6" />
                   </div>
                   
-                  {/* Details & Divider — hidden by default, expands and fades in on hover */}
-                  <div className="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out group-hover:grid-rows-[1fr] group-hover:opacity-100 sm:pl-6 relative">
+                  {/* Details & Divider — hidden by default, expands and fades in on hover/click */}
+                  <div className={`grid transition-all duration-300 ease-out sm:pl-6 relative ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 group-hover:grid-rows-[1fr] group-hover:opacity-100'}`}>
                     {/* Vertical divider - shows on hover, inside the grid to control height */}
                     <div className="hidden sm:block absolute inset-y-0 left-0 w-px bg-neutral-200" />
                     
