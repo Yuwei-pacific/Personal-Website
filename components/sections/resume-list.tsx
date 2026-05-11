@@ -28,6 +28,10 @@ export function ResumeList({ items, fallbackData }: ResumeListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const toggleExpand = (id: string) => {
+    // Disable click-to-expand on devices that support hover (like desktops)
+    if (typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches) {
+      return;
+    }
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
