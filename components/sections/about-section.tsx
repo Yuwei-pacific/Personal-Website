@@ -33,7 +33,7 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
   return (
     <section
       id="about"
-      className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-12 sm:gap-8 sm:px-6 sm:py-16 scroll-mt-24"
+      className="mx-auto flex max-w-6xl flex-col gap-5 px-4 pt-12 pb-[28px] sm:gap-8 sm:px-6 sm:pt-16 sm:pb-[48px] scroll-mt-24"
     >
       <div className="flex flex-col gap-3">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">
