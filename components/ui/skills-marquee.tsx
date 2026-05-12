@@ -38,20 +38,32 @@ const baseSkills = [
 const skillsGroup = Array(10).fill(baseSkills).flat();
 
 export function SkillsMarquee({ className }: { className?: string }) {
-  const [scrollY, setScrollY] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 监听页面滚动事件
+    let animationFrameId: number;
+
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      if (!animationFrameId) {
+        animationFrameId = requestAnimationFrame(() => {
+          if (containerRef.current) {
+            containerRef.current.style.transform = `translate3d(${-window.scrollY * 0.3}px, 0, 0)`;
+          }
+          animationFrameId = 0;
+        });
+      }
     };
 
+    window.addEventListener("scroll", handleScroll, { passive: true });
     // 初始化时获取一次
     handleScroll();
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
   }, []);
 
   return (
@@ -73,10 +85,6 @@ export function SkillsMarquee({ className }: { className?: string }) {
       <div
         ref={containerRef}
         className="flex w-max items-center h-full will-change-transform"
-        style={{
-          transform: `translate3d(${-scrollY * 0.3}px, 0, 0)`,
-          transition: "transform 0.1s ease-out" // 添加微弱的过渡让滚动更顺滑
-        }}
       >
         <ul className="flex shrink-0 items-center justify-around px-2">
           {skillsGroup.map((skill, index) => {
@@ -88,7 +96,7 @@ export function SkillsMarquee({ className }: { className?: string }) {
               >
                 {/* 这一层依然保留正弦波的上下浮动效果 */}
                 <div
-                  className="animate-bounce-sine flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full bg-secondary/40 backdrop-blur-md border border-border/60 text-foreground transition-all hover:scale-110 hover:bg-secondary/70 cursor-pointer"
+                  className="animate-bounce-sine flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full bg-white border border-neutral-200 text-neutral-900 transition-all hover:scale-110 hover:bg-neutral-100 cursor-pointer"
                   style={{ animationDelay: delay }}
                   title={skill.name}
                 >

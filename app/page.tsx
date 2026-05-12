@@ -91,7 +91,7 @@ export default async function HomePage() {
       <Hero />
       {/* 关于我简介 */}
       <AboutSection skillCategories={skillCategories} resumeItems={resumeItems} />
-      
+
       {/* 技能轮播展示 */}
       <div className="pb-12">
         <SkillsMarquee />

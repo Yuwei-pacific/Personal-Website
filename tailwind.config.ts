@@ -81,7 +81,7 @@ const config: Config = {
         marquee: "marquee 30s linear infinite",
         "marquee-vertical": "marquee-vertical 30s linear infinite",
         float: "float 3s ease-in-out infinite",
-        "bounce-sine": "bounce-sine 8s ease-in-out infinite",
+        "bounce-sine": "bounce-sine 10s ease-in-out infinite",
       },
     },
   },
