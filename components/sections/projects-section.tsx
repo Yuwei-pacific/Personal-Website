@@ -29,17 +29,17 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
       <div className="mx-auto flex max-w-6xl flex-col gap-6 sm:gap-10">
         {/* 顶部标题与说明 */}
         <header className="flex flex-col gap-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-300">
+          {/* <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-300">
             Work
-          </p>
+          </p> */}
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex-1">
               <h2 className="text-3xl font-semibold leading-tight text-white sm:text-4xl">
-                Selected work across design and build.
+                Work
               </h2>
-              <p className="max-w-3xl text-base text-neutral-200 sm:text-lg">
+              {/* <p className="max-w-3xl text-base text-neutral-200 sm:text-lg">
                 Interfaces, systems, and interaction stories that ship.
-              </p>
+              </p> */}
             </div>
             {/* <div className="inline-flex items-center gap-2 rounded-full border border-neutral-800 bg-neutral-900/80 px-3 py-2 text-xs font-medium text-neutral-100 shadow-sm backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />

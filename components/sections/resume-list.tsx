@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { PortableText, type PortableTextReactComponents } from "@portabletext/react";
 import type { ResumeItem } from "@/types";
+import { StaggerReveal } from "@/components/ui/stagger-reveal";
 
 const portableComponents: Partial<PortableTextReactComponents> = {
   block: {
@@ -30,7 +31,7 @@ export function ResumeList({ items, fallbackData }: ResumeListProps) {
   };
 
   return (
-    <div className="mt-6 border-t border-neutral-300">
+    <StaggerReveal className="mt-6 border-t border-neutral-300">
       {displayData.map((edu, idx) => {
         const id = edu._id || `edu-${idx}`;
         const hasDetails = edu.details && edu.details.length > 0;
@@ -42,11 +43,11 @@ export function ResumeList({ items, fallbackData }: ResumeListProps) {
             className={`border-b border-neutral-300 ${hasDetails ? 'cursor-pointer' : ''}`}
             onClick={() => hasDetails && toggleExpand(id)}
           >
-            <div className="group grid grid-cols-1 gap-1 px-1 py-4 transition-colors sm:grid-cols-[1.4fr_1.6fr_1fr_0.8fr] sm:items-center sm:gap-4 sm:hover:bg-neutral-50">
+            <div className="group grid grid-cols-1 gap-1.5 px-1 py-5 transition-[padding,background-color] duration-300 sm:grid-cols-[1.4fr_1.6fr_1fr_0.8fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-neutral-50">
               <p className="font-semibold text-neutral-900">{edu.institution}</p>
-              <p className="text-sm text-neutral-600 sm:text-base">{edu.degree}</p>
-              <p className="text-sm text-neutral-600">{edu.period}</p>
-              <p className="text-sm text-neutral-600">{edu.location}</p>
+              <p className="text-sm text-neutral-700 sm:text-base">{edu.degree}</p>
+              <p className="text-sm text-neutral-500">{edu.period}</p>
+              <p className="text-sm text-neutral-500">{edu.location}</p>
             </div>
 
             {hasDetails && (
@@ -61,6 +62,6 @@ export function ResumeList({ items, fallbackData }: ResumeListProps) {
           </div>
         );
       })}
-    </div>
+    </StaggerReveal>
   );
 }
