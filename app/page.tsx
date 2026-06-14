@@ -85,7 +85,7 @@ export default async function HomePage() {
 
   return (
     // 页面结构：导航栏 + Hero + About + Projects 列表
-    <div className="min-h-screen" id="home">
+    <div className="min-h-screen">
       {/* Person 结构化数据：增强 E-E-A-T 信号 */}
       <JsonLd data={personSchema} />
       {/* 顶部导航，支持滚动隐藏 */}

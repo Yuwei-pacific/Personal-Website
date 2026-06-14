@@ -14,7 +14,7 @@ export function Hero() {
   const heroRef = useHeroAnimation<HTMLElement>();
   return (
     // 全屏容器：相对定位，隔离层叠上下文，居中内容
-    <section ref={heroRef} className="relative isolate flex min-h-screen w-full items-center overflow-hidden px-6 py-16 sm:px-10 md:px-16">
+    <section ref={heroRef} id="home" className="relative isolate flex min-h-screen w-full items-center overflow-hidden px-6 py-16 sm:px-10 md:px-16">
       {/* 背景装饰层：固定定位，不阻塞交互，降低层级 */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         {/* 渐变背景：从浅蓝到浅黄 */}
