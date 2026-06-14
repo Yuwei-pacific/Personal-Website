@@ -13,6 +13,12 @@
       "skillPath": "skills/content-modeling-best-practices/SKILL.md",
       "computedHash": "9f0c62274cf8ccf41dd32fc2f2629f4c9a8e5a920826f30c2eb226d7e796b031"
     },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "4eabc66183767153e404b39d1b839b1c37f2d82d86f0a0d7e880a579d8d62336"
+    },
     "gsap-core": {
       "source": "greensock/gsap-skills",
       "sourceType": "github",
