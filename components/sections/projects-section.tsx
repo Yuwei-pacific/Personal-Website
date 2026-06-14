@@ -1,4 +1,5 @@
 // 项目列表区：展示从 CMS 获取的项目卡片
+import Image from "next/image";
 import { ProjectCard } from "@/components/projects";
 import type { Project } from "@/types";
 
@@ -24,29 +25,34 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
     // 外层区块：深色背景，带滚动定位锚点 "work"
     <section
       id="work"
-      className="w-full bg-neutral-950 px-4 pb-14 pt-14 text-white sm:px-6 sm:pb-20 sm:pt-20 scroll-mt-24"
+      className="w-full bg-neutral-950 text-white relative z-10 scroll-mt-24"
+      style={{ clipPath: "inset(0)" }}
     >
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 sm:gap-10">
-        {/* 顶部标题与说明 */}
-        <header className="flex flex-col gap-3">
-          {/* <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-300">
+      {/* 背景装饰图形：使用 fixed 定位，并通过 clipPath 限制只在 work section 内部可见 */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <Image
+          src="/hero_mg.svg"
+          alt="Work background graphic"
+          fill
+          sizes="100vw"
+          className="select-none object-contain object-center opacity-[0.22] blur-md"
+          style={{
+            animation: "hero-float 6s ease-in-out infinite alternate",
+            willChange: "transform",
+          }}
+        />
+      </div>
+
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pb-14 pt-14 sm:gap-10 sm:px-6 sm:pb-20 sm:pt-20">
+        {/* 顶部标题：与 Education / Experience 一致的大字加计数 */}
+        <div className="flex items-baseline gap-1.5">
+          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Work
-          </p> */}
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex-1">
-              <h2 className="text-3xl font-semibold leading-tight text-white sm:text-4xl">
-                Work
-              </h2>
-              {/* <p className="max-w-3xl text-base text-neutral-200 sm:text-lg">
-                Interfaces, systems, and interaction stories that ship.
-              </p> */}
-            </div>
-            {/* <div className="inline-flex items-center gap-2 rounded-full border border-neutral-800 bg-neutral-900/80 px-3 py-2 text-xs font-medium text-neutral-100 shadow-sm backdrop-blur">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />
-              Available for collaborations
-            </div> */}
-          </div>
-        </header>
+          </h2>
+          <sup className="text-sm font-semibold text-neutral-400 sm:text-base">
+            ({sortedProjects.length})
+          </sup>
+        </div>
 
         {!hasProjects ? (
           /* 空状态提示：CMS 未发布时的占位 */

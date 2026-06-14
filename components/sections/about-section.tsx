@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { MapPin, Mail, Languages } from "lucide-react";
 import { SkillCategory, ResumeItem } from "@/types";
 import { ResumeList } from "./resume-list";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
@@ -79,47 +78,39 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
         </div>
 
 
-        {/* Basic info row */}
+        {/* Basic info — same row-table style as Education / Experience / Capabilities */}
         <ScrollReveal>
-          <div className="flex flex-col gap-5 border-t border-neutral-200 pt-6">
-            {/* Name and Title */}
-            <div>
-              <h3 className="text-xl font-bold text-neutral-900 sm:text-2xl">Yuwei Li</h3>
-              <p className="text-sm text-neutral-600 sm:text-base mt-1">
-                Communication Designer & Frontend Developer
-              </p>
+          <div className="border-t border-neutral-300">
+            <div className="grid grid-cols-1 gap-1 border-b border-neutral-300 px-1 py-4 transition-[padding,background-color] duration-300 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-neutral-50">
+              <p className="font-semibold text-neutral-900">Name</p>
+              <p className="text-base font-semibold text-neutral-900">Yuwei Li</p>
             </div>
-
-            {/* Location and Email */}
-            <div className="space-y-2 text-sm font-medium text-neutral-700 sm:text-base">
-              <div className="flex items-center gap-2.5">
-                <MapPin className="h-4.5 w-4.5 text-neutral-400" />
-                <span>Milan, Italy</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Mail className="h-4.5 w-4.5 text-neutral-400" />
-                <a href="mailto:snowtime200801@gmail.com" className="transition-colors hover:text-neutral-900">
-                  snowtime200801@gmail.com
-                </a>
-              </div>
+            <div className="grid grid-cols-1 gap-1 border-b border-neutral-300 px-1 py-4 transition-[padding,background-color] duration-300 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-neutral-50">
+              <p className="font-semibold text-neutral-900">Role</p>
+              <p className="text-sm text-neutral-700 sm:text-base">Communication Designer &amp; Frontend Developer</p>
             </div>
-
-            {/* Languages */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-neutral-400">
-                <Languages className="h-4 w-4" />
-                <span>LANGUAGES</span>
-              </div>
-              <div className="flex flex-wrap gap-2.5">
-                <span className="rounded-full bg-neutral-100/60 px-3.5 py-1.5 text-sm font-medium text-neutral-800">
-                  Chinese — Native
-                </span>
-                <span className="rounded-full bg-neutral-100/60 px-3.5 py-1.5 text-sm font-medium text-neutral-800">
-                  English — B2
-                </span>
-                <span className="rounded-full bg-neutral-100/60 px-3.5 py-1.5 text-sm font-medium text-neutral-800">
-                  Italiano — B2
-                </span>
+            <div className="grid grid-cols-1 gap-1 border-b border-neutral-300 px-1 py-4 transition-[padding,background-color] duration-300 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-neutral-50">
+              <p className="font-semibold text-neutral-900">Location</p>
+              <p className="text-sm text-neutral-700 sm:text-base">Milan, Italy</p>
+            </div>
+            <div className="grid grid-cols-1 gap-1 border-b border-neutral-300 px-1 py-4 transition-[padding,background-color] duration-300 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-neutral-50">
+              <p className="font-semibold text-neutral-900">Email</p>
+              <a
+                href="mailto:snowtime200801@gmail.com"
+                className="text-sm text-neutral-700 transition-colors hover:text-neutral-950 sm:text-base"
+              >
+                snowtime200801@gmail.com
+              </a>
+            </div>
+            <div className="grid grid-cols-1 gap-1 border-b border-neutral-300 px-1 py-4 transition-[padding,background-color] duration-300 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-neutral-50">
+              <p className="font-semibold text-neutral-900">Languages</p>
+              <div className="flex flex-wrap gap-x-2 gap-y-1.5 text-sm text-neutral-700 sm:text-base">
+                {["Chinese — Native", "English — B2", "Italiano — B2"].map((lang, i) => (
+                  <span key={lang} className="flex items-center gap-2">
+                    {i > 0 && <span className="text-neutral-300">·</span>}
+                    {lang}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
