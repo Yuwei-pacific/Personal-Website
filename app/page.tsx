@@ -3,6 +3,7 @@ import groq from "groq";
 import { Navbar } from "@/components/layout";
 import { Hero, AboutSection, ProjectsSection } from "@/components/sections";
 import { SkillsMarquee } from "@/components/ui";
+import { JsonLd, personSchema } from "@/components/seo/json-ld";
 import type { Project, SkillCategory, ResumeItem } from "@/types";
 import { isSanityConfigured, sanityClient } from "@/lib/sanity";
 
@@ -85,6 +86,8 @@ export default async function HomePage() {
   return (
     // 页面结构：导航栏 + Hero + About + Projects 列表
     <div className="min-h-screen" id="home">
+      {/* Person 结构化数据：增强 E-E-A-T 信号 */}
+      <JsonLd data={personSchema} />
       {/* 顶部导航，支持滚动隐藏 */}
       <Navbar />
       {/* 首页主视觉区 */}

@@ -230,14 +230,14 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
         <section className="w-full bg-neutral-950 px-4 py-12 text-white sm:px-6 sm:py-16 scroll-mt-24">
           <div className="mx-auto flex max-w-6xl flex-col gap-8">
             {project.coverImage?.url && (
-              // 封面图：非 Next/Image，直接使用原始 URL，懒加载
-              <div className="overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+              // 封面图：使用 next/image 获得自动响应式与懒加载
+              <div className="relative aspect-video w-full overflow-hidden">
+                <Image
                   src={project.coverImage.url}
                   alt={project.title || "Project Cover"}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
+                  fill
+                  className="object-cover"
+                  sizes="(min-width: 1024px) 1152px, 100vw"
                 />
               </div>
             )}

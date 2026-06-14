@@ -1,100 +1,75 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import Image from "next/image";
 import type { Project } from "@/types";
 
-interface HoverPreviewProps {
-    project: Project;
-}
+type ProjectHoverPreviewLayerProps = {
+    projects: Project[];
+    children: ReactNode;
+};
 
-export function HoverPreview({ project }: HoverPreviewProps) {
-    const [isVisible, setIsVisible] = useState(false);
+// 项目网格的悬浮预览层：用单个事件委托替代每张卡片各自的全局监听器，
+// 避免 N 个项目挂载 N 套重复的 document 级 mousemove 监听
+export function ProjectHoverPreviewLayer({ projects, children }: ProjectHoverPreviewLayerProps) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        // 检测是否为移动设备
-        const checkMobile = () => {
-            const isTouchDevice = () => {
-                const nav = navigator as Navigator & {
-                    maxTouchPoints?: number;
-                    msMaxTouchPoints?: number;
-                };
-                return (
-                    (typeof window !== 'undefined' &&
-                        ('ontouchstart' in window ||
-                            (nav.maxTouchPoints || 0) > 0 ||
-                            (nav.msMaxTouchPoints || 0) > 0)) ||
-                    window.matchMedia('(hover: none)').matches
-                );
-            };
-
-            setIsMobile(isTouchDevice());
-        };
-
+        const checkMobile = () => setIsMobile(window.matchMedia("(hover: none)").matches);
         checkMobile();
-        window.addEventListener('resize', checkMobile);
-
-        return () => {
-            window.removeEventListener('resize', checkMobile);
-        };
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
     }, []);
 
     useEffect(() => {
-        // 如果是移动设备，不附加事件监听
         if (isMobile) return;
 
-        // 获取所有项目卡片的链接
-        const cardLinks = document.querySelectorAll('a[href*="/projects/"]');
+        const container = containerRef.current;
+        if (!container) return;
 
-        const handleMouseMove = (e: Event) => {
-            if (!(e instanceof MouseEvent)) return;
-            const x = e.clientX;
-            const y = e.clientY;
-            setPosition({ x, y });
+        const handleMouseMove = (e: MouseEvent) => {
+            setPosition({ x: e.clientX, y: e.clientY });
         };
 
-        const handleMouseEnter = (e: Event) => {
-            if (!(e instanceof MouseEvent)) return;
-            const link = e.currentTarget as HTMLElement;
-            // 检查这个卡片是否对应当前项目
-            if (link.getAttribute('href') === `/projects/${project.slug}`) {
-                setIsVisible(true);
+        const handleMouseOver = (e: MouseEvent) => {
+            const link = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="/projects/"]');
+            if (link) {
+                setHoveredSlug(link.getAttribute("href")?.replace("/projects/", "") ?? null);
             }
         };
 
-        const handleMouseLeave = (e: Event) => {
-            if (!(e instanceof MouseEvent)) return;
-            const link = e.currentTarget as HTMLElement;
-            if (link.getAttribute('href') === `/projects/${project.slug}`) {
-                setIsVisible(false);
+        const handleMouseOut = (e: MouseEvent) => {
+            const link = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="/projects/"]');
+            const related = e.relatedTarget as Node | null;
+            if (link && !(related && link.contains(related))) {
+                setHoveredSlug(null);
             }
         };
 
-        cardLinks.forEach((link) => {
-            link.addEventListener('mousemove', handleMouseMove as EventListener);
-            link.addEventListener('mouseenter', handleMouseEnter as EventListener);
-            link.addEventListener('mouseleave', handleMouseLeave as EventListener);
-        });
+        container.addEventListener("mousemove", handleMouseMove);
+        container.addEventListener("mouseover", handleMouseOver);
+        container.addEventListener("mouseout", handleMouseOut);
 
         return () => {
-            cardLinks.forEach((link) => {
-                link.removeEventListener('mousemove', handleMouseMove as EventListener);
-                link.removeEventListener('mouseenter', handleMouseEnter as EventListener);
-                link.removeEventListener('mouseleave', handleMouseLeave as EventListener);
-            });
+            container.removeEventListener("mousemove", handleMouseMove);
+            container.removeEventListener("mouseover", handleMouseOver);
+            container.removeEventListener("mouseout", handleMouseOut);
         };
-    }, [project.slug, isMobile]);
+    }, [isMobile]);
 
-    // 如果没有封面图片或没有 slug，不显示预览
-    if (!project.coverImage?.asset?.url || !project.slug || isMobile) {
-        return null;
-    }
+    const hoveredProject = projects.find((project) => {
+        const slug = typeof project.slug === "string" ? project.slug : project.slug?.current;
+        return slug === hoveredSlug;
+    });
 
     return (
-        <>
-            {isVisible && (
+        <div ref={containerRef} className="relative">
+            {children}
+
+            {!isMobile && hoveredProject?.coverImage?.asset?.url && (
                 <div
                     className="fixed pointer-events-none z-50"
                     style={{
@@ -104,8 +79,8 @@ export function HoverPreview({ project }: HoverPreviewProps) {
                 >
                     <div className="relative w-48 h-32 rounded-lg overflow-hidden shadow-2xl border border-neutral-700 bg-neutral-900 flex-shrink-0">
                         <Image
-                            src={project.coverImage.asset.url}
-                            alt={project.coverImage.alt || project.title}
+                            src={hoveredProject.coverImage.asset.url}
+                            alt={hoveredProject.coverImage.alt || hoveredProject.title}
                             fill
                             className="object-cover"
                             sizes="192px"
@@ -114,6 +89,6 @@ export function HoverPreview({ project }: HoverPreviewProps) {
                     </div>
                 </div>
             )}
-        </>
+        </div>
     );
 }

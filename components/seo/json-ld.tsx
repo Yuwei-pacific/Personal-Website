@@ -9,16 +9,16 @@ export function JsonLd({ data }: { data: Record<string, any> }) {
     )
 }
 
-// 个人/组织结构化数据
+// 个人结构化数据：用于增强 E-E-A-T 信号
 export const personSchema = {
     '@context': 'https://schema.org',
     '@type': 'Person',
     name: 'Yuwei Li',
     url: 'https://www.yuweidesign.com',
     sameAs: [
-        'https://github.com/yuweili',
-        'https://linkedin.com/in/yuweili',
-        'https://instagram.com/yuweili',
+        'https://github.com/Yuwei-pacific',
+        'https://www.linkedin.com/in/yuwei081/',
+        'https://www.instagram.com/yuwei081/',
     ],
     jobTitle: 'Designer & Developer',
     description: 'Designer, Developer, and Creative Technologist',
