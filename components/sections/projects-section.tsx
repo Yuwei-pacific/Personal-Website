@@ -1,5 +1,5 @@
 // 项目列表区：展示从 CMS 获取的项目卡片
-import { ProjectCard, ProjectHoverPreviewLayer } from "@/components/projects";
+import { ProjectCard } from "@/components/projects";
 import type { Project } from "@/types";
 
 type ProjectsSectionProps = {
@@ -54,25 +54,24 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
             Projects will appear here once they are published in Sanity.
           </div>
         ) : (
-          /* 项目网格：响应式两列起步 */
-          <ProjectHoverPreviewLayer projects={sortedProjects}>
-            <div className="mt-4 grid gap-3 sm:gap-4 sm:grid-cols-2">
-              {sortedProjects.map((project, idx) => {
-                // 兼容 slug 为字符串或 { current } 对象的情况
-                const slug =
-                  typeof project.slug === "string" ? project.slug : project.slug?.current;
+          /* 项目列表：单列编辑式大卡，图文左右交替 */
+          <div className="mt-4 flex flex-col gap-6 sm:gap-8">
+            {sortedProjects.map((project, idx) => {
+              // 兼容 slug 为字符串或 { current } 对象的情况
+              const slug =
+                typeof project.slug === "string" ? project.slug : project.slug?.current;
 
-                return (
-                  <ProjectCard
-                    key={project._id || slug || `project-${idx}`}
-                    project={project}
-                    slug={slug}
-                    revealDelay={(idx % 2) * 0.1}
-                  />
-                );
-              })}
-            </div>
-          </ProjectHoverPreviewLayer>
+              return (
+                <ProjectCard
+                  key={project._id || slug || `project-${idx}`}
+                  project={project}
+                  slug={slug}
+                  revealDelay={idx === 0 ? 0 : 0.1}
+                  reverse={idx % 2 === 1}
+                />
+              );
+            })}
+          </div>
         )}
       </div>
     </section>

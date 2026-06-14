@@ -1,109 +1,66 @@
 "use client";
 
-// 单个项目卡片：支持无 slug 的静态卡片和有 slug 的可点击卡片
+// 单个项目卡片：编辑式图文交替大卡，支持无 slug 的静态卡片和有 slug 的可点击卡片
 import { Link } from "next-view-transitions";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import type { Project } from "@/types";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { useRef } from "react";
-import gsap from "gsap";
+import { cn } from "@/lib/utils";
 
 type ProjectCardProps = {
     project: Project;
     slug?: string;
-    /** 滚动入场动画的延迟（秒），用于在网格中制造错落感 */
+    /** 滚动入场动画的延迟（秒），用于在列表中制造错落感 */
     revealDelay?: number;
+    /** 是否反转图文顺序（用于交替布局） */
+    reverse?: boolean;
 };
 
-export function ProjectCard({ project, slug, revealDelay = 0 }: ProjectCardProps) {
-    const divRef = useRef<HTMLDivElement>(null);
-    const glowRef = useRef<HTMLDivElement>(null);
-    const tintRef = useRef<HTMLDivElement>(null);
+export function ProjectCard({ project, slug, revealDelay = 0, reverse = false }: ProjectCardProps) {
+    const meta = [project.projectType, project.year].filter(Boolean);
 
-    // 鼠标跟随光晕：直接写 DOM/CSS 变量，避免每次 mousemove 触发 React 重渲染
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!divRef.current) return;
-        const rect = divRef.current.getBoundingClientRect();
-        const x = `${e.clientX - rect.left}px`;
-        const y = `${e.clientY - rect.top}px`;
-        gsap.set([glowRef.current, tintRef.current], { "--x": x, "--y": y });
-    };
-
-    const handleMouseEnter = () => {
-        gsap.to([glowRef.current, tintRef.current], { autoAlpha: 1, duration: 0.5, ease: "power2.out" });
-    };
-
-    const handleMouseLeave = () => {
-        gsap.to([glowRef.current, tintRef.current], { autoAlpha: 0, duration: 0.5, ease: "power2.out" });
-    };
-
-    // 卡片主体：带有鼠标跟随光晕效果，并使用封面图作为背景
     const cardContent = (
-        <div
-            ref={divRef}
-            onMouseMove={handleMouseMove}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            className="group relative overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 p-5 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:p-6"
-        >
-            {/* 项目封面作为背景 */}
-            {project.coverImage?.asset?.url && (
-                <div className="absolute inset-0 z-0">
+        <div className="group grid grid-cols-1 overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 transition-colors duration-300 hover:border-neutral-600 sm:grid-cols-2">
+            {/* 封面图：占一半宽度，hover 时缓慢放大 */}
+            <div className={cn("relative aspect-[16/10] overflow-hidden sm:aspect-auto sm:min-h-[220px]", reverse && "sm:order-2")}>
+                {project.coverImage?.asset?.url ? (
                     <Image
                         src={project.coverImage.asset.url}
                         alt={project.coverImage.alt || project.title}
                         fill
-                        className="object-cover opacity-20 grayscale transition-all duration-500 group-hover:opacity-40 group-hover:grayscale-0"
+                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                         sizes="(max-width: 768px) 100vw, 50vw"
                     />
-                    {/* 渐变遮罩层，确保深色模式下文本的可读性 */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/80 to-transparent" />
-                </div>
-            )}
+                ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-neutral-800 to-neutral-950" />
+                )}
+            </div>
 
-            {/* 鼠标跟随的背景高光 */}
-            <div
-                ref={glowRef}
-                className="pointer-events-none absolute inset-0 z-10 opacity-0"
-                style={{
-                    background: `radial-gradient(600px circle at var(--x, 50%) var(--y, 50%), rgba(255,255,255,0.06), transparent 40%)`,
-                }}
-            />
-            {/* 鼠标跟随的彩色光晕 (Vercel 风格带有一点点色彩倾向) */}
-            <div
-                ref={tintRef}
-                className="pointer-events-none absolute inset-0 z-10 opacity-0"
-                style={{
-                    background: `radial-gradient(400px circle at var(--x, 50%) var(--y, 50%), rgba(14, 165, 233, 0.08), transparent 40%)`,
-                }}
-            />
-
-            <div className="relative z-20 flex flex-col gap-3 h-full justify-end min-h-[140px]">
-                <div className="flex items-center gap-2">
-                    {project.projectType && (
-                        <span className="rounded-full border border-white/40 bg-white/90 px-3 py-1 text-xs font-semibold uppercase text-neutral-900 transition-colors group-hover:bg-white group-hover:border-white">
-                            {project.projectType}
-                        </span>
-                    )}
-                </div>
-                <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                        <p className="text-xl font-semibold text-white transition-colors">{project.title}</p>
-                        {project.year && (
-                            <span className="rounded-full border border-neutral-800 bg-neutral-800/80 px-3 py-1 text-xs font-medium text-neutral-100">
-                                {project.year}
+            {/* 文字区：标题、元信息、摘要、CTA */}
+            <div className="flex flex-col justify-center gap-3 p-5 sm:p-6 lg:p-8">
+                {meta.length > 0 && (
+                    <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.3em] text-neutral-400">
+                        {meta.map((item, i) => (
+                            <span key={item} className="flex items-center gap-3">
+                                {i > 0 && <span className="text-neutral-600">/</span>}
+                                {item}
                             </span>
-                        )}
+                        ))}
                     </div>
-                    <p className="text-[11px] font-semibold tracking-[0.15em] text-neutral-300">
-                        {project.summary || project.description}
-                    </p>
-                </div>
-                <div className="flex items-center justify-end gap-1.5 pt-2 text-sm font-semibold text-neutral-50">
-                    <span className="transition-transform group-hover:translate-x-1">View project</span>
-                    <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </div>
+                )}
+                <h3 className="text-xl font-semibold leading-tight text-white sm:text-2xl">
+                    {project.title}
+                </h3>
+                <p className="text-sm leading-6 text-neutral-400 line-clamp-3">
+                    {project.summary || project.description}
+                </p>
+                {slug && (
+                    <span className="inline-flex items-center gap-2 text-sm font-semibold text-white">
+                        View project
+                        <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
+                    </span>
+                )}
             </div>
         </div>
     );
