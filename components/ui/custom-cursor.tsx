@@ -18,8 +18,8 @@ export function CustomCursor() {
     if (!cursor || !dot) return;
 
     // quickTo reuses a single tween for fast-updating properties (mouse follower)
-    const xTo = gsap.quickTo(cursor, "x", { duration: 0.5, ease: "power3" });
-    const yTo = gsap.quickTo(cursor, "y", { duration: 0.5, ease: "power3" });
+    const xTo = gsap.quickTo(cursor, "x", { duration: 0.3, ease: "power3" });
+    const yTo = gsap.quickTo(cursor, "y", { duration: 0.3, ease: "power3" });
 
     let isVisible = false;
     let hasPositioned = false;
