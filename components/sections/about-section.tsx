@@ -2,6 +2,7 @@ import Image from "next/image";
 import { MapPin, Mail, Languages } from "lucide-react";
 import { SkillCategory, ResumeItem } from "@/types";
 import { ResumeList } from "./resume-list";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 type AboutSectionProps = {
   skillCategories?: SkillCategory[];
@@ -50,7 +51,7 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
       </div>
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
         <div className="w-full md:w-[28%] md:sticky md:top-24">
-          <div className="scroll-animate">
+          <ScrollReveal>
             <div className="rounded-2xl border border-neutral-200 bg-white/95 p-4 shadow-sm sm:p-5 max-h-[calc(100vh-6rem)] overflow-y-auto no-scrollbar">
               {/* <p className="text-sm font-semibold text-neutral-900">Portrait</p> */}
               <div className="relative aspect-[1/1] sm:aspect-[4/5] max-h-[320px] overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100">
@@ -104,10 +105,10 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
                 </div>
               </div>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
         <div className="flex w-full flex-col gap-4 md:w-[72%]">
-          <div className="scroll-animate rounded-2xl border border-neutral-200 bg-white/95 p-4 shadow-sm sm:p-5">
+          <ScrollReveal className="rounded-2xl border border-neutral-200 bg-white/95 p-4 shadow-sm sm:p-5">
             <div className="flex items-center gap-3">
               <p className="text-base font-semibold uppercase tracking-[0.2em] text-neutral-900">
                 Education
@@ -138,8 +139,8 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
                 }
               ]}
             />
-          </div>
-          <div className="scroll-animate rounded-2xl border border-neutral-200 bg-white/95 p-4 shadow-sm sm:p-5">
+          </ScrollReveal>
+          <ScrollReveal className="rounded-2xl border border-neutral-200 bg-white/95 p-4 shadow-sm sm:p-5">
             <div className="flex items-center gap-3">
               <p className="text-base font-semibold uppercase tracking-[0.2em] text-neutral-900">
                 EXPERIENCE
@@ -173,8 +174,8 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
                 }
               ]}
             />
-          </div>
-          <div className="scroll-animate rounded-2xl border border-neutral-200 bg-white/95 p-5 shadow-sm">
+          </ScrollReveal>
+          <ScrollReveal className="rounded-2xl border border-neutral-200 bg-white/95 p-5 shadow-sm">
             <div className="flex items-center gap-3">
               <p className="text-base font-semibold uppercase tracking-[0.2em] text-neutral-900">
                 CAPABILITIES
@@ -209,7 +210,7 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
                 </div>
               ))}
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>

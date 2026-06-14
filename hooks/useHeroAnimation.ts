@@ -1,130 +1,35 @@
-import { useEffect } from "react";
+"use client";
 
-// 在客户端动态加载 anime 库
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let animeLib: any = null;
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
-async function getAnime() {
-    if (!animeLib && typeof window !== "undefined") {
-        // 从 UMD 版本加载（这是浏览器友好的）
-        if (!window.anime) {
-            const script = document.createElement("script");
-            script.src = "https://cdn.jsdelivr.net/npm/animejs@3/lib/anime.min.js";
-            script.async = true;
-            document.body.appendChild(script);
+gsap.registerPlugin(useGSAP);
 
-            // 等待脚本加载
-            await new Promise((resolve) => {
-                script.onload = resolve;
-            });
-        }
-        animeLib = window.anime;
-    }
-    return animeLib;
-}
+// Hero 入场动画：标题、描述、状态标签、CTA 与社交图标按时间线依次淡入上滑
+export function useHeroAnimation<T extends HTMLElement>() {
+  const containerRef = useRef<T>(null);
 
-export function useHeroAnimation() {
-    useEffect(() => {
-        const initAnimation = async () => {
-            const anime = await getAnime();
+  useGSAP(() => {
+    const mm = gsap.matchMedia();
 
-            if (!anime) return;
+    mm.add("(prefers-reduced-motion: reduce)", () => {
+      gsap.set([".hero-label", ".hero-title", ".hero-description", ".hero-status", ".hero-cta", ".hero-social-icon"], {
+        autoAlpha: 1,
+      });
+    });
 
-            // 淡入和滑上标题
-            anime
-                .timeline()
-                .add({
-                    targets: ".hero-label",
-                    opacity: [0, 1],
-                    translateY: [20, 0],
-                    duration: 800,
-                    easing: "easeOutQuad",
-                })
-                .add(
-                    {
-                        targets: ".hero-title",
-                        opacity: [0, 1],
-                        translateY: [30, 0],
-                        duration: 800,
-                        easing: "easeOutQuad",
-                    },
-                    "-=600"
-                )
-                .add(
-                    {
-                        targets: ".hero-description",
-                        opacity: [0, 1],
-                        translateY: [20, 0],
-                        duration: 800,
-                        easing: "easeOutQuad",
-                    },
-                    "-=600"
-                )
-                .add(
-                    {
-                        targets: ".hero-status",
-                        opacity: [0, 1],
-                        translateY: [15, 0],
-                        duration: 600,
-                        easing: "easeOutQuad",
-                    },
-                    "-=500"
-                )
-                .add(
-                    {
-                        targets: ".hero-cta",
-                        opacity: [0, 1],
-                        translateY: [20, 0],
-                        duration: 600,
-                        easing: "easeOutQuad",
-                        delay: anime.stagger(150),
-                    },
-                    "-=400"
-                );
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      gsap
+        .timeline({ defaults: { ease: "power2.out" } })
+        .from(".hero-label", { autoAlpha: 0, y: 20, duration: 0.8 })
+        .from(".hero-title", { autoAlpha: 0, y: 30, duration: 0.8 }, "-=0.6")
+        .from(".hero-description", { autoAlpha: 0, y: 20, duration: 0.8 }, "-=0.6")
+        .from(".hero-status", { autoAlpha: 0, y: 15, duration: 0.6 }, "-=0.5")
+        .from(".hero-cta", { autoAlpha: 0, y: 20, duration: 0.6, stagger: 0.15 }, "-=0.4")
+        .from(".hero-social-icon", { autoAlpha: 0, scale: 0.8, duration: 0.6, stagger: 0.1 }, "-=0.2");
+    });
+  }, { scope: containerRef });
 
-            // 社交图标淡入动画
-            anime({
-                targets: ".hero-social-icon",
-                opacity: [0, 1],
-                scale: [0.8, 1],
-                duration: 600,
-                easing: "easeOutQuad",
-                delay: anime.stagger(100, { start: 1000 }),
-            });
-
-            // 背景元素缓慢浮动
-            anime({
-                targets: ".hero-background",
-                translateY: [-20, 20],
-                duration: 6000,
-                direction: "alternate",
-                loop: true,
-                easing: "easeInOutQuad",
-            });
-
-            // 悬停按钮时的动画效果
-            const buttons = document.querySelectorAll(".hero-cta");
-            buttons.forEach((button) => {
-                button.addEventListener("mouseenter", () => {
-                    anime({
-                        targets: button,
-                        scale: 1.05,
-                        duration: 300,
-                        easing: "easeOutQuad",
-                    });
-                });
-
-                button.addEventListener("mouseleave", () => {
-                    anime({
-                        targets: button,
-                        scale: 1,
-                        duration: 300,
-                        easing: "easeOutQuad",
-                    });
-                });
-            });
-        };
-
-        initAnimation();
-    }, []);
+  return containerRef;
 }

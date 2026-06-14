@@ -6,14 +6,17 @@ import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import type { Project } from "@/types";
 import { HoverPreview } from "./hover-preview";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { useRef, useState } from "react";
 
 type ProjectCardProps = {
     project: Project;
     slug?: string;
+    /** 滚动入场动画的延迟（秒），用于在网格中制造错落感 */
+    revealDelay?: number;
 };
 
-export function ProjectCard({ project, slug }: ProjectCardProps) {
+export function ProjectCard({ project, slug, revealDelay = 0 }: ProjectCardProps) {
     const divRef = useRef<HTMLDivElement>(null);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [opacity, setOpacity] = useState(0);
@@ -96,19 +99,18 @@ export function ProjectCard({ project, slug }: ProjectCardProps) {
 
     // 无 slug：返回静态不可点击卡片
     if (!slug) {
-        return <div className="scroll-animate">{cardContent}</div>;
+        return <ScrollReveal delay={revealDelay}>{cardContent}</ScrollReveal>;
     }
 
     // 有 slug：外层 Link 包裹，跳转到项目详情页
     return (
         <>
             <HoverPreview project={project} />
-            <Link
-                href={`/projects/${slug}`}
-                className="scroll-animate block"
-            >
-                {cardContent}
-            </Link>
+            <ScrollReveal className="block" delay={revealDelay}>
+                <Link href={`/projects/${slug}`}>
+                    {cardContent}
+                </Link>
+            </ScrollReveal>
         </>
     );
 }
