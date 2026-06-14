@@ -16,35 +16,37 @@ type ParallaxProps = {
 
 // 视差滚动：桌面端随滚动以不同速度位移，让左右两栏产生层次感
 export function Parallax({ children, className, offset = 60 }: ParallaxProps) {
-  const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    if (
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-      window.innerWidth < 1024
-    ) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
 
     gsap.fromTo(
-      ref.current,
+      targetRef.current,
       { y: -offset / 2 },
       {
         y: offset / 2,
         ease: "none",
         scrollTrigger: {
-          trigger: ref.current,
+          trigger: triggerRef.current,
+          // 用整个元素从视口底部进入、到完全离开顶部的范围，
+          // 让视差行程更长、更明显
           start: "top bottom",
-          end: "top top",
+          end: "bottom top",
           scrub: true,
         },
       }
     );
-  }, { scope: ref });
+  }, { scope: triggerRef, dependencies: [offset] });
 
   return (
-    <div ref={ref} className={className}>
-      {children}
+    <div ref={triggerRef} className={className}>
+      <div ref={targetRef} className="h-full w-full">
+        {children}
+      </div>
     </div>
   );
 }
