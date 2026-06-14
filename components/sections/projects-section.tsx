@@ -66,6 +66,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
                   key={project._id || slug || `project-${idx}`}
                   project={project}
                   slug={slug}
+                  revealDelay={(idx % 2) * 0.1}
                 />
               );
             })}

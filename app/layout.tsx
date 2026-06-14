@@ -4,7 +4,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd, websiteSchema } from "@/components/seo/json-ld";
-import { AnimationProvider } from "@/components/providers/animation-provider";
 import { CustomCursor } from "@/components/ui";
 import "./globals.css";
 
@@ -90,16 +89,14 @@ export default function RootLayout({
         // 将两种字体的 CSS 变量应用到 body，并设置全局基础样式
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background text-foreground antialiased`}
       >
-        <AnimationProvider>
-          <AppViewTransitions>
-            <OverscrollBackground />
-            <CustomCursor />
-            {/* 显式给内容区加上背景色，这样 body 背景色变化时只会在过界回弹时露出来，而不会影响页面本身 */}
-            <div className="bg-background min-h-screen w-full relative z-0">
-              {children}
-            </div>
-          </AppViewTransitions>
-        </AnimationProvider>
+        <AppViewTransitions>
+          <OverscrollBackground />
+          <CustomCursor />
+          {/* 显式给内容区加上背景色，这样 body 背景色变化时只会在过界回弹时露出来，而不会影响页面本身 */}
+          <div className="bg-background min-h-screen w-full relative z-0">
+            {children}
+          </div>
+        </AppViewTransitions>
         {/* Vercel Analytics 组件：用于监测页面性能与用户行为 */}
         {process.env.NODE_ENV === "production" && <Analytics />}
         {/* Vercel Speed Insights 组件：用于性能分析 */}
