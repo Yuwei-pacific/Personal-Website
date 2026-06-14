@@ -5,7 +5,6 @@ import { Link } from "next-view-transitions";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import type { Project } from "@/types";
-import { HoverPreview } from "./hover-preview";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { useRef } from "react";
 import gsap from "gsap";
@@ -116,13 +115,10 @@ export function ProjectCard({ project, slug, revealDelay = 0 }: ProjectCardProps
 
     // 有 slug：外层 Link 包裹，跳转到项目详情页
     return (
-        <>
-            <HoverPreview project={project} />
-            <ScrollReveal className="block" delay={revealDelay}>
-                <Link href={`/projects/${slug}`}>
-                    {cardContent}
-                </Link>
-            </ScrollReveal>
-        </>
+        <ScrollReveal className="block" delay={revealDelay}>
+            <Link href={`/projects/${slug}`}>
+                {cardContent}
+            </Link>
+        </ScrollReveal>
     );
 }
