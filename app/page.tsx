@@ -2,7 +2,6 @@
 import groq from "groq";
 import { Navbar } from "@/components/layout";
 import { Hero, AboutSection, ProjectsSection } from "@/components/sections";
-import { SkillsMarquee } from "@/components/ui";
 import { JsonLd, personSchema } from "@/components/seo/json-ld";
 import type { Project, SkillCategory, ResumeItem } from "@/types";
 import { isSanityConfigured, sanityClient } from "@/lib/sanity";
@@ -94,11 +93,6 @@ export default async function HomePage() {
       <Hero />
       {/* 关于我简介 */}
       <AboutSection skillCategories={skillCategories} resumeItems={resumeItems} />
-
-      {/* 技能轮播展示 */}
-      <div className="pb-12">
-        <SkillsMarquee />
-      </div>
 
       {/* 项目集合：从 CMS 获取的数据传入 */}
       <ProjectsSection projects={projects} />
