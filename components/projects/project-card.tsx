@@ -7,7 +7,8 @@ import Image from "next/image";
 import type { Project } from "@/types";
 import { HoverPreview } from "./hover-preview";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { useRef, useState } from "react";
+import { useRef } from "react";
+import gsap from "gsap";
 
 type ProjectCardProps = {
     project: Project;
@@ -18,22 +19,33 @@ type ProjectCardProps = {
 
 export function ProjectCard({ project, slug, revealDelay = 0 }: ProjectCardProps) {
     const divRef = useRef<HTMLDivElement>(null);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [opacity, setOpacity] = useState(0);
+    const glowRef = useRef<HTMLDivElement>(null);
+    const tintRef = useRef<HTMLDivElement>(null);
 
+    // 鼠标跟随光晕：直接写 DOM/CSS 变量，避免每次 mousemove 触发 React 重渲染
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!divRef.current) return;
         const rect = divRef.current.getBoundingClientRect();
-        setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+        const x = `${e.clientX - rect.left}px`;
+        const y = `${e.clientY - rect.top}px`;
+        gsap.set([glowRef.current, tintRef.current], { "--x": x, "--y": y });
+    };
+
+    const handleMouseEnter = () => {
+        gsap.to([glowRef.current, tintRef.current], { autoAlpha: 1, duration: 0.5, ease: "power2.out" });
+    };
+
+    const handleMouseLeave = () => {
+        gsap.to([glowRef.current, tintRef.current], { autoAlpha: 0, duration: 0.5, ease: "power2.out" });
     };
 
     // 卡片主体：带有鼠标跟随光晕效果，并使用封面图作为背景
     const cardContent = (
-        <div 
+        <div
             ref={divRef}
             onMouseMove={handleMouseMove}
-            onMouseEnter={() => setOpacity(1)}
-            onMouseLeave={() => setOpacity(0)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
             className="group relative overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 p-5 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:p-6"
         >
             {/* 项目封面作为背景 */}
@@ -53,18 +65,18 @@ export function ProjectCard({ project, slug, revealDelay = 0 }: ProjectCardProps
 
             {/* 鼠标跟随的背景高光 */}
             <div
-                className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-500 ease-in-out"
+                ref={glowRef}
+                className="pointer-events-none absolute inset-0 z-10 opacity-0"
                 style={{
-                    opacity,
-                    background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(255,255,255,0.06), transparent 40%)`,
+                    background: `radial-gradient(600px circle at var(--x, 50%) var(--y, 50%), rgba(255,255,255,0.06), transparent 40%)`,
                 }}
             />
             {/* 鼠标跟随的彩色光晕 (Vercel 风格带有一点点色彩倾向) */}
             <div
-                className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-500 ease-in-out"
+                ref={tintRef}
+                className="pointer-events-none absolute inset-0 z-10 opacity-0"
                 style={{
-                    opacity,
-                    background: `radial-gradient(400px circle at ${position.x}px ${position.y}px, rgba(14, 165, 233, 0.08), transparent 40%)`,
+                    background: `radial-gradient(400px circle at var(--x, 50%) var(--y, 50%), rgba(14, 165, 233, 0.08), transparent 40%)`,
                 }}
             />
 

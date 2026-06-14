@@ -1,7 +1,11 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { cn } from "@/lib/utils";
+
+gsap.registerPlugin(ScrollTrigger);
 import {
   SiFigma,
   SiReact,
@@ -41,29 +45,16 @@ export function SkillsMarquee({ className }: { className?: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let animationFrameId: number;
+    // 用 ScrollTrigger 统一接管滚动监听（与页面其他滚动动画共享同一套 rAF 调度）
+    const trigger = ScrollTrigger.create({
+      start: 0,
+      end: "max",
+      onUpdate: (self) => {
+        gsap.set(containerRef.current, { x: -self.scroll() * 0.3 });
+      },
+    });
 
-    const handleScroll = () => {
-      if (!animationFrameId) {
-        animationFrameId = requestAnimationFrame(() => {
-          if (containerRef.current) {
-            containerRef.current.style.transform = `translate3d(${-window.scrollY * 0.3}px, 0, 0)`;
-          }
-          animationFrameId = 0;
-        });
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    // 初始化时获取一次
-    handleScroll();
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-    };
+    return () => trigger.kill();
   }, []);
 
   return (
