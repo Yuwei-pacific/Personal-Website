@@ -19,25 +19,22 @@ export function ScrollReveal({ children, className, delay = 0 }: ScrollRevealPro
   const ref = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    const mm = gsap.matchMedia();
-
-    mm.add("(prefers-reduced-motion: reduce)", () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       gsap.set(ref.current, { autoAlpha: 1 });
-    });
+      return;
+    }
 
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      gsap.from(ref.current, {
-        autoAlpha: 0,
-        y: 40,
-        duration: 0.7,
-        delay,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ref.current,
-          start: "top 85%",
-          once: true,
-        },
-      });
+    gsap.from(ref.current, {
+      autoAlpha: 0,
+      y: 40,
+      duration: 0.7,
+      delay,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: ref.current,
+        start: "top 85%",
+        once: true,
+      },
     });
   }, { scope: ref, dependencies: [delay] });
 
