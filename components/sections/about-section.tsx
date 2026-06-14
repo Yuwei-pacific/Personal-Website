@@ -6,6 +6,7 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { StaggerReveal } from "@/components/ui/stagger-reveal";
 import { RevealText } from "@/components/ui/reveal-text";
 import { Parallax } from "@/components/ui/parallax";
+import { SkillsMarquee } from "@/components/ui/skills-marquee";
 
 type AboutSectionProps = {
   skillCategories?: SkillCategory[];
@@ -37,8 +38,9 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
   return (
     <section
       id="about"
-      className="mx-auto flex max-w-6xl flex-col gap-10 px-4 pt-12 pb-[28px] sm:gap-14 sm:px-6 sm:pt-16 sm:pb-[48px] scroll-mt-24"
+      className="w-full bg-background relative z-10 scroll-mt-24"
     >
+      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 pt-12 pb-[28px] sm:gap-14 sm:px-6 sm:pt-16 sm:pb-[48px]">
       {/* Intro: 大字逐词点亮的自我介绍，人像与文字左右排版 */}
       <div className="flex flex-col gap-10">
         {/* Edwin Le style layout - Image absolutely positioned on the right, overlapping the text on the left */}
@@ -79,41 +81,43 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
 
         {/* Basic info row */}
         <ScrollReveal>
-          <div className="flex flex-col gap-6 border-t border-neutral-200 pt-6 sm:flex-row sm:items-end sm:justify-between">
-            <div className="space-y-3">
-              <div>
-                <h3 className="text-lg font-semibold text-neutral-900">Yuwei Li</h3>
-                <p className="text-sm text-neutral-600">Communication Designer & Frontend Developer</p>
-              </div>
+          <div className="flex flex-col gap-5 border-t border-neutral-200 pt-6">
+            {/* Name and Title */}
+            <div>
+              <h3 className="text-xl font-bold text-neutral-900 sm:text-2xl">Yuwei Li</h3>
+              <p className="text-sm text-neutral-600 sm:text-base mt-1">
+                Communication Designer & Frontend Developer
+              </p>
+            </div>
 
-              <div className="space-y-1.5 text-sm font-medium text-neutral-600">
-                <div className="flex items-center gap-2.5">
-                  <MapPin className="h-4 w-4 text-neutral-400" />
-                  <span>Milan, Italy</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <Mail className="h-4 w-4 text-neutral-400" />
-                  <a href="mailto:snowtime200801@gmail.com" className="transition-colors hover:text-neutral-900">
-                    snowtime200801@gmail.com
-                  </a>
-                </div>
+            {/* Location and Email */}
+            <div className="space-y-2 text-sm font-medium text-neutral-700 sm:text-base">
+              <div className="flex items-center gap-2.5">
+                <MapPin className="h-4.5 w-4.5 text-neutral-400" />
+                <span>Milan, Italy</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Mail className="h-4.5 w-4.5 text-neutral-400" />
+                <a href="mailto:snowtime200801@gmail.com" className="transition-colors hover:text-neutral-900">
+                  snowtime200801@gmail.com
+                </a>
               </div>
             </div>
 
             {/* Languages */}
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">
-                <Languages className="h-3.5 w-3.5" />
-                <span>Languages</span>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-neutral-400">
+                <Languages className="h-4 w-4" />
+                <span>LANGUAGES</span>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700">
+              <div className="flex flex-wrap gap-2.5">
+                <span className="rounded-full bg-neutral-100/60 px-3.5 py-1.5 text-sm font-medium text-neutral-800">
                   Chinese — Native
                 </span>
-                <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700">
+                <span className="rounded-full bg-neutral-100/60 px-3.5 py-1.5 text-sm font-medium text-neutral-800">
                   English — B2
                 </span>
-                <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700">
+                <span className="rounded-full bg-neutral-100/60 px-3.5 py-1.5 text-sm font-medium text-neutral-800">
                   Italiano — B2
                 </span>
               </div>
@@ -209,6 +213,12 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
             ))}
           </StaggerReveal>
         </ScrollReveal>
+      </div>
+      </div>
+
+      {/* 技能轮播展示 */}
+      <div className="pb-12">
+        <SkillsMarquee />
       </div>
     </section>
   );
