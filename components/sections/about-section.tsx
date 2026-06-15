@@ -64,7 +64,7 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
             </div>
 
             {/* Text on top — inverts over the photo via mix-blend-difference */}
-            <div className="relative z-10 mix-blend-difference pr-[20%] sm:pr-[15%] md:pr-0">
+            <div className="relative z-10 mix-blend-difference pr-[30%] sm:pr-[24%] lg:pr-[20%]">
               <p className="text-label font-semibold uppercase text-design-light-text-muted">
                 About me
               </p>

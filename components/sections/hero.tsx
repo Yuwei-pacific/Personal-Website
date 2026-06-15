@@ -15,9 +15,9 @@ export function Hero() {
   return (
     // 全屏容器：相对定位，隔离层叠上下文，居中内容
     <section ref={heroRef} id="home" className="relative isolate flex min-h-screen w-full items-center overflow-hidden px-container-sm py-16 sm:px-10 md:px-16">
-      {/* 背景装饰层：固定定位，不阻塞交互，降低层级 */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        {/* 渐变背景：从浅蓝到浅黄 */}
+      {/* 背景装饰层：限制在 hero 内部，不影响主页后续区块 */}
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        {/* 渐变背景：保持冷白调，避免底部泛黄 */}
         <div className="absolute inset-0 bg-gradient-to-b from-design-hero-start via-design-hero-mid to-design-hero-end" />
         {/* 背景图形：半透明模糊 SVG，响应式定位 */}
         <Image
@@ -75,12 +75,12 @@ export function Hero() {
       </div>
 
       {/* 底部社交链接区：绝对定位，固定在视窗底部 */}
-      <div className="absolute inset-x-0 bottom-10 w-full px-6 sm:px-10 md:px-16">
+      <div className="absolute inset-x-0 bottom-8 z-20 w-full px-6 sm:bottom-10 sm:px-10 md:px-16">
         <div className="flex flex-col gap-2 sm:gap-3">
           <div className="flex items-center gap-4">
             {/* "Get in touch" 标题与装饰箭头 */}
             <div className="flex items-center gap-3">
-              <p className="text-base font-semibold uppercase tracking-[0.2em] text-design-light-text-primary sm:text-card whitespace-nowrap">
+              <p className="whitespace-nowrap text-base font-semibold uppercase leading-[1.25] tracking-[0.2em] text-design-light-accent sm:text-2xl">
                 Get in touch
               </p>
               <Image
@@ -91,8 +91,6 @@ export function Hero() {
                 className="h-[18px] w-auto sm:h-[22px]"
               />
             </div>
-            {/* 分隔线：flex-1 自动填充剩余空间 */}
-            {/* 分隔线：flex-1 自动填充剩余空间 */}
             <div className="h-px flex-1 bg-design-light-accent" />
             {/* 社交链接图标：GitHub、LinkedIn、Instagram */}
             <div className="flex items-center gap-3 sm:gap-4">

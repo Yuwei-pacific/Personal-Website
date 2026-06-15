@@ -49,7 +49,7 @@ export function ProjectCard({ project, slug, revealDelay = 0, reverse = false }:
                         ))}
                     </div>
                 )}
-                <h3 className="text-xl font-semibold leading-tight text-design-dark-text-primary sm:text-card">
+                <h3 className="text-xl font-semibold leading-tight text-design-dark-text-primary sm:text-2xl">
                     {project.title}
                 </h3>
                 <p className="text-small leading-6 text-design-dark-text-muted line-clamp-3">
