@@ -26,6 +26,18 @@ const layoutPattern = [
     { span: "md:col-span-3", aspect: "aspect-[3/4]" },
     { span: "md:col-span-7", aspect: "aspect-[16/10]" },
     { span: "md:col-span-5", aspect: "aspect-[5/3]" },
+    { span: "md:col-span-4", aspect: "aspect-square" },
+    { span: "md:col-span-4", aspect: "aspect-[4/3]" },
+    { span: "md:col-span-4", aspect: "aspect-[3/4]" },
+    { span: "md:col-span-6", aspect: "aspect-[16/10]" },
+    { span: "md:col-span-3", aspect: "aspect-[4/5]" },
+    { span: "md:col-span-3", aspect: "aspect-[4/3]" },
+    { span: "md:col-span-5", aspect: "aspect-[5/3]" },
+    { span: "md:col-span-7", aspect: "aspect-[16/9]" },
+    { span: "md:col-span-3", aspect: "aspect-[3/4]" },
+    { span: "md:col-span-5", aspect: "aspect-[5/4]" },
+    { span: "md:col-span-4", aspect: "aspect-[4/3]" },
+    { span: "md:col-span-8", aspect: "aspect-[21/9]" },
 ];
 
 export function ProjectCard({ project, slug, revealDelay = 0, index = 0 }: ProjectCardProps) {
