@@ -273,7 +273,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
             {project.body?.length ? (
               // 项目详情（富文本）：通过 PortableText 渲染，支持标题、列表、加粗、链接等
               <section className="space-y-3 border-t border-design-dark-border-strong pt-3">
-                <h2 className="text-card font-semibold text-design-dark-text-primary">Details:</h2>
+                <h2 className="text-2xl font-semibold leading-tight text-design-dark-text-primary">Details:</h2>
                 <div className="space-y-3 text-design-dark-text-muted">{renderBlocks(project.body)}</div>
               </section>
             ) : null}
@@ -319,4 +319,3 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
     </div>
   );
 }
-

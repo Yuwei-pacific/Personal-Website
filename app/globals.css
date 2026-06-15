@@ -30,9 +30,9 @@
     --color-hover-border-dark: 0 0% 45%;
     --color-active-dark: 0 0% 100%;
 
-    --color-hero-start: 194 100% 97%;
-    --color-hero-mid: 0 100% 99%;
-    --color-hero-end: 60 100% 97%;
+    --color-hero-start: 200 50% 98%;
+    --color-hero-mid: 0 0% 99%;
+    --color-hero-end: 210 40% 97%;
 
     --space-section-y: 3.5rem;
     --space-section-y-sm: 5rem;
@@ -132,6 +132,12 @@
 .hero-background {
   animation: hero-float 6s ease-in-out infinite alternate;
   will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-background {
+    animation: none;
+  }
 }
 
 @layer utilities {
