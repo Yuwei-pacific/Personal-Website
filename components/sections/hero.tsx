@@ -124,7 +124,7 @@ export function Hero() {
             </div>
           </div>
           {/* 邮箱地址 */}
-          <p className="text-small text-design-light-text-secondary sm:text-body">Find me via different Social Media Platforms</p>
+          {/* <p className="text-small text-design-light-text-secondary sm:text-body">Find me via different Social Media Platforms</p> */}
         </div>
       </div>
     </section>
