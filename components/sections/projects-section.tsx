@@ -43,9 +43,9 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
         />
       </div>
 
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-container pb-section pt-section sm:gap-gap-section sm:px-container-sm sm:pb-section-sm sm:pt-section-sm">
+      <div className="flex w-full flex-col gap-6 pb-section pt-section sm:gap-gap-section sm:pb-section-sm sm:pt-section-sm">
         {/* 顶部标题：与 Education / Experience 一致的大字加计数 */}
-        <div className="flex items-baseline gap-1.5">
+        <div className="mx-auto flex w-full max-w-6xl items-baseline gap-1.5 px-container sm:px-container-sm">
           <h2 className="text-3xl font-bold tracking-tight text-design-dark-text-primary sm:text-section">
             Work
           </h2>
@@ -56,12 +56,12 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
 
         {!hasProjects ? (
           /* 空状态提示：CMS 未发布时的占位 */
-          <div className="mt-2 rounded-card border border-dashed border-design-dark-border bg-design-dark-surface/60 p-card text-small text-design-dark-text-secondary">
+          <div className="mx-auto mt-2 w-full max-w-6xl rounded-card border border-dashed border-design-dark-border bg-design-dark-surface/60 p-card text-small text-design-dark-text-secondary">
             Projects will appear here once they are published in Sanity.
           </div>
         ) : (
-          /* 项目列表：单列编辑式大卡，图文左右交替 */
-          <div className="mt-4 flex flex-col gap-6 sm:gap-8">
+          /* 项目列表：拼贴式项目墙，使用不同跨列宽度制造节奏 */
+          <div className="mt-4 grid w-full grid-cols-1 gap-x-3 gap-y-14 px-container sm:gap-x-4 sm:gap-y-20 sm:px-container-sm md:grid-cols-12 lg:px-8">
             {sortedProjects.map((project, idx) => {
               // 兼容 slug 为字符串或 { current } 对象的情况
               const slug =
@@ -73,7 +73,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
                   project={project}
                   slug={slug}
                   revealDelay={idx === 0 ? 0 : 0.1}
-                  reverse={idx % 2 === 1}
+                  index={idx}
                 />
               );
             })}
