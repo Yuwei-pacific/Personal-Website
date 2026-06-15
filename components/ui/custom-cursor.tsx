@@ -84,7 +84,7 @@ export function CustomCursor() {
           width: "24px",
           height: "24px",
           borderRadius: "50%",
-          backgroundColor: "#ffffff",
+          backgroundColor: "hsl(var(--color-text-primary-dark))",
           transformOrigin: "center center",
         }}
       />

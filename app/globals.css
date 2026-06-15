@@ -4,48 +4,109 @@
 
 @layer base {
   :root {
-    --background: 210 40% 97%;
-    /* was 0 0% 100% */
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --color-bg-light: 210 40% 97%;
+    --color-surface-light: 0 0% 100%;
+    --color-surface-elevated-light: 0 0% 98%;
+    --color-text-primary-light: 0 0% 9%;
+    --color-text-secondary-light: 0 0% 26%;
+    --color-text-muted-light: 0 0% 45%;
+    --color-border-light: 0 0% 83%;
+    --color-border-strong-light: 0 0% 64%;
+    --color-accent-light: 0 0% 9%;
+    --color-hover-bg-light: 0 0% 98%;
+    --color-hover-border-light: 0 0% 64%;
+    --color-active-light: 0 0% 96%;
+
+    --color-bg-dark: 0 0% 4%;
+    --color-surface-dark: 0 0% 9%;
+    --color-surface-elevated-dark: 0 0% 15%;
+    --color-text-primary-dark: 0 0% 100%;
+    --color-text-secondary-dark: 0 0% 90%;
+    --color-text-muted-dark: 0 0% 64%;
+    --color-border-dark: 0 0% 15%;
+    --color-border-strong-dark: 0 0% 32%;
+    --color-accent-dark: 0 0% 100%;
+    --color-hover-bg-dark: 0 0% 100%;
+    --color-hover-border-dark: 0 0% 45%;
+    --color-active-dark: 0 0% 100%;
+
+    --color-hero-start: 194 100% 97%;
+    --color-hero-mid: 0 100% 99%;
+    --color-hero-end: 60 100% 97%;
+
+    --space-section-y: 3.5rem;
+    --space-section-y-sm: 5rem;
+    --space-container-x: 1rem;
+    --space-container-x-sm: 1.5rem;
+    --space-card: 1.5rem;
+    --space-card-lg: 2rem;
+    --space-gap-section: 2.5rem;
+    --space-gap-section-sm: 3.5rem;
+    --space-gap-card: 1.5rem;
+    --space-gap-inline: 0.75rem;
+    --space-stack: 1.5rem;
+
+    --radius-card: 1rem;
+    --radius-button: 0.75rem;
+    --radius-tag: 9999px;
+    --radius-media: 1.5rem;
+    --radius-panel: 1.5rem;
+
+    --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.08), 0 2px 4px -2px hsl(0 0% 0% / 0.08);
+    --shadow-hover: 0 20px 25px -5px hsl(0 0% 0% / 0.12), 0 8px 10px -6px hsl(0 0% 0% / 0.12);
+    --shadow-nav: 0 10px 30px hsl(0 0% 0% / 0.06);
+
+    --motion-duration-fast: 200ms;
+    --motion-duration-base: 300ms;
+    --motion-duration-slow: 500ms;
+    --motion-duration-media: 700ms;
+    --motion-ease-standard: ease-in-out;
+    --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --motion-scale-hover: 1.04;
+    --motion-scale-emphasis: 1.05;
+    --motion-shift-hover: 0.25rem;
+
+    --background: var(--color-bg-light);
+    --foreground: var(--color-text-primary-light);
+    --card: var(--color-surface-light);
+    --card-foreground: var(--color-text-primary-light);
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
+    --popover-foreground: var(--color-text-primary-light);
+    --primary: var(--color-accent-light);
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --secondary: var(--color-active-light);
+    --secondary-foreground: var(--color-text-primary-light);
+    --muted: var(--color-active-light);
+    --muted-foreground: var(--color-text-muted-light);
+    --accent: var(--color-hover-bg-light);
+    --accent-foreground: var(--color-text-primary-light);
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.75rem;
+    --border: var(--color-border-light);
+    --input: var(--color-border-light);
+    --ring: var(--color-accent-light);
+    --radius: var(--radius-button);
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
+    --background: var(--color-bg-dark);
+    --foreground: var(--color-text-primary-dark);
+    --card: var(--color-surface-dark);
+    --card-foreground: var(--color-text-primary-dark);
+    --popover: var(--color-surface-dark);
+    --popover-foreground: var(--color-text-primary-dark);
+    --primary: var(--color-accent-dark);
+    --primary-foreground: var(--color-bg-dark);
+    --secondary: var(--color-surface-elevated-dark);
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
+    --muted: var(--color-surface-elevated-dark);
+    --muted-foreground: var(--color-text-muted-dark);
+    --accent: var(--color-hover-bg-dark);
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
+    --border: var(--color-border-dark);
+    --input: var(--color-border-dark);
     --ring: 240 4.9% 83.9%;
   }
 

@@ -63,13 +63,13 @@ const portableComponents: Partial<PortableTextReactComponents> = {
   block: {
     h2: ({ children }) => <h3 className="text-xl font-semibold leading-tight">{children}</h3>,
     h3: ({ children }) => <h4 className="text-lg font-semibold leading-tight">{children}</h4>,
-    normal: ({ children }) => <p className="text-base leading-7 whitespace-pre-line">{children}</p>,
+    normal: ({ children }) => <p className="text-body whitespace-pre-line">{children}</p>,
   },
   marks: {
     strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
     em: ({ children }) => <em className="italic">{children}</em>,
     link: ({ children, value }) => (
-      <a href={(value as { href?: string })?.href} className="underline underline-offset-4 hover:text-emerald-400">
+      <a href={(value as { href?: string })?.href} className="underline underline-offset-4 transition-colors duration-base hover:text-design-dark-text-primary">
         {children}
       </a>
     ),
@@ -79,8 +79,8 @@ const portableComponents: Partial<PortableTextReactComponents> = {
     number: ({ children }) => <ol className="list-decimal space-y-2 pl-6">{children}</ol>,
   },
   listItem: {
-    bullet: ({ children }) => <li className="text-base leading-7">{children}</li>,
-    number: ({ children }) => <li className="text-base leading-7">{children}</li>,
+    bullet: ({ children }) => <li className="text-body">{children}</li>,
+    number: ({ children }) => <li className="text-body">{children}</li>,
   },
 };
 
@@ -137,7 +137,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
 
   return (
     // 顶部浅色信息区 + 底部深色详情区
-    <div className="relative min-h-screen text-neutral-900">
+    <div className="relative min-h-screen text-design-light-text-primary">
       {/* 固定导航栏：支持向下滚动时收起（见 Navbar 实现）*/}
       <Navbar />
       {/* 背景装饰层：不阻塞交互（pointer-events-none），固定在视窗，降低层级 */}
@@ -154,57 +154,57 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
         />
       </div>
 
-      <main className="w-full bg-neutral-100 px-4 py-12 sm:px-6 sm:py-16">
+      <main className="w-full bg-design-light-bg px-container py-section sm:px-container-sm sm:py-section-sm">
         <div className="mx-auto max-w-6xl flex flex-col gap-12">
           {/* 顶部浅色信息区 */}
           <section className="flex flex-col gap-4">
             {/* 返回链接：回到项目列表 */}
-            <Link href="/#work" className="text-sm font-medium text-neutral-700 hover:text-neutral-900">
+            <Link href="/#work" className="text-small font-medium text-design-light-text-secondary transition-colors duration-base hover:text-design-light-text-primary">
               ← Back to projects
             </Link>
 
             {project ? (
               <>
                 {/* 头部标签：项目类型/年份/地点/客户等元信息 */}
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Project</p>
+                <p className="text-label font-semibold uppercase text-design-light-text-muted">Project</p>
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-3">
-                    <h1 className="text-3xl font-semibold sm:text-4xl">{project.title}</h1>
-                    <div className="flex flex-wrap gap-2 text-xs font-medium text-neutral-800">
+                    <h1 className="text-3xl font-semibold sm:text-section">{project.title}</h1>
+                    <div className="flex flex-wrap gap-2 text-xs font-medium text-design-light-text-primary">
                       {project.projectType && (
-                        <span className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1">
+                        <span className="rounded-tag border border-design-light-border bg-design-light-active px-3 py-1">
                           Project type: {project.projectType}
                         </span>
                       )}
                       {project.year && (
-                        <span className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1">
+                        <span className="rounded-tag border border-design-light-border bg-design-light-active px-3 py-1">
                           Year: {project.year}
                         </span>
                       )}
                       {project.location && (
-                        <span className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1">
+                        <span className="rounded-tag border border-design-light-border bg-design-light-active px-3 py-1">
                           Location: {project.location}
                         </span>
                       )}
                       {project.client && (
-                        <span className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1">
+                        <span className="rounded-tag border border-design-light-border bg-design-light-active px-3 py-1">
                           {project.client}
                         </span>
                       )}
                     </div>
                   </div>
                   {/* 项目摘要：优先使用 summary，无则回退到 description */}
-                  <p className="text-lg leading-7 text-neutral-700">{project.summary || project.description}</p>
+                  <p className="text-lg leading-7 text-design-light-text-secondary">{project.summary || project.description}</p>
                 </div>
 
 
                 {/* 贡献者：单独一行列出 */}
                 {project.contributors?.length ? (
-                  <div className="space-y-2 border-t border-neutral-200 pt-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Contributors</p>
+                  <div className="space-y-2 border-t border-design-light-border pt-3">
+                    <p className="text-label font-semibold uppercase text-design-light-text-muted">Contributors</p>
                     <div className="flex flex-wrap gap-2">
                       {project.contributors.map((c: string) => (
-                        <span key={c} className="rounded-full border border-neutral-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                        <span key={c} className="rounded-tag border border-design-light-border bg-design-light-active px-3 py-1 text-xs font-medium text-design-light-text-primary">
                           {c}
                         </span>
                       ))}
@@ -215,8 +215,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
             ) : (
               // 查无项目：友好的兜底提示与引导
               <div className="space-y-3">
-                <h1 className="text-2xl font-semibold text-neutral-900">Project not found</h1>
-                <p className="text-sm text-neutral-700">
+                <h1 className="text-2xl font-semibold text-design-light-text-primary">Project not found</h1>
+                <p className="text-small text-design-light-text-secondary">
                   We couldn&apos;t find this project. Try another link or check your Sanity content.
                 </p>
               </div>
@@ -227,11 +227,11 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
 
       {/* 底部深色详情区：封面、富文本详情、我的贡献、外链、图片画廊 */}
       {project && (
-        <section className="w-full bg-neutral-950 px-4 py-12 text-white sm:px-6 sm:py-16 scroll-mt-24">
+        <section className="w-full bg-design-dark-bg px-container py-section text-design-dark-text-primary sm:px-container-sm sm:py-section-sm scroll-mt-24">
           <div className="mx-auto flex max-w-6xl flex-col gap-8">
             {project.coverImage?.url && (
               // 封面图：使用 next/image 获得自动响应式与懒加载
-              <div className="relative aspect-video w-full overflow-hidden">
+              <div className="relative aspect-video w-full overflow-hidden rounded-media">
                 <Image
                   src={project.coverImage.url}
                   alt={project.title || "Project Cover"}
@@ -244,11 +244,11 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
 
             {/* 角色：单独一行列出 */}
             {project.role?.length ? (
-              <div className="space-y-2 border-t border-neutral-700 pt-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Roles</p>
+              <div className="space-y-2 border-t border-design-dark-border-strong pt-3">
+                <p className="text-label font-semibold uppercase text-design-dark-text-muted">Roles</p>
                 <div className="flex flex-wrap gap-2">
                   {project.role.map((r: string) => (
-                    <span key={r} className="rounded-full border border-neutral-400 px-3 py-1 text-sm font-medium text-neutral-400">
+                    <span key={r} className="rounded-tag border border-design-dark-text-muted px-3 py-1 text-small font-medium text-design-dark-text-muted">
                       {r}
                     </span>
                   ))}
@@ -259,10 +259,10 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
             {/* 技能标签：单独一行列出 */}
             {project.tags?.length ? (
               <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">Skills</p>
+                <p className="text-label font-semibold uppercase text-design-dark-text-muted">Skills</p>
                 <div className="flex flex-wrap gap-2">
                   {project.tags.map((tag: string) => (
-                    <span key={tag} className="rounded-full border border-neutral-400 px-3 py-1 text-sm font-medium text-neutral-400">
+                    <span key={tag} className="rounded-tag border border-design-dark-text-muted px-3 py-1 text-small font-medium text-design-dark-text-muted">
                       {tag}
                     </span>
                   ))}
@@ -272,9 +272,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
 
             {project.body?.length ? (
               // 项目详情（富文本）：通过 PortableText 渲染，支持标题、列表、加粗、链接等
-              <section className="space-y-3 border-t border-neutral-700 pt-3">
-                <h2 className="text-2xl font-semibold text-white">Details:</h2>
-                <div className="space-y-3 text-neutral-400">{renderBlocks(project.body)}</div>
+              <section className="space-y-3 border-t border-design-dark-border-strong pt-3">
+                <h2 className="text-card font-semibold text-design-dark-text-primary">Details:</h2>
+                <div className="space-y-3 text-design-dark-text-muted">{renderBlocks(project.body)}</div>
               </section>
             ) : null}
 
@@ -283,20 +283,20 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
             {project.myContribution?.length ? (
               // 我的贡献（富文本）：与详情同样的渲染配置
               <section className="space-y-3">
-                <h2 className="text-lg font-semibold text-white">My Contribution</h2>
-                <div className="space-y-3 text-neutral-400">{renderBlocks(project.myContribution)}</div>
+                <h2 className="text-lg font-semibold text-design-dark-text-primary">My Contribution</h2>
+                <div className="space-y-3 text-design-dark-text-muted">{renderBlocks(project.myContribution)}</div>
               </section>
             ) : null}
 
             {project.links?.length ? (
               // 相关链接：优先显示 label；无 label 时显示 URL
               <section className="space-y-3">
-                <h2 className="text-lg font-semibold text-white">Links</h2>
-                <ul className="space-y-2 text-sm text-neutral-200">
+                <h2 className="text-lg font-semibold text-design-dark-text-primary">Links</h2>
+                <ul className="space-y-2 text-small text-design-dark-text-secondary">
                   {project.links.map((link: { label?: string; url?: string }, idx: number) => (
                     <li key={idx}>
                       {link.url ? (
-                        <a href={link.url} className="text-emerald-300 underline hover:text-emerald-200">
+                        <a href={link.url} className="text-design-dark-text-secondary underline underline-offset-4 transition-colors duration-base hover:text-design-dark-text-primary">
                           {link.label || link.url}
                         </a>
                       ) : (

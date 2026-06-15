@@ -87,7 +87,7 @@ export function SkillsMarquee({ className }: { className?: string }) {
               >
                 {/* 这一层依然保留正弦波的上下浮动效果 */}
                 <div
-                  className="animate-bounce-sine flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full bg-white border border-neutral-200 text-neutral-900 transition-all hover:scale-110 hover:bg-neutral-100 cursor-pointer"
+                  className="animate-bounce-sine flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full border border-design-light-border bg-design-light-surface text-design-light-text-primary transition-all duration-base hover:scale-110 hover:bg-design-light-hover cursor-pointer"
                   style={{ animationDelay: delay }}
                   title={skill.name}
                 >

@@ -25,7 +25,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
     // 外层区块：深色背景，带滚动定位锚点 "work"
     <section
       id="work"
-      className="w-full bg-neutral-950 text-white relative z-10 scroll-mt-24"
+      className="w-full bg-design-dark-bg text-design-dark-text-primary relative z-10 scroll-mt-24"
       style={{ clipPath: "inset(0)" }}
     >
       {/* 背景装饰图形：使用 fixed 定位，并通过 clipPath 限制只在 work section 内部可见 */}
@@ -43,20 +43,20 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
         />
       </div>
 
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pb-14 pt-14 sm:gap-10 sm:px-6 sm:pb-20 sm:pt-20">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-container pb-section pt-section sm:gap-gap-section sm:px-container-sm sm:pb-section-sm sm:pt-section-sm">
         {/* 顶部标题：与 Education / Experience 一致的大字加计数 */}
         <div className="flex items-baseline gap-1.5">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-design-dark-text-primary sm:text-section">
             Work
           </h2>
-          <sup className="text-sm font-semibold text-neutral-400 sm:text-base">
+          <sup className="text-small font-semibold text-design-dark-text-muted sm:text-body">
             ({sortedProjects.length})
           </sup>
         </div>
 
         {!hasProjects ? (
           /* 空状态提示：CMS 未发布时的占位 */
-          <div className="mt-2 rounded-2xl border border-dashed border-neutral-800 bg-neutral-900/60 p-6 text-sm text-neutral-200">
+          <div className="mt-2 rounded-card border border-dashed border-design-dark-border bg-design-dark-surface/60 p-card text-small text-design-dark-text-secondary">
             Projects will appear here once they are published in Sanity.
           </div>
         ) : (

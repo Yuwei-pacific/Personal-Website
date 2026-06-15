@@ -39,7 +39,7 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
       id="about"
       className="w-full bg-background relative z-10 scroll-mt-24"
     >
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 pt-12 pb-[28px] sm:gap-14 sm:px-6 sm:pt-16 sm:pb-[48px]">
+      <div className="mx-auto flex max-w-6xl flex-col gap-gap-section px-container pt-section pb-7 sm:gap-gap-section-sm sm:px-container-sm sm:pt-section-sm sm:pb-12">
         {/* Intro: 大字逐词点亮的自我介绍，人像与文字左右排版 */}
         <div className="flex flex-col gap-10">
           {/* Edwin Le style layout - Image absolutely positioned on the right, overlapping the text on the left */}
@@ -48,30 +48,30 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
               owns the transform (drifts upward on scroll) so they don't conflict */}
             <div className="pointer-events-none absolute right-0 top-1/2 w-[45%] max-w-[240px] -translate-y-1/2 sm:w-[35%] sm:max-w-[320px] lg:w-[30%] lg:max-w-[360px]">
               <Parallax offset={-160}>
-                <div className="group relative aspect-square overflow-hidden rounded-3xl bg-neutral-100 shadow-md transition-shadow duration-500 hover:shadow-xl">
+                <div className="group relative aspect-square overflow-hidden rounded-media bg-design-light-elevated shadow-card transition-shadow duration-slow hover:shadow-hover">
                   <Image
                     src="/Profile_Yuwei.webp"
                     alt="Portrait of Yuwei Li"
                     fill
                     sizes="(min-width: 1024px) 360px, (min-width: 640px) 320px, 240px"
-                    className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
+                    className="object-cover object-top transition-transform duration-media ease-design-out group-hover:scale-emphasis"
                     priority
                   />
                   {/* Sleek overlay hover effect */}
-                  <div className="absolute inset-0 bg-neutral-950/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
+                  <div className="absolute inset-0 bg-design-light-accent/5 opacity-0 transition-opacity duration-slow group-hover:opacity-100 pointer-events-none" />
                 </div>
               </Parallax>
             </div>
 
             {/* Text on top — inverts over the photo via mix-blend-difference */}
             <div className="relative z-10 mix-blend-difference pr-[20%] sm:pr-[15%] md:pr-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-neutral-500">
+              <p className="text-label font-semibold uppercase text-design-light-text-muted">
                 About me
               </p>
               <RevealText
                 text="Design is how I make sense of ideas — sketching, prototyping, and writing code until something finally clicks. I move between Figma and the browser, shaping rough concepts into interfaces people enjoy using. Curiosity keeps me building, one small detail at a time."
-                fromColor="#2b2b2b"
-                toColor="#f4f7fa"
+                fromColor="hsl(var(--color-text-primary-light))"
+                toColor="hsl(var(--color-bg-light))"
                 className="mt-4 text-3xl font-semibold leading-[1.2] tracking-tight sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.15]"
               />
             </div>
@@ -80,18 +80,18 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
 
           {/* Basic info — same row-table style as Education / Experience / Capabilities */}
           <ScrollReveal>
-            <div className="border-t border-neutral-300">
+            <div className="border-t border-design-light-border">
               {/* <div className="grid grid-cols-1 gap-1 border-b border-neutral-300 px-1 py-4 transition-[padding,background-color] duration-300 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-neutral-50">
               <p className="font-semibold text-neutral-900">Name</p>
               <p className="text-base font-semibold text-neutral-900">Yuwei Li</p>
             </div> */}
-              <div className="grid grid-cols-1 gap-1 border-b border-neutral-300 px-1 py-4 transition-[padding,background-color] duration-300 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-neutral-50">
-                <p className="font-semibold text-neutral-900">Role</p>
-                <p className="text-sm text-neutral-700 sm:text-base">Communication Designer &amp; Frontend Developer</p>
+              <div className="grid grid-cols-1 gap-1 border-b border-design-light-border px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover">
+                <p className="font-semibold text-design-light-text-primary">Role</p>
+                <p className="text-small text-design-light-text-secondary sm:text-body">Communication Designer &amp; Frontend Developer</p>
               </div>
-              <div className="grid grid-cols-1 gap-1 border-b border-neutral-300 px-1 py-4 transition-[padding,background-color] duration-300 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-neutral-50">
-                <p className="font-semibold text-neutral-900">Location</p>
-                <p className="text-sm text-neutral-700 sm:text-base">Milan, Italy</p>
+              <div className="grid grid-cols-1 gap-1 border-b border-design-light-border px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover">
+                <p className="font-semibold text-design-light-text-primary">Location</p>
+                <p className="text-small text-design-light-text-secondary sm:text-body">Milan, Italy</p>
               </div>
               {/* <div className="grid grid-cols-1 gap-1 border-b border-neutral-300 px-1 py-4 transition-[padding,background-color] duration-300 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-neutral-50">
                 <p className="font-semibold text-neutral-900">Email</p>
@@ -102,12 +102,12 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
                   snowtime200801@gmail.com
                 </a>
               </div> */}
-              <div className="grid grid-cols-1 gap-1 border-b border-neutral-300 px-1 py-4 transition-[padding,background-color] duration-300 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-neutral-50">
-                <p className="font-semibold text-neutral-900">Languages</p>
-                <div className="flex flex-wrap gap-x-2 gap-y-1.5 text-sm text-neutral-700 sm:text-base">
+              <div className="grid grid-cols-1 gap-1 border-b border-design-light-border px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover">
+                <p className="font-semibold text-design-light-text-primary">Languages</p>
+                <div className="flex flex-wrap gap-x-2 gap-y-1.5 text-small text-design-light-text-secondary sm:text-body">
                   {["Chinese — Native", "English — B2", "Italiano — B2"].map((lang, i) => (
                     <span key={lang} className="flex items-center gap-2">
-                      {i > 0 && <span className="text-neutral-300">·</span>}
+                      {i > 0 && <span className="text-design-light-border">·</span>}
                       {lang}
                     </span>
                   ))}
@@ -121,10 +121,10 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
         <div className="flex flex-col gap-12 sm:gap-16">
           <ScrollReveal>
             <div className="flex items-baseline gap-1.5">
-              <h3 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+              <h3 className="text-3xl font-bold tracking-tight text-design-light-text-primary sm:text-section">
                 Education
               </h3>
-              <sup className="text-sm font-semibold text-neutral-500 sm:text-base">
+              <sup className="text-small font-semibold text-design-light-text-muted sm:text-body">
                 ({educations.length})
               </sup>
             </div>
@@ -148,10 +148,10 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
           </ScrollReveal>
           <ScrollReveal>
             <div className="flex items-baseline gap-1.5">
-              <h3 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+              <h3 className="text-3xl font-bold tracking-tight text-design-light-text-primary sm:text-section">
                 Experience
               </h3>
-              <sup className="text-sm font-semibold text-neutral-500 sm:text-base">
+              <sup className="text-small font-semibold text-design-light-text-muted sm:text-body">
                 ({experiences.length})
               </sup>
             </div>
@@ -178,24 +178,24 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
           </ScrollReveal>
           <ScrollReveal>
             <div className="flex items-baseline gap-1.5">
-              <h3 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+              <h3 className="text-3xl font-bold tracking-tight text-design-light-text-primary sm:text-section">
                 Capabilities
               </h3>
-              <sup className="text-sm font-semibold text-neutral-500 sm:text-base">
+              <sup className="text-small font-semibold text-design-light-text-muted sm:text-body">
                 ({categoriesToRender.length})
               </sup>
             </div>
-            <StaggerReveal className="mt-6 border-t border-neutral-300">
+            <StaggerReveal className="mt-stack border-t border-design-light-border">
               {categoriesToRender.map((category) => (
                 <div
                   key={category.title || category._id}
-                  className="grid grid-cols-1 gap-2 border-b border-neutral-300 px-1 py-4 transition-[padding,background-color] duration-300 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-neutral-50"
+                  className="grid grid-cols-1 gap-2 border-b border-design-light-border px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover"
                 >
-                  <p className="font-semibold text-neutral-900">{category.title}</p>
-                  <div className="flex flex-wrap gap-x-2 gap-y-1.5 text-sm text-neutral-700">
+                  <p className="font-semibold text-design-light-text-primary">{category.title}</p>
+                  <div className="flex flex-wrap gap-x-2 gap-y-1.5 text-small text-design-light-text-secondary">
                     {category.skills?.map((item, i) => (
                       <span key={item} className="flex items-center gap-2">
-                        {i > 0 && <span className="text-neutral-300">·</span>}
+                        {i > 0 && <span className="text-design-light-border">·</span>}
                         {item}
                       </span>
                     ))}

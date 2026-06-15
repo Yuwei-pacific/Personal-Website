@@ -69,9 +69,9 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full px-4 pt-4 sm:px-6">
       {/* 悬浮导航：白色实色背景 + 阴影，圆角矩形，无论叠在浅色还是深色区块上方都保持清晰可读 */}
-      <div className="mx-auto flex max-w-5xl items-center justify-between rounded-2xl bg-white/95 px-6 py-4 shadow-lg shadow-black/5 dark:bg-neutral-900/95">
+      <div className="mx-auto flex max-w-5xl items-center justify-between rounded-panel border border-design-light-border/60 bg-design-light-surface/95 px-6 py-4 shadow-nav backdrop-blur-xl dark:border-design-dark-border dark:bg-design-dark-surface/95">
         {/* Left: Logo */}
-        <Link href="/" className="flex items-center gap-2 transition-transform hover:scale-105">
+        <Link href="/" className="flex items-center gap-2 transition-transform duration-base hover:scale-emphasis">
           <Image
             src="/Logo.svg"
             alt="Yuwei Li"
@@ -80,7 +80,7 @@ export function Navbar() {
             className="h-8 w-8"
             priority
           />
-          <span className="text-xs font-semibold uppercase tracking-[0.25em] text-neutral-900 dark:text-white">Yuwei Li</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.25em] text-design-light-text-primary dark:text-design-dark-text-primary">Yuwei Li</span>
         </Link>
 
         {/* Right: Desktop Nav + Mobile Toggle */}
@@ -94,10 +94,10 @@ export function Navbar() {
                   href={item.href}
                   onClick={(e) => handleNavClick(e, item.href)}
                   className={cn(
-                    "rounded-full px-4 py-2 text-xs font-medium uppercase tracking-[0.25em] transition-colors",
+                    "rounded-tag px-4 py-2 text-xs font-medium uppercase tracking-[0.25em] transition-colors duration-base",
                     isActive
-                      ? "bg-neutral-100 text-neutral-950 dark:bg-white/10 dark:text-white"
-                      : "text-neutral-600 hover:text-neutral-950 dark:text-neutral-300 dark:hover:text-white"
+                      ? "bg-design-light-active text-design-light-text-primary dark:bg-design-dark-active/10 dark:text-design-dark-text-primary"
+                      : "text-design-light-text-secondary hover:bg-design-light-hover hover:text-design-light-text-primary dark:text-design-dark-text-muted dark:hover:bg-design-dark-hover/10 dark:hover:text-design-dark-text-primary"
                   )}
                 >
                   {item.label}
@@ -109,7 +109,7 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-9 w-9 items-center justify-center text-neutral-900 dark:text-white md:hidden"
+            className="inline-flex h-9 w-9 items-center justify-center text-design-light-text-primary dark:text-design-dark-text-primary md:hidden"
             aria-expanded={open}
             aria-label="Toggle navigation"
           >
@@ -132,7 +132,7 @@ export function Navbar() {
       </div>
 
       {/* Mobile Nav Dropdown：保留实色背景以确保菜单内容可读 */}
-      <div className={`absolute left-4 right-4 mt-2 overflow-hidden rounded-3xl border border-white/20 bg-white/80 backdrop-blur-xl transition-all duration-300 ease-in-out dark:border-white/10 dark:bg-neutral-950/80 md:hidden ${open ? "max-h-64 opacity-100 shadow-xl" : "pointer-events-none max-h-0 opacity-0"}`}>
+      <div className={`absolute left-4 right-4 mt-2 overflow-hidden rounded-panel border border-design-light-border/60 bg-design-light-surface/90 backdrop-blur-xl transition-all duration-base ease-standard dark:border-design-dark-border dark:bg-design-dark-bg/90 md:hidden ${open ? "max-h-64 opacity-100 shadow-hover" : "pointer-events-none max-h-0 opacity-0"}`}>
         <nav className="flex flex-col p-4">
           {navItems.map((item) => {
             const isActive = activeSection === item.id;
@@ -142,10 +142,10 @@ export function Navbar() {
                 href={item.href}
                 onClick={(e) => handleNavClick(e, item.href)}
                 className={cn(
-                  "rounded-xl px-4 py-3 text-sm font-medium uppercase tracking-[0.2em] transition-colors",
+                  "rounded-button px-4 py-3 text-small font-medium uppercase tracking-[0.2em] transition-colors duration-base",
                   isActive
-                    ? "bg-black/5 text-neutral-900 dark:bg-white/10 dark:text-white"
-                    : "text-neutral-600 hover:bg-black/5 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
+                    ? "bg-design-light-active text-design-light-text-primary dark:bg-design-dark-active/10 dark:text-design-dark-text-primary"
+                    : "text-design-light-text-secondary hover:bg-design-light-hover hover:text-design-light-text-primary dark:text-design-dark-text-muted dark:hover:bg-design-dark-hover/10 dark:hover:text-design-dark-text-primary"
                 )}
               >
                 {item.label}

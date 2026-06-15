@@ -362,7 +362,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
         {items.map((item, idx) => (
           <figure
             key={idx}
-            className="relative overflow-hidden rounded-lg bg-neutral-900 group cursor-pointer hover:ring-2 hover:ring-emerald-500/60 transition-all"
+            className="relative overflow-hidden rounded-card bg-design-dark-surface group cursor-pointer transition-all duration-base hover:ring-2 hover:ring-design-dark-hover-border"
             style={{
               aspectRatio: item.width && item.height ? `${item.width} / ${item.height}` : undefined,
             }}
@@ -371,7 +371,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
               <button
                 type="button"
                 onClick={() => handleImageClick(item, idx)}
-                className="relative block w-full h-full focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
+                className="relative block w-full h-full focus:outline-none focus:ring-2 focus:ring-design-dark-hover-border"
                 aria-label={`View ${item.alt || `image ${idx + 1}`}`}
               >
                 <Image
@@ -379,7 +379,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
                   alt={item.alt || ""}
                   width={item.width}
                   height={item.height}
-                  className="w-full h-full object-contain transition duration-300 group-hover:scale-[1.01] bg-neutral-950"
+                  className="w-full h-full object-contain bg-design-dark-bg transition duration-base group-hover:scale-[1.01]"
                   sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                   priority={idx < 2}
                 />
@@ -392,14 +392,14 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
       {active && typeof window !== "undefined"
         ? createPortal(
           <div
-            className="fixed inset-0 z-[9999] m-0 flex items-center justify-center bg-black/95 backdrop-blur-md p-4 animate-in fade-in duration-200 touch-none"
+            className="fixed inset-0 z-[9999] m-0 flex items-center justify-center bg-design-dark-bg/95 backdrop-blur-md p-4 animate-in fade-in duration-fast touch-none"
             onClick={closeModal}
             aria-modal="true"
             role="dialog"
             aria-label="Image gallery modal"
           >
             <div
-              className="relative flex h-[90vh] max-h-[90vh] flex-col w-full max-w-6xl overflow-hidden rounded-2xl bg-neutral-900 shadow-2xl ring-1 ring-white/10 animate-in zoom-in-95 duration-200"
+              className="relative flex h-[90vh] max-h-[90vh] flex-col w-full max-w-6xl overflow-hidden rounded-panel bg-design-dark-surface shadow-hover ring-1 ring-design-dark-active/10 animate-in zoom-in-95 duration-fast"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header with close button */}
@@ -407,10 +407,10 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
               <div className="flex items-center justify-between bg-gradient-to-b from-black/50 to-transparent px-4 py-3">
                 {/* Zoom Controls */}
                 {/* 缩放按钮：-、+、重置 */}
-                <div className="flex items-center gap-2 rounded-full bg-black/50 px-2 py-1 text-white shadow hover:bg-black/70 transition-colors">
+                <div className="flex items-center gap-2 rounded-tag bg-design-dark-bg/50 px-2 py-1 text-design-dark-text-primary shadow-card transition-colors duration-base hover:bg-design-dark-bg/70">
                   <button
                     type="button"
-                    className="px-2 py-1 text-sm hover:bg-white/10 transition-colors"
+                    className="px-2 py-1 text-small transition-colors duration-base hover:bg-design-dark-hover/10"
                     onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}
                     title="Zoom out"
                     aria-label="Zoom out"
@@ -420,7 +420,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
                   <span className="text-xs font-semibold min-w-[45px] text-center">{Math.round(zoom * 100)}%</span>
                   <button
                     type="button"
-                    className="px-2 py-1 text-sm hover:bg-white/10 transition-colors"
+                    className="px-2 py-1 text-small transition-colors duration-base hover:bg-design-dark-hover/10"
                     onClick={() => setZoom((z) => Math.min(3, z + 0.1))}
                     title="Zoom in"
                     aria-label="Zoom in"
@@ -429,7 +429,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
                   </button>
                   <button
                     type="button"
-                    className="px-2 py-1 text-xs hover:bg-white/10 transition-colors"
+                    className="px-2 py-1 text-xs transition-colors duration-base hover:bg-design-dark-hover/10"
                     onClick={() => setZoom(1)}
                     title="Reset zoom"
                     aria-label="Reset zoom"
@@ -437,11 +437,11 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
                     ↺
                   </button>
                 </div>
-                <p className="text-sm text-white/80">{activeIndex + 1} / {items.length}</p>
+                <p className="text-small text-design-dark-text-primary/80">{activeIndex + 1} / {items.length}</p>
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="rounded-full bg-black/50 hover:bg-black/70 text-white px-3 py-1 text-sm font-medium shadow transition-colors"
+                  className="rounded-tag bg-design-dark-bg/50 px-3 py-1 text-small font-medium text-design-dark-text-primary shadow-card transition-colors duration-base hover:bg-design-dark-bg/70"
                   title="Close (ESC)"
                   aria-label="Close modal"
                 >
@@ -453,7 +453,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
               {/* 主图区域：缩放与偏移通过 transform 控制；拖拽绑定在容器上 */}
               <div
                 ref={imageContainerRef}
-                className="relative flex flex-1 min-h-0 items-center justify-center overflow-hidden bg-black/40 select-none p-3"
+                className="relative flex flex-1 min-h-0 items-center justify-center overflow-hidden bg-design-dark-bg/40 select-none p-3"
                 style={{
                   cursor: zoom > 1 ? "grab" : "default",
                 }}
@@ -477,7 +477,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
               {/* Caption */}
               {/* 图片说明：在底部渐变背景上居中显示 */}
               {active.caption && (
-                <p className="bg-gradient-to-t from-black/50 to-transparent px-5 py-3 text-sm text-neutral-200 text-center">{active.caption}</p>
+                <p className="bg-gradient-to-t from-design-dark-bg/50 to-transparent px-5 py-3 text-small text-design-dark-text-secondary text-center">{active.caption}</p>
               )}
 
               {/* Navigation Buttons */}
@@ -485,7 +485,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
               <button
                 type="button"
                 onClick={handlePrevious}
-                className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/50 hover:bg-black/70 text-white p-2 shadow transition-all hover:scale-110 hidden sm:flex items-center justify-center"
+                className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-design-dark-bg/50 p-2 text-design-dark-text-primary shadow-card transition-all duration-base hover:scale-110 hover:bg-design-dark-bg/70 hidden sm:flex items-center justify-center"
                 title="Previous (←)"
                 aria-label="Previous image"
               >
@@ -496,7 +496,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
               <button
                 type="button"
                 onClick={handleNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/50 hover:bg-black/70 text-white p-2 shadow transition-all hover:scale-110 hidden sm:flex items-center justify-center"
+                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-design-dark-bg/50 p-2 text-design-dark-text-primary shadow-card transition-all duration-base hover:scale-110 hover:bg-design-dark-bg/70 hidden sm:flex items-center justify-center"
                 title="Next (→)"
                 aria-label="Next image"
               >
