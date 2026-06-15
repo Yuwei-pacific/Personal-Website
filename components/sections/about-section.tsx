@@ -69,7 +69,7 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
                 About me
               </p>
               <RevealText
-                text="Design is how I make sense of ideas — sketching, prototyping, and writing code until something finally clicks. I move between Figma and the browser, shaping rough concepts into interfaces people enjoy using. Curiosity keeps me building, one small detail at a time."
+                text="I design and build digital experiences that turn ideas into clear, usable interfaces."
                 fromColor="hsl(var(--color-text-primary-light))"
                 toColor="hsl(var(--color-bg-light))"
                 className="mt-4 text-3xl font-semibold leading-[1.2] tracking-tight sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.15]"
