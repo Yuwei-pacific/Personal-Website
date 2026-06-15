@@ -14,11 +14,11 @@ export function Hero() {
   const heroRef = useHeroAnimation<HTMLElement>();
   return (
     // 全屏容器：相对定位，隔离层叠上下文，居中内容
-    <section ref={heroRef} id="home" className="relative isolate flex min-h-screen w-full items-center overflow-hidden px-6 py-16 sm:px-10 md:px-16">
+    <section ref={heroRef} id="home" className="relative isolate flex min-h-screen w-full items-center overflow-hidden px-container-sm py-16 sm:px-10 md:px-16">
       {/* 背景装饰层：固定定位，不阻塞交互，降低层级 */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         {/* 渐变背景：从浅蓝到浅黄 */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#F0FBFF] via-[##FFFAFA] to-[#FFFFF2]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-design-hero-start via-design-hero-mid to-design-hero-end" />
         {/* 背景图形：半透明模糊 SVG，响应式定位 */}
         <Image
           src="/hero_mg.svg"
@@ -39,23 +39,23 @@ export function Hero() {
         {/* 文本内容：标题、副标题、描述与状态标签 */}
         <div className="space-y-4">
           {/* 顶部标签：Portfolio */}
-          <p className="hero-label text-sm font-semibold uppercase tracking-[0.3em] text-neutral-600">
+          <p className="hero-label text-label font-semibold uppercase text-design-light-text-secondary">
             Portfolio
           </p>
           {/* 主标题：响应式字号，从 4xl 到 6xl */}
-          <h1 className="hero-title text-4xl font-semibold leading-tight tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
+          <h1 className="hero-title text-4xl font-semibold leading-tight tracking-tight text-design-light-text-primary sm:text-display-sm lg:text-display">
             Creative Designer
           </h1>
           {/* 描述文案 */}
-          <p className="hero-description max-w-2xl text-lg text-neutral-700 sm:text-xl">
+          <p className="hero-description max-w-2xl text-lg text-design-light-text-secondary sm:text-xl">
             I design and build vivid digital experiences.
             <br />
             that bring color to the ordinary.
           </p>
           {/* 地点与状态标签 */}
-          <div className="hero-status flex flex-wrap items-center gap-3 text-sm text-neutral-600">
-            <span className="font-medium text-neutral-800">Based in Milan</span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-neutral-300 px-3 py-1 text-xs">
+          <div className="hero-status flex flex-wrap items-center gap-3 text-small text-design-light-text-secondary">
+            <span className="font-medium text-design-light-text-primary">Based in Milan</span>
+            <span className="inline-flex items-center gap-1 rounded-tag border border-design-light-border px-3 py-1 text-xs">
               Available for freelance
             </span>
           </div>
@@ -63,12 +63,12 @@ export function Hero() {
 
         {/* CTA 按钮组：查看作品与联系我 */}
         <div className="flex flex-wrap gap-3">
-          <Button className="hero-cta gap-2 transition-transform duration-300 hover:scale-105" asChild>
+          <Button className="hero-cta gap-2 transition-transform duration-base hover:scale-emphasis" asChild>
             <Link href="#work">
               View work <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
-          <Button className="hero-cta transition-transform duration-300 hover:scale-105" variant="outline" asChild>
+          <Button className="hero-cta transition-transform duration-base hover:scale-emphasis" variant="outline" asChild>
             <Link href="mailto:snowtime200801@gmail.com">Contact me Via mail</Link>
           </Button>
         </div>
@@ -80,7 +80,7 @@ export function Hero() {
           <div className="flex items-center gap-4">
             {/* "Get in touch" 标题与装饰箭头 */}
             <div className="flex items-center gap-3">
-              <p className="text-base font-semibold uppercase tracking-[0.2em] text-neutral-900 sm:text-2xl whitespace-nowrap">
+              <p className="text-base font-semibold uppercase tracking-[0.2em] text-design-light-text-primary sm:text-card whitespace-nowrap">
                 Get in touch
               </p>
               <Image
@@ -93,7 +93,7 @@ export function Hero() {
             </div>
             {/* 分隔线：flex-1 自动填充剩余空间 */}
             {/* 分隔线：flex-1 自动填充剩余空间 */}
-            <div className="h-px flex-1 bg-neutral-900" />
+            <div className="h-px flex-1 bg-design-light-accent" />
             {/* 社交链接图标：GitHub、LinkedIn、Instagram */}
             <div className="flex items-center gap-3 sm:gap-4">
               <Link
@@ -101,7 +101,7 @@ export function Hero() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub"
-                className="hero-social-icon inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-900/80 text-neutral-900 transition hover:bg-neutral-900 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+                className="hero-social-icon inline-flex h-10 w-10 items-center justify-center rounded-full border border-design-light-accent/80 text-design-light-accent transition-colors duration-base hover:bg-design-light-accent hover:text-design-dark-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-design-light-accent"
               >
                 <Github className="h-5 w-5" />
               </Link>
@@ -110,7 +110,7 @@ export function Hero() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
-                className="hero-social-icon inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-neutral-900/80 text-neutral-900 transition hover:bg-neutral-900 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+                className="hero-social-icon inline-flex h-10 w-10 items-center justify-center rounded-button border border-design-light-accent/80 text-design-light-accent transition-colors duration-base hover:bg-design-light-accent hover:text-design-dark-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-design-light-accent"
               >
                 <Linkedin className="h-5 w-5" />
               </Link>
@@ -119,14 +119,14 @@ export function Hero() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="hero-social-icon inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-900/80 text-neutral-900 transition hover:bg-neutral-900 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+                className="hero-social-icon inline-flex h-10 w-10 items-center justify-center rounded-full border border-design-light-accent/80 text-design-light-accent transition-colors duration-base hover:bg-design-light-accent hover:text-design-dark-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-design-light-accent"
               >
                 <Instagram className="h-5 w-5" />
               </Link>
             </div>
           </div>
           {/* 邮箱地址 */}
-          <p className="text-sm text-neutral-700 sm:text-base">Find me via different Social Media Platforms</p>
+          <p className="text-small text-design-light-text-secondary sm:text-body">Find me via different Social Media Platforms</p>
         </div>
       </div>
     </section>

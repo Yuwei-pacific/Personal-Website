@@ -12,9 +12,8 @@ export function OverscrollBackground() {
       const isNearBottom = window.scrollY + window.innerHeight > document.body.scrollHeight - 800;
       
       if (isNearBottom && !isDark) {
-        // Match bg-neutral-950 (#0a0a0a)
-        document.documentElement.style.backgroundColor = "#0a0a0a";
-        document.body.style.backgroundColor = "#0a0a0a";
+        document.documentElement.style.backgroundColor = "hsl(var(--color-bg-dark))";
+        document.body.style.backgroundColor = "hsl(var(--color-bg-dark))";
         isDark = true;
       } else if (!isNearBottom && isDark) {
         // Restore to default light background

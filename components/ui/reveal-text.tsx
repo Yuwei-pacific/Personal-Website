@@ -16,12 +16,28 @@ type RevealTextProps = {
   toColor?: string;
 };
 
+const resolveCssColor = (color: string) => {
+  if (typeof window === "undefined") return color;
+
+  const probe = document.createElement("span");
+  probe.style.color = color;
+  probe.style.position = "absolute";
+  probe.style.pointerEvents = "none";
+  probe.style.visibility = "hidden";
+
+  document.documentElement.appendChild(probe);
+  const resolvedColor = getComputedStyle(probe).color;
+  probe.remove();
+
+  return resolvedColor || color;
+};
+
 // 大段文案逐词上色：随滚动从浅灰过渡到深色，营造"逐句点亮"的阅读节奏
 export function RevealText({
   text,
   className,
-  fromColor = "#d4d4d4",
-  toColor = "#171717",
+  fromColor = "hsl(var(--color-border-light))",
+  toColor = "hsl(var(--color-text-primary-light))",
 }: RevealTextProps) {
   const containerRef = useRef<HTMLParagraphElement>(null);
   const words = text.split(" ");
@@ -30,15 +46,18 @@ export function RevealText({
     const wordEls = containerRef.current?.querySelectorAll<HTMLElement>(".reveal-word");
     if (!wordEls?.length) return;
 
+    const resolvedFromColor = resolveCssColor(fromColor);
+    const resolvedToColor = resolveCssColor(toColor);
+
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      gsap.set(wordEls, { color: toColor });
+      gsap.set(wordEls, { color: resolvedToColor });
       return;
     }
 
-    gsap.set(wordEls, { color: fromColor });
+    gsap.set(wordEls, { color: resolvedFromColor });
 
     gsap.to(wordEls, {
-      color: toColor,
+      color: resolvedToColor,
       stagger: 0.04,
       ease: "none",
       scrollTrigger: {
@@ -48,7 +67,7 @@ export function RevealText({
         scrub: true,
       },
     });
-  }, { scope: containerRef });
+  }, { scope: containerRef, dependencies: [fromColor, toColor] });
 
   return (
     <p ref={containerRef} className={className}>
