@@ -64,14 +64,27 @@ const PROJECT_QUERY = groq`*[_type == "project" && slug.current == $slug && visi
 }`;
 
 // PortableText 组件配置：定义富文本内容的渲染方式
+// 各级块元素自带上边距（first:mt-0 抵消首个元素），让标题与正文之间有明显的呼吸感
 const portableComponents: Partial<PortableTextReactComponents> = {
   block: {
-    h2: ({ children }) => <h3 className="text-xl font-semibold leading-tight">{children}</h3>,
-    h3: ({ children }) => <h4 className="text-lg font-semibold leading-tight">{children}</h4>,
-    normal: ({ children }) => <p className="text-body whitespace-pre-line">{children}</p>,
+    h2: ({ children }) => (
+      <h3 className="mt-14 text-2xl font-semibold leading-tight text-design-dark-text-primary first:mt-0 sm:text-3xl">
+        {children}
+      </h3>
+    ),
+    h3: ({ children }) => (
+      <h4 className="mt-10 text-xl font-semibold leading-tight text-design-dark-text-primary first:mt-0 sm:text-2xl">
+        {children}
+      </h4>
+    ),
+    normal: ({ children }) => (
+      <p className="mt-5 whitespace-pre-line text-base leading-relaxed first:mt-0 sm:text-lg sm:leading-8">
+        {children}
+      </p>
+    ),
   },
   marks: {
-    strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+    strong: ({ children }) => <strong className="font-semibold text-design-dark-text-primary">{children}</strong>,
     em: ({ children }) => <em className="italic">{children}</em>,
     link: ({ children, value }) => (
       <a href={(value as { href?: string })?.href} className="underline underline-offset-4 transition-colors duration-base hover:text-design-dark-text-primary">
@@ -80,12 +93,20 @@ const portableComponents: Partial<PortableTextReactComponents> = {
     ),
   },
   list: {
-    bullet: ({ children }) => <ul className="list-disc space-y-2 pl-6">{children}</ul>,
-    number: ({ children }) => <ol className="list-decimal space-y-2 pl-6">{children}</ol>,
+    bullet: ({ children }) => (
+      <ul className="mt-5 list-disc space-y-3 pl-6 text-base leading-relaxed first:mt-0 sm:text-lg sm:leading-8">
+        {children}
+      </ul>
+    ),
+    number: ({ children }) => (
+      <ol className="mt-5 list-decimal space-y-3 pl-6 text-base leading-relaxed first:mt-0 sm:text-lg sm:leading-8">
+        {children}
+      </ol>
+    ),
   },
   listItem: {
-    bullet: ({ children }) => <li className="text-body">{children}</li>,
-    number: ({ children }) => <li className="text-body">{children}</li>,
+    bullet: ({ children }) => <li>{children}</li>,
+    number: ({ children }) => <li>{children}</li>,
   },
 };
 
@@ -283,20 +304,19 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
             ) : null}
 
             {project.body?.length ? (
-              // 项目详情（富文本）：通过 PortableText 渲染，支持标题、列表、加粗、链接等
-              <section className="space-y-3 border-t border-design-dark-border-strong pt-3">
-                <h2 className="text-2xl font-semibold leading-tight text-design-dark-text-primary">Details:</h2>
-                <div className="space-y-3 text-design-dark-text-muted">{renderBlocks(project.body)}</div>
+              // 项目详情（富文本）：标题由编辑者在富文本中自行书写；块间距由 portableComponents 内部管理
+              <section className="border-t border-design-dark-border-strong pt-10">
+                <div className="text-design-dark-text-secondary">{renderBlocks(project.body)}</div>
               </section>
             ) : null}
 
 
 
             {project.myContribution?.length ? (
-              // 我的贡献（富文本）：与详情同样的渲染配置
-              <section className="space-y-3">
-                <h2 className="text-lg font-semibold text-design-dark-text-primary">My Contribution</h2>
-                <div className="space-y-3 text-design-dark-text-muted">{renderBlocks(project.myContribution)}</div>
+              // 我的贡献（富文本）：与详情同样的渲染配置与阅读行宽
+              <section className="border-t border-design-dark-border-strong pt-10">
+                <h2 className="text-2xl font-semibold leading-tight text-design-dark-text-primary sm:text-3xl">My Contribution</h2>
+                <div className="mt-6 text-design-dark-text-secondary">{renderBlocks(project.myContribution)}</div>
               </section>
             ) : null}
 
