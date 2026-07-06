@@ -19,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (isSanityConfigured() && sanityClient) {
         try {
             const projects = await sanityClient.fetch<Array<{ slug: string; _updatedAt: string }>>(
-                groq`*[_type == "project" && defined(slug.current)]{
+                groq`*[_type == "project" && defined(slug.current) && visibility != false]{
           "slug": slug.current,
           _updatedAt
         }`

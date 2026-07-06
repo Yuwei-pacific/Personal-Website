@@ -28,18 +28,15 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
       className="w-full bg-design-dark-bg text-design-dark-text-primary relative z-10 scroll-mt-24"
       style={{ clipPath: "inset(0)" }}
     >
-      {/* 背景装饰图形：使用 fixed 定位，并通过 clipPath 限制只在 work section 内部可见 */}
+      {/* 背景装饰图形：使用 fixed 定位，并通过 clipPath 限制只在 work section 内部可见；
+          动画统一由 .hero-background 类控制，保证 prefers-reduced-motion 生效 */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <Image
           src="/hero_mg.svg"
-          alt="Work background graphic"
+          alt=""
           fill
           sizes="100vw"
-          className="select-none object-contain object-center opacity-[0.22] blur-md"
-          style={{
-            animation: "hero-float 6s ease-in-out infinite alternate",
-            willChange: "transform",
-          }}
+          className="hero-background select-none object-contain object-center opacity-[0.22] blur-md"
         />
       </div>
 

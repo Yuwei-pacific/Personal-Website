@@ -2,7 +2,7 @@
 
 // 图片画廊组件：支持点击放大、拖拽移动、滚轮/双指缩放、键盘导航
 import Image from "next/image";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 
 // 画廊图片条目类型：包含 URL、替代文本、说明及尺寸
@@ -27,6 +27,12 @@ type ProjectGalleryProps = {
 };
 
 export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWidth }: ProjectGalleryProps) {
+  // 过滤掉缺少 URL 或尺寸信息的条目，避免渲染出空图块
+  const galleryItems = useMemo(
+    () => (items ?? []).filter((item) => Boolean(item.url && item.width && item.height)),
+    [items]
+  );
+
   // 模态状态：当前激活图片与索引
   const [active, setActive] = useState<GalleryItem | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -46,6 +52,12 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   const dragInitialOffsetRef = useRef({ x: 0, y: 0 });
   const rafRef = useRef<number | null>(null);
   const resetTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // 焦点管理引用：模态面板、关闭按钮与打开前的焦点元素
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  const isOpen = active !== null;
 
   // Close modal handler
   // 关闭模态：重置状态与位置
@@ -60,30 +72,30 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   // Navigation handlers
   // 上一张：循环到最后一张，始终重置缩放与偏移
   const handlePrevious = useCallback(() => {
-    if (!items) return;
-    const newIndex = activeIndex === 0 ? items.length - 1 : activeIndex - 1;
+    if (!galleryItems.length) return;
+    const newIndex = activeIndex === 0 ? galleryItems.length - 1 : activeIndex - 1;
     setActiveIndex(newIndex);
-    setActive(items[newIndex]);
+    setActive(galleryItems[newIndex]);
     setZoom(1);
     setOffsetX(0);
     setOffsetY(0);
-  }, [activeIndex, items]);
+  }, [activeIndex, galleryItems]);
 
   // 下一张：循环到第一张，始终重置缩放与偏移
   const handleNext = useCallback(() => {
-    if (!items) return;
-    const newIndex = activeIndex === items.length - 1 ? 0 : activeIndex + 1;
+    if (!galleryItems.length) return;
+    const newIndex = activeIndex === galleryItems.length - 1 ? 0 : activeIndex + 1;
     setActiveIndex(newIndex);
-    setActive(items[newIndex]);
+    setActive(galleryItems[newIndex]);
     setZoom(1);
     setOffsetX(0);
     setOffsetY(0);
-  }, [activeIndex, items]);
+  }, [activeIndex, galleryItems]);
 
   // Keyboard navigation
-  // 键盘导航：Esc 关闭、左右方向键切换
+  // 键盘导航：Esc 关闭、左右方向键切换、Tab 焦点圈闭在模态内
   useEffect(() => {
-    if (!active || !items) return;
+    if (!active || !galleryItems.length) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -94,12 +106,39 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
         handleNext();
+      } else if (e.key === "Tab") {
+        // 焦点圈闭：防止 Tab 跑到模态背后的页面内容
+        const modal = modalRef.current;
+        if (!modal) return;
+        const focusables = modal.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [active, items, closeModal, handlePrevious, handleNext]);
+  }, [active, galleryItems, closeModal, handlePrevious, handleNext]);
+
+  // 焦点管理：打开时把焦点移到关闭按钮，关闭后归还给打开前的元素
+  useEffect(() => {
+    if (!isOpen) return;
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    closeButtonRef.current?.focus();
+    return () => {
+      previousFocusRef.current?.focus();
+    };
+  }, [isOpen]);
 
   // Prevent body scroll when modal is open
   // 打开模态时禁用 body 滚动，关闭后恢复
@@ -337,7 +376,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
     };
   }, [zoom]);
 
-  if (!items?.length) return null;
+  if (!galleryItems.length) return null;
 
   // 点击缩略图打开模态并重置缩放
   const handleImageClick = (item: GalleryItem, idx: number) => {
@@ -359,32 +398,30 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
       </div>
       <div className="h-px w-full bg-gradient-to-r from-transparent via-white/50 to-transparent" />
       <div className={`grid gap-3 ${gridColsClass}`}>
-        {items.map((item, idx) => (
+        {galleryItems.map((item, idx) => (
           <figure
             key={idx}
-            className="relative overflow-hidden rounded-card bg-design-dark-surface group cursor-pointer transition-all duration-base hover:ring-2 hover:ring-design-dark-hover-border"
+            className="relative overflow-hidden rounded-card bg-design-dark-surface group cursor-pointer transition-shadow duration-base hover:ring-2 hover:ring-design-dark-hover-border"
             style={{
-              aspectRatio: item.width && item.height ? `${item.width} / ${item.height}` : undefined,
+              aspectRatio: `${item.width} / ${item.height}`,
             }}
           >
-            {item.url && item.width && item.height && (
-              <button
-                type="button"
-                onClick={() => handleImageClick(item, idx)}
-                className="relative block w-full h-full focus:outline-none focus:ring-2 focus:ring-design-dark-hover-border"
-                aria-label={`View ${item.alt || `image ${idx + 1}`}`}
-              >
-                <Image
-                  src={item.url}
-                  alt={item.alt || ""}
-                  width={item.width}
-                  height={item.height}
-                  className="w-full h-full object-contain bg-design-dark-bg transition duration-base group-hover:scale-[1.01]"
-                  sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                  priority={idx < 2}
-                />
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => handleImageClick(item, idx)}
+              className="relative block w-full h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-hover-border"
+              aria-label={`View ${item.alt || `image ${idx + 1}`}`}
+            >
+              <Image
+                src={item.url!}
+                alt={item.alt || ""}
+                width={item.width}
+                height={item.height}
+                className="w-full h-full object-contain bg-design-dark-bg transition duration-base group-hover:scale-[1.01]"
+                sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                priority={idx < 2}
+              />
+            </button>
           </figure>
         ))}
       </div>
@@ -392,13 +429,14 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
       {active && typeof window !== "undefined"
         ? createPortal(
           <div
-            className="fixed inset-0 z-[9999] m-0 flex items-center justify-center bg-design-dark-bg/95 backdrop-blur-md p-4 animate-in fade-in duration-fast touch-none"
+            className="fixed inset-0 z-[9999] m-0 flex items-center justify-center overscroll-contain bg-design-dark-bg/95 backdrop-blur-md p-4 animate-in fade-in duration-fast touch-none"
             onClick={closeModal}
             aria-modal="true"
             role="dialog"
             aria-label="Image gallery modal"
           >
             <div
+              ref={modalRef}
               className="relative flex h-[90vh] max-h-[90vh] flex-col w-full max-w-6xl overflow-hidden rounded-panel bg-design-dark-surface shadow-hover ring-1 ring-design-dark-active/10 animate-in zoom-in-95 duration-fast"
               onClick={(e) => e.stopPropagation()}
             >
@@ -437,8 +475,9 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
                     ↺
                   </button>
                 </div>
-                <p className="text-small text-design-dark-text-primary/80">{activeIndex + 1} / {items.length}</p>
+                <p className="text-small text-design-dark-text-primary/80">{activeIndex + 1} / {galleryItems.length}</p>
                 <button
+                  ref={closeButtonRef}
                   type="button"
                   onClick={closeModal}
                   className="rounded-tag bg-design-dark-bg/50 px-3 py-1 text-small font-medium text-design-dark-text-primary shadow-card transition-colors duration-base hover:bg-design-dark-bg/70"
@@ -485,7 +524,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
               <button
                 type="button"
                 onClick={handlePrevious}
-                className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-design-dark-bg/50 p-2 text-design-dark-text-primary shadow-card transition-all duration-base hover:scale-110 hover:bg-design-dark-bg/70 hidden sm:flex items-center justify-center"
+                className="absolute left-4 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full bg-design-dark-bg/50 p-2 text-design-dark-text-primary shadow-card transition-[transform,background-color] duration-base hover:scale-110 hover:bg-design-dark-bg/70"
                 title="Previous (←)"
                 aria-label="Previous image"
               >
@@ -496,7 +535,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
               <button
                 type="button"
                 onClick={handleNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-design-dark-bg/50 p-2 text-design-dark-text-primary shadow-card transition-all duration-base hover:scale-110 hover:bg-design-dark-bg/70 hidden sm:flex items-center justify-center"
+                className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full bg-design-dark-bg/50 p-2 text-design-dark-text-primary shadow-card transition-[transform,background-color] duration-base hover:scale-110 hover:bg-design-dark-bg/70"
                 title="Next (→)"
                 aria-label="Next image"
               >

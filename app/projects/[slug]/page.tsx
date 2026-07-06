@@ -1,6 +1,8 @@
 // 页面依赖：Next.js 组件、Sanity 客户端、PortableText 等
+import { cache } from "react";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { Link } from "next-view-transitions";
 import groq from "groq";
 
@@ -31,8 +33,11 @@ type ProjectDetail = Project & {
   myContribution?: Block[]; // 我的贡献内容（富文本）
 };
 
-// GROQ 查询：从 Sanity 获取项目详情数据
-const PROJECT_QUERY = groq`*[_type == "project" && slug.current == $slug][0]{
+// Incremental Static Regeneration: revalidate project pages every 60s
+export const revalidate = 60;
+
+// GROQ 查询：从 Sanity 获取项目详情数据（过滤隐藏项目）
+const PROJECT_QUERY = groq`*[_type == "project" && slug.current == $slug && visibility != false][0]{
   _id,
   title,
   summary,
@@ -89,7 +94,8 @@ const renderBlocks = (blocks?: Block[]) =>
   blocks?.length ? <PortableText value={blocks as PortableTextBlock[]} components={portableComponents} /> : null;
 
 // 从 Sanity 获取项目数据
-async function fetchProject(rawSlug?: string): Promise<ProjectDetail | null> {
+// 用 React cache() 去重：generateMetadata 与页面组件共用同一次请求
+const fetchProject = cache(async (rawSlug?: string): Promise<ProjectDetail | null> => {
   // 1. 数据清洗：确保 slug 存在并去除两端的空格，防止无效的查询请求
   const slug = rawSlug?.toString().trim();
 
@@ -116,6 +122,19 @@ async function fetchProject(rawSlug?: string): Promise<ProjectDetail | null> {
 
   // 6. 兜底策略：如果以上条件均不满足（如 CMS 未连接或查无此项），统一返回 null
   return null;
+});
+
+// 构建时预生成所有可见项目的静态页面
+export async function generateStaticParams() {
+  if (!(isSanityConfigured() && sanityClient)) return [];
+  try {
+    const slugs = await sanityClient.fetch<string[]>(
+      groq`*[_type == "project" && defined(slug.current) && visibility != false].slug.current`
+    );
+    return slugs.map((slug) => ({ slug }));
+  } catch {
+    return [];
+  }
 }
 
 // 生成页面元数据（用于 SEO）
@@ -135,6 +154,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
   const { slug } = await params;
   const project = await fetchProject(slug);
 
+  // 查无项目：返回真正的 404 状态码，避免死链被搜索引擎当作正常页面收录
+  if (!project) notFound();
+
   return (
     // 顶部浅色信息区 + 底部深色详情区
     <div className="relative min-h-screen text-design-light-text-primary">
@@ -146,7 +168,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
         <div className="absolute inset-0" />
         <Image
           src="/hero_mg.svg"
-          alt="Hero background graphic"
+          alt=""
           fill
           priority
           sizes="100vw"
@@ -163,9 +185,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
               ← Back to projects
             </Link>
 
-            {project ? (
-              <>
-                {/* 头部标签：项目类型/年份/地点/客户等元信息 */}
+            <>
+              {/* 头部标签：项目类型/年份/地点/客户等元信息 */}
                 <p className="text-label font-semibold uppercase text-design-light-text-muted">Project</p>
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-3">
@@ -211,16 +232,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
                     </div>
                   </div>
                 ) : null}
-              </>
-            ) : (
-              // 查无项目：友好的兜底提示与引导
-              <div className="space-y-3">
-                <h1 className="text-2xl font-semibold text-design-light-text-primary">Project not found</h1>
-                <p className="text-small text-design-light-text-secondary">
-                  We couldn&apos;t find this project. Try another link or check your Sanity content.
-                </p>
-              </div>
-            )}
+            </>
           </section>
         </div>
       </main>

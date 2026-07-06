@@ -65,9 +65,10 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
 
             {/* Text on top — inverts over the photo via mix-blend-difference */}
             <div className="relative z-10 mix-blend-difference pr-[30%] sm:pr-[24%] lg:pr-[20%]">
-              <p className="text-label font-semibold uppercase text-design-light-text-muted">
+              {/* 用 h2 保证标题层级连续（h1 Hero → h2 About → h3 Education/Experience/Capabilities） */}
+              <h2 className="text-label font-semibold uppercase text-design-light-text-muted">
                 About me
-              </p>
+              </h2>
               <RevealText
                 text="I design and build digital experiences that turn ideas into clear, usable interfaces."
                 fromColor="hsl(var(--color-text-primary-light))"

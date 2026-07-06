@@ -14,23 +14,19 @@ export function Hero() {
   const heroRef = useHeroAnimation<HTMLElement>();
   return (
     // 全屏容器：相对定位，隔离层叠上下文，居中内容
-    <section ref={heroRef} id="home" className="relative isolate flex min-h-screen w-full items-center overflow-hidden px-container-sm py-16 sm:px-10 md:px-16">
+    <section ref={heroRef} id="home" className="relative isolate flex min-h-screen w-full items-center overflow-hidden px-container-sm pb-28 pt-16 sm:px-10 md:px-16">
       {/* 背景装饰层：限制在 hero 内部，不影响主页后续区块 */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         {/* 渐变背景：保持冷白调，避免底部泛黄 */}
         <div className="absolute inset-0 bg-gradient-to-b from-design-hero-start via-design-hero-mid to-design-hero-end" />
-        {/* 背景图形：半透明模糊 SVG，响应式定位 */}
+        {/* 背景图形：半透明模糊 SVG，响应式定位；动画统一由 .hero-background 类控制，保证 prefers-reduced-motion 生效 */}
         <Image
           src="/hero_mg.svg"
-          alt="Hero background graphic"
+          alt=""
           fill
           priority
           sizes="100vw"
           className="hero-background select-none object-contain object-center opacity-50 blur-md"
-          style={{
-            animation: "hero-float 6s ease-in-out infinite alternate",
-            willChange: "transform",
-          }}
         />
       </div>
 
@@ -43,12 +39,12 @@ export function Hero() {
             Portfolio
           </p>
           {/* 主标题：响应式字号，从 4xl 到 6xl */}
-          <h1 className="hero-title text-4xl font-semibold leading-tight tracking-tight text-design-light-text-primary sm:text-display-sm lg:text-display">
+          <h1 className="hero-title text-balance text-4xl font-semibold leading-tight tracking-tight text-design-light-text-primary sm:text-display-sm lg:text-display">
             Creative Designer
           </h1>
           {/* 描述文案 */}
           <p className="hero-description max-w-2xl text-lg text-design-light-text-secondary sm:text-xl">
-            I design and build vivid digital experiences.
+            I design and build vivid digital experiences
             <br />
             that bring color to the ordinary.
           </p>
@@ -69,7 +65,7 @@ export function Hero() {
             </Link>
           </Button>
           <Button className="hero-cta transition-transform duration-base hover:scale-emphasis" variant="outline" asChild>
-            <Link href="mailto:snowtime200801@gmail.com">Contact me Via mail</Link>
+            <Link href="mailto:snowtime200801@gmail.com">Contact Me via Email</Link>
           </Button>
         </div>
       </div>
@@ -85,7 +81,8 @@ export function Hero() {
               </p>
               <Image
                 src="/arrow_1.svg"
-                alt="Directional arrow"
+                alt=""
+                aria-hidden="true"
                 width={29}
                 height={22}
                 className="h-[18px] w-auto sm:h-[22px]"
