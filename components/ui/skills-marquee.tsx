@@ -39,7 +39,9 @@ const WAVE_CYCLES = 2;
 
 export function SkillsMarquee({ className }: { className?: string }) {
   return (
+    // 纯装饰性轮播：技能已在 Capabilities 区完整列出，这里对辅助技术隐藏，避免重复朗读
     <div
+      aria-hidden="true"
       className={cn(
         "relative flex h-[180px] w-full items-center overflow-hidden",
         className
@@ -60,7 +62,7 @@ export function SkillsMarquee({ className }: { className?: string }) {
                   className="flex items-center justify-center"
                 >
                   <div
-                    className="flex h-20 w-20 animate-bounce-sine cursor-pointer items-center justify-center rounded-full border border-design-light-border bg-design-light-surface text-design-light-text-primary transition-[background-color,border-color,color,transform] [transition-duration:var(--motion-duration-base)] hover:scale-105 hover:bg-design-light-hover motion-reduce:animate-none md:h-24 md:w-24"
+                    className="flex h-20 w-20 animate-bounce-sine items-center justify-center rounded-full border border-design-light-border bg-design-light-surface text-design-light-text-primary transition-[background-color,border-color,color,transform] [transition-duration:var(--motion-duration-base)] hover:scale-105 hover:bg-design-light-hover motion-reduce:animate-none md:h-24 md:w-24"
                     style={{ animationDelay: delay }}
                     title={skill.name}
                   >

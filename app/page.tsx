@@ -15,8 +15,8 @@ export const metadata = {
   description: "Welcome to Yuwei Li's portfolio - Explore my design and development projects.",
 };
 
-// GROQ 查询：从 Sanity 获取项目列表，按创建时间倒序
-const PROJECTS_QUERY = groq`*[_type == "project"] | order(_createdAt desc){
+// GROQ 查询：从 Sanity 获取项目列表（过滤隐藏项目），按创建时间倒序
+const PROJECTS_QUERY = groq`*[_type == "project" && visibility != false] | order(_createdAt desc){
   _id,
   title,
   summary,

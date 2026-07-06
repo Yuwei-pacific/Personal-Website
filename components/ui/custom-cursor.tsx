@@ -8,8 +8,13 @@ export function CustomCursor() {
   const dotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Only run on non-touch devices
-    if (typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches) {
+    // Only run on non-touch devices; also respect prefers-reduced-motion
+    // (跳过时保持元素透明，系统默认光标不受影响)
+    if (
+      typeof window !== "undefined" &&
+      (window.matchMedia("(pointer: coarse)").matches ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+    ) {
       return;
     }
 

@@ -37,22 +37,37 @@ export function ResumeList({ items, fallbackData }: ResumeListProps) {
         const hasDetails = edu.details && edu.details.length > 0;
         const isExpanded = expandedId === id;
 
+        const rowClassName = "group grid grid-cols-1 gap-1.5 px-1 py-5 transition-[padding,background-color] duration-base sm:grid-cols-[1.4fr_1.6fr_1fr_0.8fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover";
+        const rowContent = (
+          <>
+            <p className="font-semibold text-design-light-text-primary">{edu.institution}</p>
+            <p className="text-small text-design-light-text-secondary sm:text-body">{edu.degree}</p>
+            <p className="text-small text-design-light-text-muted">{edu.period}</p>
+            <p className="text-small text-design-light-text-muted">{edu.location}</p>
+          </>
+        );
+
         return (
-          <div
-            key={id}
-            className={`border-b border-design-light-border ${hasDetails ? 'cursor-pointer' : ''}`}
-            onClick={() => hasDetails && toggleExpand(id)}
-          >
-            <div className="group grid grid-cols-1 gap-1.5 px-1 py-5 transition-[padding,background-color] duration-base sm:grid-cols-[1.4fr_1.6fr_1fr_0.8fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover">
-              <p className="font-semibold text-design-light-text-primary">{edu.institution}</p>
-              <p className="text-small text-design-light-text-secondary sm:text-body">{edu.degree}</p>
-              <p className="text-small text-design-light-text-muted">{edu.period}</p>
-              <p className="text-small text-design-light-text-muted">{edu.location}</p>
-            </div>
+          <div key={id} className="border-b border-design-light-border">
+            {hasDetails ? (
+              // 可展开条目：使用 button 保证键盘可达，并暴露展开状态给辅助技术
+              <button
+                type="button"
+                onClick={() => toggleExpand(id)}
+                aria-expanded={isExpanded}
+                aria-controls={`resume-details-${id}`}
+                className={`${rowClassName} w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-design-light-accent`}
+              >
+                {rowContent}
+              </button>
+            ) : (
+              <div className={rowClassName}>{rowContent}</div>
+            )}
 
             {hasDetails && (
               <div
-                className={`grid overflow-hidden px-1 transition-all duration-base ease-design-out ${isExpanded ? 'grid-rows-[1fr] pb-4 opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+                id={`resume-details-${id}`}
+                className={`grid overflow-hidden px-1 transition-[grid-template-rows,opacity,padding] duration-base ease-design-out ${isExpanded ? 'grid-rows-[1fr] pb-4 opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
               >
                 <div className="overflow-hidden">
                   <PortableText value={edu.details!} components={portableComponents} />

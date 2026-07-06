@@ -1,5 +1,5 @@
 // 全局布局：配置字体、默认元数据与基础样式
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -39,21 +39,13 @@ export const metadata: Metadata = {
     title: "Yuwei Design | UX/UI Designer & Creative Developer",
     description: "Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.",
     siteName: "Yuwei Design",
-    images: [
-      {
-        url: "https://www.yuweidesign.com/Profile_Yuwei.webp",
-        width: 1200,
-        height: 630,
-        alt: "Yuwei Li Portfolio",
-      },
-    ],
+    // 分享图由 app/opengraph-image.tsx 自动生成（1200x630 PNG）
   },
   twitter: {
     card: "summary_large_image",
     title: "Yuwei Design | UX/UI Designer & Creative Developer",
     description: "Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.",
     creator: "@yuweili",
-    images: ["https://www.yuweidesign.com/Profile_Yuwei.webp"],
   },
   robots: {
     index: true,
@@ -68,8 +60,13 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.ico",
-    apple: "/favicon.ico",
+    // Apple touch icon 由 app/apple-icon.tsx 自动生成（180x180 PNG）
   },
+};
+
+// 浏览器主题色：与页面浅色背景一致（移动端地址栏/状态栏着色）
+export const viewport: Viewport = {
+  themeColor: "#f4f7fb",
 };
 
 import { AppViewTransitions } from "@/components/providers/view-transitions-provider";

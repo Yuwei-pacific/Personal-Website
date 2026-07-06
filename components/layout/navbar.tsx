@@ -23,7 +23,9 @@ export function Navbar() {
       const targetId = href.replace("/#", "");
       const elem = document.getElementById(targetId);
       if (elem) {
-        elem.scrollIntoView({ behavior: "smooth" });
+        // 尊重系统"减弱动画"偏好：偏好开启时直接跳转而非平滑滚动
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        elem.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth" });
         window.history.pushState(null, "", href);
         setOpen(false);
       }
@@ -109,7 +111,7 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-9 w-9 items-center justify-center text-design-light-text-primary dark:text-design-dark-text-primary md:hidden"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-button text-design-light-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-design-light-accent dark:text-design-dark-text-primary md:hidden"
             aria-expanded={open}
             aria-label="Toggle navigation"
           >
@@ -132,7 +134,7 @@ export function Navbar() {
       </div>
 
       {/* Mobile Nav Dropdown：保留实色背景以确保菜单内容可读 */}
-      <div className={`absolute left-4 right-4 mt-2 overflow-hidden rounded-panel border border-design-light-border/60 bg-design-light-surface/90 backdrop-blur-xl transition-all duration-base ease-standard dark:border-design-dark-border dark:bg-design-dark-bg/90 md:hidden ${open ? "max-h-64 opacity-100 shadow-hover" : "pointer-events-none max-h-0 opacity-0"}`}>
+      <div className={`absolute left-4 right-4 mt-2 overflow-hidden rounded-panel border border-design-light-border/60 bg-design-light-surface/90 backdrop-blur-xl transition-[max-height,opacity,box-shadow] duration-base ease-standard dark:border-design-dark-border dark:bg-design-dark-bg/90 md:hidden ${open ? "max-h-64 opacity-100 shadow-hover" : "pointer-events-none max-h-0 opacity-0"}`}>
         <nav className="flex flex-col p-4">
           {navItems.map((item) => {
             const isActive = activeSection === item.id;
