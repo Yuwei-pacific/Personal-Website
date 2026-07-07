@@ -197,7 +197,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
         />
       </div>
 
-      <main className="w-full bg-design-light-bg px-container py-section sm:px-container-sm sm:py-section-sm">
+      {/* 顶部留白加大：给 fixed 导航浮层（logo / Menu 按钮）让出空间 */}
+      <main className="w-full bg-design-light-bg px-container pb-section pt-24 sm:px-container-sm sm:pb-section-sm sm:pt-28">
         <div className="mx-auto max-w-6xl flex flex-col gap-12">
           {/* 顶部浅色信息区 */}
           <section className="flex flex-col gap-4">

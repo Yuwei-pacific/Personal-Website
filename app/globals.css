@@ -149,3 +149,31 @@
     scrollbar-width: none;
   }
 }
+
+/* StaggeredMenu 站点适配：
+   - 隐藏 vendor 自带 logo（不可点击），由 Navbar 里站点自己的 Logo 链接替代
+   - vendor 头部靠 space-between 排版，隐藏 logo 后 toggle 会掉到最左边（压在站点 logo 下），
+     用 margin-left: auto 推回右侧
+   - toggle 反差色由 Navbar 外层 div 的 mix-blend-difference 提供（与 logo 同款），
+     菜单打开时由 React 关闭混合并把按钮变为深色
+   - 放大文字/图标，并用 padding + 负 margin 扩大点击热区且不改变视觉位置 */
+.staggered-menu-wrapper .sm-logo {
+  display: none;
+}
+.staggered-menu-wrapper .sm-toggle {
+  /* 上 margin 略小于下 margin：让按钮垂直中心与左侧 48px logo 的中心对齐 */
+  margin: -0.4rem -1rem -0.75rem auto;
+  padding: 0.75rem 1rem;
+  gap: 0.625rem;
+  font-size: 1.375rem;
+  font-weight: 600;
+}
+.staggered-menu-wrapper .sm-toggle:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+.staggered-menu-wrapper .sm-icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+}
