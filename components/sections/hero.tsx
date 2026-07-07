@@ -7,6 +7,7 @@ import { Link } from "next-view-transitions";
 import { ArrowRight, Github, Linkedin, Instagram } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import DecryptedText from "@/components/DecryptedText";
 import { useHeroAnimation } from "@/hooks/useHeroAnimation";
 
 // Hero 组件：首页主视觉区，包含标题、描述、CTA 按钮与社交链接
@@ -14,7 +15,8 @@ export function Hero() {
   const heroRef = useHeroAnimation<HTMLElement>();
   return (
     // 全屏容器：相对定位，隔离层叠上下文，居中内容
-    <section ref={heroRef} id="home" className="relative isolate flex min-h-screen w-full items-center overflow-hidden px-container-sm pb-28 pt-16 sm:px-10 md:px-16">
+    // min-h 扣除导航栏在文档流中的高度（约 82px），保证底部 Get in touch 栏落在首屏内
+    <section ref={heroRef} id="home" className="relative isolate flex min-h-[calc(100svh-82px)] w-full items-center overflow-hidden px-container-sm pb-28 pt-16 sm:px-10 md:px-16">
       {/* 背景装饰层：限制在 hero 内部，不影响主页后续区块 */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         {/* 渐变背景：保持冷白调，避免底部泛黄 */}
@@ -30,30 +32,36 @@ export function Hero() {
         />
       </div>
 
-      {/* 主内容区：提升层级确保在背景之上，最大宽度限制 */}
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-10">
-        {/* 文本内容：标题、副标题、描述与状态标签 */}
-        <div className="space-y-4">
-          {/* 顶部标签：Portfolio */}
+      {/* 主内容区：全宽布局，与底部 Get in touch 通栏对齐 */}
+      <div className="relative z-10 flex w-full flex-col gap-8">
+        {/* 文本内容：标签与超大两行标题（与下方区块的编辑式排版呼应） */}
+        <div className="space-y-5">
+          {/* 顶部标签：Portfolio，与 About me 标签同款式 */}
           <p className="hero-label text-label font-semibold uppercase text-design-light-text-secondary">
             Portfolio
           </p>
-          {/* 主标题：响应式字号，从 4xl 到 6xl */}
-          <h1 className="hero-title text-balance text-4xl font-semibold leading-tight tracking-tight text-design-light-text-primary sm:text-display-sm lg:text-display">
-            Creative Designer
-          </h1>
-          {/* 描述文案 */}
-          <p className="hero-description max-w-2xl text-lg text-design-light-text-secondary sm:text-xl">
-            I design and build vivid digital experiences
+          {/* 主标题：整页最大的排版时刻，两行堆叠 */}
+          <h1 className="hero-title text-[3.25rem] font-semibold leading-[0.95] tracking-tight text-design-light-text-primary sm:text-7xl lg:text-[7.5rem]">
+            Creative
             <br />
-            that bring color to the ordinary.
-          </p>
-          {/* 地点与状态标签 */}
-          <div className="hero-status flex flex-wrap items-center gap-3 text-small text-design-light-text-secondary">
-            <span className="font-medium text-design-light-text-primary">Based in Milan</span>
-            <span className="inline-flex items-center gap-1 rounded-tag border border-design-light-border px-3 py-1 text-xs">
-              Available for freelance
-            </span>
+            Designer
+          </h1>
+        </div>
+
+        {/* 细分隔线 + 描述/状态行：复用 About 区行表语言（细线、圆点分隔符） */}
+        <div className="border-t border-design-light-border pt-6">
+          <div className="flex flex-col gap-5">
+            {/* 描述句：全宽展开，进入视口时逐字“解密”，只触发一次 */}
+            <p className="hero-description text-pretty text-xl leading-relaxed text-design-light-text-secondary sm:text-2xl lg:text-3xl">
+              <DecryptedText
+                text="I design and build vivid digital experiences that bring color to the ordinary."
+                animateOn="view"
+                sequential
+                revealDirection="start"
+                speed={30}
+                encryptedClassName="text-design-light-text-muted/50"
+              />
+            </p>
           </div>
         </div>
 
