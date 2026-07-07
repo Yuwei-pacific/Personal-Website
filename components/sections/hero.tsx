@@ -1,46 +1,54 @@
 // 首页 Hero 区：依赖的 Next.js 组件、图标与按钮
 "use client";
 
-import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Link } from "next-view-transitions";
-import type { ComponentType, ReactNode } from "react";
+import { useEffect, useState } from "react";
+import type { ComponentType } from "react";
 
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import DecryptedText from "@/components/DecryptedText";
 import { useHeroAnimation } from "@/hooks/useHeroAnimation";
+import { truncate } from "sanity/migrate";
 
-// GridMotion 渲染期读取 window，必须关闭 SSR 仅在客户端加载；
-// .jsx 源码的 items 默认值 [] 会被 TS 推断成 never[]，这里显式标注 props 类型
-type GridMotionProps = {
-  items?: (string | ReactNode)[];
-  gradientColor?: string;
+// DotFieldImage 交互点阵背景（DotField 扩展版，支持按图片取色）：
+// canvas 渲染，关闭 SSR（避免内部随机 SVG id 造成水合不匹配）；.jsx 组件显式标注 props 类型
+type DotFieldImageProps = {
+  dotRadius?: number;
+  dotSpacing?: number;
+  cursorRadius?: number;
+  cursorForce?: number;
+  bulgeOnly?: boolean;
+  bulgeStrength?: number;
+  glowRadius?: number;
+  sparkle?: boolean;
+  waveAmplitude?: number;
+  gradientFrom?: string;
+  gradientTo?: string;
+  glowColor?: string;
+  /** 取色图片：点阵颜色来自该图片对应位置的像素 */
+  imageSrc?: string;
+  imageFit?: "contain" | "cover";
+  /** 图片透明/未覆盖区域的点的颜色 */
+  fallbackColor?: string;
+  className?: string;
+  style?: React.CSSProperties;
 };
-const GridMotion = dynamic(() => import("@/components/GridMotion"), {
+const DotFieldImage = dynamic(() => import("@/components/DotFieldImage"), {
   ssr: false,
-}) as ComponentType<GridMotionProps>;
+}) as ComponentType<DotFieldImageProps>;
 
-// GridMotion 网格固定 4 行 × 7 列
-const GRID_ITEM_COUNT = 28;
-
-type HeroProps = {
-  /** 项目封面图 URL 列表，用于背景动态网格 */
-  backgroundImages?: string[];
-};
-
-// Hero 组件：首页主视觉区，包含标题、描述、CTA 按钮与社交链接
-export function Hero({ backgroundImages = [] }: HeroProps) {
+// Hero 组件：首页主视觉区，包含标题、描述与 CTA 按钮
+export function Hero() {
   const heroRef = useHeroAnimation<HTMLElement>();
 
-  // 将项目封面图循环填满 28 格；带上 Sanity CDN 压缩参数控制加载体积
-  const gridItems = backgroundImages.length
-    ? Array.from(
-        { length: GRID_ITEM_COUNT },
-        (_, i) => `${backgroundImages[i % backgroundImages.length]}?w=800&q=60&auto=format`
-      )
-    : [];
+  // 尊重"减弱动画"偏好：偏好开启时不渲染点阵（其 rAF 循环会持续运行）
+  const [reducedMotion, setReducedMotion] = useState(false);
+  useEffect(() => {
+    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
 
   return (
     // 全屏容器：相对定位，隔离层叠上下文，居中内容
@@ -50,22 +58,23 @@ export function Hero({ backgroundImages = [] }: HeroProps) {
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         {/* 渐变背景：保持冷白调，避免底部泛黄 */}
         <div className="absolute inset-0 bg-gradient-to-b from-design-hero-start via-design-hero-mid to-design-hero-end" />
-        {gridItems.length ? (
-          <>
-            {/* 项目封面动态网格：跟随鼠标横向漂移（GridMotion 监听 window 事件，不受 pointer-events-none 影响） */}
-            <GridMotion items={gridItems} gradientColor="white" />
-            {/* 亮色蒙版：压暗网格存在感，保证前景深色文字可读（z-10 盖过 GridMotion 内部 z-index:2 的网格层） */}
-            <div className="absolute inset-0 z-10 bg-design-light-bg/80" />
-          </>
-        ) : (
-          /* 无项目图片时回退到原棱镜背景 */
-          <Image
-            src="/hero_mg.svg"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="hero-background select-none object-contain object-center opacity-50 blur-md"
+        {/* 交互点阵背景：颜色取自棱镜图对应位置的像素，鼠标划过时产生排斥波纹
+            （组件监听 window 事件，不受 pointer-events-none 影响） */}
+        {!reducedMotion && (
+          <DotFieldImage
+            dotRadius={4}
+            dotSpacing={6}
+            bulgeStrength={32}
+            glowRadius={0}
+            sparkle={true}
+            waveAmplitude={0}
+            cursorRadius={500}
+            cursorForce={0.5}
+            bulgeOnly={true}
+            imageSrc="/hero_mg.svg"
+            imageFit="contain"
+            fallbackColor="rgba(148, 163, 184, 0.25)"
+            glowColor="#120F17"
           />
         )}
       </div>

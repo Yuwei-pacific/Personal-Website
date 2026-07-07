@@ -82,11 +82,6 @@ export default async function HomePage() {
     }
   }
 
-  // 提取项目封面图 URL，作为 Hero 背景动态网格的素材
-  const heroImages = projects
-    .filter((p) => p.visibility !== false && p.coverImage?.asset?.url)
-    .map((p) => p.coverImage!.asset!.url as string);
-
   return (
     // 页面结构：导航栏 + Hero + About + Projects 列表
     <div className="min-h-screen">
@@ -95,7 +90,7 @@ export default async function HomePage() {
       {/* 顶部导航，支持滚动隐藏 */}
       <Navbar />
       {/* 首页主视觉区 */}
-      <Hero backgroundImages={heroImages} />
+      <Hero />
       {/* 关于我简介 */}
       <AboutSection skillCategories={skillCategories} resumeItems={resumeItems} />
 
