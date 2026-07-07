@@ -2,34 +2,72 @@
 "use client";
 
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { Link } from "next-view-transitions";
+import type { ComponentType, ReactNode } from "react";
 
-import { ArrowRight, Github, Linkedin, Instagram } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import DecryptedText from "@/components/DecryptedText";
 import { useHeroAnimation } from "@/hooks/useHeroAnimation";
 
+// GridMotion 渲染期读取 window，必须关闭 SSR 仅在客户端加载；
+// .jsx 源码的 items 默认值 [] 会被 TS 推断成 never[]，这里显式标注 props 类型
+type GridMotionProps = {
+  items?: (string | ReactNode)[];
+  gradientColor?: string;
+};
+const GridMotion = dynamic(() => import("@/components/GridMotion"), {
+  ssr: false,
+}) as ComponentType<GridMotionProps>;
+
+// GridMotion 网格固定 4 行 × 7 列
+const GRID_ITEM_COUNT = 28;
+
+type HeroProps = {
+  /** 项目封面图 URL 列表，用于背景动态网格 */
+  backgroundImages?: string[];
+};
+
 // Hero 组件：首页主视觉区，包含标题、描述、CTA 按钮与社交链接
-export function Hero() {
+export function Hero({ backgroundImages = [] }: HeroProps) {
   const heroRef = useHeroAnimation<HTMLElement>();
+
+  // 将项目封面图循环填满 28 格；带上 Sanity CDN 压缩参数控制加载体积
+  const gridItems = backgroundImages.length
+    ? Array.from(
+        { length: GRID_ITEM_COUNT },
+        (_, i) => `${backgroundImages[i % backgroundImages.length]}?w=800&q=60&auto=format`
+      )
+    : [];
+
   return (
     // 全屏容器：相对定位，隔离层叠上下文，居中内容
-    // min-h 扣除导航栏在文档流中的高度（约 82px），保证底部 Get in touch 栏落在首屏内
-    <section ref={heroRef} id="home" className="relative isolate flex min-h-[calc(100svh-82px)] w-full items-center overflow-hidden px-container-sm pb-28 pt-16 sm:px-10 md:px-16">
+    // 导航已改为 fixed 浮层不占文档流，hero 直接铺满整个视口
+    <section ref={heroRef} id="home" className="relative isolate flex min-h-[100svh] w-full items-center overflow-hidden px-container-sm py-16 sm:px-10 md:px-16">
       {/* 背景装饰层：限制在 hero 内部，不影响主页后续区块 */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         {/* 渐变背景：保持冷白调，避免底部泛黄 */}
         <div className="absolute inset-0 bg-gradient-to-b from-design-hero-start via-design-hero-mid to-design-hero-end" />
-        {/* 背景图形：半透明模糊 SVG，响应式定位；动画统一由 .hero-background 类控制，保证 prefers-reduced-motion 生效 */}
-        <Image
-          src="/hero_mg.svg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="hero-background select-none object-contain object-center opacity-50 blur-md"
-        />
+        {gridItems.length ? (
+          <>
+            {/* 项目封面动态网格：跟随鼠标横向漂移（GridMotion 监听 window 事件，不受 pointer-events-none 影响） */}
+            <GridMotion items={gridItems} gradientColor="white" />
+            {/* 亮色蒙版：压暗网格存在感，保证前景深色文字可读（z-10 盖过 GridMotion 内部 z-index:2 的网格层） */}
+            <div className="absolute inset-0 z-10 bg-design-light-bg/80" />
+          </>
+        ) : (
+          /* 无项目图片时回退到原棱镜背景 */
+          <Image
+            src="/hero_mg.svg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="hero-background select-none object-contain object-center opacity-50 blur-md"
+          />
+        )}
       </div>
 
       {/* 主内容区：全宽布局，与底部 Get in touch 通栏对齐 */}
@@ -78,60 +116,6 @@ export function Hero() {
         </div>
       </div>
 
-      {/* 底部社交链接区：绝对定位，固定在视窗底部 */}
-      <div className="absolute inset-x-0 bottom-8 z-20 w-full px-6 sm:bottom-10 sm:px-10 md:px-16">
-        <div className="flex flex-col gap-2 sm:gap-3">
-          <div className="flex items-center gap-4">
-            {/* "Get in touch" 标题与装饰箭头 */}
-            <div className="flex items-center gap-3">
-              <p className="whitespace-nowrap text-base font-semibold uppercase leading-[1.25] tracking-[0.2em] text-design-light-accent sm:text-2xl">
-                Get in touch
-              </p>
-              <Image
-                src="/arrow_1.svg"
-                alt=""
-                aria-hidden="true"
-                width={29}
-                height={22}
-                className="h-[18px] w-auto sm:h-[22px]"
-              />
-            </div>
-            <div className="h-px flex-1 bg-design-light-accent" />
-            {/* 社交链接图标：GitHub、LinkedIn、Instagram */}
-            <div className="flex items-center gap-3 sm:gap-4">
-              <Link
-                href="https://github.com/Yuwei-pacific"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-                className="hero-social-icon inline-flex h-10 w-10 items-center justify-center rounded-full border border-design-light-accent/80 text-design-light-accent transition-colors duration-base hover:bg-design-light-accent hover:text-design-dark-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-design-light-accent"
-              >
-                <Github className="h-5 w-5" />
-              </Link>
-              <Link
-                href="https://www.linkedin.com/in/yuwei081/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-                className="hero-social-icon inline-flex h-10 w-10 items-center justify-center rounded-button border border-design-light-accent/80 text-design-light-accent transition-colors duration-base hover:bg-design-light-accent hover:text-design-dark-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-design-light-accent"
-              >
-                <Linkedin className="h-5 w-5" />
-              </Link>
-              <Link
-                href="https://www.instagram.com/yuwei081/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="hero-social-icon inline-flex h-10 w-10 items-center justify-center rounded-full border border-design-light-accent/80 text-design-light-accent transition-colors duration-base hover:bg-design-light-accent hover:text-design-dark-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-design-light-accent"
-              >
-                <Instagram className="h-5 w-5" />
-              </Link>
-            </div>
-          </div>
-          {/* 邮箱地址 */}
-          {/* <p className="text-small text-design-light-text-secondary sm:text-body">Find me via different Social Media Platforms</p> */}
-        </div>
-      </div>
     </section>
   );
 }
