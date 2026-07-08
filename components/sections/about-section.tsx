@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { SkillCategory, ResumeItem } from "@/types";
+import { fallbackEducation, fallbackExperience, fallbackSkillCategories } from "@/content/fallbacks";
 import { ResumeList } from "./resume-list";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { StaggerReveal } from "@/components/ui/stagger-reveal";
@@ -17,30 +18,10 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
   const educations = resumeItems?.filter(item => item.type === 'education' || !item.type) || [];
   const experiences = resumeItems?.filter(item => item.type === 'experience') || [];
 
-  // 后备数据（与 SkillCategory 查询结果同构，CMS 无数据时展示）
-  const fallbackCategories: SkillCategory[] = [
-    {
-      _id: "fallback-design",
-      title: "Design Disciplines",
-      order: 1,
-      skills: ["User Experience", "User Interface", "Interaction Design", "Communication Design", "Branding Design", "Design Systems", "Prototyping", "User Research"]
-    },
-    {
-      _id: "fallback-tools",
-      title: "Tools & Software",
-      order: 2,
-      skills: ["Figma", "Protopie", "Adobe XD", "Photoshop", "Illustrator", "Premiere Pro", "After Effects"]
-    },
-    {
-      _id: "fallback-frontend",
-      title: "Frontend Development",
-      order: 3,
-      skills: ["Next.js", "React", "TypeScript", "Tailwind CSS", "HTML/CSS", "JavaScript"]
-    }
-  ];
+  // CMS 无数据时使用兜底内容（见 content/fallbacks.ts）
   const categoriesToRender = skillCategories && skillCategories.length > 0
     ? skillCategories
-    : fallbackCategories;
+    : fallbackSkillCategories;
   return (
     <section
       id="about"
@@ -89,10 +70,6 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
           {/* Basic info — same row-table style as Education / Experience / Capabilities */}
           <ScrollReveal>
             <div className="border-t border-design-light-border">
-              {/* <div className="grid grid-cols-1 gap-1 border-b border-neutral-300 px-1 py-4 transition-[padding,background-color] duration-300 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-neutral-50">
-              <p className="font-semibold text-neutral-900">Name</p>
-              <p className="text-base font-semibold text-neutral-900">Yuwei Li</p>
-            </div> */}
               <div className="grid grid-cols-1 gap-1 border-b border-design-light-border px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover">
                 <p className="font-semibold text-design-light-text-primary">Role</p>
                 <p className="text-small text-design-light-text-secondary sm:text-body">Communication Designer &amp; Frontend Developer</p>
@@ -101,15 +78,6 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
                 <p className="font-semibold text-design-light-text-primary">Location</p>
                 <p className="text-small text-design-light-text-secondary sm:text-body">Milan, Italy</p>
               </div>
-              {/* <div className="grid grid-cols-1 gap-1 border-b border-neutral-300 px-1 py-4 transition-[padding,background-color] duration-300 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-neutral-50">
-                <p className="font-semibold text-neutral-900">Email</p>
-                <a
-                  href="mailto:snowtime200801@gmail.com"
-                  className="text-sm text-neutral-700 transition-colors hover:text-neutral-950 sm:text-base"
-                >
-                  snowtime200801@gmail.com
-                </a>
-              </div> */}
               <div className="grid grid-cols-1 gap-1 border-b border-design-light-border px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover">
                 <p className="font-semibold text-design-light-text-primary">Languages</p>
                 <div className="flex flex-wrap gap-x-2 gap-y-1.5 text-small text-design-light-text-secondary sm:text-body">
@@ -136,31 +104,7 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
                 ({educations.length})
               </sup>
             </div>
-            <ResumeList
-              items={educations}
-              fallbackData={[
-                {
-                  _id: "edu-default-1",
-                  type: "education",
-                  institution: "Politecnico di Milano",
-                  degree: "Laurea Magistrale LM, Comunicazione design",
-                  period: "2023 – 2026",
-                  location: null,
-                  details: null,
-                  order: null,
-                },
-                {
-                  _id: "edu-default-2",
-                  type: "education",
-                  institution: "Accademia di Belle Arti di Firenze",
-                  degree: "Visive, decorazione",
-                  period: "2019 – 2023",
-                  location: null,
-                  details: null,
-                  order: null,
-                }
-              ]}
-            />
+            <ResumeList items={educations} fallbackData={fallbackEducation} />
           </ScrollReveal>
           <ScrollReveal>
             <div className="flex items-baseline gap-1.5">
@@ -171,31 +115,7 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
                 ({experiences.length})
               </sup>
             </div>
-            <ResumeList
-              items={experiences}
-              fallbackData={[
-                {
-                  _id: "exp-default-1",
-                  type: "experience",
-                  institution: "Multi-disciplinary Experience",
-                  degree: "Design, Web Development, Team Coordination",
-                  period: "Past – Present",
-                  location: null,
-                  order: null,
-                  details: [
-                    {
-                      _type: "block",
-                      _key: "exp-default-1-block-0",
-                      children: [{
-                        _type: "span",
-                        _key: "exp-default-1-span-0",
-                        text: "I have gained experience across design, web development, and team coordination, working on projects that range from corporate events and branding to online learning platforms and IT management. These roles allowed me to combine creative design thinking with technical problem-solving, shaping a versatile practice that bridges creativity and technology."
-                      }]
-                    }
-                  ]
-                }
-              ]}
-            />
+            <ResumeList items={experiences} fallbackData={fallbackExperience} />
           </ScrollReveal>
           <ScrollReveal>
             <div className="flex items-baseline gap-1.5">
