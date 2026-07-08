@@ -19,7 +19,8 @@ export type DotFieldImageProps = {
   glowColor?: string;
   /** Source image: each dot samples the pixel color at its position */
   imageSrc?: string;
-  imageFit?: "contain" | "cover";
+  /** "fill" (site adaptation) stretches non-uniformly to cover every viewport — dots only sample colors, so source distortion is invisible */
+  imageFit?: "contain" | "cover" | "fill";
   /** Color for dots on transparent / uncovered areas of the image */
   fallbackColor?: string;
   className?: string;

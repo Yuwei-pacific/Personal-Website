@@ -145,11 +145,18 @@ const DotFieldImage = memo(
         if (!iw || !ih) return;
 
         const p = propsRef.current;
-        const scale =
-          p.imageFit === 'cover' ? Math.max(w / iw, h / ih) : Math.min(w / iw, h / ih);
-        const dw = iw * scale;
-        const dh = ih * scale;
-        offCtx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+        if (p.imageFit === 'fill') {
+          // 站点适配新增 fill：非等比拉伸铺满容器。点阵只做颜色采样，
+          // 源图变形不会让点变形——任何视口比例下色彩都布满整个画布，
+          // 避免 contain 在竖屏下只剩中间一条色带、且随窗口尺寸上下漂移
+          offCtx.drawImage(img, 0, 0, w, h);
+        } else {
+          const scale =
+            p.imageFit === 'cover' ? Math.max(w / iw, h / ih) : Math.min(w / iw, h / ih);
+          const dw = iw * scale;
+          const dh = ih * scale;
+          offCtx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+        }
 
         let data;
         try {
