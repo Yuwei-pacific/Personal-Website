@@ -268,7 +268,7 @@ export type AllSanitySchemaTypes = Education | SkillCategory | Project | SanityI
 export declare const internalGroqTypeReferenceTo: unique symbol;
 // Source: ./sanity/lib/queries.ts
 // Variable: PROJECTS_QUERY
-// Query: *[_type == "project" && visibility != false]  | order(coalesce(year, 0) desc, _createdAt desc){  _id,  title,  summary,  year,  projectType,  "slug": slug.current,  "coverImage": coverImage{    asset->{      _id,      url    },    alt  }}
+// Query: *[_type == "project" && visibility != false]  | order(coalesce(year, 0) desc, _createdAt desc){  _id,  title,  summary,  year,  projectType,  "slug": slug.current,  "coverImage": coverImage{    ...,    asset->{      _id,      url    }  }}
 export type PROJECTS_QUERYResult = Array<{
   _id: string;
   title: string | null;
@@ -281,7 +281,11 @@ export type PROJECTS_QUERYResult = Array<{
       _id: string;
       url: string | null;
     } | null;
-    alt: string | null;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
   } | null;
 }>;
 // Variable: SKILLS_QUERY
@@ -401,7 +405,7 @@ export type PROJECT_SITEMAP_QUERYResult = Array<{
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    "*[_type == \"project\" && visibility != false]\n  | order(coalesce(year, 0) desc, _createdAt desc){\n  _id,\n  title,\n  summary,\n  year,\n  projectType,\n  \"slug\": slug.current,\n  \"coverImage\": coverImage{\n    asset->{\n      _id,\n      url\n    },\n    alt\n  }\n}": PROJECTS_QUERYResult;
+    "*[_type == \"project\" && visibility != false]\n  | order(coalesce(year, 0) desc, _createdAt desc){\n  _id,\n  title,\n  summary,\n  year,\n  projectType,\n  \"slug\": slug.current,\n  \"coverImage\": coverImage{\n    ...,\n    asset->{\n      _id,\n      url\n    }\n  }\n}": PROJECTS_QUERYResult;
     "*[_type == \"skillCategory\"] | order(order asc){\n  _id,\n  title,\n  order,\n  skills\n}": SKILLS_QUERYResult;
     "*[_type == \"education\"] | order(order desc){\n  _id,\n  type,\n  institution,\n  degree,\n  location,\n  period,\n  details,\n  order\n}": RESUME_QUERYResult;
     "*[_type == \"project\" && slug.current == $slug && visibility != false][0]{\n  _id,\n  title,\n  summary,\n  role,\n  tags,\n  contributors,\n  \"slug\": slug.current,\n  year,\n  projectType,\n  client,\n  location,\n  links,\n  \"coverImage\": { \"url\": coalesce(coverImage.asset->url, \"\") },\n  \"gallery\": gallery[]{\n    \"url\": coalesce(image.asset->url, \"\"),\n    alt,\n    caption,\n    \"width\": image.asset->metadata.dimensions.width,\n    \"height\": image.asset->metadata.dimensions.height\n  },\n  body,\n  myContribution\n}": PROJECT_QUERYResult;

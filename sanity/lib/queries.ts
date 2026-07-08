@@ -15,11 +15,11 @@ export const PROJECTS_QUERY = defineQuery(`*[_type == "project" && visibility !=
   projectType,
   "slug": slug.current,
   "coverImage": coverImage{
+    ...,
     asset->{
       _id,
       url
-    },
-    alt
+    }
   }
 }`);
 
