@@ -54,7 +54,7 @@ export function ProjectCard({ project, slug, revealDelay = 0, index = 0 }: Proje
                 {project.coverImage?.asset?.url ? (
                     <Image
                         src={project.coverImage.asset.url}
-                        alt={project.coverImage.alt || project.title}
+                        alt={project.coverImage.alt || project.title || "Project cover"}
                         fill
                         className="object-cover transition-transform duration-media ease-design-out group-hover:scale-[1.035]"
                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 58vw"
@@ -84,7 +84,7 @@ export function ProjectCard({ project, slug, revealDelay = 0, index = 0 }: Proje
                     </p>
                 ) : (
                     <p className="col-start-2 text-small leading-5 text-design-dark-text-muted line-clamp-2">
-                        {project.summary || project.description}
+                        {project.summary}
                     </p>
                 )}
             </div>

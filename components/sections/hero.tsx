@@ -3,52 +3,27 @@
 
 import dynamic from "next/dynamic";
 import { Link } from "next-view-transitions";
-import { useEffect, useState } from "react";
-import type { ComponentType } from "react";
 
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import DecryptedText from "@/components/DecryptedText";
+import DecryptedText from "@/components/vendor/DecryptedText";
 import { useHeroAnimation } from "@/hooks/useHeroAnimation";
-import { truncate } from "sanity/migrate";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 // DotFieldImage 交互点阵背景（DotField 扩展版，支持按图片取色）：
-// canvas 渲染，关闭 SSR（避免内部随机 SVG id 造成水合不匹配）；.jsx 组件显式标注 props 类型
-type DotFieldImageProps = {
-  dotRadius?: number;
-  dotSpacing?: number;
-  cursorRadius?: number;
-  cursorForce?: number;
-  bulgeOnly?: boolean;
-  bulgeStrength?: number;
-  glowRadius?: number;
-  sparkle?: boolean;
-  waveAmplitude?: number;
-  gradientFrom?: string;
-  gradientTo?: string;
-  glowColor?: string;
-  /** 取色图片：点阵颜色来自该图片对应位置的像素 */
-  imageSrc?: string;
-  imageFit?: "contain" | "cover";
-  /** 图片透明/未覆盖区域的点的颜色 */
-  fallbackColor?: string;
-  className?: string;
-  style?: React.CSSProperties;
-};
-const DotFieldImage = dynamic(() => import("@/components/DotFieldImage"), {
+// canvas 渲染，关闭 SSR（避免内部随机 SVG id 造成水合不匹配）；
+// props 类型来自 vendor 目录的 .d.ts 声明
+const DotFieldImage = dynamic(() => import("@/components/vendor/DotFieldImage"), {
   ssr: false,
-}) as ComponentType<DotFieldImageProps>;
+});
 
 // Hero 组件：首页主视觉区，包含标题、描述与 CTA 按钮
 export function Hero() {
   const heroRef = useHeroAnimation<HTMLElement>();
 
   // 尊重"减弱动画"偏好：偏好开启时不渲染点阵（其 rAF 循环会持续运行）
-  const [reducedMotion, setReducedMotion] = useState(false);
-  useEffect(() => {
-    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }, []);
+  const reducedMotion = usePrefersReducedMotion();
 
   return (
     // 全屏容器：相对定位，隔离层叠上下文，居中内容

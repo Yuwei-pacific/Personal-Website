@@ -1,12 +1,4 @@
-import type { PortableTextBlock } from "@portabletext/types";
+// 简历条目类型：来自 TypeGen 生成的查询结果（sanity/sanity.types.ts）。
+import type { RESUME_QUERYResult } from "@/sanity/sanity.types";
 
-export type ResumeItem = {
-  _id?: string;
-  type?: 'education' | 'experience';
-  institution: string;
-  degree?: string;
-  location?: string;
-  period?: string;
-  details?: PortableTextBlock[];
-  order?: number;
-};
+export type ResumeItem = RESUME_QUERYResult[number];

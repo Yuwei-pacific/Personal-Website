@@ -4,64 +4,21 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Link } from "next-view-transitions";
-import groq from "groq";
 
 import { Navbar } from "@/components/layout";
 import { ProjectGallery } from "@/components/projects";
-import type { Project } from "@/types";
-import { isSanityConfigured, sanityClient } from "@/lib/sanity";
+import { sanityClient } from "@/lib/sanity";
+import { PROJECT_QUERY, PROJECT_SLUGS_QUERY } from "@/sanity/lib/queries";
+import type { PROJECT_QUERYResult } from "@/sanity/sanity.types";
 import { PortableText, type PortableTextReactComponents } from "@portabletext/react";
 import type { PortableTextBlock } from "@portabletext/types";
 
-// PortableText 块类型定义
-type Block = PortableTextBlock & {
-  _type: string; // 确保 _type 不为 undefined
-  children?: Array<{ text?: string }>;
-};
-
-// 项目详情页面的类型定义，扩展自基础 Project 类型
-type ProjectDetail = Project & {
-  role?: string[]; // 职责列表
-  tags?: string[]; // 标签列表
-  contributors?: string[]; // 贡献者列表
-  client?: string; // 客户名称
-  location?: string; // 项目地点
-  links?: { label?: string; url?: string }[]; // 相关链接
-  coverImage?: { url?: string }; // 封面图
-  gallery?: { url?: string; alt?: string; caption?: string; width?: number; height?: number }[]; // 图片画廊
-  body?: Block[]; // 项目详情内容（富文本）
-  myContribution?: Block[]; // 我的贡献内容（富文本）
-};
+// 项目详情类型：直接来自 TypeGen 生成的查询结果类型
+type ProjectDetail = NonNullable<PROJECT_QUERYResult>;
+type Block = NonNullable<ProjectDetail["body"]>[number];
 
 // Incremental Static Regeneration: revalidate project pages every 60s
 export const revalidate = 60;
-
-// GROQ 查询：从 Sanity 获取项目详情数据（过滤隐藏项目）
-const PROJECT_QUERY = groq`*[_type == "project" && slug.current == $slug && visibility != false][0]{
-  _id,
-  title,
-  summary,
-  role,
-  tags,
-  contributors,
-  description,
-  "slug": slug.current,
-  year,
-  projectType,
-  client,
-  location,
-  links,
-  "coverImage": { "url": coalesce(coverImage.asset->url, "") },
-  "gallery": gallery[]{
-    "url": coalesce(image.asset->url, ""),
-    alt,
-    caption,
-    "width": image.asset->metadata.dimensions.width,
-    "height": image.asset->metadata.dimensions.height
-  },
-  body,
-  myContribution
-}`;
 
 // PortableText 组件配置：定义富文本内容的渲染方式
 // 各级块元素自带上边距（first:mt-0 抵消首个元素），让标题与正文之间有明显的呼吸感
@@ -111,7 +68,7 @@ const portableComponents: Partial<PortableTextReactComponents> = {
 };
 
 // 辅助函数：渲染富文本块
-const renderBlocks = (blocks?: Block[]) =>
+const renderBlocks = (blocks?: Block[] | null) =>
   blocks?.length ? <PortableText value={blocks as PortableTextBlock[]} components={portableComponents} /> : null;
 
 // 从 Sanity 获取项目数据
@@ -123,36 +80,20 @@ const fetchProject = cache(async (rawSlug?: string): Promise<ProjectDetail | nul
   // 2. 卫语句 (Guard Clause)：如果 slug 为空，直接返回 null，不进行后续昂贵的网络请求
   if (!slug) return null;
 
-  // 3. 环境检查：确保 Sanity 的配置项（如 Project ID）已正确设置，且客户端实例已初始化
-  if (isSanityConfigured() && sanityClient) {
-    try {
-      // 4. 发起网络请求：
-      // - 使用 sanityClient.fetch 方法
-      // - 传入事先定义好的 GROQ 查询语句 (PROJECT_QUERY)
-      // - 传入参数对象 { slug }，Sanity 会将其替换查询语句中的 $slug 变量
-      // - <ProjectDetail | null> 是 TS 泛型，告诉程序返回的数据符合什么结构
-      const project = await sanityClient.fetch<ProjectDetail | null>(PROJECT_QUERY, { slug });
-
-      // 5. 如果查到了项目数据，将其返回
-      if (project) return project;
-    } catch {
-      // 实际开发中通常会在这里添加错误日志，例如 console.error("Fetch error:", error);
-      return null;
-    }
+  // 3. 发起请求：查询结果类型由 TypeGen 自动推导（见 sanity/sanity.types.ts）
+  try {
+    return await sanityClient.fetch(PROJECT_QUERY, { slug });
+  } catch (error) {
+    console.error("Failed to fetch project from Sanity", error);
+    return null;
   }
-
-  // 6. 兜底策略：如果以上条件均不满足（如 CMS 未连接或查无此项），统一返回 null
-  return null;
 });
 
 // 构建时预生成所有可见项目的静态页面
 export async function generateStaticParams() {
-  if (!(isSanityConfigured() && sanityClient)) return [];
   try {
-    const slugs = await sanityClient.fetch<string[]>(
-      groq`*[_type == "project" && defined(slug.current) && visibility != false].slug.current`
-    );
-    return slugs.map((slug) => ({ slug }));
+    const slugs = await sanityClient.fetch(PROJECT_SLUGS_QUERY);
+    return slugs.filter((slug): slug is string => Boolean(slug)).map((slug) => ({ slug }));
   } catch {
     return [];
   }
@@ -167,7 +108,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const project = await fetchProject(slug);
   if (!project) return { title: "Project Not Found | Yuwei Li" };
-  return { title: `${project.title} | Yuwei Li`, description: project.summary || project.description };
+  return { title: `${project.title} | Yuwei Li`, description: project.summary ?? undefined };
 }
 
 // 页面组件：根据动态路由 `slug` 查询并渲染项目详情
@@ -236,8 +177,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
                       )}
                     </div>
                   </div>
-                  {/* 项目摘要：优先使用 summary，无则回退到 description */}
-                  <p className="text-lg leading-7 text-design-light-text-secondary">{project.summary || project.description}</p>
+                  {/* 项目摘要 */}
+                  <p className="text-lg leading-7 text-design-light-text-secondary">{project.summary}</p>
                 </div>
 
 
@@ -259,9 +200,10 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
         </div>
       </main>
 
-      {/* 底部深色详情区：封面、富文本详情、我的贡献、外链、图片画廊 */}
+      {/* 底部深色详情区：封面、富文本详情、我的贡献、外链、图片画廊
+          data-overscroll-dark：区块在视口内时 body 背景切深色（见 OverscrollBackground） */}
       {project && (
-        <section className="w-full bg-design-dark-bg px-container py-section text-design-dark-text-primary sm:px-container-sm sm:py-section-sm scroll-mt-24">
+        <section data-overscroll-dark className="w-full bg-design-dark-bg px-container py-section text-design-dark-text-primary sm:px-container-sm sm:py-section-sm scroll-mt-24">
           <div className="mx-auto flex max-w-6xl flex-col gap-8">
             {project.coverImage?.url && (
               // 封面图：使用 next/image 获得自动响应式与懒加载

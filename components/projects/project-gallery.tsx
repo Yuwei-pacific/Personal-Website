@@ -6,12 +6,20 @@ import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 
 // 画廊图片条目类型：包含 URL、替代文本、说明及尺寸
+// （字段允许 null：与 Sanity 查询结果的可空性对齐，见 sanity/sanity.types.ts）
 type GalleryItem = {
-  url?: string;
-  alt?: string;
-  caption?: string;
-  width?: number;
-  height?: number;
+  url?: string | null;
+  alt?: string | null;
+  caption?: string | null;
+  width?: number | null;
+  height?: number | null;
+};
+
+// 过滤后的条目：url 与尺寸已确认存在
+type ResolvedGalleryItem = GalleryItem & {
+  url: string;
+  width: number;
+  height: number;
 };
 
 // 组件入参：
@@ -29,12 +37,15 @@ type ProjectGalleryProps = {
 export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWidth }: ProjectGalleryProps) {
   // 过滤掉缺少 URL 或尺寸信息的条目，避免渲染出空图块
   const galleryItems = useMemo(
-    () => (items ?? []).filter((item) => Boolean(item.url && item.width && item.height)),
+    () =>
+      (items ?? []).filter(
+        (item): item is ResolvedGalleryItem => Boolean(item.url && item.width && item.height)
+      ),
     [items]
   );
 
   // 模态状态：当前激活图片与索引
-  const [active, setActive] = useState<GalleryItem | null>(null);
+  const [active, setActive] = useState<ResolvedGalleryItem | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
   // 交互状态：缩放比例与平移偏移量
   const [zoom, setZoom] = useState(1);
@@ -379,7 +390,7 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
   if (!galleryItems.length) return null;
 
   // 点击缩略图打开模态并重置缩放
-  const handleImageClick = (item: GalleryItem, idx: number) => {
+  const handleImageClick = (item: ResolvedGalleryItem, idx: number) => {
     setActive(item);
     setActiveIndex(idx);
     setZoom(1);

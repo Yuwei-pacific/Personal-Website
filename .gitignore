@@ -40,3 +40,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local content archive (assets live in Sanity, not in the repo)
+/Image Backup/
+
+# sanity typegen intermediate artifact (regenerate with `npm run typegen`;
+# the generated sanity/sanity.types.ts IS committed)
+/sanity/schema.json
+
+# agent tooling (skills are machine-installed; keep only .claude/launch.json tracked)
+/.agents/
+/.claude/skills/
+/.claude/settings.local.json
+/skills-lock.json
