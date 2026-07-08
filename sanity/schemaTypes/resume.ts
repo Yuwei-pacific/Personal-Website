@@ -1,5 +1,7 @@
 import { defineField, defineType } from 'sanity'
 
+// 历史包袱：document 类型名叫 "education"，但实际同时存 education 和 experience
+// 两种条目（用 type 字段区分）。改 _type 名需要数据迁移，暂保留旧名。
 export const resume = defineType({
   name: 'education',
   title: 'Resume (Edu & Exp)',

@@ -88,27 +88,9 @@
     --radius: var(--radius-button);
   }
 
-  .dark {
-    --background: var(--color-bg-dark);
-    --foreground: var(--color-text-primary-dark);
-    --card: var(--color-surface-dark);
-    --card-foreground: var(--color-text-primary-dark);
-    --popover: var(--color-surface-dark);
-    --popover-foreground: var(--color-text-primary-dark);
-    --primary: var(--color-accent-dark);
-    --primary-foreground: var(--color-bg-dark);
-    --secondary: var(--color-surface-elevated-dark);
-    --secondary-foreground: 0 0% 98%;
-    --muted: var(--color-surface-elevated-dark);
-    --muted-foreground: var(--color-text-muted-dark);
-    --accent: var(--color-hover-bg-dark);
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: var(--color-border-dark);
-    --input: var(--color-border-dark);
-    --ring: 240 4.9% 83.9%;
-  }
+  /* 本站不做主题切换（无 dark mode）：
+     --color-*-light / --color-*-dark 是固定的浅色/深色「分区」token
+     （页面上半浅色、Work 区深色），而不是随系统或开关切换的主题。 */
 
   * {
     @apply border-border;

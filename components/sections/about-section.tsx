@@ -17,23 +17,30 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
   const educations = resumeItems?.filter(item => item.type === 'education' || !item.type) || [];
   const experiences = resumeItems?.filter(item => item.type === 'experience') || [];
 
-  // 后备数据
+  // 后备数据（与 SkillCategory 查询结果同构，CMS 无数据时展示）
+  const fallbackCategories: SkillCategory[] = [
+    {
+      _id: "fallback-design",
+      title: "Design Disciplines",
+      order: 1,
+      skills: ["User Experience", "User Interface", "Interaction Design", "Communication Design", "Branding Design", "Design Systems", "Prototyping", "User Research"]
+    },
+    {
+      _id: "fallback-tools",
+      title: "Tools & Software",
+      order: 2,
+      skills: ["Figma", "Protopie", "Adobe XD", "Photoshop", "Illustrator", "Premiere Pro", "After Effects"]
+    },
+    {
+      _id: "fallback-frontend",
+      title: "Frontend Development",
+      order: 3,
+      skills: ["Next.js", "React", "TypeScript", "Tailwind CSS", "HTML/CSS", "JavaScript"]
+    }
+  ];
   const categoriesToRender = skillCategories && skillCategories.length > 0
     ? skillCategories
-    : [
-      {
-        title: "Design Disciplines",
-        skills: ["User Experience", "User Interface", "Interaction Design", "Communication Design", "Branding Design", "Design Systems", "Prototyping", "User Research"]
-      },
-      {
-        title: "Tools & Software",
-        skills: ["Figma", "Protopie", "Adobe XD", "Photoshop", "Illustrator", "Premiere Pro", "After Effects"]
-      },
-      {
-        title: "Frontend Development",
-        skills: ["Next.js", "React", "TypeScript", "Tailwind CSS", "HTML/CSS", "JavaScript"]
-      }
-    ];
+    : fallbackCategories;
   return (
     <section
       id="about"
@@ -134,15 +141,23 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
               fallbackData={[
                 {
                   _id: "edu-default-1",
+                  type: "education",
                   institution: "Politecnico di Milano",
                   degree: "Laurea Magistrale LM, Comunicazione design",
                   period: "2023 – 2026",
+                  location: null,
+                  details: null,
+                  order: null,
                 },
                 {
                   _id: "edu-default-2",
+                  type: "education",
                   institution: "Accademia di Belle Arti di Firenze",
                   degree: "Visive, decorazione",
                   period: "2019 – 2023",
+                  location: null,
+                  details: null,
+                  order: null,
                 }
               ]}
             />
@@ -161,14 +176,19 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
               fallbackData={[
                 {
                   _id: "exp-default-1",
+                  type: "experience",
                   institution: "Multi-disciplinary Experience",
                   degree: "Design, Web Development, Team Coordination",
                   period: "Past – Present",
+                  location: null,
+                  order: null,
                   details: [
                     {
                       _type: "block",
+                      _key: "exp-default-1-block-0",
                       children: [{
                         _type: "span",
+                        _key: "exp-default-1-span-0",
                         text: "I have gained experience across design, web development, and team coordination, working on projects that range from corporate events and branding to online learning platforms and IT management. These roles allowed me to combine creative design thinking with technical problem-solving, shaping a versatile practice that bridges creativity and technology."
                       }]
                     }
@@ -189,7 +209,7 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
             <StaggerReveal className="mt-stack border-t border-design-light-border">
               {categoriesToRender.map((category) => (
                 <div
-                  key={category.title || category._id}
+                  key={category._id}
                   className="grid grid-cols-1 gap-2 border-b border-design-light-border px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover"
                 >
                   <p className="font-semibold text-design-light-text-primary">{category.title}</p>

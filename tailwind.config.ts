@@ -5,7 +5,6 @@ import tailwindcssAnimate from "tailwindcss-animate";
 const hslVar = (name: string) => `hsl(var(${name}) / <alpha-value>)`;
 
 const config: Config = {
-  darkMode: ["class"],
   future: {
     hoverOnlyWhenSupported: true,
   },

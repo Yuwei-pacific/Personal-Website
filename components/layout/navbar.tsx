@@ -8,34 +8,13 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Link } from "next-view-transitions";
-import type { ComponentType } from "react";
+import type { StaggeredMenuItem, StaggeredMenuSocialItem } from "@/components/vendor/StaggeredMenu";
 
-type StaggeredMenuItem = { label: string; ariaLabel?: string; link: string };
-type StaggeredMenuSocialItem = { label: string; link: string };
-type StaggeredMenuProps = {
-  position?: "left" | "right";
-  colors?: string[];
-  items?: StaggeredMenuItem[];
-  socialItems?: StaggeredMenuSocialItem[];
-  displaySocials?: boolean;
-  displayItemNumbering?: boolean;
-  className?: string;
-  logoUrl?: string;
-  menuButtonColor?: string;
-  openMenuButtonColor?: string;
-  accentColor?: string;
-  changeMenuColorOnOpen?: boolean;
-  isFixed?: boolean;
-  closeOnClickAway?: boolean;
-  onMenuOpen?: () => void;
-  onMenuClose?: () => void;
-};
-
-// vendor .jsx 的默认值会被 TS 推断成 never[]，这里显式标注 props 类型；
+// props 类型来自 vendor 目录的 .d.ts 声明；
 // 组件在 effect 里操作 DOM，关闭 SSR 避免 useLayoutEffect 服务端警告
-const StaggeredMenu = dynamic(() => import("@/components/StaggeredMenu"), {
+const StaggeredMenu = dynamic(() => import("@/components/vendor/StaggeredMenu"), {
   ssr: false,
-}) as ComponentType<StaggeredMenuProps>;
+});
 
 const menuItems: StaggeredMenuItem[] = [
   { label: "Home", ariaLabel: "Go to home", link: "/#home" },

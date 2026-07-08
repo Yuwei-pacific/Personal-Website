@@ -8,23 +8,16 @@ type ProjectsSectionProps = {
 };
 
 export function ProjectsSection({ projects }: ProjectsSectionProps) {
-  // 只显示 visibility 为 true 的项目
-  const visibleProjects = projects.filter(project => project.visibility !== false);
-
-  // 是否有可展示的项目
-  const hasProjects = visibleProjects && visibleProjects.length > 0;
-
-  // 按年份排序，最近的排在最前面
-  const sortedProjects = [...visibleProjects].sort((a, b) => {
-    const yearA = a.year || 0;
-    const yearB = b.year || 0;
-    return yearB - yearA;
-  });
+  // 可见性过滤与年份排序都在 GROQ 里完成（见 sanity/lib/queries.ts），这里直接渲染
+  const hasProjects = projects.length > 0;
 
   return (
     // 外层区块：深色背景，带滚动定位锚点 "work"
     <section
       id="work"
+      // data-overscroll-dark：告知 OverscrollBackground 本区块为深色，
+      // 区块在视口内时 body 背景切深色（只在过界回弹时可见）
+      data-overscroll-dark
       className="w-full bg-design-dark-bg text-design-dark-text-primary relative z-10 scroll-mt-24"
       style={{ clipPath: "inset(0)" }}
     >
@@ -47,7 +40,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
             Work
           </h2>
           <sup className="text-small font-semibold text-design-dark-text-muted sm:text-body">
-            ({sortedProjects.length})
+            ({projects.length})
           </sup>
         </div>
 
@@ -59,21 +52,15 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
         ) : (
           /* 项目列表：拼贴式项目墙，使用不同跨列宽度制造节奏 */
           <div className="mt-4 grid w-full grid-cols-1 gap-x-3 gap-y-14 px-container sm:gap-x-4 sm:gap-y-20 sm:px-container-sm md:grid-cols-12 lg:px-8">
-            {sortedProjects.map((project, idx) => {
-              // 兼容 slug 为字符串或 { current } 对象的情况
-              const slug =
-                typeof project.slug === "string" ? project.slug : project.slug?.current;
-
-              return (
-                <ProjectCard
-                  key={project._id || slug || `project-${idx}`}
-                  project={project}
-                  slug={slug}
-                  revealDelay={idx === 0 ? 0 : 0.1}
-                  index={idx}
-                />
-              );
-            })}
+            {projects.map((project, idx) => (
+              <ProjectCard
+                key={project._id}
+                project={project}
+                slug={project.slug ?? undefined}
+                revealDelay={idx === 0 ? 0 : 0.1}
+                index={idx}
+              />
+            ))}
           </div>
         )}
       </div>
