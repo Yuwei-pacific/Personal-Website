@@ -9,7 +9,12 @@ import { LuArrowRight } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 import DecryptedText from "@/components/vendor/DecryptedText";
 import { useHeroAnimation } from "@/hooks/useHeroAnimation";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+
+// Hero 点阵取色图的 art direction：横屏用全景棱镜图，竖屏用竖版构图
+const HERO_IMAGE_LANDSCAPE = "/hero_mg.svg";
+const HERO_IMAGE_PORTRAIT = "/hero_mg_portrait.svg";
 
 // DotFieldImage 交互点阵背景（DotField 扩展版，支持按图片取色）：
 // canvas 渲染，关闭 SSR（避免内部随机 SVG id 造成水合不匹配）；
@@ -24,6 +29,10 @@ export function Hero() {
 
   // 尊重"减弱动画"偏好：偏好开启时不渲染点阵（其 rAF 循环会持续运行）
   const reducedMotion = usePrefersReducedMotion();
+
+  // 按屏幕方向选取色图（art direction）；imageSrc 变化时点阵会自动重新取色
+  const isPortrait = useMediaQuery("(orientation: portrait)");
+  const heroImage = isPortrait ? HERO_IMAGE_PORTRAIT : HERO_IMAGE_LANDSCAPE;
 
   return (
     // 全屏容器：相对定位，隔离层叠上下文，居中内容
@@ -45,8 +54,10 @@ export function Hero() {
             cursorRadius={500}
             cursorForce={0.5}
             bulgeOnly={true}
-            imageSrc="/hero_mg.svg"
-            imageFit="contain"
+            imageSrc={heroImage}
+            // cover：等比缩放铺满 + 居中裁边——不变形、不随窗口尺寸漂移、不留空带；
+            // 竖屏的构图问题由竖版取色图解决（见 HERO_IMAGE_PORTRAIT）
+            imageFit="cover"
             fallbackColor="rgba(148, 163, 184, 0.25)"
             glowColor="#120F17"
           />
