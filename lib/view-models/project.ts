@@ -54,7 +54,9 @@ export function normalizeProjectDetail(
     client: optionalText(item.client),
     location: optionalText(item.location),
     links: normalizeLinks(item.links ?? []),
-    coverImage: coverUrl ? { url: coverUrl, alt: `${title} cover image` } : null,
+    coverImage: coverUrl
+      ? { url: coverUrl, alt: text(item.coverImage?.alt, `${title} cover image`) }
+      : null,
     gallery: normalizeGallery(item.gallery),
     body: blocks(item.body),
     myContribution: blocks(item.myContribution),

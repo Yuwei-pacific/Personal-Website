@@ -57,7 +57,7 @@ export const PROJECT_QUERY = defineQuery(`*[_type == "project" && slug.current =
   client,
   location,
   links,
-  "coverImage": { "url": coalesce(coverImage.asset->url, "") },
+  "coverImage": { "url": coalesce(coverImage.asset->url, ""), "alt": coverImage.alt },
   "gallery": gallery[]{
     "url": coalesce(image.asset->url, ""),
     alt,
