@@ -3,12 +3,8 @@
 // 防止 SANITY_READ_TOKEN 泄漏进浏览器 bundle。
 import "server-only";
 import { createClient } from "@sanity/client";
+import { projectId, dataset, apiVersion } from "@/sanity/lib/config";
 
-// projectId / dataset 是公开信息（本就带 NEXT_PUBLIC_ 前缀），这里内置默认值，
-// 因此客户端总是可用；环境变量仅用于在其他 dataset / 项目间切换。
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID?.trim() || "ubdc9y57";
-const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET?.trim() || "personal_website";
-const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION?.trim() || "2024-01-01";
 const token = process.env.SANITY_READ_TOKEN?.trim() || undefined;
 
 export const sanityClient = createClient({

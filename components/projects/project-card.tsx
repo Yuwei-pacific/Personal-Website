@@ -6,6 +6,7 @@ import { LuArrowUpRight } from "react-icons/lu";
 import Image from "next/image";
 import type { Project } from "@/types";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { urlFor } from "@/sanity/lib/image";
 import { cn } from "@/lib/utils";
 
 type ProjectCardProps = {
@@ -17,32 +18,38 @@ type ProjectCardProps = {
     index?: number;
 };
 
+// 拼贴节奏：8 个槽位一个循环，每行凑满 12 列（7+5 / 4+4+4 / 5+7 / 12），
+// 任意项目数量收尾都是完整行或一段体面的留白。
+// - ratio 用于按槽位比例请求 Sanity 裁切图（尊重编辑者标注的 hotspot）
+// - sizes 按槽位实际占宽告知浏览器，避免下载过大的图
 const layoutPattern = [
-    { span: "md:col-span-3", aspect: "aspect-[4/3]" },
-    { span: "md:col-span-3", aspect: "aspect-[4/3]" },
-    { span: "md:col-span-6", aspect: "aspect-[16/9]" },
-    { span: "md:col-span-5", aspect: "aspect-[5/4]" },
-    { span: "md:col-span-4", aspect: "aspect-[4/5]" },
-    { span: "md:col-span-3", aspect: "aspect-[3/4]" },
-    { span: "md:col-span-7", aspect: "aspect-[16/10]" },
-    { span: "md:col-span-5", aspect: "aspect-[5/3]" },
-    { span: "md:col-span-4", aspect: "aspect-square" },
-    { span: "md:col-span-4", aspect: "aspect-[4/3]" },
-    { span: "md:col-span-4", aspect: "aspect-[3/4]" },
-    { span: "md:col-span-6", aspect: "aspect-[16/10]" },
-    { span: "md:col-span-3", aspect: "aspect-[4/5]" },
-    { span: "md:col-span-3", aspect: "aspect-[4/3]" },
-    { span: "md:col-span-5", aspect: "aspect-[5/3]" },
-    { span: "md:col-span-7", aspect: "aspect-[16/9]" },
-    { span: "md:col-span-3", aspect: "aspect-[3/4]" },
-    { span: "md:col-span-5", aspect: "aspect-[5/4]" },
-    { span: "md:col-span-4", aspect: "aspect-[4/3]" },
-    { span: "md:col-span-8", aspect: "aspect-[21/9]" },
+    { span: "md:col-span-7", aspect: "aspect-[16/10]", ratio: 16 / 10, sizes: "(min-width: 768px) 58vw, 100vw" },
+    { span: "md:col-span-5", aspect: "aspect-[4/3]", ratio: 4 / 3, sizes: "(min-width: 768px) 42vw, 100vw" },
+    { span: "md:col-span-4", aspect: "aspect-[4/3]", ratio: 4 / 3, sizes: "(min-width: 768px) 33vw, 100vw" },
+    { span: "md:col-span-4", aspect: "aspect-[4/5]", ratio: 4 / 5, sizes: "(min-width: 768px) 33vw, 100vw" },
+    { span: "md:col-span-4", aspect: "aspect-[4/3]", ratio: 4 / 3, sizes: "(min-width: 768px) 33vw, 100vw" },
+    { span: "md:col-span-5", aspect: "aspect-[5/4]", ratio: 5 / 4, sizes: "(min-width: 768px) 42vw, 100vw" },
+    { span: "md:col-span-7", aspect: "aspect-[16/9]", ratio: 16 / 9, sizes: "(min-width: 768px) 58vw, 100vw" },
+    { span: "md:col-span-12", aspect: "aspect-[21/9]", ratio: 21 / 9, sizes: "100vw" },
 ];
+
+// 裁切图请求宽度：足够覆盖最大槽位在 2x 屏上的显示宽度
+const COVER_CROP_WIDTH = 1600;
 
 export function ProjectCard({ project, slug, revealDelay = 0, index = 0 }: ProjectCardProps) {
     const meta = [project.projectType, project.year].filter(Boolean);
     const layout = layoutPattern[index % layoutPattern.length];
+
+    // 按槽位比例生成 Sanity 裁切 URL：编辑者在 Studio 标注的 hotspot/crop 生效，
+    // 竖槽裁横图时保住焦点，而不是从中心盲裁
+    const coverSrc = project.coverImage?.asset
+        ? urlFor(project.coverImage)
+              .width(COVER_CROP_WIDTH)
+              .height(Math.round(COVER_CROP_WIDTH / layout.ratio))
+              .fit("crop")
+              .auto("format")
+              .url()
+        : null;
 
     const cardContent = (
         <article className="group block">
@@ -51,13 +58,13 @@ export function ProjectCard({ project, slug, revealDelay = 0, index = 0 }: Proje
                 "relative overflow-hidden rounded-card border border-design-dark-border bg-design-dark-surface transition-[border-color,transform] duration-base ease-design-out group-hover:-translate-y-1 group-hover:border-design-dark-hover-border",
                 layout.aspect
             )}>
-                {project.coverImage?.asset?.url ? (
+                {coverSrc ? (
                     <Image
-                        src={project.coverImage.asset.url}
-                        alt={project.coverImage.alt || project.title || "Project cover"}
+                        src={coverSrc}
+                        alt={project.coverImage?.alt || project.title || "Project cover"}
                         fill
                         className="object-cover transition-transform duration-media ease-design-out group-hover:scale-[1.035]"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 58vw"
+                        sizes={layout.sizes}
                     />
                 ) : (
                     <div className="absolute inset-0 bg-gradient-to-br from-design-dark-elevated to-design-dark-bg" />
