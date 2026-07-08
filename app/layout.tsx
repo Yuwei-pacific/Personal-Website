@@ -64,9 +64,9 @@ export const metadata: Metadata = {
   },
 };
 
-// 浏览器主题色：与页面浅色背景一致（移动端地址栏/状态栏着色）
+// 浏览器主题色：与页面统一白背景一致（--color-bg-light = 0 0% 100%；移动端地址栏/状态栏着色）
 export const viewport: Viewport = {
-  themeColor: "#f4f7fb",
+  themeColor: "#ffffff",
 };
 
 import { AppViewTransitions } from "@/components/providers/view-transitions-provider";

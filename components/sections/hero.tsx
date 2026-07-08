@@ -29,10 +29,9 @@ export function Hero() {
     // 全屏容器：相对定位，隔离层叠上下文，居中内容
     // 导航已改为 fixed 浮层不占文档流，hero 直接铺满整个视口
     <section ref={heroRef} id="home" className="relative isolate flex min-h-[100svh] w-full items-center overflow-hidden px-container-sm py-16 sm:px-10 md:px-16">
-      {/* 背景装饰层：限制在 hero 内部，不影响主页后续区块 */}
+      {/* 背景装饰层：限制在 hero 内部，不影响主页后续区块
+          （背景色即统一白，不再叠加渐变） */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        {/* 渐变背景：保持冷白调，避免底部泛黄 */}
-        <div className="absolute inset-0 bg-gradient-to-b from-design-hero-start via-design-hero-mid to-design-hero-end" />
         {/* 交互点阵背景：颜色取自棱镜图对应位置的像素，鼠标划过时产生排斥波纹
             （组件监听 window 事件，不受 pointer-events-none 影响） */}
         {!reducedMotion && (

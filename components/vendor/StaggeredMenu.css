@@ -132,7 +132,8 @@
   right: 0;
   width: clamp(260px, 38vw, 420px);
   height: 100%;
-  background: white;
+  /* 站点适配：面板底色接统一白 token（上游为硬编码 white） */
+  background: hsl(var(--color-bg-light));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   display: flex;
@@ -236,7 +237,8 @@
 .sm-socials-link {
   font-size: 1.2rem;
   font-weight: 500;
-  color: #111;
+  /* 站点适配：文字色接 token（上游为 #111） */
+  color: hsl(var(--color-text-primary-light));
   text-decoration: none;
   position: relative;
   padding: 2px 0;
@@ -269,7 +271,8 @@
 
 .sm-panel-item {
   position: relative;
-  color: #000;
+  /* 站点适配：文字色接 token（上游为 #000） */
+  color: hsl(var(--color-text-primary-light));
   font-weight: 600;
   font-size: 3.5rem;
   cursor: pointer;

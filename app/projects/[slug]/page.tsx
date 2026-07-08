@@ -284,9 +284,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
             ) : null}
           </div>
           {project.gallery?.length ? (
-            // 图片画廊：支持缩放、拖拽、移动端手势；`columns` 控制列数，`fullWidth` 充满容器
+            // 图片画廊：Masonry 瀑布流缩略图，点击进入 lightbox（缩放、拖拽、移动端手势）
             <div className="mt-32 -mx-4 sm:-mx-6 px-4 sm:px-10">
-              <ProjectGallery items={project.gallery} columns="3" fullWidth />
+              <ProjectGallery items={project.gallery} fullWidth />
             </div>
           ) : null}
         </section>

@@ -4,9 +4,10 @@
 
 @layer base {
   :root {
-    --color-bg-light: 210 40% 97%;
+    /* 浅色端统一白：页面背景、菜单面板、人像容器等所有静置表面共用同一个纯白，
+       避免多种近似白并存产生色差。hover/active 的浅灰仅用于交互反馈。 */
+    --color-bg-light: 0 0% 100%;
     --color-surface-light: 0 0% 100%;
-    --color-surface-elevated-light: 0 0% 98%;
     --color-text-primary-light: 0 0% 9%;
     --color-text-secondary-light: 0 0% 26%;
     --color-text-muted-light: 0 0% 45%;
@@ -29,10 +30,6 @@
     --color-hover-bg-dark: 0 0% 100%;
     --color-hover-border-dark: 0 0% 45%;
     --color-active-dark: 0 0% 100%;
-
-    --color-hero-start: 200 50% 98%;
-    --color-hero-mid: 0 0% 99%;
-    --color-hero-end: 210 40% 97%;
 
     --space-section-y: 3.5rem;
     --space-section-y-sm: 5rem;

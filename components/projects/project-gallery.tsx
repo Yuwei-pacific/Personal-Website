@@ -1,9 +1,10 @@
 "use client";
 
-// 图片画廊：缩略图网格 + lightbox 大图浏览。
+// 图片画廊：Masonry 瀑布流缩略图 + lightbox 大图浏览。
+// 瀑布流布局/入场动画由 vendor 的 Masonry 提供（GSAP）；
 // lightbox（缩放、拖拽、双指手势、键盘导航、焦点圈闭、滚动锁定）
 // 由 yet-another-react-lightbox 提供，不再自研手势逻辑。
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import Lightbox from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
@@ -12,6 +13,12 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/captions.css";
 import "yet-another-react-lightbox/plugins/counter.css";
+
+// Masonry 在渲染期读取 matchMedia / 布局尺寸，关闭 SSR；
+// props 类型来自 vendor 目录的 .d.ts 声明
+const Masonry = dynamic(() => import("@/components/vendor/Masonry"), {
+  ssr: false,
+});
 
 // 画廊图片条目类型：包含 URL、替代文本、说明及尺寸
 // （字段允许 null：与 Sanity 查询结果的可空性对齐，见 sanity/sanity.types.ts）
@@ -33,18 +40,21 @@ type ResolvedGalleryItem = GalleryItem & {
 // 组件入参：
 // - items：图片列表
 // - title：标题文案
-// - columns：网格列数（2/3）
 // - fullWidth：是否整屏宽度展示
+// （列数由 Masonry 按容器断点自适应：1–5 列）
 type ProjectGalleryProps = {
   items?: GalleryItem[];
   title?: string;
-  columns?: "2" | "3";
   fullWidth?: boolean;
 };
 
 // Sanity CDN 支持 URL 参数缩放：为 lightbox 生成多档宽度的 srcSet，
 // 避免在弹层里加载原始大图
 const SRCSET_WIDTHS = [640, 1080, 1600, 2048];
+
+// 瀑布流缩略图用中等宽度即可（列宽最多 ~1/2 视口）
+const thumbUrl = (url: string) =>
+  url.includes("cdn.sanity.io") ? `${url}?w=1000&fit=max&auto=format` : url;
 
 const buildSlide = (item: ResolvedGalleryItem) => {
   const isSanityCdn = item.url.includes("cdn.sanity.io");
@@ -64,7 +74,7 @@ const buildSlide = (item: ResolvedGalleryItem) => {
   };
 };
 
-export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWidth }: ProjectGalleryProps) {
+export function ProjectGallery({ items, title = "Gallery", fullWidth }: ProjectGalleryProps) {
   // 过滤掉缺少 URL 或尺寸信息的条目，避免渲染出空图块
   const galleryItems = useMemo(
     () =>
@@ -76,50 +86,38 @@ export function ProjectGallery({ items, title = "Gallery", columns = "2", fullWi
 
   const slides = useMemo(() => galleryItems.map(buildSlide), [galleryItems]);
 
+  // Masonry 条目：id 即在 galleryItems 中的索引，点击时用它打开对应 lightbox 页
+  const masonryItems = useMemo(
+    () =>
+      galleryItems.map((item, idx) => ({
+        id: String(idx),
+        img: thumbUrl(item.url),
+        width: item.width,
+        height: item.height,
+        alt: item.alt || `View image ${idx + 1}`,
+      })),
+    [galleryItems]
+  );
+
   // 当前打开的图片索引；-1 表示 lightbox 关闭
   const [activeIndex, setActiveIndex] = useState(-1);
 
   if (!galleryItems.length) return null;
-
-  // 网格列数：在不同断点下的响应式列数
-  const gridColsClass = columns === "3"
-    ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4"
-    : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
 
   return (
     <section className={`space-y-4 ${fullWidth ? "w-full" : ""}`}>
       <div className="text-center">
         <h2 className="text-3xl font-bold text-design-dark-text-primary mb-2">{title}</h2>
       </div>
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-white/50 to-transparent" />
-      <div className={`grid gap-3 ${gridColsClass}`}>
-        {galleryItems.map((item, idx) => (
-          <figure
-            key={idx}
-            className="relative overflow-hidden rounded-card bg-design-dark-surface group cursor-pointer transition-shadow duration-base hover:ring-2 hover:ring-design-dark-hover-border"
-            style={{
-              aspectRatio: `${item.width} / ${item.height}`,
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setActiveIndex(idx)}
-              className="relative block w-full h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-hover-border"
-              aria-label={`View ${item.alt || `image ${idx + 1}`}`}
-            >
-              <Image
-                src={item.url}
-                alt={item.alt || ""}
-                width={item.width}
-                height={item.height}
-                className="w-full h-full object-contain bg-design-dark-bg transition duration-base group-hover:scale-[1.01]"
-                sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                priority={idx < 2}
-              />
-            </button>
-          </figure>
-        ))}
-      </div>
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-design-dark-text-primary/50 to-transparent" />
+      <Masonry
+        items={masonryItems}
+        animateFrom="bottom"
+        scaleOnHover
+        hoverScale={0.97}
+        blurToFocus
+        onItemClick={(_item, index) => setActiveIndex(index)}
+      />
 
       <Lightbox
         open={activeIndex >= 0}

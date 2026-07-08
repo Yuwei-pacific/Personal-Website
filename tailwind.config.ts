@@ -53,7 +53,6 @@ const config: Config = {
           light: {
             bg: hslVar("--color-bg-light"),
             surface: hslVar("--color-surface-light"),
-            elevated: hslVar("--color-surface-elevated-light"),
             text: {
               primary: hslVar("--color-text-primary-light"),
               secondary: hslVar("--color-text-secondary-light"),
@@ -81,11 +80,6 @@ const config: Config = {
             hover: hslVar("--color-hover-bg-dark"),
             "hover-border": hslVar("--color-hover-border-dark"),
             active: hslVar("--color-active-dark"),
-          },
-          hero: {
-            start: hslVar("--color-hero-start"),
-            mid: hslVar("--color-hero-mid"),
-            end: hslVar("--color-hero-end"),
           },
         },
       },
