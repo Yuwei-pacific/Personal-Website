@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd, websiteSchema } from "@/components/seo/json-ld";
-import { CustomCursor } from "@/components/ui";
+import { CustomCursor } from "@/components/ui/custom-cursor";
 import "./globals.css";
 
 // 配置无衬线字体（Geist Sans）：

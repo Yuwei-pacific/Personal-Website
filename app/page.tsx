@@ -1,6 +1,8 @@
 // 首页页面：依赖的展示组件与 Sanity 客户端
-import { Navbar } from "@/components/layout";
-import { Hero, AboutSection, ProjectsSection } from "@/components/sections";
+import { Navbar } from "@/components/layout/navbar";
+import { AboutSection } from "@/components/sections/about-section";
+import { Hero } from "@/components/sections/hero";
+import { ProjectsSection } from "@/components/sections/projects-section";
 import { JsonLd, personSchema } from "@/components/seo/json-ld";
 import { sanityClient } from "@/lib/sanity";
 import { normalizeHomeData } from "@/lib/view-models/home";

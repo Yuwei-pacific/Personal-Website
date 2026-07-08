@@ -1,10 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-
-gsap.registerPlugin(useGSAP);
+import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/gsap-react";
 
 const HERO_TARGETS = [".hero-label", ".hero-title", ".hero-description", ".hero-cta"];
 
@@ -13,7 +10,7 @@ export function useHeroAnimation<T extends HTMLElement>() {
   const containerRef = useRef<T>(null);
 
   useGSAP(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (prefersReducedMotion()) {
       gsap.set(HERO_TARGETS, { autoAlpha: 1 });
       return;
     }

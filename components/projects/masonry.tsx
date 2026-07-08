@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent, RefObject } from "react";
-import { gsap } from "gsap";
+import { gsap } from "@/lib/animation/gsap";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 import "./masonry.css";
 
@@ -93,22 +94,6 @@ const useMeasure = (): [RefObject<HTMLDivElement | null>, MeasuredSize] => {
   }, []);
 
   return [ref, size];
-};
-
-const usePrefersReducedMotion = () => {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches);
-
-    handleChange();
-    mediaQuery.addEventListener("change", handleChange);
-
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
-
-  return prefersReducedMotion;
 };
 
 const preloadImages = async (urls: string[]) => {

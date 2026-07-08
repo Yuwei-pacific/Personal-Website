@@ -6,7 +6,6 @@ import { Link } from "next-view-transitions";
 
 import { LuArrowRight } from "react-icons/lu";
 
-import { Button } from "@/components/ui/button";
 import DecryptedText from "@/components/vendor/DecryptedText";
 import { useHeroAnimation } from "@/hooks/useHeroAnimation";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -107,14 +106,18 @@ export function Hero() {
 
         {/* CTA 按钮组：查看作品与联系我 */}
         <div className="flex flex-wrap gap-3">
-          <Button className="hero-cta gap-2 transition-transform duration-base hover:scale-emphasis" asChild>
-            <Link href="#work">
-              View work <LuArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button className="hero-cta transition-transform duration-base hover:scale-emphasis" variant="outline" asChild>
-            <Link href="mailto:snowtime200801@gmail.com">Contact Me via Email</Link>
-          </Button>
+          <Link
+            href="#work"
+            className="hero-cta inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-button bg-design-light-accent px-4 py-2 text-small font-medium text-design-dark-text-primary shadow-card transition-[background-color,transform] duration-base hover:scale-emphasis hover:bg-design-light-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            View work <LuArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
+            href="mailto:snowtime200801@gmail.com"
+            className="hero-cta inline-flex h-10 items-center justify-center whitespace-nowrap rounded-button border border-design-light-border bg-design-light-bg px-4 py-2 text-small font-medium shadow-card transition-[background-color,color,transform] duration-base hover:scale-emphasis hover:bg-design-light-hover hover:text-design-light-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            Contact Me via Email
+          </Link>
         </div>
       </div>
 
