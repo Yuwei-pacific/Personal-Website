@@ -1,11 +1,7 @@
 "use client";
 
 import { useRef, type ReactNode } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-gsap.registerPlugin(useGSAP, ScrollTrigger);
+import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/scroll-trigger";
 
 type StaggerRevealProps = {
   children: ReactNode;
@@ -23,7 +19,7 @@ export function StaggerReveal({ children, className, selector = ":scope > *" }: 
 
     const targets = ref.current.querySelectorAll(selector);
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (prefersReducedMotion()) {
       gsap.set(targets, { autoAlpha: 1 });
       return;
     }

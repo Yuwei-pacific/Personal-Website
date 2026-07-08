@@ -1,11 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-gsap.registerPlugin(useGSAP, ScrollTrigger);
+import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/scroll-trigger";
 
 type RevealTextProps = {
   text: string;
@@ -49,7 +45,7 @@ export function RevealText({
     const resolvedFromColor = resolveCssColor(fromColor);
     const resolvedToColor = resolveCssColor(toColor);
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (prefersReducedMotion()) {
       gsap.set(wordEls, { color: resolvedToColor });
       return;
     }

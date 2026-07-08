@@ -1,6 +1,6 @@
 // 项目列表区：展示从 CMS 获取的项目卡片
 import Image from "next/image";
-import { ProjectCard } from "@/components/projects";
+import { ProjectCard } from "@/components/projects/project-card";
 import type { Project } from "@/types";
 
 type ProjectsSectionProps = {

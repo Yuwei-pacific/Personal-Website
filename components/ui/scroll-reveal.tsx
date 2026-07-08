@@ -1,11 +1,7 @@
 "use client";
 
 import { useRef, type ReactNode } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-gsap.registerPlugin(useGSAP, ScrollTrigger);
+import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/scroll-trigger";
 
 type ScrollRevealProps = {
   children: ReactNode;
@@ -19,7 +15,7 @@ export function ScrollReveal({ children, className, delay = 0 }: ScrollRevealPro
   const ref = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (prefersReducedMotion()) {
       gsap.set(ref.current, { autoAlpha: 1 });
       return;
     }

@@ -1,24 +1,10 @@
-import type { PortableTextBlock } from "@portabletext/types";
 import type { Project, ResumeItem, SkillCategory } from "@/types";
 import type {
   PROJECTS_QUERYResult,
   RESUME_QUERYResult,
   SKILLS_QUERYResult,
 } from "@/sanity/sanity.types";
-
-const text = (value: string | null | undefined, fallback = "") =>
-  value?.trim() || fallback;
-
-const optionalText = (value: string | null | undefined) => {
-  const resolved = text(value);
-  return resolved || null;
-};
-
-const stringList = (items: string[] | null | undefined) =>
-  (items ?? []).map((item) => item.trim()).filter(Boolean);
-
-const blocks = (value: unknown): PortableTextBlock[] =>
-  Array.isArray(value) ? (value as PortableTextBlock[]) : [];
+import { blocks, optionalText, stringList, text } from "./utils";
 
 const resumeType = (value: RESUME_QUERYResult[number]["type"]): ResumeItem["type"] | null =>
   value === "education" || value === "experience" ? value : null;

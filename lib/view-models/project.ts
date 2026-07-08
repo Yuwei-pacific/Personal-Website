@@ -1,21 +1,7 @@
-import type { PortableTextBlock } from "@portabletext/types";
 import type { ProjectDetail, ProjectGalleryItem, ProjectLink } from "@/types";
 import { getSafeHref } from "@/lib/safe-url";
 import type { PROJECT_QUERYResult } from "@/sanity/sanity.types";
-
-const text = (value: string | null | undefined, fallback = "") =>
-  value?.trim() || fallback;
-
-const optionalText = (value: string | null | undefined) => {
-  const resolved = text(value);
-  return resolved || null;
-};
-
-const stringList = (items: string[] | null | undefined) =>
-  (items ?? []).map((item) => item.trim()).filter(Boolean);
-
-const blocks = (value: unknown): PortableTextBlock[] =>
-  Array.isArray(value) ? (value as PortableTextBlock[]) : [];
+import { blocks, optionalText, stringList, text } from "./utils";
 
 const normalizeLinks = (links: NonNullable<NonNullable<PROJECT_QUERYResult>["links"]>): ProjectLink[] =>
   links.map((link, index) => {

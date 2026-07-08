@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, MouseEvent as ReactMouseEvent } from "react";
-import { gsap } from "gsap";
+import { gsap } from "@/lib/animation/gsap";
 
 import "./staggered-menu.css";
 
