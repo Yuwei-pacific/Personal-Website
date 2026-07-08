@@ -71,6 +71,55 @@ const portableComponents: Partial<PortableTextReactComponents> = {
 const renderBlocks = (blocks?: Block[] | null) =>
   blocks?.length ? <PortableText value={blocks as PortableTextBlock[]} components={portableComponents} /> : null;
 
+// 项目元信息行：与 About 区 Basic info / Capabilities 同款的行表语言
+// （label / value 两栏、细分隔线、hover 时缩进 + 底色反馈），深浅分区各一套配色
+const metaRowTones = {
+  light: {
+    row: "border-design-light-border sm:hover:bg-design-light-hover",
+    label: "text-design-light-text-primary",
+    value: "text-design-light-text-secondary",
+  },
+  dark: {
+    row: "border-design-dark-border sm:hover:bg-design-dark-surface",
+    label: "text-design-dark-text-primary",
+    value: "text-design-dark-text-secondary",
+  },
+} as const;
+
+function MetaRow({
+  label,
+  tone = "light",
+  children,
+}: {
+  label: string;
+  tone?: keyof typeof metaRowTones;
+  children: React.ReactNode;
+}) {
+  const t = metaRowTones[tone];
+  return (
+    <div
+      className={`grid grid-cols-1 gap-1 border-b px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 ${t.row}`}
+    >
+      <p className={`font-semibold ${t.label}`}>{label}</p>
+      <div className={`text-small sm:text-body ${t.value}`}>{children}</div>
+    </div>
+  );
+}
+
+// 圆点分隔的行内列表：与 About 区 Languages / Capabilities 的技能列表同款
+function DotList({ items, separatorClassName }: { items: string[]; separatorClassName: string }) {
+  return (
+    <div className="flex flex-wrap gap-x-2 gap-y-1.5">
+      {items.map((item, i) => (
+        <span key={item} className="flex items-center gap-2">
+          {i > 0 && <span className={separatorClassName}>·</span>}
+          {item}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 // 从 Sanity 获取项目数据
 // 用 React cache() 去重：generateMetadata 与页面组件共用同一次请求
 const fetchProject = cache(async (rawSlug?: string): Promise<ProjectDetail | null> => {
@@ -142,60 +191,55 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
       <main className="w-full bg-design-light-bg px-container pb-section pt-24 sm:px-container-sm sm:pb-section-sm sm:pt-28">
         <div className="mx-auto max-w-6xl flex flex-col gap-12">
           {/* 顶部浅色信息区 */}
-          <section className="flex flex-col gap-4">
+          <section className="flex flex-col gap-6">
             {/* 返回链接：回到项目列表 */}
             <Link href="/#work" className="text-small font-medium text-design-light-text-secondary transition-colors duration-base hover:text-design-light-text-primary">
               ← Back to projects
             </Link>
 
-            <>
-              {/* 头部标签：项目类型/年份/地点/客户等元信息 */}
-                <p className="text-label font-semibold uppercase text-design-light-text-muted">Project</p>
-                <div className="space-y-3">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <h1 className="text-3xl font-semibold sm:text-section">{project.title}</h1>
-                    <div className="flex flex-wrap gap-2 text-xs font-medium text-design-light-text-primary">
-                      {project.projectType && (
-                        <span className="rounded-tag border border-design-light-border bg-design-light-active px-3 py-1">
-                          Project type: {project.projectType}
-                        </span>
-                      )}
-                      {project.year && (
-                        <span className="rounded-tag border border-design-light-border bg-design-light-active px-3 py-1">
-                          Year: {project.year}
-                        </span>
-                      )}
-                      {project.location && (
-                        <span className="rounded-tag border border-design-light-border bg-design-light-active px-3 py-1">
-                          Location: {project.location}
-                        </span>
-                      )}
-                      {project.client && (
-                        <span className="rounded-tag border border-design-light-border bg-design-light-active px-3 py-1">
-                          {project.client}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  {/* 项目摘要 */}
-                  <p className="text-lg leading-7 text-design-light-text-secondary">{project.summary}</p>
-                </div>
+            {/* 标题块：与 hero / About 同款的「小标签 + 大标题」排版时刻 */}
+            <div className="space-y-5">
+              <p className="text-label font-semibold uppercase text-design-light-text-muted">Project</p>
+              <h1 className="text-balance text-4xl font-semibold tracking-tight text-design-light-text-primary sm:text-5xl lg:text-6xl">
+                {project.title}
+              </h1>
+            </div>
 
+            {/* 项目摘要：细分隔线 + 大号次级文字（呼应 hero 的描述行） */}
+            {project.summary && (
+              <div className="border-t border-design-light-border pt-6">
+                <p className="max-w-4xl text-pretty text-lg leading-relaxed text-design-light-text-secondary sm:text-xl">
+                  {project.summary}
+                </p>
+              </div>
+            )}
 
-                {/* 贡献者：单独一行列出 */}
-                {project.contributors?.length ? (
-                  <div className="space-y-2 border-t border-design-light-border pt-3">
-                    <p className="text-label font-semibold uppercase text-design-light-text-muted">Contributors</p>
-                    <div className="flex flex-wrap gap-2">
-                      {project.contributors.map((c: string) => (
-                        <span key={c} className="rounded-tag border border-design-light-border bg-design-light-active px-3 py-1 text-xs font-medium text-design-light-text-primary">
-                          {c}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-            </>
+            {/* 封面大图：放在首屏（从项目卡片点进来第一眼就能看到），priority 优化 LCP */}
+            {project.coverImage?.url && (
+              <div className="relative aspect-video w-full overflow-hidden rounded-media">
+                <Image
+                  src={project.coverImage.url}
+                  alt={project.title || "Project Cover"}
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(min-width: 1024px) 1152px, 100vw"
+                />
+              </div>
+            )}
+
+            {/* 元信息行表：类型/年份/地点/客户/贡献者，与 About 区 Basic info 同款 */}
+            <div className="border-t border-design-light-border">
+              {project.projectType && <MetaRow label="Type">{project.projectType}</MetaRow>}
+              {project.year && <MetaRow label="Year">{project.year}</MetaRow>}
+              {project.location && <MetaRow label="Location">{project.location}</MetaRow>}
+              {project.client && <MetaRow label="Client">{project.client}</MetaRow>}
+              {project.contributors?.length ? (
+                <MetaRow label="Contributors">
+                  <DotList items={project.contributors} separatorClassName="text-design-light-border" />
+                </MetaRow>
+              ) : null}
+            </div>
           </section>
         </div>
       </main>
@@ -205,61 +249,35 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
       {project && (
         <section data-overscroll-dark className="w-full bg-design-dark-bg px-container py-section text-design-dark-text-primary sm:px-container-sm sm:py-section-sm scroll-mt-24">
           <div className="mx-auto flex max-w-6xl flex-col gap-8">
-            {project.coverImage?.url && (
-              // 封面图：使用 next/image 获得自动响应式与懒加载
-              <div className="relative aspect-video w-full overflow-hidden rounded-media">
-                <Image
-                  src={project.coverImage.url}
-                  alt={project.title || "Project Cover"}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width: 1024px) 1152px, 100vw"
-                />
-              </div>
-            )}
-
-            {/* 角色：单独一行列出 */}
-            {project.role?.length ? (
-              <div className="space-y-2 border-t border-design-dark-border-strong pt-3">
-                <p className="text-label font-semibold uppercase text-design-dark-text-muted">Roles</p>
-                <div className="flex flex-wrap gap-2">
-                  {project.role.map((r: string) => (
-                    <span key={r} className="rounded-tag border border-design-dark-text-muted px-3 py-1 text-small font-medium text-design-dark-text-muted">
-                      {r}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            {/* 技能标签：单独一行列出 */}
-            {project.tags?.length ? (
-              <div className="space-y-2">
-                <p className="text-label font-semibold uppercase text-design-dark-text-muted">Skills</p>
-                <div className="flex flex-wrap gap-2">
-                  {project.tags.map((tag: string) => (
-                    <span key={tag} className="rounded-tag border border-design-dark-text-muted px-3 py-1 text-small font-medium text-design-dark-text-muted">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
             {project.body?.length ? (
-              // 项目详情（富文本）：标题由编辑者在富文本中自行书写；块间距由 portableComponents 内部管理
-              <section className="border-t border-design-dark-border-strong pt-10">
+              // 项目详情（富文本）：深色区以项目故事开场，不加顶部分割线；标题由编辑者在富文本中自行书写
+              <section>
                 <div className="text-design-dark-text-secondary">{renderBlocks(project.body)}</div>
               </section>
             ) : null}
 
-
-
-            {project.myContribution?.length ? (
-              // 我的贡献（富文本）：与详情同样的渲染配置与阅读行宽
+            {/* My Contribution：关于"我"的一组——角色/技能行表 + 贡献描述，
+                与浅色区的项目 metadata 表明确分组（那边是项目信息，这边是个人信息） */}
+            {project.role?.length || project.tags?.length || project.myContribution?.length ? (
               <section className="border-t border-design-dark-border-strong pt-10">
                 <h2 className="text-2xl font-semibold leading-tight text-design-dark-text-primary sm:text-3xl">My Contribution</h2>
-                <div className="mt-6 text-design-dark-text-secondary">{renderBlocks(project.myContribution)}</div>
+                {project.role?.length || project.tags?.length ? (
+                  <div className="mt-6 border-t border-design-dark-border">
+                    {project.role?.length ? (
+                      <MetaRow label="Roles" tone="dark">
+                        <DotList items={project.role} separatorClassName="text-design-dark-border-strong" />
+                      </MetaRow>
+                    ) : null}
+                    {project.tags?.length ? (
+                      <MetaRow label="Skills" tone="dark">
+                        <DotList items={project.tags} separatorClassName="text-design-dark-border-strong" />
+                      </MetaRow>
+                    ) : null}
+                  </div>
+                ) : null}
+                {project.myContribution?.length ? (
+                  <div className="mt-6 text-design-dark-text-secondary">{renderBlocks(project.myContribution)}</div>
+                ) : null}
               </section>
             ) : null}
 
