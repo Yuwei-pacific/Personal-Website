@@ -73,27 +73,42 @@ export function Hero() {
             Portfolio
           </p>
           {/* 主标题：整页最大的排版时刻，两行堆叠 */}
-          <h1 className="hero-title text-[3.25rem] font-semibold leading-[0.95] tracking-tight text-design-light-text-primary sm:text-7xl lg:text-[7.5rem]">
-            Creative
-            <br />
-            Designer
-          </h1>
+          <div className="relative">
+            {/* 标题专属柔光：与描述句同款的文字锚定保护层 */}
+            <div
+              aria-hidden
+              className="absolute -inset-x-8 -inset-y-10 -z-10 rounded-full bg-design-light-bg/70 blur-2xl"
+            />
+            <h1 className="hero-title text-[3.25rem] font-semibold leading-[0.95] tracking-tight text-design-light-text-primary sm:text-7xl lg:text-[7.5rem]">
+              Creative
+              <br />
+              Designer
+            </h1>
+          </div>
         </div>
 
         {/* 细分隔线 + 描述/状态行：复用 About 区行表语言（细线、圆点分隔符） */}
         <div className="border-t border-design-light-border pt-6">
           <div className="flex flex-col gap-5">
             {/* 描述句：全宽展开，进入视口时逐字“解密”，只触发一次 */}
-            <p className="hero-description text-pretty text-xl leading-relaxed text-design-light-text-secondary sm:text-2xl lg:text-3xl">
-              <DecryptedText
-                text="I design and build vivid digital experiences that bring color to the ordinary."
-                animateOn="view"
-                sequential
-                revealDirection="start"
-                speed={30}
-                encryptedClassName="text-design-light-text-muted/50"
+            <div className="relative">
+              {/* 句子专属保护层：锚在文字上的柔光白底，任何断点都跟着这句话走；
+                  调整 /70 控制浓度、inset 数值控制光晕外扩范围 */}
+              <div
+                aria-hidden
+                className="absolute -inset-x-6 -inset-y-8 -z-10 rounded-full bg-design-light-bg/70 blur-2xl"
               />
-            </p>
+              <p className="hero-description text-pretty text-xl leading-relaxed text-design-light-text-secondary sm:text-2xl lg:text-3xl">
+                <DecryptedText
+                  text="I design and build vivid digital experiences that bring color to the ordinary."
+                  animateOn="view"
+                  sequential
+                  revealDirection="start"
+                  speed={30}
+                  encryptedClassName="text-design-light-text-muted/50"
+                />
+              </p>
+            </div>
           </div>
         </div>
 
