@@ -80,6 +80,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="preconnect" href="https://cdn.sanity.io" />
         <JsonLd data={websiteSchema} />
       </head>
       <body
@@ -87,10 +88,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background text-foreground antialiased`}
       >
         <AppViewTransitions>
+          <a
+            href="#main-content"
+            className="sr-only fixed left-4 top-4 z-[10000] rounded-button bg-design-light-bg px-4 py-2 text-small font-semibold text-design-light-text-primary shadow-card focus:not-sr-only"
+          >
+            Skip to main content
+          </a>
           <OverscrollBackground />
           <CustomCursor />
           {/* 显式给内容区加上背景色，这样 body 背景色变化时只会在过界回弹时露出来，而不会影响页面本身 */}
-          <div className="bg-background min-h-screen w-full relative z-0">
+          <div id="main-content" className="bg-background min-h-screen w-full relative z-0">
             {children}
           </div>
         </AppViewTransitions>

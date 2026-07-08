@@ -53,6 +53,7 @@ const config: Config = {
           light: {
             bg: hslVar("--color-bg-light"),
             surface: hslVar("--color-surface-light"),
+            raised: hslVar("--color-surface-raised-light"),
             text: {
               primary: hslVar("--color-text-primary-light"),
               secondary: hslVar("--color-text-secondary-light"),

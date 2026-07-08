@@ -15,7 +15,7 @@ type AboutSectionProps = {
 
 export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps) {
   // 分离 Education 和 Experience 数据
-  const educations = resumeItems?.filter(item => item.type === 'education' || !item.type) || [];
+  const educations = resumeItems?.filter(item => item.type === 'education') || [];
   const experiences = resumeItems?.filter(item => item.type === 'experience') || [];
 
   // CMS 无数据时使用兜底内容（见 content/fallbacks.ts）
@@ -37,14 +37,13 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
             <div className="pointer-events-none absolute right-0 top-1/2 w-[45%] max-w-[240px] -translate-y-1/2 sm:w-[35%] sm:max-w-[320px] lg:w-[30%] lg:max-w-[360px]">
               <Parallax offset={-160}>
                 {/* 人像是透明底抠像：容器用统一白（同页面背景），只靠阴影区分层次 */}
-                <div className="group relative aspect-square overflow-hidden rounded-media bg-design-light-surface shadow-card transition-shadow duration-slow hover:shadow-hover">
+                <div className="group relative aspect-square overflow-hidden rounded-media bg-design-light-raised shadow-card transition-shadow duration-slow hover:shadow-hover">
                   <Image
                     src="/Profile_Yuwei.webp"
                     alt="Portrait of Yuwei Li"
                     fill
                     sizes="(min-width: 1024px) 360px, (min-width: 640px) 320px, 240px"
                     className="object-cover object-top transition-transform duration-media ease-design-out group-hover:scale-emphasis"
-                    priority
                   />
                   {/* Sleek overlay hover effect */}
                   <div className="absolute inset-0 bg-design-light-accent/5 opacity-0 transition-opacity duration-slow group-hover:opacity-100 pointer-events-none" />

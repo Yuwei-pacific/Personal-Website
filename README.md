@@ -66,9 +66,13 @@ Personal-Website/
   motion: `duration-fast/base/slow/media`, type scale: `display/section/card/body/small/label`).
   Rule of thumb: a visual decision used 3+ times becomes a token; one-off art
   direction (portrait offsets, collage ratios) stays inline.
-- **Vendor components** (`components/vendor/`): React Bits `.jsx` sources with a
-  matching `.d.ts` per component — keep the `.d.ts` in sync when editing props.
-  Import them dynamically with `ssr: false` (they touch the DOM in effects).
+- **Owned interactive components**: `components/layout/staggered-menu.tsx` and
+  `components/projects/masonry.tsx` are React Bits adaptations that now own core
+  site behavior, so their prop contracts live in TSX source rather than handwritten
+  `.d.ts` files.
+- **Vendor components** (`components/vendor/`): low-touch React Bits visual
+  components stay in JavaScript with local adaptation notes. Import DOM-heavy
+  components dynamically with `ssr: false`.
 - **Animations**: use the primitives in `components/ui/` (ScrollReveal,
   StaggerReveal, RevealText, Parallax). All of them respect
   `prefers-reduced-motion`; new animations must too.

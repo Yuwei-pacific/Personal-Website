@@ -23,7 +23,7 @@
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 2em;
   background: transparent;
   pointer-events: none;
@@ -32,19 +32,6 @@
 
 .staggered-menu-header > * {
   pointer-events: auto;
-}
-
-.sm-logo {
-  display: flex;
-  align-items: center;
-  user-select: none;
-}
-
-.sm-logo-img {
-  display: block;
-  height: 32px;
-  width: auto;
-  object-fit: contain;
 }
 
 .sm-toggle {
@@ -133,7 +120,7 @@
   width: clamp(260px, 38vw, 420px);
   height: 100%;
   /* 站点适配：面板底色接统一白 token（上游为硬编码 white） */
-  background: hsl(var(--color-bg-light));
+  background: hsl(var(--color-surface-raised-light));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   display: flex;
@@ -341,9 +328,6 @@
     right: 0;
   }
 
-  .staggered-menu-wrapper[data-open] .sm-logo-img {
-    filter: invert(100%);
-  }
 }
 
 @media (max-width: 640px) {
@@ -353,7 +337,4 @@
     right: 0;
   }
 
-  .staggered-menu-wrapper[data-open] .sm-logo-img {
-    filter: invert(100%);
-  }
 }
