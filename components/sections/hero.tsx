@@ -4,7 +4,7 @@
 import dynamic from "next/dynamic";
 import { Link } from "next-view-transitions";
 
-import { ArrowRight } from "lucide-react";
+import { LuArrowRight } from "react-icons/lu";
 
 import { Button } from "@/components/ui/button";
 import DecryptedText from "@/components/vendor/DecryptedText";
@@ -91,7 +91,7 @@ export function Hero() {
         <div className="flex flex-wrap gap-3">
           <Button className="hero-cta gap-2 transition-transform duration-base hover:scale-emphasis" asChild>
             <Link href="#work">
-              View work <ArrowRight className="h-4 w-4" />
+              View work <LuArrowRight className="h-4 w-4" />
             </Link>
           </Button>
           <Button className="hero-cta transition-transform duration-base hover:scale-emphasis" variant="outline" asChild>

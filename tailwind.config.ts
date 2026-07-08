@@ -1,6 +1,5 @@
 import type { Config } from "tailwindcss";
 import { fontFamily } from "tailwindcss/defaultTheme";
-import tailwindcssAnimate from "tailwindcss-animate";
 
 const hslVar = (name: string) => `hsl(var(${name}) / <alpha-value>)`;
 
@@ -171,7 +170,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [tailwindcssAnimate],
+  plugins: [],
 };
 
 export default config;
