@@ -1,0 +1,39 @@
+/* React Bits Masonry 站点适配样式：
+   - class 名加 masonry- 前缀（上游的 .list / .item-wrapper 太通用，易冲突）
+   - 圆角/阴影接站点 token（--radius-card / --shadow-card）
+   - 条目是 <button>：重置默认样式并补 focus-visible 外框 */
+.masonry-list {
+  position: relative;
+  width: 100%;
+}
+
+.masonry-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform, width, height, opacity;
+  padding: 6px;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  text-align: inherit;
+  color: inherit;
+  /* 入场动画播放前保持不可见（由 GSAP 在容器进入视窗后接管） */
+  opacity: 0;
+}
+
+.masonry-item:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+  border-radius: var(--radius-card);
+}
+
+.masonry-item > .masonry-item-img {
+  position: relative;
+  background-size: cover;
+  background-position: center center;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}

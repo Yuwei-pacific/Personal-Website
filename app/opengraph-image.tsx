@@ -17,7 +17,9 @@ export default function OpenGraphImage() {
           flexDirection: "column",
           justifyContent: "center",
           padding: "80px",
-          background: "linear-gradient(180deg, #f2f8fc 0%, #fcfcfc 50%, #f4f7fb 100%)",
+          // Satori 环境拿不到 CSS 变量，硬编码站点 token 值：
+          // 背景 = --color-bg-light（统一白）、文字 = --color-text-primary-light
+          background: "#ffffff",
           color: "#171717",
           fontFamily: "sans-serif",
         }}
