@@ -1,6 +1,6 @@
 // CMS 兜底内容：Sanity 请求失败或对应类型暂无数据时展示。
 // 这是「内容」而不是 UI —— 修改文案在这里改，不要写进组件。
-// 形状与 TypeGen 生成的查询结果一致（见 types/*.ts）。
+// 形状与 UI view model 一致；Sanity 原始 nullable 字段在 normalizer 中消化。
 import type { ResumeItem, SkillCategory } from "@/types";
 
 export const fallbackSkillCategories: SkillCategory[] = [
@@ -31,8 +31,8 @@ export const fallbackEducation: ResumeItem[] = [
     institution: "Politecnico di Milano",
     degree: "Laurea Magistrale LM, Comunicazione design",
     period: "2023 – 2026",
-    location: null,
-    details: null,
+    location: "",
+    details: [],
     order: null,
   },
   {
@@ -41,8 +41,8 @@ export const fallbackEducation: ResumeItem[] = [
     institution: "Accademia di Belle Arti di Firenze",
     degree: "Visive, decorazione",
     period: "2019 – 2023",
-    location: null,
-    details: null,
+    location: "",
+    details: [],
     order: null,
   },
 ];
@@ -54,7 +54,7 @@ export const fallbackExperience: ResumeItem[] = [
     institution: "Multi-disciplinary Experience",
     degree: "Design, Web Development, Team Coordination",
     period: "Past – Present",
-    location: null,
+    location: "",
     order: null,
     details: [
       {

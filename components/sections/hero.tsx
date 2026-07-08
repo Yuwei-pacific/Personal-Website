@@ -30,9 +30,9 @@ export function Hero() {
   // 尊重"减弱动画"偏好：偏好开启时不渲染点阵（其 rAF 循环会持续运行）
   const reducedMotion = usePrefersReducedMotion();
 
-  // 按屏幕方向选取色图（art direction）；imageSrc 变化时点阵会自动重新取色
-  const isPortrait = useMediaQuery("(orientation: portrait)");
-  const heroImage = isPortrait ? HERO_IMAGE_PORTRAIT : HERO_IMAGE_LANDSCAPE;
+  // 按容器比例倾向选取色图（art direction）：比 orientation 更适合 iPad 分屏和横屏手机边界
+  const isTallViewport = useMediaQuery("(max-aspect-ratio: 4/5)");
+  const heroImage = isTallViewport ? HERO_IMAGE_PORTRAIT : HERO_IMAGE_LANDSCAPE;
 
   return (
     // 全屏容器：相对定位，隔离层叠上下文，居中内容
@@ -66,6 +66,10 @@ export function Hero() {
 
       {/* 主内容区：全宽布局，与底部 Get in touch 通栏对齐 */}
       <div className="relative z-10 flex w-full flex-col gap-8">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -inset-x-6 -top-8 bottom-20 -z-10 rounded-[3rem] bg-design-light-bg/70 blur-2xl"
+        />
         {/* 文本内容：标签与超大两行标题（与下方区块的编辑式排版呼应） */}
         <div className="space-y-5">
           {/* 顶部标签：Portfolio，与 About me 标签同款式 */}
@@ -74,11 +78,6 @@ export function Hero() {
           </p>
           {/* 主标题：整页最大的排版时刻，两行堆叠 */}
           <div className="relative">
-            {/* 标题专属柔光：与描述句同款的文字锚定保护层 */}
-            <div
-              aria-hidden
-              className="absolute -inset-x-8 -inset-y-10 -z-10 rounded-full bg-design-light-bg/70 blur-2xl"
-            />
             <h1 className="hero-title text-[3.25rem] font-semibold leading-[0.95] tracking-tight text-design-light-text-primary sm:text-7xl lg:text-[7.5rem]">
               Creative
               <br />
@@ -92,12 +91,6 @@ export function Hero() {
           <div className="flex flex-col gap-5">
             {/* 描述句：全宽展开，进入视口时逐字“解密”，只触发一次 */}
             <div className="relative">
-              {/* 句子专属保护层：锚在文字上的柔光白底，任何断点都跟着这句话走；
-                  调整 /70 控制浓度、inset 数值控制光晕外扩范围 */}
-              <div
-                aria-hidden
-                className="absolute -inset-x-6 -inset-y-8 -z-10 rounded-full bg-design-light-bg/70 blur-2xl"
-              />
               <p className="hero-description text-pretty text-xl leading-relaxed text-design-light-text-secondary sm:text-2xl lg:text-3xl">
                 <DecryptedText
                   text="I design and build vivid digital experiences that bring color to the ordinary."

@@ -94,6 +94,7 @@ export const project = defineType({
           title: "Alt text",
           type: "string",
           description: "Describe the image for screen readers and SEO.",
+          validation: (Rule) => Rule.required(),
         },
       ],
       validation: (Rule) => Rule.required(),
@@ -157,11 +158,13 @@ export const project = defineType({
               title: "Image",
               type: "image",
               options: { hotspot: true },
+              validation: (Rule) => Rule.required(),
             },
             {
               name: "alt",
               title: "Alt text",
               type: "string",
+              validation: (Rule) => Rule.required(),
             },
             {
               name: "caption",

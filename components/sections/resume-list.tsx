@@ -34,7 +34,7 @@ export function ResumeList({ items, fallbackData }: ResumeListProps) {
     <StaggerReveal className="mt-stack border-t border-design-light-border">
       {displayData.map((edu, idx) => {
         const id = edu._id || `edu-${idx}`;
-        const hasDetails = edu.details && edu.details.length > 0;
+        const hasDetails = edu.details.length > 0;
         const isExpanded = expandedId === id;
 
         const rowClassName = "group grid grid-cols-1 gap-1.5 px-1 py-5 transition-[padding,background-color] duration-base sm:grid-cols-[1.4fr_1.6fr_1fr_0.8fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover";
@@ -70,7 +70,7 @@ export function ResumeList({ items, fallbackData }: ResumeListProps) {
                 className={`grid overflow-hidden px-1 transition-[grid-template-rows,opacity,padding] duration-base ease-design-out ${isExpanded ? 'grid-rows-[1fr] pb-4 opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
               >
                 <div className="overflow-hidden">
-                  <PortableText value={edu.details!} components={portableComponents} />
+                  <PortableText value={edu.details} components={portableComponents} />
                 </div>
               </div>
             )}

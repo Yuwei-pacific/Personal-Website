@@ -2,9 +2,14 @@
 import { Navbar } from "@/components/layout";
 import { Hero, AboutSection, ProjectsSection } from "@/components/sections";
 import { JsonLd, personSchema } from "@/components/seo/json-ld";
-import type { Project, SkillCategory, ResumeItem } from "@/types";
 import { sanityClient } from "@/lib/sanity";
+import { normalizeHomeData } from "@/lib/view-models/home";
 import { PROJECTS_QUERY, SKILLS_QUERY, RESUME_QUERY } from "@/sanity/lib/queries";
+import type {
+  PROJECTS_QUERYResult,
+  RESUME_QUERYResult,
+  SKILLS_QUERYResult,
+} from "@/sanity/sanity.types";
 
 // Incremental Static Regeneration: revalidate home page every 60s
 export const revalidate = 60;
@@ -17,9 +22,9 @@ export const metadata = {
 
 export default async function HomePage() {
   // 过滤与排序都在 GROQ 里完成（见 sanity/lib/queries.ts），这里只兜底请求失败
-  let projects: Project[] = [];
-  let skillCategories: SkillCategory[] = [];
-  let resumeItems: ResumeItem[] = [];
+  let projects: PROJECTS_QUERYResult = [];
+  let skillCategories: SKILLS_QUERYResult = [];
+  let resumeItems: RESUME_QUERYResult = [];
 
   try {
     [projects, skillCategories, resumeItems] = await Promise.all([
@@ -31,6 +36,8 @@ export default async function HomePage() {
     console.error("Failed to fetch data from Sanity", error);
   }
 
+  const homeData = normalizeHomeData({ projects, skillCategories, resumeItems });
+
   return (
     // 页面结构：导航栏 + Hero + About + Projects 列表
     <div className="min-h-screen">
@@ -41,10 +48,10 @@ export default async function HomePage() {
       {/* 首页主视觉区 */}
       <Hero />
       {/* 关于我简介 */}
-      <AboutSection skillCategories={skillCategories} resumeItems={resumeItems} />
+      <AboutSection skillCategories={homeData.skillCategories} resumeItems={homeData.resumeItems} />
 
       {/* 项目集合：从 CMS 获取的数据传入 */}
-      <ProjectsSection projects={projects} />
+      <ProjectsSection projects={homeData.projects} />
     </div>
   );
 }

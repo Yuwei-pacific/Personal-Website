@@ -1,18 +1,17 @@
 "use client";
 
-// 导航：React Bits StaggeredMenu 全屏交错菜单
-// - vendor 自带 logo 不可点击，用站点自己的 Link 替代（vendor logo 通过 globals.css 隐藏）
+// 导航：站点拥有的 StaggeredMenu 全屏交错菜单
+// - 站点 Logo 独立于菜单，保持可点击
 // - toggle 按钮与 logo 用 mix-blend-difference 自适应深浅背景（hero 浅色 / work 深色）
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Link } from "next-view-transitions";
-import type { StaggeredMenuItem, StaggeredMenuSocialItem } from "@/components/vendor/StaggeredMenu";
+import type { StaggeredMenuItem, StaggeredMenuSocialItem } from "@/components/layout/staggered-menu";
 
-// props 类型来自 vendor 目录的 .d.ts 声明；
 // 组件在 effect 里操作 DOM，关闭 SSR 避免 useLayoutEffect 服务端警告
-const StaggeredMenu = dynamic(() => import("@/components/vendor/StaggeredMenu"), {
+const StaggeredMenu = dynamic(() => import("@/components/layout/staggered-menu"), {
   ssr: false,
 });
 
@@ -31,11 +30,10 @@ const socialItems: StaggeredMenuSocialItem[] = [
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const wrapRef = useRef<HTMLDivElement>(null);
 
   // 差值混合开关：菜单关闭时开启（toggle 白字反色自适应深浅背景，与 logo 同款）；
-  // 打开时关闭混合（否则白色面板会被反色），按钮文字由 vendor 的开/关变色逻辑切成深色。
-  // vendor 容器自身是隔离层叠上下文，混合必须加在它外面这层 div 上才能透出页面。
+  // 打开时关闭混合（否则白色面板会被反色），按钮文字由菜单自己的开/关变色逻辑切成深色。
+  // 菜单容器自身是隔离层叠上下文，混合必须加在它外面这层 div 上才能透出页面。
   const [blendActive, setBlendActive] = useState(true);
   const blendTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -56,16 +54,11 @@ export function Navbar() {
     };
   }, []);
 
-  // 面板链接点击：同页锚点平滑滚动 / 跨页用 router 跳转；
-  // vendor 未暴露关闭 API，通过模拟点击 toggle 收起菜单
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      const anchor = (e.target as HTMLElement).closest("a.sm-panel-item");
-      if (!anchor) return;
-
-      const href = anchor.getAttribute("href") || "";
+  // 面板链接点击：同页锚点平滑滚动 / 跨页用 router 跳转。
+  const handleMenuItemClick = useCallback(
+    (href: string, event: React.MouseEvent<HTMLAnchorElement>) => {
       if (href.startsWith("/#")) {
-        e.preventDefault();
+        event.preventDefault();
         if (pathname === "/") {
           const el = document.getElementById(href.slice(2));
           if (el) {
@@ -77,15 +70,12 @@ export function Navbar() {
           router.push(href);
         }
       }
-
-      const toggle = wrapRef.current?.querySelector<HTMLButtonElement>(".sm-toggle");
-      if (toggle?.getAttribute("aria-expanded") === "true") toggle.click();
     },
     [pathname, router]
   );
 
   return (
-    <div ref={wrapRef} onClick={handleClick}>
+    <div>
       {/* 站点 Logo：invert 转白后配合差值混合，在深浅背景上都可读 */}
       <Link href="/" aria-label="Home" className="fixed left-6 top-6 z-50 mix-blend-difference sm:left-8 sm:top-6">
         <Image src="/Logo.svg" alt="Yuwei Li" width={48} height={48} className="h-12 w-12 invert" priority />
@@ -100,7 +90,6 @@ export function Navbar() {
           socialItems={socialItems}
           displaySocials
           displayItemNumbering
-          logoUrl="/Logo.svg"
           menuButtonColor="#ffffff"
           openMenuButtonColor="#171717"
           changeMenuColorOnOpen
@@ -108,6 +97,7 @@ export function Navbar() {
           colors={["#dbe4ee", "#171717"]}
           onMenuOpen={handleMenuOpen}
           onMenuClose={handleMenuClose}
+          onItemClick={handleMenuItemClick}
         />
       </div>
     </div>
