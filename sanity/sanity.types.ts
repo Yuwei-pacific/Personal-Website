@@ -326,7 +326,7 @@ export type RESUME_QUERYResult = Array<{
   order: number | null;
 }>;
 // Variable: PROJECT_QUERY
-// Query: *[_type == "project" && slug.current == $slug && visibility != false][0]{  _id,  title,  summary,  role,  tags,  contributors,  "slug": slug.current,  year,  projectType,  client,  location,  links,  "coverImage": { "url": coalesce(coverImage.asset->url, "") },  "gallery": gallery[]{    "url": coalesce(image.asset->url, ""),    alt,    caption,    "width": image.asset->metadata.dimensions.width,    "height": image.asset->metadata.dimensions.height  },  body,  myContribution}
+// Query: *[_type == "project" && slug.current == $slug && visibility != false][0]{  _id,  title,  summary,  role,  tags,  contributors,  "slug": slug.current,  year,  projectType,  client,  location,  links,  "coverImage": { "url": coalesce(coverImage.asset->url, ""), "alt": coverImage.alt },  "gallery": gallery[]{    "url": coalesce(image.asset->url, ""),    alt,    caption,    "width": image.asset->metadata.dimensions.width,    "height": image.asset->metadata.dimensions.height  },  body,  myContribution}
 export type PROJECT_QUERYResult = {
   _id: string;
   title: string | null;
@@ -346,6 +346,7 @@ export type PROJECT_QUERYResult = {
   }> | null;
   coverImage: {
     url: string | "";
+    alt: string | null;
   };
   gallery: Array<{
     url: string | "";
@@ -408,7 +409,7 @@ declare module "@sanity/client" {
     "*[_type == \"project\" && visibility != false]\n  | order(coalesce(year, 0) desc, _createdAt desc){\n  _id,\n  title,\n  summary,\n  year,\n  projectType,\n  \"slug\": slug.current,\n  \"coverImage\": coverImage{\n    ...,\n    asset->{\n      _id,\n      url\n    }\n  }\n}": PROJECTS_QUERYResult;
     "*[_type == \"skillCategory\"] | order(order asc){\n  _id,\n  title,\n  order,\n  skills\n}": SKILLS_QUERYResult;
     "*[_type == \"education\"] | order(order desc){\n  _id,\n  type,\n  institution,\n  degree,\n  location,\n  period,\n  details,\n  order\n}": RESUME_QUERYResult;
-    "*[_type == \"project\" && slug.current == $slug && visibility != false][0]{\n  _id,\n  title,\n  summary,\n  role,\n  tags,\n  contributors,\n  \"slug\": slug.current,\n  year,\n  projectType,\n  client,\n  location,\n  links,\n  \"coverImage\": { \"url\": coalesce(coverImage.asset->url, \"\") },\n  \"gallery\": gallery[]{\n    \"url\": coalesce(image.asset->url, \"\"),\n    alt,\n    caption,\n    \"width\": image.asset->metadata.dimensions.width,\n    \"height\": image.asset->metadata.dimensions.height\n  },\n  body,\n  myContribution\n}": PROJECT_QUERYResult;
+    "*[_type == \"project\" && slug.current == $slug && visibility != false][0]{\n  _id,\n  title,\n  summary,\n  role,\n  tags,\n  contributors,\n  \"slug\": slug.current,\n  year,\n  projectType,\n  client,\n  location,\n  links,\n  \"coverImage\": { \"url\": coalesce(coverImage.asset->url, \"\"), \"alt\": coverImage.alt },\n  \"gallery\": gallery[]{\n    \"url\": coalesce(image.asset->url, \"\"),\n    alt,\n    caption,\n    \"width\": image.asset->metadata.dimensions.width,\n    \"height\": image.asset->metadata.dimensions.height\n  },\n  body,\n  myContribution\n}": PROJECT_QUERYResult;
     "*[_type == \"project\" && defined(slug.current) && visibility != false].slug.current": PROJECT_SLUGS_QUERYResult;
     "*[_type == \"project\" && defined(slug.current) && visibility != false]{\n  \"slug\": slug.current,\n  _updatedAt\n}": PROJECT_SITEMAP_QUERYResult;
   }
