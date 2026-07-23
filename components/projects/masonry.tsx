@@ -16,17 +16,12 @@ export type MasonryItem = {
   url?: string;
 };
 
-export type MasonryAnimateFrom = "top" | "bottom" | "left" | "right" | "center" | "random";
-
 export type MasonryProps = {
   items: MasonryItem[];
   ease?: string;
   duration?: number;
-  stagger?: number;
-  animateFrom?: MasonryAnimateFrom;
   scaleOnHover?: boolean;
   hoverScale?: number;
-  blurToFocus?: boolean;
   colorShiftOnHover?: boolean;
   preloadCount?: number;
   onItemClick?: (item: MasonryItem, index: number) => void;
@@ -115,57 +110,20 @@ export function Masonry({
   items,
   ease = "power3.out",
   duration = 0.6,
-  stagger = 0.05,
-  animateFrom = "bottom",
   scaleOnHover = true,
   hoverScale = 0.95,
-  blurToFocus = true,
   colorShiftOnHover = false,
   preloadCount = 8,
   onItemClick,
 }: MasonryProps) {
   const columns = useMedia<number>(COLUMN_QUERIES, COLUMN_VALUES, 1);
   const [containerRef, { width }] = useMeasure();
-  const [inView, setInView] = useState(false);
   const hasMounted = useRef(false);
   const prefersReducedMotion = usePrefersReducedMotion();
   const preloadUrls = useMemo(() => items.slice(0, preloadCount).map((item) => item.img), [items, preloadCount]);
   const preloadKey = useMemo(() => preloadUrls.join("\u0000"), [preloadUrls]);
   const [readyPreloadKey, setReadyPreloadKey] = useState<string | null>(null);
   const imagesReady = readyPreloadKey === preloadKey;
-
-  const getInitialPosition = useCallback(
-    (item: MasonryGridItem) => {
-      const containerRect = containerRef.current?.getBoundingClientRect();
-      if (!containerRect) return { x: item.x, y: item.y };
-
-      let direction = animateFrom;
-
-      if (animateFrom === "random") {
-        const directions: Exclude<MasonryAnimateFrom, "random">[] = ["top", "bottom", "left", "right"];
-        direction = directions[Math.floor(Math.random() * directions.length)] ?? "bottom";
-      }
-
-      switch (direction) {
-        case "top":
-          return { x: item.x, y: -200 };
-        case "bottom":
-          return { x: item.x, y: window.innerHeight + 200 };
-        case "left":
-          return { x: -200, y: item.y };
-        case "right":
-          return { x: window.innerWidth + 200, y: item.y };
-        case "center":
-          return {
-            x: containerRect.width / 2 - item.w / 2,
-            y: containerRect.height / 2 - item.h / 2,
-          };
-        default:
-          return { x: item.x, y: item.y + 100 };
-      }
-    },
-    [animateFrom, containerRef]
-  );
 
   useEffect(() => {
     let active = true;
@@ -178,24 +136,6 @@ export function Masonry({
       active = false;
     };
   }, [preloadKey, preloadUrls]);
-
-  useEffect(() => {
-    const element = containerRef.current;
-    if (!element) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "0px 0px -80px 0px" }
-    );
-
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [containerRef]);
 
   const { grid, containerHeight } = useMemo(() => {
     if (!width) return { grid: [] as MasonryGridItem[], containerHeight: 0 };
@@ -218,9 +158,13 @@ export function Masonry({
   }, [columns, items, width]);
 
   useLayoutEffect(() => {
-    if (!imagesReady || !inView) return;
+    // grid 为空（容器宽度未测出）时不能标记 hasMounted，
+    // 否则首次真正布局会走补间分支、永远不写 opacity
+    if (!imagesReady || !grid.length) return;
 
-    grid.forEach((item, index) => {
+    // 入场不做动画：首次布局（以及 reduced-motion 下的任何布局）直接定位显示；
+    // 之后的布局变化（容器缩放、断点换列）仍用补间过渡
+    grid.forEach((item) => {
       const selector = dataKeySelector(item.id);
       const animationProps = {
         x: item.x,
@@ -229,42 +173,21 @@ export function Masonry({
         height: item.h,
       };
 
-      if (prefersReducedMotion) {
+      if (prefersReducedMotion || !hasMounted.current) {
         gsap.set(selector, { opacity: 1, ...animationProps });
         return;
       }
 
-      if (!hasMounted.current) {
-        const initialPosition = getInitialPosition(item);
-        const initialState = {
-          opacity: 0,
-          x: initialPosition.x,
-          y: initialPosition.y,
-          width: item.w,
-          height: item.h,
-          ...(blurToFocus && { filter: "blur(10px)" }),
-        };
-
-        gsap.fromTo(selector, initialState, {
-          opacity: 1,
-          ...animationProps,
-          ...(blurToFocus && { filter: "blur(0px)" }),
-          duration: 0.8,
-          ease: "power3.out",
-          delay: index * stagger,
-        });
-      } else {
-        gsap.to(selector, {
-          ...animationProps,
-          duration,
-          ease,
-          overwrite: "auto",
-        });
-      }
+      gsap.to(selector, {
+        ...animationProps,
+        duration,
+        ease,
+        overwrite: "auto",
+      });
     });
 
     hasMounted.current = true;
-  }, [blurToFocus, duration, ease, getInitialPosition, grid, imagesReady, inView, prefersReducedMotion, stagger]);
+  }, [duration, ease, grid, imagesReady, prefersReducedMotion]);
 
   const handleMouseEnter = (event: MouseEvent<HTMLButtonElement>, item: MasonryGridItem) => {
     if (prefersReducedMotion) return;

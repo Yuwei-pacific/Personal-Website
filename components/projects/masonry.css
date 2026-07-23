@@ -18,7 +18,7 @@
   border: 0;
   text-align: inherit;
   color: inherit;
-  /* 入场动画播放前保持不可见（由 GSAP 在容器进入视窗后接管） */
+  /* GSAP 完成首次定位前保持不可见，避免所有条目未布局时叠在左上角闪现 */
   opacity: 0;
 }
 

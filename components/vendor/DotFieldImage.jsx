@@ -310,13 +310,33 @@ const DotFieldImage = memo(
           ctx.fill();
         }
 
+        if (runningRef.current) rafRef.current = requestAnimationFrame(tick);
+      }
+
+      // 站点适配新增：容器滚出视口时暂停 rAF 循环，滚回时恢复。
+      // 点阵只在 hero 区可见时才需要绘制，离屏后继续全量重绘纯属浪费主线程
+      const runningRef = { current: false };
+
+      function startLoop() {
+        if (runningRef.current) return;
+        runningRef.current = true;
         rafRef.current = requestAnimationFrame(tick);
       }
+
+      function stopLoop() {
+        runningRef.current = false;
+        cancelAnimationFrame(rafRef.current);
+      }
+
+      const visibilityObserver = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) startLoop();
+        else stopLoop();
+      });
 
       doResize();
       window.addEventListener('resize', resize);
       window.addEventListener('mousemove', onMouseMove, { passive: true });
-      rafRef.current = requestAnimationFrame(tick);
+      visibilityObserver.observe(canvas.parentElement);
 
       rebuildRef.current = () => {
         const { w, h } = sizeRef.current;
@@ -324,7 +344,8 @@ const DotFieldImage = memo(
       };
 
       return () => {
-        cancelAnimationFrame(rafRef.current);
+        stopLoop();
+        visibilityObserver.disconnect();
         clearInterval(speedInterval);
         clearTimeout(resizeTimer);
         window.removeEventListener('resize', resize);

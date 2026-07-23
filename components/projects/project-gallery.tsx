@@ -1,7 +1,7 @@
 "use client";
 
 // 图片画廊：Masonry 瀑布流缩略图 + lightbox 大图浏览。
-// 瀑布流布局/入场动画由站点拥有的 Masonry 提供（GSAP）；
+// 瀑布流布局由站点拥有的 Masonry 提供（GSAP，无入场动画）；
 // lightbox（缩放、拖拽、双指手势、键盘导航、焦点圈闭、滚动锁定）
 // 由 yet-another-react-lightbox 提供，不再自研手势逻辑。
 import dynamic from "next/dynamic";
@@ -90,10 +90,8 @@ export function ProjectGallery({ items, title = "Gallery", fullWidth }: ProjectG
       <Masonry
         items={masonryItems}
         preloadCount={8}
-        animateFrom="bottom"
         scaleOnHover
         hoverScale={0.97}
-        blurToFocus
         onItemClick={(_item, index) => setActiveIndex(index)}
       />
 
