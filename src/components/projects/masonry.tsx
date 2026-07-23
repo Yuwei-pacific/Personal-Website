@@ -34,11 +34,6 @@ type MasonryGridItem = MasonryItem & {
   h: number;
 };
 
-type MeasuredSize = {
-  width: number;
-  height: number;
-};
-
 const COLUMN_QUERIES = ["(min-width:1500px)", "(min-width:1000px)", "(min-width:600px)", "(min-width:400px)"] as const;
 const COLUMN_VALUES = [5, 4, 3, 2] as const;
 
@@ -69,9 +64,9 @@ const useMedia = <T,>(queries: readonly string[], values: readonly T[], defaultV
   return value;
 };
 
-const useMeasure = (): [RefObject<HTMLDivElement | null>, MeasuredSize] => {
+const useMeasure = (): [RefObject<HTMLDivElement | null>, number] => {
   const ref = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState<MeasuredSize>({ width: 0, height: 0 });
+  const [width, setWidth] = useState(0);
 
   useLayoutEffect(() => {
     const element = ref.current;
@@ -80,15 +75,15 @@ const useMeasure = (): [RefObject<HTMLDivElement | null>, MeasuredSize] => {
     const observer = new ResizeObserver(([entry]) => {
       if (!entry) return;
 
-      const { width, height } = entry.contentRect;
-      setSize({ width, height });
+      const nextWidth = entry.contentRect.width;
+      setWidth((currentWidth) => currentWidth === nextWidth ? currentWidth : nextWidth);
     });
 
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
 
-  return [ref, size];
+  return [ref, width];
 };
 
 const preloadImages = async (urls: string[]) => {
@@ -117,7 +112,7 @@ export function Masonry({
   onItemClick,
 }: MasonryProps) {
   const columns = useMedia<number>(COLUMN_QUERIES, COLUMN_VALUES, 1);
-  const [containerRef, { width }] = useMeasure();
+  const [containerRef, width] = useMeasure();
   const hasMounted = useRef(false);
   const prefersReducedMotion = usePrefersReducedMotion();
   const preloadUrls = useMemo(() => items.slice(0, preloadCount).map((item) => item.img), [items, preloadCount]);

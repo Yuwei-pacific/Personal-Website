@@ -8,6 +8,7 @@ const TWO_PI = Math.PI * 2;
 // - imageSrc：图片按 imageFit（contain/cover）适配容器后，每个点取其所在位置的像素颜色
 // - 图片透明/未覆盖区域的点用 fallbackColor 绘制，保持完整点阵场
 // - 未传 imageSrc 或图片未加载完成时，退回原版的 gradientFrom/To 线性渐变
+// - 站点适配：离屏/后台暂停；静止时只局部更新 sparkle，交互与回弹仍逐帧绘制
 // 交互逻辑（bulge/repel、光晕、波动、闪烁）与原版一致。
 const DotFieldImage = memo(
   ({
@@ -29,7 +30,6 @@ const DotFieldImage = memo(
     ...rest
   }) => {
     const canvasRef = useRef(null);
-    const svgRef = useRef(null);
     const glowRef = useRef(null);
     const dotsRef = useRef([]);
     const mouseRef = useRef({ x: -9999, y: -9999, prevX: -9999, prevY: -9999, speed: 0 });
@@ -81,6 +81,11 @@ const DotFieldImage = memo(
       const ctx = canvas.getContext('2d', { alpha: true });
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       let resizeTimer;
+      let speedInterval = null;
+      let needsRender = true;
+      let dotsSettling = false;
+      let isIntersecting = false;
+      let previousSparkleIndices = [];
 
       function resize() {
         clearTimeout(resizeTimer);
@@ -127,6 +132,8 @@ const DotFieldImage = memo(
         }
         dotsRef.current = dots;
         assignColors(w, h);
+        needsRender = true;
+        previousSparkleIndices = [];
       }
 
       // 把图片绘制到离屏 canvas 并读取像素，为每个点取其锚点位置的颜色
@@ -196,9 +203,76 @@ const DotFieldImage = memo(
         m.prevY = m.y;
       }
 
-      const speedInterval = setInterval(updateMouseSpeed, 20);
-
       let frameCount = 0;
+
+      function drawDot(dot, radius, fillStyle) {
+        ctx.fillStyle = fillStyle;
+        ctx.beginPath();
+        ctx.arc(dot.ax, dot.ay, radius, 0, TWO_PI);
+        ctx.fill();
+      }
+
+      function drawStaticDots(indices, radius, p, useImageColors, gradient) {
+        const sharedPath = new Path2D();
+        let hasSharedDots = false;
+
+        for (const index of indices) {
+          const dot = dotsRef.current[index];
+          if (!dot) continue;
+
+          if (useImageColors && dot.color) {
+            drawDot(dot, radius, dot.color);
+          } else {
+            sharedPath.moveTo(dot.ax + radius, dot.ay);
+            sharedPath.arc(dot.ax, dot.ay, radius, 0, TWO_PI);
+            hasSharedDots = true;
+          }
+        }
+
+        if (hasSharedDots) {
+          ctx.fillStyle = useImageColors ? p.fallbackColor : gradient;
+          ctx.fill(sharedPath);
+        }
+      }
+
+      function drawIdleSparkleFrame(p) {
+        const dots = dotsRef.current;
+        const { w, h } = sizeRef.current;
+        const rad = p.dotRadius / 2;
+        const sparkleRad = rad * 1.8;
+        const clearRad = sparkleRad + 1;
+        if (clearRad + rad >= p.dotRadius + p.dotSpacing) return false;
+
+        const useImageColors = colorsReadyRef.current;
+        let gradient = null;
+
+        if (!useImageColors) {
+          gradient = ctx.createLinearGradient(0, 0, w, h);
+          gradient.addColorStop(0, p.gradientFrom);
+          gradient.addColorStop(1, p.gradientTo);
+        }
+
+        const nextSparkleIndices = [];
+        for (let i = 0; i < dots.length; i++) {
+          const hash = ((i * 2654435761) ^ (frameCount >> 3)) >>> 0;
+          if (hash % 100 < 3) nextSparkleIndices.push(i);
+        }
+
+        const nextSet = new Set(nextSparkleIndices);
+        const previousSet = new Set(previousSparkleIndices);
+        const removedIndices = previousSparkleIndices.filter((index) => !nextSet.has(index));
+        const addedIndices = nextSparkleIndices.filter((index) => !previousSet.has(index));
+
+        for (const index of removedIndices) {
+          const dot = dots[index];
+          ctx.clearRect(dot.ax - clearRad, dot.ay - clearRad, clearRad * 2, clearRad * 2);
+        }
+
+        drawStaticDots(removedIndices, rad, p, useImageColors, gradient);
+        drawStaticDots(addedIndices, sparkleRad, p, useImageColors, gradient);
+        previousSparkleIndices = nextSparkleIndices;
+        return true;
+      }
 
       function tick() {
         frameCount++;
@@ -208,6 +282,24 @@ const DotFieldImage = memo(
         const p = propsRef.current;
         const len = dots.length;
         const t = frameCount * 0.02;
+        const isAnimating =
+          m.speed > 0 ||
+          engagement.current > 0 ||
+          dotsSettling ||
+          (glowEl && glowOpacity.current > 0.001);
+        // Sparkle only changes when frameCount >> 3 changes. Keep ticking so the
+        // phase stays identical, but skip the seven visually identical redraws.
+        const isSparkleFrame = p.sparkle && frameCount % 8 === 0;
+
+        if (!needsRender && !isAnimating && p.waveAmplitude <= 0) {
+          if (!isSparkleFrame || drawIdleSparkleFrame(p)) {
+            if (runningRef.current) rafRef.current = requestAnimationFrame(tick);
+            return;
+          }
+        }
+
+        needsRender = false;
+        dotsSettling = false;
 
         const targetEngagement = Math.min(m.speed / 5, 1);
         engagement.current += (targetEngagement - engagement.current) * 0.06;
@@ -239,6 +331,7 @@ const DotFieldImage = memo(
         const isBulge = p.bulgeOnly;
         // 备用色的点集中到同一条路径一次填充，只有取到图片颜色的点才逐个填充
         const fallbackPath = useImageColors ? new Path2D() : null;
+        const nextSparkleIndices = p.sparkle ? [] : null;
 
         for (let i = 0; i < len; i++) {
           const d = dots[i];
@@ -274,6 +367,10 @@ const DotFieldImage = memo(
             d.sy += (d.y - d.sy) * 0.1;
           }
 
+          if (Math.abs(d.sx - d.ax) > 0.01 || Math.abs(d.sy - d.ay) > 0.01) {
+            dotsSettling = true;
+          }
+
           let drawX = d.sx;
           let drawY = d.sy;
           if (p.waveAmplitude > 0) {
@@ -284,7 +381,10 @@ const DotFieldImage = memo(
           let r = rad;
           if (p.sparkle) {
             const hash = ((i * 2654435761) ^ (frameCount >> 3)) >>> 0;
-            if (hash % 100 < 3) r = rad * 1.8;
+            if (hash % 100 < 3) {
+              r = rad * 1.8;
+              nextSparkleIndices.push(i);
+            }
           }
 
           if (useImageColors) {
@@ -309,6 +409,7 @@ const DotFieldImage = memo(
         } else {
           ctx.fill();
         }
+        previousSparkleIndices = nextSparkleIndices ?? [];
 
         if (runningRef.current) rafRef.current = requestAnimationFrame(tick);
       }
@@ -320,22 +421,40 @@ const DotFieldImage = memo(
       function startLoop() {
         if (runningRef.current) return;
         runningRef.current = true;
+        const m = mouseRef.current;
+        m.speed = 0;
+        m.prevX = m.x;
+        m.prevY = m.y;
+        speedInterval = setInterval(updateMouseSpeed, 20);
         rafRef.current = requestAnimationFrame(tick);
       }
 
       function stopLoop() {
         runningRef.current = false;
-        cancelAnimationFrame(rafRef.current);
+        if (rafRef.current !== null) {
+          cancelAnimationFrame(rafRef.current);
+          rafRef.current = null;
+        }
+        if (speedInterval !== null) {
+          clearInterval(speedInterval);
+          speedInterval = null;
+        }
       }
 
       const visibilityObserver = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting) startLoop();
+        isIntersecting = entry.isIntersecting;
+        if (isIntersecting && !document.hidden) startLoop();
         else stopLoop();
       });
+      const onVisibilityChange = () => {
+        if (isIntersecting && !document.hidden) startLoop();
+        else stopLoop();
+      };
 
       doResize();
       window.addEventListener('resize', resize);
       window.addEventListener('mousemove', onMouseMove, { passive: true });
+      document.addEventListener('visibilitychange', onVisibilityChange);
       visibilityObserver.observe(canvas.parentElement);
 
       rebuildRef.current = () => {
@@ -346,10 +465,11 @@ const DotFieldImage = memo(
       return () => {
         stopLoop();
         visibilityObserver.disconnect();
-        clearInterval(speedInterval);
         clearTimeout(resizeTimer);
         window.removeEventListener('resize', resize);
         window.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+        rebuildRef.current = null;
       };
     }, []);
 
@@ -368,31 +488,32 @@ const DotFieldImage = memo(
             height: '100%',
           }}
         />
-        <svg
-          ref={svgRef}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            pointerEvents: 'none',
-          }}
-        >
-          <defs>
-            <radialGradient id={glowIdRef.current}>
-              <stop offset="0%" stopColor={glowColor} />
-              <stop offset="100%" stopColor="transparent" />
-            </radialGradient>
-          </defs>
-          <circle
-            ref={glowRef}
-            cx="-9999"
-            cy="-9999"
-            r={glowRadius}
-            fill={`url(#${glowIdRef.current})`}
-            style={{ opacity: 0, willChange: 'opacity' }}
-          />
-        </svg>
+        {glowRadius > 0 && (
+          <svg
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+            }}
+          >
+            <defs>
+              <radialGradient id={glowIdRef.current}>
+                <stop offset="0%" stopColor={glowColor} />
+                <stop offset="100%" stopColor="transparent" />
+              </radialGradient>
+            </defs>
+            <circle
+              ref={glowRef}
+              cx="-9999"
+              cy="-9999"
+              r={glowRadius}
+              fill={`url(#${glowIdRef.current})`}
+              style={{ opacity: 0, willChange: 'opacity' }}
+            />
+          </svg>
+        )}
       </div>
     );
   }

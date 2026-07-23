@@ -28,6 +28,8 @@ export function CustomCursor() {
 
     let isVisible = false;
     let hasPositioned = false;
+    let isInteractive = false;
+    let hoverTween: gsap.core.Tween | null = null;
 
     const onMouseMove = (e: MouseEvent) => {
       if (!hasPositioned) {
@@ -52,15 +54,21 @@ export function CustomCursor() {
 
     const onMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const isInteractive = target.closest("a, button, input, textarea, select, .cursor-hover, [role='button']");
-      gsap.to(dot, {
+      const nextIsInteractive = Boolean(
+        target.closest("a, button, input, textarea, select, .cursor-hover, [role='button']")
+      );
+      if (nextIsInteractive === isInteractive) return;
+
+      isInteractive = nextIsInteractive;
+      hoverTween?.kill();
+      hoverTween = gsap.to(dot, {
         scale: isInteractive ? 2.666 : 1,
         duration: 0.3,
         ease: "back.out(1.7)",
       });
     };
 
-    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
     document.addEventListener("mouseleave", onMouseLeave);
     document.addEventListener("mouseover", onMouseOver);
 
@@ -68,6 +76,9 @@ export function CustomCursor() {
       window.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseleave", onMouseLeave);
       document.removeEventListener("mouseover", onMouseOver);
+      hoverTween?.kill();
+      xTo.tween.kill();
+      yTo.tween.kill();
     };
   }, []);
 
