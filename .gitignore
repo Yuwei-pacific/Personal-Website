@@ -46,8 +46,8 @@ next-env.d.ts
 /Image Backup/
 
 # sanity typegen intermediate artifact (regenerate with `npm run typegen`;
-# the generated sanity/sanity.types.ts IS committed)
-/sanity/schema.json
+# the generated src/sanity/sanity.types.ts IS committed)
+/src/sanity/schema.json
 
 # agent tooling (skills are machine-installed; keep only .claude/launch.json tracked)
 /.agents/
