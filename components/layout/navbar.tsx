@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Link } from "next-view-transitions";
+import { useLenis } from "lenis/react";
 import type { StaggeredMenuItem, StaggeredMenuSocialItem } from "@/components/layout/staggered-menu";
 
 // 组件在 effect 里操作 DOM，关闭 SSR 避免 useLayoutEffect 服务端警告
@@ -30,6 +31,8 @@ const socialItems: StaggeredMenuSocialItem[] = [
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
+  // Lenis 未启用（减弱动画 / Studio）时为 undefined，回退到原生滚动
+  const lenis = useLenis();
 
   // 差值混合开关：菜单关闭时开启（toggle 白字反色自适应深浅背景，与 logo 同款）；
   // 打开时关闭混合（否则白色面板会被反色），按钮文字由菜单自己的开/关变色逻辑切成深色。
@@ -62,8 +65,14 @@ export function Navbar() {
         if (pathname === "/") {
           const el = document.getElementById(href.slice(2));
           if (el) {
-            const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-            el.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+            if (lenis) {
+              // Lenis 的 scrollTo 不读 CSS scroll-margin，手动换算成 offset
+              const offset = -parseFloat(getComputedStyle(el).scrollMarginTop || "0");
+              lenis.scrollTo(el, { offset });
+            } else {
+              const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+              el.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+            }
             window.history.pushState(null, "", href);
           }
         } else {
@@ -71,7 +80,7 @@ export function Navbar() {
         }
       }
     },
-    [pathname, router]
+    [pathname, router, lenis]
   );
 
   return (

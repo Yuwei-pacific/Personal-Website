@@ -5,7 +5,8 @@
 // lightbox（缩放、拖拽、双指手势、键盘导航、焦点圈闭、滚动锁定）
 // 由 yet-another-react-lightbox 提供，不再自研手势逻辑。
 import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLenis } from "lenis/react";
 import type { ProjectGalleryItem } from "@/types";
 import type { MasonryItem } from "@/components/projects/masonry";
 import Lightbox from "yet-another-react-lightbox";
@@ -78,6 +79,16 @@ export function ProjectGallery({ items, title = "Gallery", fullWidth }: ProjectG
 
   // 当前打开的图片索引；-1 表示 lightbox 关闭
   const [activeIndex, setActiveIndex] = useState(-1);
+
+  // lightbox 打开时暂停 Lenis：它虚拟化了滚轮事件，lightbox 自带的
+  // overflow 锁滚对它无效，不停掉的话滚轮缩放图片时背景页面会跟着滚
+  const lenis = useLenis();
+  const lightboxOpen = activeIndex >= 0;
+  useEffect(() => {
+    if (!lightboxOpen || !lenis) return;
+    lenis.stop();
+    return () => lenis.start();
+  }, [lightboxOpen, lenis]);
 
   if (!galleryItems.length) return null;
 

@@ -2,7 +2,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Link } from "next-view-transitions";
 
 import { LuArrowRight } from "react-icons/lu";
 
@@ -104,20 +103,22 @@ export function Hero() {
           </div>
         </div>
 
-        {/* CTA 按钮组：查看作品与联系我 */}
+        {/* CTA 按钮组：查看作品与联系我。
+            用原生 <a>：同页锚点由 Lenis 的 anchors 平滑滚动接管（router 会抢先拦截 hash），
+            mailto 本就不该走客户端路由 */}
         <div className="flex flex-wrap gap-3">
-          <Link
+          <a
             href="#work"
             className="hero-cta inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-button bg-design-light-accent px-4 py-2 text-small font-medium text-design-dark-text-primary shadow-card transition-[background-color,transform] duration-base hover:scale-emphasis hover:bg-design-light-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             View work <LuArrowRight className="h-4 w-4" />
-          </Link>
-          <Link
+          </a>
+          <a
             href="mailto:snowtime200801@gmail.com"
             className="hero-cta inline-flex h-10 items-center justify-center whitespace-nowrap rounded-button border border-design-light-border bg-design-light-bg px-4 py-2 text-small font-medium shadow-card transition-[background-color,color,transform] duration-base hover:scale-emphasis hover:bg-design-light-hover hover:text-design-light-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             Contact Me via Email
-          </Link>
+          </a>
         </div>
       </div>
 

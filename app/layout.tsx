@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd, websiteSchema } from "@/components/seo/json-ld";
 import { CustomCursor } from "@/components/ui/custom-cursor";
+import "lenis/dist/lenis.css";
 import "./globals.css";
 
 // 配置无衬线字体（Geist Sans）：
@@ -70,6 +71,7 @@ export const viewport: Viewport = {
 };
 
 import { AppViewTransitions } from "@/components/providers/view-transitions-provider";
+import { LenisProvider } from "@/components/providers/lenis-provider";
 import { OverscrollBackground } from "@/components/ui/overscroll-background";
 
 export default function RootLayout({
@@ -88,18 +90,20 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background text-foreground antialiased`}
       >
         <AppViewTransitions>
-          <a
-            href="#main-content"
-            className="sr-only fixed left-4 top-4 z-[10000] rounded-button bg-design-light-bg px-4 py-2 text-small font-semibold text-design-light-text-primary shadow-card focus:not-sr-only"
-          >
-            Skip to main content
-          </a>
-          <OverscrollBackground />
-          <CustomCursor />
-          {/* 显式给内容区加上背景色，这样 body 背景色变化时只会在过界回弹时露出来，而不会影响页面本身 */}
-          <div id="main-content" className="bg-background min-h-screen w-full relative z-0">
-            {children}
-          </div>
+          <LenisProvider>
+            <a
+              href="#main-content"
+              className="sr-only fixed left-4 top-4 z-[10000] rounded-button bg-design-light-bg px-4 py-2 text-small font-semibold text-design-light-text-primary shadow-card focus:not-sr-only"
+            >
+              Skip to main content
+            </a>
+            <OverscrollBackground />
+            <CustomCursor />
+            {/* 显式给内容区加上背景色，这样 body 背景色变化时只会在过界回弹时露出来，而不会影响页面本身 */}
+            <div id="main-content" className="bg-background min-h-screen w-full relative z-0">
+              {children}
+            </div>
+          </LenisProvider>
         </AppViewTransitions>
         {/* Vercel Analytics 组件：用于监测页面性能与用户行为 */}
         {process.env.NODE_ENV === "production" && <Analytics />}
