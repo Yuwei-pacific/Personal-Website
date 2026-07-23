@@ -14,7 +14,7 @@
     "typecheck": "tsc --noEmit",
     "check": "npm run lint && npm run typecheck && npm run build",
     "smoke": "node scripts/smoke.mjs",
-    "typegen": "sanity schema extract --path=./sanity/schema.json && sanity typegen generate"
+    "typegen": "sanity schema extract --path=./src/sanity/schema.json && sanity typegen generate"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
