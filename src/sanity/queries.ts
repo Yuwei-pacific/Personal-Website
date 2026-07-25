@@ -18,9 +18,11 @@ export const PROJECTS_QUERY = defineQuery(`*[_type == "project" && visibility !=
     ...,
     asset->{
       _id,
-      url
+      url,
+      mimeType
     }
-  }
+  },
+  "coverVideo": coverVideo.asset->{ url, mimeType }
 }`);
 
 // 技能分类列表
@@ -57,13 +59,22 @@ export const PROJECT_QUERY = defineQuery(`*[_type == "project" && slug.current =
   client,
   location,
   links,
-  "coverImage": { "url": coalesce(coverImage.asset->url, ""), "alt": coverImage.alt },
+  "coverImage": {
+    "url": coalesce(coverImage.asset->url, ""),
+    "alt": coverImage.alt,
+    "mimeType": coverImage.asset->mimeType
+  },
+  "coverVideo": coverVideo.asset->{ url, mimeType },
   "gallery": gallery[]{
-    "url": coalesce(image.asset->url, ""),
     alt,
     caption,
-    "width": image.asset->metadata.dimensions.width,
-    "height": image.asset->metadata.dimensions.height
+    "image": image.asset->{
+      url,
+      mimeType,
+      "width": metadata.dimensions.width,
+      "height": metadata.dimensions.height
+    },
+    "video": video.asset->{ url, mimeType }
   },
   body,
   myContribution

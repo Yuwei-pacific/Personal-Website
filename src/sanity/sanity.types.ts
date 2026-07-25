@@ -65,6 +65,13 @@ export type SanityImageAssetReference = {
   [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
 };
 
+export type SanityFileAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.fileAsset";
+};
+
 export type Project = {
   _id: string;
   _type: "project";
@@ -88,6 +95,11 @@ export type Project = {
     crop?: SanityImageCrop;
     alt?: string;
     _type: "image";
+  };
+  coverVideo?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: "file";
   };
   body?: Array<{
     children?: Array<{
@@ -138,6 +150,11 @@ export type Project = {
       hotspot?: SanityImageHotspot;
       crop?: SanityImageCrop;
       _type: "image";
+    };
+    video?: {
+      asset?: SanityFileAssetReference;
+      media?: unknown;
+      _type: "file";
     };
     alt?: string;
     caption?: string;
@@ -268,6 +285,7 @@ export type AllSanitySchemaTypes =
   | Education
   | SkillCategory
   | SanityImageAssetReference
+  | SanityFileAssetReference
   | Project
   | SanityImageCrop
   | SanityImageHotspot
@@ -283,7 +301,7 @@ export type AllSanitySchemaTypes =
 
 // Source: src/sanity/queries.ts
 // Variable: PROJECTS_QUERY
-// Query: *[_type == "project" && visibility != false]  | order(coalesce(year, 0) desc, _createdAt desc){  _id,  title,  summary,  year,  projectType,  "slug": slug.current,  "coverImage": coverImage{    ...,    asset->{      _id,      url    }  }}
+// Query: *[_type == "project" && visibility != false]  | order(coalesce(year, 0) desc, _createdAt desc){  _id,  title,  summary,  year,  projectType,  "slug": slug.current,  "coverImage": coverImage{    ...,    asset->{      _id,      url,      mimeType    }  },  "coverVideo": coverVideo.asset->{ url, mimeType }}
 export type PROJECTS_QUERY_RESULT = Array<{
   _id: string;
   title: string | null;
@@ -295,12 +313,17 @@ export type PROJECTS_QUERY_RESULT = Array<{
     asset: {
       _id: string;
       url: string | null;
+      mimeType: string | null;
     } | null;
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
     alt?: string;
     _type: "image";
+  } | null;
+  coverVideo: {
+    url: string | null;
+    mimeType: string | null;
   } | null;
 }>;
 
@@ -347,7 +370,7 @@ export type RESUME_QUERY_RESULT = Array<{
 
 // Source: src/sanity/queries.ts
 // Variable: PROJECT_QUERY
-// Query: *[_type == "project" && slug.current == $slug && visibility != false][0]{  _id,  title,  summary,  role,  tags,  contributors,  "slug": slug.current,  year,  projectType,  client,  location,  links,  "coverImage": { "url": coalesce(coverImage.asset->url, ""), "alt": coverImage.alt },  "gallery": gallery[]{    "url": coalesce(image.asset->url, ""),    alt,    caption,    "width": image.asset->metadata.dimensions.width,    "height": image.asset->metadata.dimensions.height  },  body,  myContribution}
+// Query: *[_type == "project" && slug.current == $slug && visibility != false][0]{  _id,  title,  summary,  role,  tags,  contributors,  "slug": slug.current,  year,  projectType,  client,  location,  links,  "coverImage": {    "url": coalesce(coverImage.asset->url, ""),    "alt": coverImage.alt,    "mimeType": coverImage.asset->mimeType  },  "coverVideo": coverVideo.asset->{ url, mimeType },  "gallery": gallery[]{    alt,    caption,    "image": image.asset->{      url,      mimeType,      "width": metadata.dimensions.width,      "height": metadata.dimensions.height    },    "video": video.asset->{ url, mimeType }  },  body,  myContribution}
 export type PROJECT_QUERY_RESULT = {
   _id: string;
   title: string | null;
@@ -368,13 +391,25 @@ export type PROJECT_QUERY_RESULT = {
   coverImage: {
     url: string | "";
     alt: string | null;
+    mimeType: string | null;
   };
+  coverVideo: {
+    url: string | null;
+    mimeType: string | null;
+  } | null;
   gallery: Array<{
-    url: string | "";
     alt: string | null;
     caption: string | null;
-    width: number | null;
-    height: number | null;
+    image: {
+      url: string | null;
+      mimeType: string | null;
+      width: number | null;
+      height: number | null;
+    } | null;
+    video: {
+      url: string | null;
+      mimeType: string | null;
+    } | null;
   }> | null;
   body: Array<{
     children?: Array<{
@@ -431,10 +466,10 @@ export type PROJECT_SITEMAP_QUERY_RESULT = Array<{
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '*[_type == "project" && visibility != false]\n  | order(coalesce(year, 0) desc, _createdAt desc){\n  _id,\n  title,\n  summary,\n  year,\n  projectType,\n  "slug": slug.current,\n  "coverImage": coverImage{\n    ...,\n    asset->{\n      _id,\n      url\n    }\n  }\n}': PROJECTS_QUERY_RESULT;
+    '*[_type == "project" && visibility != false]\n  | order(coalesce(year, 0) desc, _createdAt desc){\n  _id,\n  title,\n  summary,\n  year,\n  projectType,\n  "slug": slug.current,\n  "coverImage": coverImage{\n    ...,\n    asset->{\n      _id,\n      url,\n      mimeType\n    }\n  },\n  "coverVideo": coverVideo.asset->{ url, mimeType }\n}': PROJECTS_QUERY_RESULT;
     '*[_type == "skillCategory"] | order(order asc){\n  _id,\n  title,\n  order,\n  skills\n}': SKILLS_QUERY_RESULT;
     '*[_type == "education"] | order(order desc){\n  _id,\n  type,\n  institution,\n  degree,\n  location,\n  period,\n  details,\n  order\n}': RESUME_QUERY_RESULT;
-    '*[_type == "project" && slug.current == $slug && visibility != false][0]{\n  _id,\n  title,\n  summary,\n  role,\n  tags,\n  contributors,\n  "slug": slug.current,\n  year,\n  projectType,\n  client,\n  location,\n  links,\n  "coverImage": { "url": coalesce(coverImage.asset->url, ""), "alt": coverImage.alt },\n  "gallery": gallery[]{\n    "url": coalesce(image.asset->url, ""),\n    alt,\n    caption,\n    "width": image.asset->metadata.dimensions.width,\n    "height": image.asset->metadata.dimensions.height\n  },\n  body,\n  myContribution\n}': PROJECT_QUERY_RESULT;
+    '*[_type == "project" && slug.current == $slug && visibility != false][0]{\n  _id,\n  title,\n  summary,\n  role,\n  tags,\n  contributors,\n  "slug": slug.current,\n  year,\n  projectType,\n  client,\n  location,\n  links,\n  "coverImage": {\n    "url": coalesce(coverImage.asset->url, ""),\n    "alt": coverImage.alt,\n    "mimeType": coverImage.asset->mimeType\n  },\n  "coverVideo": coverVideo.asset->{ url, mimeType },\n  "gallery": gallery[]{\n    alt,\n    caption,\n    "image": image.asset->{\n      url,\n      mimeType,\n      "width": metadata.dimensions.width,\n      "height": metadata.dimensions.height\n    },\n    "video": video.asset->{ url, mimeType }\n  },\n  body,\n  myContribution\n}': PROJECT_QUERY_RESULT;
     '*[_type == "project" && defined(slug.current) && visibility != false].slug.current': PROJECT_SLUGS_QUERY_RESULT;
     '*[_type == "project" && defined(slug.current) && visibility != false]{\n  "slug": slug.current,\n  _updatedAt\n}': PROJECT_SITEMAP_QUERY_RESULT;
   }

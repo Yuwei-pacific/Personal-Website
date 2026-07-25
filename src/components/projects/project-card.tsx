@@ -1,12 +1,14 @@
 "use client";
 
 // 单个项目卡片：编辑式图文交替大卡，支持无 slug 的静态卡片和有 slug 的可点击卡片
+import { useRef } from "react";
 import { Link } from "next-view-transitions";
 import { LuArrowUpRight } from "react-icons/lu";
 import Image from "next/image";
 import type { Project } from "@/lib/view-models/types";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { urlFor } from "@/sanity/image";
+import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
+import { buildCropUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 
 type ProjectCardProps = {
@@ -41,18 +43,41 @@ export function ProjectCard({ project, slug, revealDelay = 0, index = 0 }: Proje
     const layout = layoutPattern[index % layoutPattern.length];
 
     // 按槽位比例生成 Sanity 裁切 URL：编辑者在 Studio 标注的 hotspot/crop 生效，
-    // 竖槽裁横图时保住焦点，而不是从中心盲裁
+    // 竖槽裁横图时保住焦点，而不是从中心盲裁。
+    // 动图（GIF）跳过 auto=format，否则只会剩第一帧（见 lib/media.ts）
     const coverSrc = project.coverImage?.asset
-        ? urlFor(project.coverImage)
-              .width(COVER_CROP_WIDTH)
-              .height(Math.round(COVER_CROP_WIDTH / layout.ratio))
-              .fit("crop")
-              .auto("format")
-              .url()
+        ? buildCropUrl(project.coverImage, {
+              width: COVER_CROP_WIDTH,
+              height: Math.round(COVER_CROP_WIDTH / layout.ratio),
+              animated: project.coverImage.animated,
+          })
         : null;
 
+    // 可选封面视频：默认显示封面图，hover 时才静音循环播放。
+    // preload="none" 保证列表初次加载不下载任何视频，只有真的 hover 了才拉流；
+    // 视频的 poster 用同一张裁切图，避免缓冲期间闪出黑块
+    const reducedMotion = usePrefersReducedMotion();
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const hoverVideo = reducedMotion ? null : project.coverVideo;
+
+    const playHoverVideo = () => {
+        // play() 在自动播放策略下可能 reject，静默忽略即可
+        videoRef.current?.play().catch(() => {});
+    };
+
+    const resetHoverVideo = () => {
+        const video = videoRef.current;
+        if (!video) return;
+        video.pause();
+        video.currentTime = 0;
+    };
+
     const cardContent = (
-        <article className="group block">
+        <article
+            className="group block"
+            onMouseEnter={hoverVideo ? playHoverVideo : undefined}
+            onMouseLeave={hoverVideo ? resetHoverVideo : undefined}
+        >
             {/* 封面图：拼贴墙的主视觉块 */}
             <div className={cn(
                 "relative overflow-hidden rounded-card border border-design-dark-border bg-design-dark-surface transition-[border-color,transform] duration-base ease-design-out group-hover:-translate-y-1 group-hover:border-design-dark-hover-border",
@@ -68,6 +93,19 @@ export function ProjectCard({ project, slug, revealDelay = 0, index = 0 }: Proje
                     />
                 ) : (
                     <div className="absolute inset-0 bg-gradient-to-br from-design-dark-elevated to-design-dark-bg" />
+                )}
+                {hoverVideo && (
+                    <video
+                        ref={videoRef}
+                        src={hoverVideo.url}
+                        poster={coverSrc ?? undefined}
+                        muted
+                        loop
+                        playsInline
+                        preload="none"
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-base group-hover:opacity-100"
+                    />
                 )}
                 <div className="pointer-events-none absolute inset-0 bg-design-dark-bg/0 transition-colors duration-base group-hover:bg-design-dark-bg/10" />
                 {slug && (

@@ -1,7 +1,9 @@
 import Image from "next/image";
 import { Link } from "next-view-transitions";
 
+import { buildScaledUrl } from "@/lib/media";
 import { getExternalLinkProps } from "@/lib/safe-url";
+import { CoverVideo } from "./cover-video";
 import type { ProjectDetail } from "@/lib/view-models/types";
 import { ProjectGallery } from "./project-gallery";
 import { DotList, MetaRow } from "./project-meta-table";
@@ -45,14 +47,28 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
 
             {project.coverImage && (
               <div className="relative aspect-video w-full overflow-hidden rounded-media">
-                <Image
-                  src={project.coverImage.url}
-                  alt={project.coverImage.alt}
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="(min-width: 1024px) 1152px, 100vw"
-                />
+                {project.coverVideo ? (
+                  // 有封面视频时它占据 hero 位，封面图作为 poster 首帧
+                  <CoverVideo
+                    src={project.coverVideo.url}
+                    poster={buildScaledUrl(project.coverImage.url, {
+                      width: 1600,
+                      animated: project.coverImage.animated,
+                    })}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <Image
+                    src={project.coverImage.url}
+                    alt={project.coverImage.alt}
+                    fill
+                    priority
+                    // 动图（GIF）必须跳过 Next 的图片优化，否则动画会被压成静帧
+                    unoptimized={project.coverImage.animated}
+                    className="object-cover"
+                    sizes="(min-width: 1024px) 1152px, 100vw"
+                  />
+                )}
               </div>
             )}
 
