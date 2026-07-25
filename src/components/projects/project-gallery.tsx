@@ -6,9 +6,9 @@
 // - yet-another-react-lightbox：缩放、拖拽、双指手势、键盘导航、焦点圈闭
 import { useEffect, useMemo, useState } from "react";
 import { useLenis } from "lenis/react";
-import { MasonryPhotoAlbum } from "react-photo-album";
+import { RowsPhotoAlbum } from "react-photo-album";
 import type { Photo } from "react-photo-album";
-import "react-photo-album/masonry.css";
+import "react-photo-album/rows.css";
 import type { ProjectGalleryItem } from "@/lib/view-models/types";
 import Lightbox from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
@@ -22,7 +22,7 @@ import "yet-another-react-lightbox/plugins/counter.css";
 // - items：图片列表
 // - title：标题文案
 // - fullWidth：是否整屏宽度展示
-// （列数由容器宽度自适应：1–5 列，见 columnsForWidth）
+// （每行图片数由 justified 算法按目标行高自动决定，见 targetRowHeightForWidth）
 type ProjectGalleryProps = {
   items?: ProjectGalleryItem[];
   title?: string;
@@ -35,13 +35,13 @@ const SLIDE_WIDTHS = [640, 1080, 1600, 2048];
 // 缩略图 srcSet 档位：最窄的列约占容器 1/5，最宽时单列满宽，覆盖到 2x 屏
 const THUMB_WIDTHS = [320, 480, 640, 800, 1200, 1600];
 
-// 列数断点：沿用原 Masonry 的节奏（此处按容器宽度而非视口宽度判断）
-const columnsForWidth = (containerWidth: number) => {
-  if (containerWidth >= 1500) return 5;
-  if (containerWidth >= 1000) return 4;
-  if (containerWidth >= 600) return 3;
-  if (containerWidth >= 400) return 2;
-  return 1;
+// justified 行布局的目标行高：算法会在这个高度附近凑整每一行，
+// 保证每行等高、图片不变形。窄容器给小行高，避免一行只塞得下半张图
+const targetRowHeightForWidth = (containerWidth: number) => {
+  if (containerWidth >= 1500) return 320;
+  if (containerWidth >= 1000) return 280;
+  if (containerWidth >= 600) return 240;
+  return 200;
 };
 
 // SSR 期间没有容器尺寸，按桌面主宽度出图；水合后按实测宽度重排
@@ -108,9 +108,11 @@ export function ProjectGallery({ items, title = "Gallery", fullWidth }: ProjectG
       </div>
       <div className="h-px w-full bg-gradient-to-r from-transparent via-design-dark-text-primary/50 to-transparent" />
 
-      <MasonryPhotoAlbum
+      <RowsPhotoAlbum
         photos={photos}
-        columns={columnsForWidth}
+        targetRowHeight={targetRowHeightForWidth}
+        // 图片总数不足以铺满一行时，限制高度，避免单张图被撑到超大
+        rowConstraints={{ singleRowMaxHeight: 420 }}
         spacing={12}
         defaultContainerWidth={DEFAULT_CONTAINER_WIDTH}
         // 容器实际占宽：外层是 px-4 / sm:px-10 的通栏
