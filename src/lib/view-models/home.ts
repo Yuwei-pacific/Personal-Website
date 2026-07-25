@@ -4,7 +4,8 @@ import type {
   RESUME_QUERY_RESULT,
   SKILLS_QUERY_RESULT,
 } from "@/sanity/sanity.types";
-import { blocks, optionalText, stringList, text } from "./utils";
+import { isAnimatedImage } from "@/lib/media";
+import { blocks, optionalText, stringList, text, video } from "./utils";
 
 const resumeType = (value: RESUME_QUERY_RESULT[number]["type"]): ResumeItem["type"] | null =>
   value === "education" || value === "experience" ? value : null;
@@ -23,8 +24,10 @@ export function normalizeProjects(items: PROJECTS_QUERY_RESULT = []): Project[] 
         ? {
             ...item.coverImage,
             alt: text(item.coverImage.alt, `${title} cover image`),
+            animated: isAnimatedImage(item.coverImage.asset.mimeType),
           }
         : null,
+      coverVideo: video(item.coverVideo),
     };
   });
 }

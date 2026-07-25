@@ -1,6 +1,7 @@
 import { getSafeHref } from "@/lib/safe-url";
 import type { PROJECT_QUERY_RESULT } from "@/sanity/sanity.types";
-import { blocks, optionalText, stringList, text } from "./utils";
+import { isAnimatedImage } from "@/lib/media";
+import { blocks, optionalText, stringList, text, video } from "./utils";
 import type { ProjectDetail, ProjectGalleryItem, ProjectLink } from "./types";
 
 const normalizeLinks = (links: NonNullable<NonNullable<PROJECT_QUERY_RESULT>["links"]>): ProjectLink[] =>
@@ -15,19 +16,47 @@ const normalizeLinks = (links: NonNullable<NonNullable<PROJECT_QUERY_RESULT>["li
     };
   });
 
+// 画廊条目：图片是每条的视觉锚点（缩略图 + 布局宽高比 + 视频封面帧），
+// 视频是可选的附加播放源。唯一的丢弃条件是「图片本身缺失或没有尺寸」——
+// 挂了视频绝不会让一条目消失。
 const normalizeGallery = (
   gallery: NonNullable<PROJECT_QUERY_RESULT>["gallery"]
 ): ProjectGalleryItem[] =>
-  (gallery ?? [])
-    .filter((item) => Boolean(item.url && item.width && item.height))
-    .map((item, index) => ({
-      key: `gallery-${index}-${item.url}`,
-      url: item.url,
-      alt: text(item.alt, `Project image ${index + 1}`),
-      caption: optionalText(item.caption),
-      width: item.width as number,
-      height: item.height as number,
-    }));
+  (gallery ?? []).flatMap((item, index): ProjectGalleryItem[] => {
+    // alt 可留空：空串表示装饰性媒体，渲染时让屏幕阅读器跳过图片本身，
+    // 可点击按钮另给位置性名称（见 project-gallery.tsx）。
+    // 不在这里编造 "Project media 1" 之类的文案——那对读屏用户只是噪音
+    const alt = text(item.alt);
+    const caption = optionalText(item.caption);
+
+    const imageUrl = text(item.image?.url);
+    const { width, height } = item.image ?? {};
+    if (!imageUrl || !width || !height) return [];
+
+    const base = {
+      key: `gallery-${index}-${imageUrl}`,
+      alt,
+      caption,
+      imageUrl,
+      imageAnimated: isAnimatedImage(item.image?.mimeType),
+      width,
+      height,
+    };
+
+    const videoSource = video(item.video);
+    if (videoSource) {
+      return [
+        {
+          ...base,
+          kind: "video" as const,
+          videoUrl: videoSource.url,
+          mimeType: videoSource.mimeType,
+        },
+      ];
+    }
+
+    return [{ ...base, kind: "image" as const }];
+  });
 
 export function normalizeProjectDetail(
   item: PROJECT_QUERY_RESULT,
@@ -55,8 +84,13 @@ export function normalizeProjectDetail(
     location: optionalText(item.location),
     links: normalizeLinks(item.links ?? []),
     coverImage: coverUrl
-      ? { url: coverUrl, alt: text(item.coverImage?.alt, `${title} cover image`) }
+      ? {
+          url: coverUrl,
+          alt: text(item.coverImage?.alt, `${title} cover image`),
+          animated: isAnimatedImage(item.coverImage?.mimeType),
+        }
       : null,
+    coverVideo: video(item.coverVideo),
     gallery: normalizeGallery(item.gallery),
     body: blocks(item.body),
     myContribution: blocks(item.myContribution),

@@ -1,28 +1,34 @@
 "use client";
 
-// 图片画廊：瀑布流缩略图 + lightbox 大图浏览。
+// 多媒体画廊：图片 / GIF / 视频混排的 justified 行布局 + lightbox 大图浏览。
 // 布局与 lightbox 都来自同一作者（Igor Danchenko）的配套库：
-// - react-photo-album：按图片真实比例排列，不裁切、不拉伸，SSR 友好
-// - yet-another-react-lightbox：缩放、拖拽、双指手势、键盘导航、焦点圈闭
+// - react-photo-album：按真实比例排列，不裁切、不拉伸，SSR 友好
+// - yet-another-react-lightbox：缩放、拖拽、键盘导航、焦点圈闭，Video 插件播视频
+//
+// 视频条目在网格里只显示 poster 缩略图（加播放角标），点开才在 lightbox 里播放——
+// 网格里同时自动播放多个视频对低端机器是灾难。
 import { useEffect, useMemo, useState } from "react";
 import { useLenis } from "lenis/react";
+import { LuPlay } from "react-icons/lu";
 import { RowsPhotoAlbum } from "react-photo-album";
 import type { Photo } from "react-photo-album";
 import "react-photo-album/rows.css";
 import type { ProjectGalleryItem } from "@/lib/view-models/types";
+import { buildScaledUrl, buildSrcSet } from "@/lib/media";
 import Lightbox from "yet-another-react-lightbox";
+import type { SlideImage, SlideVideo } from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import Counter from "yet-another-react-lightbox/plugins/counter";
+import Video from "yet-another-react-lightbox/plugins/video";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/captions.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 
 // 组件入参：
-// - items：图片列表
+// - items：媒体列表（图片 / GIF / 视频）
 // - title：标题文案
 // - fullWidth：是否整屏宽度展示
-// （每行图片数由 justified 算法按目标行高自动决定，见 targetRowHeightForWidth）
 type ProjectGalleryProps = {
   items?: ProjectGalleryItem[];
   title?: string;
@@ -32,7 +38,7 @@ type ProjectGalleryProps = {
 // lightbox 大图的 srcSet 档位
 const SLIDE_WIDTHS = [640, 1080, 1600, 2048];
 
-// 缩略图 srcSet 档位：最窄的列约占容器 1/5，最宽时单列满宽，覆盖到 2x 屏
+// 缩略图 srcSet 档位：覆盖单列满宽到多列窄栏，含 2x 屏
 const THUMB_WIDTHS = [320, 480, 640, 800, 1200, 1600];
 
 // justified 行布局的目标行高：算法会在这个高度附近凑整每一行，
@@ -47,38 +53,52 @@ const targetRowHeightForWidth = (containerWidth: number) => {
 // SSR 期间没有容器尺寸，按桌面主宽度出图；水合后按实测宽度重排
 const DEFAULT_CONTAINER_WIDTH = 1200;
 
-const isSanityCdn = (url: string) => url.includes("cdn.sanity.io");
+// 网格缩略图：视频用它的 poster，图片用自身
+type GalleryPhoto = Photo & { isVideo: boolean };
 
-// Sanity CDN 支持 URL 参数缩放：按档位生成 srcSet，
-// 过滤掉比原图还宽的档位，避免请求放大图
-const buildSrcSet = (item: ProjectGalleryItem, widths: number[]) =>
-  isSanityCdn(item.url)
-    ? widths
-        .filter((w) => w < item.width)
-        .map((w) => ({
-          src: `${item.url}?w=${w}&fit=max&auto=format`,
-          width: w,
-          height: Math.round((item.height / item.width) * w),
-        }))
-    : undefined;
+const buildPhoto = (item: ProjectGalleryItem, index: number): GalleryPhoto => {
+  const isVideo = item.kind === "video";
+  const { imageUrl, imageAnimated, width, height } = item;
 
-const buildPhoto = (item: ProjectGalleryItem, index: number): Photo => ({
-  key: `${index}-${item.url}`,
-  src: isSanityCdn(item.url) ? `${item.url}?w=1000&fit=max&auto=format` : item.url,
-  width: item.width,
-  height: item.height,
-  alt: item.alt,
-  srcSet: buildSrcSet(item, THUMB_WIDTHS),
-});
+  return {
+    key: item.key,
+    src: buildScaledUrl(imageUrl, { width: 1000, animated: imageAnimated }),
+    width,
+    height,
+    // alt 为空 = 装饰性，屏幕阅读器跳过图片；
+    // label 始终有值，保证可点击按钮对键盘/读屏用户仍有可读名称
+    alt: item.alt,
+    label: item.alt || `${isVideo ? "Play video" : "View image"} ${index + 1}`,
+    isVideo,
+    srcSet: buildSrcSet({ url: imageUrl, width, height, animated: imageAnimated }, THUMB_WIDTHS),
+  };
+};
 
-const buildSlide = (item: ProjectGalleryItem) => ({
-  src: item.url,
-  alt: item.alt || "",
-  width: item.width,
-  height: item.height,
-  description: item.caption || undefined,
-  srcSet: buildSrcSet(item, SLIDE_WIDTHS),
-});
+const buildSlide = (item: ProjectGalleryItem): SlideImage | SlideVideo => {
+  const description = item.caption || undefined;
+  const { imageUrl, imageAnimated, width, height } = item;
+
+  if (item.kind === "video") {
+    return {
+      type: "video",
+      // 同一张图在这里当封面帧；poster 是静帧用途，不需要保留 GIF 动画
+      poster: buildScaledUrl(imageUrl, { width: 1600, animated: false }),
+      width,
+      height,
+      description,
+      sources: [{ src: item.videoUrl, type: item.mimeType }],
+    };
+  }
+
+  return {
+    src: imageUrl,
+    alt: item.alt,
+    width,
+    height,
+    description,
+    srcSet: buildSrcSet({ url: imageUrl, width, height, animated: imageAnimated }, SLIDE_WIDTHS),
+  };
+};
 
 export function ProjectGallery({ items, title = "Gallery", fullWidth }: ProjectGalleryProps) {
   const galleryItems = useMemo(() => items ?? [], [items]);
@@ -86,7 +106,7 @@ export function ProjectGallery({ items, title = "Gallery", fullWidth }: ProjectG
   const photos = useMemo(() => galleryItems.map(buildPhoto), [galleryItems]);
   const slides = useMemo(() => galleryItems.map(buildSlide), [galleryItems]);
 
-  // 当前打开的图片索引；-1 表示 lightbox 关闭
+  // 当前打开的媒体索引；-1 表示 lightbox 关闭
   const [activeIndex, setActiveIndex] = useState(-1);
 
   // lightbox 打开时暂停 Lenis：它虚拟化了滚轮事件，lightbox 自带的
@@ -111,7 +131,7 @@ export function ProjectGallery({ items, title = "Gallery", fullWidth }: ProjectG
       <RowsPhotoAlbum
         photos={photos}
         targetRowHeight={targetRowHeightForWidth}
-        // 图片总数不足以铺满一行时，限制高度，避免单张图被撑到超大
+        // 媒体总数不足以铺满一行时，限制高度，避免单条被撑到超大
         rowConstraints={{ singleRowMaxHeight: 420 }}
         spacing={12}
         defaultContainerWidth={DEFAULT_CONTAINER_WIDTH}
@@ -121,6 +141,15 @@ export function ProjectGallery({ items, title = "Gallery", fullWidth }: ProjectG
           sizes: [{ viewport: "(max-width: 640px)", size: "calc(100vw - 2rem)" }],
         }}
         onClick={({ index }) => setActiveIndex(index)}
+        render={{
+          // 视频条目盖一个播放角标，和项目卡片的箭头角标同款语言
+          extras: (_props, { photo }) =>
+            photo.isVideo ? (
+              <span className="pointer-events-none absolute left-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-design-dark-text-primary/40 bg-design-dark-bg/50 text-design-dark-text-primary backdrop-blur-md">
+                <LuPlay className="h-4 w-4" />
+              </span>
+            ) : null,
+        }}
         componentsProps={{
           image: {
             className:
@@ -138,9 +167,12 @@ export function ProjectGallery({ items, title = "Gallery", fullWidth }: ProjectG
         index={activeIndex}
         close={() => setActiveIndex(-1)}
         slides={slides}
-        plugins={[Zoom, Captions, Counter]}
+        plugins={[Zoom, Captions, Counter, Video]}
         zoom={{ maxZoomPixelRatio: 3 }}
         counter={{ container: { style: { top: 0 } } }}
+        // 静音自动循环：符合作品集里 UI 演示片段的用法，
+        // 保留 controls 让访客能自己解除静音或暂停
+        video={{ autoPlay: true, muted: true, loop: true, controls: true, playsInline: true }}
         // 背景色对齐站点深色分区 token
         styles={{ container: { backgroundColor: "hsl(var(--color-bg-dark) / 0.95)" } }}
         controller={{ closeOnBackdropClick: true }}

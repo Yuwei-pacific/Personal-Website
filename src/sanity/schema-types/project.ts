@@ -88,6 +88,8 @@ export const project = defineType({
       title: "Cover image",
       type: "image",
       options: { hotspot: true },
+      description:
+        "Still image or animated GIF. Always required: this is what social shares and structured data use.",
       fields: [
         {
           name: "alt",
@@ -98,6 +100,17 @@ export const project = defineType({
         },
       ],
       validation: (Rule) => Rule.required(),
+    }),
+
+    // 可选的封面视频：卡片 hover 时静音循环播放，封面图作为首帧/回退。
+    // 社交分享图（Open Graph）与 JSON-LD 仍然只用 coverImage —— 那些场景不支持视频。
+    defineField({
+      name: "coverVideo",
+      title: "Cover video (optional)",
+      type: "file",
+      options: { accept: "video/mp4,video/webm" },
+      description:
+        "Optional. Plays muted on hover over the project card. Keep it short and under ~10 MB; the cover image is still used everywhere a still is required.",
     }),
 
     // 正文
@@ -145,6 +158,14 @@ export const project = defineType({
       ],
     }),
 
+    // 画廊条目：每条都以一张图片为视觉锚点，可选地再挂一个视频。
+    //
+    // 图片必填的原因不只是「要有东西显示」：视频文件没有尺寸元数据，而 justified
+    // 布局必须知道宽高比，所以图片同时承担了缩略图、视频封面帧、布局尺寸三个职责。
+    // 这样就不存在「传了两个反而什么都不显示」的状态——不需要互斥校验。
+    //
+    // 沿用原来的匿名内联对象结构（不改成多类型联合数组），因为已有条目在库里
+    // 不带 _type 字段，换成联合类型会让它们全部失效。
     defineField({
       name: "gallery",
       title: "Gallery",
@@ -155,16 +176,27 @@ export const project = defineType({
           fields: [
             {
               name: "image",
-              title: "Image",
+              title: "Image / GIF",
               type: "image",
               options: { hotspot: true },
+              description:
+                "Shown in the gallery grid. If you also attach a video below, this doubles as its poster frame. Required either way — it sets this entry's aspect ratio in the layout.",
               validation: (Rule) => Rule.required(),
             },
             {
+              name: "video",
+              title: "Video (optional)",
+              type: "file",
+              options: { accept: "video/mp4,video/webm" },
+              description:
+                "Optional. When set, the thumbnail gets a play badge and the video plays in the lightbox. MP4 or WebM, ideally under ~10 MB.",
+            },
+            {
               name: "alt",
-              title: "Alt text",
+              title: "Alt text (optional)",
               type: "string",
-              validation: (Rule) => Rule.required(),
+              description:
+                "Describe the media for screen readers and SEO. Leave empty for purely decorative shots — the entry is then marked decorative and skipped by screen readers.",
             },
             {
               name: "caption",
@@ -173,7 +205,14 @@ export const project = defineType({
             },
           ],
           preview: {
-            select: { media: "image", title: "caption" },
+            select: { media: "image", title: "caption", alt: "alt", video: "video" },
+            prepare({ media, title, alt, video }) {
+              return {
+                title: title || alt || "Gallery item",
+                subtitle: video ? "Image + video" : undefined,
+                media,
+              };
+            },
           },
         },
       ],
