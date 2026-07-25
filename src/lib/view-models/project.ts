@@ -1,9 +1,9 @@
 import { getSafeHref } from "@/lib/safe-url";
-import type { PROJECT_QUERYResult } from "@/sanity/sanity.types";
+import type { PROJECT_QUERY_RESULT } from "@/sanity/sanity.types";
 import { blocks, optionalText, stringList, text } from "./utils";
 import type { ProjectDetail, ProjectGalleryItem, ProjectLink } from "./types";
 
-const normalizeLinks = (links: NonNullable<NonNullable<PROJECT_QUERYResult>["links"]>): ProjectLink[] =>
+const normalizeLinks = (links: NonNullable<NonNullable<PROJECT_QUERY_RESULT>["links"]>): ProjectLink[] =>
   links.map((link, index) => {
     const originalUrl = optionalText(link.url);
     const href = getSafeHref(originalUrl);
@@ -16,7 +16,7 @@ const normalizeLinks = (links: NonNullable<NonNullable<PROJECT_QUERYResult>["lin
   });
 
 const normalizeGallery = (
-  gallery: NonNullable<PROJECT_QUERYResult>["gallery"]
+  gallery: NonNullable<PROJECT_QUERY_RESULT>["gallery"]
 ): ProjectGalleryItem[] =>
   (gallery ?? [])
     .filter((item) => Boolean(item.url && item.width && item.height))
@@ -30,7 +30,7 @@ const normalizeGallery = (
     }));
 
 export function normalizeProjectDetail(
-  item: PROJECT_QUERYResult,
+  item: PROJECT_QUERY_RESULT,
   fallbackSlug: string
 ): ProjectDetail | null {
   if (!item) return null;
