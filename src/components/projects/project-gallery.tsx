@@ -1,14 +1,15 @@
 "use client";
 
-// 图片画廊：Masonry 瀑布流缩略图 + lightbox 大图浏览。
-// 瀑布流布局由站点拥有的 Masonry 提供（GSAP，无入场动画）；
-// lightbox（缩放、拖拽、双指手势、键盘导航、焦点圈闭、滚动锁定）
-// 由 yet-another-react-lightbox 提供，不再自研手势逻辑。
-import dynamic from "next/dynamic";
+// 图片画廊：瀑布流缩略图 + lightbox 大图浏览。
+// 布局与 lightbox 都来自同一作者（Igor Danchenko）的配套库：
+// - react-photo-album：按图片真实比例排列，不裁切、不拉伸，SSR 友好
+// - yet-another-react-lightbox：缩放、拖拽、双指手势、键盘导航、焦点圈闭
 import { useEffect, useMemo, useState } from "react";
 import { useLenis } from "lenis/react";
+import { MasonryPhotoAlbum } from "react-photo-album";
+import type { Photo } from "react-photo-album";
+import "react-photo-album/masonry.css";
 import type { ProjectGalleryItem } from "@/lib/view-models/types";
-import type { MasonryItem } from "@/components/projects/masonry";
 import Lightbox from "yet-another-react-lightbox";
 import Captions from "yet-another-react-lightbox/plugins/captions";
 import Counter from "yet-another-react-lightbox/plugins/counter";
@@ -17,65 +18,73 @@ import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/captions.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 
-// Masonry 在渲染期读取 matchMedia / 布局尺寸，关闭 SSR
-const Masonry = dynamic(() => import("@/components/projects/masonry"), {
-  ssr: false,
-});
-
 // 组件入参：
 // - items：图片列表
 // - title：标题文案
 // - fullWidth：是否整屏宽度展示
-// （列数由 Masonry 按容器断点自适应：1–5 列）
+// （列数由容器宽度自适应：1–5 列，见 columnsForWidth）
 type ProjectGalleryProps = {
   items?: ProjectGalleryItem[];
   title?: string;
   fullWidth?: boolean;
 };
 
-// Sanity CDN 支持 URL 参数缩放：为 lightbox 生成多档宽度的 srcSet，
-// 避免在弹层里加载原始大图
-const SRCSET_WIDTHS = [640, 1080, 1600, 2048];
+// lightbox 大图的 srcSet 档位
+const SLIDE_WIDTHS = [640, 1080, 1600, 2048];
 
-// 瀑布流缩略图用中等宽度即可（列宽最多 ~1/2 视口）
-const thumbUrl = (url: string) =>
-  url.includes("cdn.sanity.io") ? `${url}?w=1000&fit=max&auto=format` : url;
+// 缩略图 srcSet 档位：最窄的列约占容器 1/5，最宽时单列满宽，覆盖到 2x 屏
+const THUMB_WIDTHS = [320, 480, 640, 800, 1200, 1600];
 
-const buildSlide = (item: ProjectGalleryItem) => {
-  const isSanityCdn = item.url.includes("cdn.sanity.io");
-  return {
-    src: item.url,
-    alt: item.alt || "",
-    width: item.width,
-    height: item.height,
-    description: item.caption || undefined,
-    srcSet: isSanityCdn
-      ? SRCSET_WIDTHS.filter((w) => w < item.width).map((w) => ({
+// 列数断点：沿用原 Masonry 的节奏（此处按容器宽度而非视口宽度判断）
+const columnsForWidth = (containerWidth: number) => {
+  if (containerWidth >= 1500) return 5;
+  if (containerWidth >= 1000) return 4;
+  if (containerWidth >= 600) return 3;
+  if (containerWidth >= 400) return 2;
+  return 1;
+};
+
+// SSR 期间没有容器尺寸，按桌面主宽度出图；水合后按实测宽度重排
+const DEFAULT_CONTAINER_WIDTH = 1200;
+
+const isSanityCdn = (url: string) => url.includes("cdn.sanity.io");
+
+// Sanity CDN 支持 URL 参数缩放：按档位生成 srcSet，
+// 过滤掉比原图还宽的档位，避免请求放大图
+const buildSrcSet = (item: ProjectGalleryItem, widths: number[]) =>
+  isSanityCdn(item.url)
+    ? widths
+        .filter((w) => w < item.width)
+        .map((w) => ({
           src: `${item.url}?w=${w}&fit=max&auto=format`,
           width: w,
           height: Math.round((item.height / item.width) * w),
         }))
-      : undefined,
-  };
-};
+    : undefined;
+
+const buildPhoto = (item: ProjectGalleryItem, index: number): Photo => ({
+  key: `${index}-${item.url}`,
+  src: isSanityCdn(item.url) ? `${item.url}?w=1000&fit=max&auto=format` : item.url,
+  width: item.width,
+  height: item.height,
+  alt: item.alt,
+  srcSet: buildSrcSet(item, THUMB_WIDTHS),
+});
+
+const buildSlide = (item: ProjectGalleryItem) => ({
+  src: item.url,
+  alt: item.alt || "",
+  width: item.width,
+  height: item.height,
+  description: item.caption || undefined,
+  srcSet: buildSrcSet(item, SLIDE_WIDTHS),
+});
 
 export function ProjectGallery({ items, title = "Gallery", fullWidth }: ProjectGalleryProps) {
   const galleryItems = useMemo(() => items ?? [], [items]);
 
+  const photos = useMemo(() => galleryItems.map(buildPhoto), [galleryItems]);
   const slides = useMemo(() => galleryItems.map(buildSlide), [galleryItems]);
-
-  // Masonry 条目：id 即在 galleryItems 中的索引，点击时用它打开对应 lightbox 页
-  const masonryItems = useMemo<MasonryItem[]>(
-    () =>
-      galleryItems.map((item, idx) => ({
-        id: String(idx),
-        img: thumbUrl(item.url),
-        width: item.width,
-        height: item.height,
-        alt: item.alt,
-      })),
-    [galleryItems]
-  );
 
   // 当前打开的图片索引；-1 表示 lightbox 关闭
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -98,16 +107,32 @@ export function ProjectGallery({ items, title = "Gallery", fullWidth }: ProjectG
         <h2 className="text-3xl font-bold text-design-dark-text-primary mb-2">{title}</h2>
       </div>
       <div className="h-px w-full bg-gradient-to-r from-transparent via-design-dark-text-primary/50 to-transparent" />
-      <Masonry
-        items={masonryItems}
-        preloadCount={8}
-        scaleOnHover
-        hoverScale={0.97}
-        onItemClick={(_item, index) => setActiveIndex(index)}
+
+      <MasonryPhotoAlbum
+        photos={photos}
+        columns={columnsForWidth}
+        spacing={12}
+        defaultContainerWidth={DEFAULT_CONTAINER_WIDTH}
+        // 容器实际占宽：外层是 px-4 / sm:px-10 的通栏
+        sizes={{
+          size: "calc(100vw - 5rem)",
+          sizes: [{ viewport: "(max-width: 640px)", size: "calc(100vw - 2rem)" }],
+        }}
+        onClick={({ index }) => setActiveIndex(index)}
+        componentsProps={{
+          image: {
+            className:
+              "rounded-card shadow-card transition-transform duration-base ease-design-out",
+          },
+          button: {
+            className:
+              "group rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary hover:[&_img]:scale-[0.97]",
+          },
+        }}
       />
 
       <Lightbox
-        open={activeIndex >= 0}
+        open={lightboxOpen}
         index={activeIndex}
         close={() => setActiveIndex(-1)}
         slides={slides}
