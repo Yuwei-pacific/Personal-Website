@@ -1,15 +1,15 @@
 import type { Project, ResumeItem, SkillCategory } from "./types";
 import type {
-  PROJECTS_QUERYResult,
-  RESUME_QUERYResult,
-  SKILLS_QUERYResult,
+  PROJECTS_QUERY_RESULT,
+  RESUME_QUERY_RESULT,
+  SKILLS_QUERY_RESULT,
 } from "@/sanity/sanity.types";
 import { blocks, optionalText, stringList, text } from "./utils";
 
-const resumeType = (value: RESUME_QUERYResult[number]["type"]): ResumeItem["type"] | null =>
+const resumeType = (value: RESUME_QUERY_RESULT[number]["type"]): ResumeItem["type"] | null =>
   value === "education" || value === "experience" ? value : null;
 
-export function normalizeProjects(items: PROJECTS_QUERYResult = []): Project[] {
+export function normalizeProjects(items: PROJECTS_QUERY_RESULT = []): Project[] {
   return items.map((item) => {
     const title = text(item.title, "Untitled project");
     return {
@@ -29,7 +29,7 @@ export function normalizeProjects(items: PROJECTS_QUERYResult = []): Project[] {
   });
 }
 
-export function normalizeSkillCategories(items: SKILLS_QUERYResult = []): SkillCategory[] {
+export function normalizeSkillCategories(items: SKILLS_QUERY_RESULT = []): SkillCategory[] {
   return items.map((item) => ({
     _id: item._id,
     title: text(item.title, "Untitled category"),
@@ -38,7 +38,7 @@ export function normalizeSkillCategories(items: SKILLS_QUERYResult = []): SkillC
   }));
 }
 
-export function normalizeResumeItems(items: RESUME_QUERYResult = []): ResumeItem[] {
+export function normalizeResumeItems(items: RESUME_QUERY_RESULT = []): ResumeItem[] {
   return items.flatMap((item) => {
     const type = resumeType(item.type);
     if (!type) return [];
@@ -61,9 +61,9 @@ export function normalizeHomeData({
   skillCategories,
   resumeItems,
 }: {
-  projects?: PROJECTS_QUERYResult;
-  skillCategories?: SKILLS_QUERYResult;
-  resumeItems?: RESUME_QUERYResult;
+  projects?: PROJECTS_QUERY_RESULT;
+  skillCategories?: SKILLS_QUERY_RESULT;
+  resumeItems?: RESUME_QUERY_RESULT;
 }) {
   return {
     projects: normalizeProjects(projects),

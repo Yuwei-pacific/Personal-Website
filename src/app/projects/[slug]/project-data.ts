@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { sanityClient } from "@/sanity/client";
 import { normalizeProjectDetail } from "@/lib/view-models/project";
 import { PROJECT_QUERY, PROJECT_SLUGS_QUERY } from "@/sanity/queries";
-import type { PROJECT_QUERYResult } from "@/sanity/sanity.types";
+import type { PROJECT_QUERY_RESULT } from "@/sanity/sanity.types";
 import type { ProjectDetail } from "@/lib/view-models/types";
 
 const SITE_URL = "https://www.yuweidesign.com";
@@ -14,7 +14,7 @@ export const fetchProject = cache(async (rawSlug?: string): Promise<ProjectDetai
   if (!slug) return null;
 
   try {
-    const result: PROJECT_QUERYResult = await sanityClient.fetch(PROJECT_QUERY, { slug });
+    const result: PROJECT_QUERY_RESULT = await sanityClient.fetch(PROJECT_QUERY, { slug });
     return normalizeProjectDetail(result, slug);
   } catch (error) {
     console.error("Failed to fetch project from Sanity", error);

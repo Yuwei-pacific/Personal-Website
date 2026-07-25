@@ -8,9 +8,9 @@ import { sanityClient } from "@/sanity/client";
 import { normalizeHomeData } from "@/lib/view-models/home";
 import { PROJECTS_QUERY, RESUME_QUERY, SKILLS_QUERY } from "@/sanity/queries";
 import type {
-  PROJECTS_QUERYResult,
-  RESUME_QUERYResult,
-  SKILLS_QUERYResult,
+  PROJECTS_QUERY_RESULT,
+  RESUME_QUERY_RESULT,
+  SKILLS_QUERY_RESULT,
 } from "@/sanity/sanity.types";
 
 // Incremental Static Regeneration: revalidate home page every 60s
@@ -24,9 +24,9 @@ export const metadata = {
 
 export default async function HomePage() {
   // 过滤与排序都在 GROQ 里完成（见 sanity/queries.ts），这里只兜底请求失败
-  let projects: PROJECTS_QUERYResult = [];
-  let skillCategories: SKILLS_QUERYResult = [];
-  let resumeItems: RESUME_QUERYResult = [];
+  let projects: PROJECTS_QUERY_RESULT = [];
+  let skillCategories: SKILLS_QUERY_RESULT = [];
+  let resumeItems: RESUME_QUERY_RESULT = [];
 
   try {
     [projects, skillCategories, resumeItems] = await Promise.all([

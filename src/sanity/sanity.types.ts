@@ -12,7 +12,9 @@
  * ---------------------------------------------------------------------------------
  */
 
-// Source: schema.json
+export declare const internalGroqTypeReferenceTo: unique symbol;
+
+// Source: src/sanity/schema.json
 export type Education = {
   _id: string;
   _type: "education";
@@ -56,6 +58,13 @@ export type SkillCategory = {
   skills?: Array<string>;
 };
 
+export type SanityImageAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+};
+
 export type Project = {
   _id: string;
   _type: "project";
@@ -73,12 +82,7 @@ export type Project = {
   client?: string;
   location?: string;
   coverImage?: {
-    asset?: {
-      _ref: string;
-      _type: "reference";
-      _weak?: boolean;
-      [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-    };
+    asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
@@ -129,12 +133,7 @@ export type Project = {
   }>;
   gallery?: Array<{
     image?: {
-      asset?: {
-        _ref: string;
-        _type: "reference";
-        _weak?: boolean;
-        [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-      };
+      asset?: SanityImageAssetReference;
       media?: unknown;
       hotspot?: SanityImageHotspot;
       crop?: SanityImageCrop;
@@ -201,6 +200,7 @@ export type SanityImageMetadata = {
   palette?: SanityImagePalette;
   lqip?: string;
   blurHash?: string;
+  thumbHash?: string;
   hasAlpha?: boolean;
   isOpaque?: boolean;
 };
@@ -264,12 +264,27 @@ export type Geopoint = {
   alt?: number;
 };
 
-export type AllSanitySchemaTypes = Education | SkillCategory | Project | SanityImageCrop | SanityImageHotspot | Slug | SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageMetadata | SanityFileAsset | SanityAssetSourceData | SanityImageAsset | Geopoint;
-export declare const internalGroqTypeReferenceTo: unique symbol;
-// Source: ./src/sanity/queries.ts
+export type AllSanitySchemaTypes =
+  | Education
+  | SkillCategory
+  | SanityImageAssetReference
+  | Project
+  | SanityImageCrop
+  | SanityImageHotspot
+  | Slug
+  | SanityImagePaletteSwatch
+  | SanityImagePalette
+  | SanityImageDimensions
+  | SanityImageMetadata
+  | SanityFileAsset
+  | SanityAssetSourceData
+  | SanityImageAsset
+  | Geopoint;
+
+// Source: src/sanity/queries.ts
 // Variable: PROJECTS_QUERY
 // Query: *[_type == "project" && visibility != false]  | order(coalesce(year, 0) desc, _createdAt desc){  _id,  title,  summary,  year,  projectType,  "slug": slug.current,  "coverImage": coverImage{    ...,    asset->{      _id,      url    }  }}
-export type PROJECTS_QUERYResult = Array<{
+export type PROJECTS_QUERY_RESULT = Array<{
   _id: string;
   title: string | null;
   summary: string | null;
@@ -288,17 +303,21 @@ export type PROJECTS_QUERYResult = Array<{
     _type: "image";
   } | null;
 }>;
+
+// Source: src/sanity/queries.ts
 // Variable: SKILLS_QUERY
 // Query: *[_type == "skillCategory"] | order(order asc){  _id,  title,  order,  skills}
-export type SKILLS_QUERYResult = Array<{
+export type SKILLS_QUERY_RESULT = Array<{
   _id: string;
   title: string | null;
   order: number | null;
   skills: Array<string> | null;
 }>;
+
+// Source: src/sanity/queries.ts
 // Variable: RESUME_QUERY
 // Query: *[_type == "education"] | order(order desc){  _id,  type,  institution,  degree,  location,  period,  details,  order}
-export type RESUME_QUERYResult = Array<{
+export type RESUME_QUERY_RESULT = Array<{
   _id: string;
   type: "education" | "experience" | null;
   institution: string | null;
@@ -325,9 +344,11 @@ export type RESUME_QUERYResult = Array<{
   }> | null;
   order: number | null;
 }>;
+
+// Source: src/sanity/queries.ts
 // Variable: PROJECT_QUERY
 // Query: *[_type == "project" && slug.current == $slug && visibility != false][0]{  _id,  title,  summary,  role,  tags,  contributors,  "slug": slug.current,  year,  projectType,  client,  location,  links,  "coverImage": { "url": coalesce(coverImage.asset->url, ""), "alt": coverImage.alt },  "gallery": gallery[]{    "url": coalesce(image.asset->url, ""),    alt,    caption,    "width": image.asset->metadata.dimensions.width,    "height": image.asset->metadata.dimensions.height  },  body,  myContribution}
-export type PROJECT_QUERYResult = {
+export type PROJECT_QUERY_RESULT = {
   _id: string;
   title: string | null;
   summary: string | null;
@@ -392,12 +413,16 @@ export type PROJECT_QUERYResult = {
     _key: string;
   }> | null;
 } | null;
+
+// Source: src/sanity/queries.ts
 // Variable: PROJECT_SLUGS_QUERY
 // Query: *[_type == "project" && defined(slug.current) && visibility != false].slug.current
-export type PROJECT_SLUGS_QUERYResult = Array<string | null>;
+export type PROJECT_SLUGS_QUERY_RESULT = Array<string | null>;
+
+// Source: src/sanity/queries.ts
 // Variable: PROJECT_SITEMAP_QUERY
 // Query: *[_type == "project" && defined(slug.current) && visibility != false]{  "slug": slug.current,  _updatedAt}
-export type PROJECT_SITEMAP_QUERYResult = Array<{
+export type PROJECT_SITEMAP_QUERY_RESULT = Array<{
   slug: string | null;
   _updatedAt: string;
 }>;
@@ -406,11 +431,11 @@ export type PROJECT_SITEMAP_QUERYResult = Array<{
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    "*[_type == \"project\" && visibility != false]\n  | order(coalesce(year, 0) desc, _createdAt desc){\n  _id,\n  title,\n  summary,\n  year,\n  projectType,\n  \"slug\": slug.current,\n  \"coverImage\": coverImage{\n    ...,\n    asset->{\n      _id,\n      url\n    }\n  }\n}": PROJECTS_QUERYResult;
-    "*[_type == \"skillCategory\"] | order(order asc){\n  _id,\n  title,\n  order,\n  skills\n}": SKILLS_QUERYResult;
-    "*[_type == \"education\"] | order(order desc){\n  _id,\n  type,\n  institution,\n  degree,\n  location,\n  period,\n  details,\n  order\n}": RESUME_QUERYResult;
-    "*[_type == \"project\" && slug.current == $slug && visibility != false][0]{\n  _id,\n  title,\n  summary,\n  role,\n  tags,\n  contributors,\n  \"slug\": slug.current,\n  year,\n  projectType,\n  client,\n  location,\n  links,\n  \"coverImage\": { \"url\": coalesce(coverImage.asset->url, \"\"), \"alt\": coverImage.alt },\n  \"gallery\": gallery[]{\n    \"url\": coalesce(image.asset->url, \"\"),\n    alt,\n    caption,\n    \"width\": image.asset->metadata.dimensions.width,\n    \"height\": image.asset->metadata.dimensions.height\n  },\n  body,\n  myContribution\n}": PROJECT_QUERYResult;
-    "*[_type == \"project\" && defined(slug.current) && visibility != false].slug.current": PROJECT_SLUGS_QUERYResult;
-    "*[_type == \"project\" && defined(slug.current) && visibility != false]{\n  \"slug\": slug.current,\n  _updatedAt\n}": PROJECT_SITEMAP_QUERYResult;
+    '*[_type == "project" && visibility != false]\n  | order(coalesce(year, 0) desc, _createdAt desc){\n  _id,\n  title,\n  summary,\n  year,\n  projectType,\n  "slug": slug.current,\n  "coverImage": coverImage{\n    ...,\n    asset->{\n      _id,\n      url\n    }\n  }\n}': PROJECTS_QUERY_RESULT;
+    '*[_type == "skillCategory"] | order(order asc){\n  _id,\n  title,\n  order,\n  skills\n}': SKILLS_QUERY_RESULT;
+    '*[_type == "education"] | order(order desc){\n  _id,\n  type,\n  institution,\n  degree,\n  location,\n  period,\n  details,\n  order\n}': RESUME_QUERY_RESULT;
+    '*[_type == "project" && slug.current == $slug && visibility != false][0]{\n  _id,\n  title,\n  summary,\n  role,\n  tags,\n  contributors,\n  "slug": slug.current,\n  year,\n  projectType,\n  client,\n  location,\n  links,\n  "coverImage": { "url": coalesce(coverImage.asset->url, ""), "alt": coverImage.alt },\n  "gallery": gallery[]{\n    "url": coalesce(image.asset->url, ""),\n    alt,\n    caption,\n    "width": image.asset->metadata.dimensions.width,\n    "height": image.asset->metadata.dimensions.height\n  },\n  body,\n  myContribution\n}': PROJECT_QUERY_RESULT;
+    '*[_type == "project" && defined(slug.current) && visibility != false].slug.current': PROJECT_SLUGS_QUERY_RESULT;
+    '*[_type == "project" && defined(slug.current) && visibility != false]{\n  "slug": slug.current,\n  _updatedAt\n}': PROJECT_SITEMAP_QUERY_RESULT;
   }
 }
