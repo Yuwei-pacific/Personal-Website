@@ -5,6 +5,9 @@ import { PROJECT_SITEMAP_QUERY } from "@/sanity/queries";
 const baseUrl = 'https://www.yuweidesign.com'
 const fallbackLastModified = new Date('2026-01-01')
 
+// Keep the generated sitemap aligned with the same CMS refresh cadence as project pages.
+export const revalidate = 60
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 动态获取项目页面
     try {

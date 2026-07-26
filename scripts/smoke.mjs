@@ -9,21 +9,23 @@ async function assertOk(path) {
   }
 }
 
-async function getFirstProjectPath() {
+async function getProjectPaths() {
   const response = await fetch(new URL("/sitemap.xml", baseUrl));
-  if (!response.ok) return null;
+  if (!response.ok) return [];
+
   const xml = await response.text();
-  const match = xml.match(/https?:\/\/[^<]+(\/projects\/[^<]+)/);
-  return match?.[1] || null;
+  const projectPaths = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)]
+    .map(([, value]) => new URL(value).pathname)
+    .filter((path) => path.startsWith("/projects/"));
+
+  return [...new Set(projectPaths)];
 }
 
 for (const path of requiredPaths) {
   await assertOk(path);
 }
 
-const projectPath = await getFirstProjectPath();
-if (projectPath) {
-  await assertOk(projectPath);
-}
+const projectPaths = await getProjectPaths();
+await Promise.all(projectPaths.map(assertOk));
 
-console.log(`Smoke check passed for ${baseUrl}`);
+console.log(`Smoke check passed for ${baseUrl} (${projectPaths.length} project routes)`);
