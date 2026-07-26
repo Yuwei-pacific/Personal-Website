@@ -52,9 +52,10 @@ Personal-Website/
 
 ## Conventions
 
-- **Data flow**: pages (Server Components) fetch via `src/sanity/client.ts` using
-  queries from `src/sanity/queries.ts`. Query results pass through
-  `src/lib/view-models/` before reaching UI components.
+- **Data flow**: pages (Server Components) fetch through
+  `src/sanity/live.ts` using queries from `src/sanity/queries.ts`.
+  `SanityLive` invalidates affected query caches when published content changes;
+  query results then pass through `src/lib/view-models/` before reaching UI components.
   Filtering (`visibility != false`) and ordering happen **in GROQ only** — never
   re-filter/re-sort in components.
 - **Types**: never hand-write raw CMS result types. Run `npm run typegen` after
