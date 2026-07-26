@@ -8,12 +8,19 @@
 // 两个受约束的取值，属于编辑决策；绝不引入 marginTop 之类的自由样式字段，
 // 那会让 schema 变成样式表、以后改设计就得动数据。
 import { defineType, defineField, defineArrayMember } from "sanity";
+// 这个版本的 @sanity/icons 只提供子路径导出，没有顶层命名导出
+import { BlockquoteIcon } from "@sanity/icons/Blockquote";
+import { ImageIcon } from "@sanity/icons/Image";
+import { ImagesIcon } from "@sanity/icons/Images";
+import { SplitVerticalIcon } from "@sanity/icons/SplitVertical";
+import { TextIcon } from "@sanity/icons/Text";
 
 /** 模块内的单个媒体位：图片 / GIF 必填，可选挂视频（与 gallery 条目同构） */
 export const sectionMedia = defineType({
   name: "sectionMedia",
   title: "Media",
   type: "object",
+  icon: ImageIcon,
   fields: [
     defineField({
       name: "image",
@@ -62,6 +69,7 @@ export const richTextSection = defineType({
   name: "richTextSection",
   title: "Text",
   type: "object",
+  icon: TextIcon,
   fields: [
     defineField({ name: "heading", title: "Heading (optional)", type: "string" }),
     defineField({
@@ -92,6 +100,7 @@ export const mediaTextSection = defineType({
   name: "mediaTextSection",
   title: "Media + text",
   type: "object",
+  icon: SplitVerticalIcon,
   fields: [
     defineField({ name: "heading", title: "Heading (optional)", type: "string" }),
     defineField({
@@ -140,6 +149,7 @@ export const mediaSection = defineType({
   name: "mediaSection",
   title: "Media",
   type: "object",
+  icon: ImageIcon,
   fields: [
     defineField({
       name: "media",
@@ -172,6 +182,7 @@ export const mediaGroupSection = defineType({
   name: "mediaGroupSection",
   title: "Media group",
   type: "object",
+  icon: ImagesIcon,
   fields: [
     defineField({
       name: "items",
@@ -197,6 +208,7 @@ export const quoteSection = defineType({
   name: "quoteSection",
   title: "Quote",
   type: "object",
+  icon: BlockquoteIcon,
   fields: [
     defineField({
       name: "quote",

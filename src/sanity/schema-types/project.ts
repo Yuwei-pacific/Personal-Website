@@ -1,27 +1,60 @@
 import { defineType, defineField } from "sanity";
+// 这个版本的 @sanity/icons 只提供子路径导出，没有顶层命名导出
+import { CaseIcon } from "@sanity/icons/Case";
+import { DocumentIcon } from "@sanity/icons/Document";
+import { ImageIcon } from "@sanity/icons/Image";
+import { ImagesIcon } from "@sanity/icons/Images";
+import { TextIcon } from "@sanity/icons/Text";
+import { UserIcon } from "@sanity/icons/User";
 
 export const project = defineType({
   name: "project",
   title: "Project",
   type: "document",
-  // Roles / Skills / My contribution 描述的是同一件事——「我在这个项目里做了什么」，
-  // 详情页也早已把三者渲染在同一个区块下。这里让表单结构追上既有的渲染事实。
-  fieldsets: [
+  icon: CaseIcon,
+
+  // 表单按编辑流程分页：先填基本信息 → 传封面 → 写正文 → 补贡献 → 加画廊。
+  // Contribution 单独成页而不是 fieldset —— Roles / Skills / My contribution
+  // 描述的是同一件事（我在这个项目里做了什么），详情页也早已把三者渲染在
+  // 同一个区块下，独立分页比折叠组的归属感更强。
+  groups: [
+    { name: "overview", title: "Overview", icon: DocumentIcon, default: true },
+    { name: "cover", title: "Cover", icon: ImageIcon },
+    { name: "content", title: "Content", icon: TextIcon },
+    { name: "contribution", title: "Contribution", icon: UserIcon },
+    { name: "gallery", title: "Gallery", icon: ImagesIcon },
+  ],
+
+  // 列表排序选项。第一项与前台 PROJECTS_QUERY 的排序一致，
+  // 这样 Studio 里看到的顺序就是访客在作品墙上看到的顺序。
+  orderings: [
     {
-      name: "contribution",
-      title: "My contribution",
-      options: { collapsible: true, collapsed: false },
+      title: "Year (newest first)",
+      name: "yearDesc",
+      by: [
+        { field: "year", direction: "desc" },
+        { field: "_createdAt", direction: "desc" },
+      ],
+    },
+    { title: "Title (A–Z)", name: "titleAsc", by: [{ field: "title", direction: "asc" }] },
+    {
+      title: "Recently updated",
+      name: "updatedDesc",
+      by: [{ field: "_updatedAt", direction: "desc" }],
     },
   ],
+
   fields: [
     defineField({
       name: "title",
+      group: "overview",
       title: "Title",
       type: "string",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "slug",
+      group: "overview",
       title: "Slug",
       type: "slug",
       options: {
@@ -34,6 +67,7 @@ export const project = defineType({
     // 一句话简介，用在卡片 / meta 描述
     defineField({
       name: "summary",
+      group: "overview",
       title: "Summary",
       type: "string",
       description: "One-line or short paragraph used in cards and previews.",
@@ -42,6 +76,7 @@ export const project = defineType({
 
     defineField({
       name: "year",
+      group: "overview",
       title: "Year",
       type: "number",
       description: "e.g. 2024",
@@ -50,6 +85,7 @@ export const project = defineType({
 
     defineField({
       name: "projectType",
+      group: "overview",
       title: "Project type",
       type: "string",
       description: "Project type or category, e.g. 'Web App', 'Branding', etc.",
@@ -58,6 +94,7 @@ export const project = defineType({
 
     defineField({
       name: "contributors",
+      group: "overview",
       title: "Contributors",
       type: "array",
       of: [{ type: "string" }],
@@ -66,44 +103,46 @@ export const project = defineType({
 
     defineField({
       name: "role",
+      group: "contribution",
       title: "Roles",
       type: "array",
       of: [{ type: "string" }],
       options: { layout: "tags" },
-      fieldset: "contribution",
     }),
 
     defineField({
       name: "tags",
+      group: "contribution",
       title: "Tags / Skills",
       type: "array",
       of: [{ type: "string" }],
       options: { layout: "tags" },
-      fieldset: "contribution",
     }),
 
     defineField({
       name: "myContribution",
+      group: "contribution",
       title: "My contribution",
       type: "array",
       of: [{ type: "block" }],
-      fieldset: "contribution",
     }),
-
 
     defineField({
       name: "client",
+      group: "overview",
       title: "Client / Organization",
       type: "string",
     }),
     defineField({
       name: "location",
+      group: "overview",
       title: "Location",
       type: "string",
     }),
 
     defineField({
       name: "coverImage",
+      group: "cover",
       title: "Cover image",
       type: "image",
       options: { hotspot: true },
@@ -125,6 +164,7 @@ export const project = defineType({
     // 社交分享图（Open Graph）与 JSON-LD 仍然只用 coverImage —— 那些场景不支持视频。
     defineField({
       name: "coverVideo",
+      group: "cover",
       title: "Cover video (optional)",
       type: "file",
       options: { accept: "video/mp4,video/webm" },
@@ -135,6 +175,7 @@ export const project = defineType({
     // 正文：可增删、可排序的内容模块
     defineField({
       name: "sections",
+      group: "content",
       title: "Content sections",
       type: "array",
       of: [
@@ -149,6 +190,7 @@ export const project = defineType({
 
     defineField({
       name: "visibility",
+      group: "overview",
       title: "Project visibility",
       type: "boolean",
       initialValue: true,
@@ -163,6 +205,7 @@ export const project = defineType({
 
     defineField({
       name: "links",
+      group: "overview",
       title: "Links",
       type: "array",
       of: [
@@ -186,6 +229,7 @@ export const project = defineType({
     // 不带 _type 字段，换成联合类型会让它们全部失效。
     defineField({
       name: "gallery",
+      group: "gallery",
       title: "Gallery",
       type: "array",
       of: [
@@ -244,13 +288,24 @@ export const project = defineType({
     select: {
       title: "title",
       media: "coverImage",
-      subtitle: "year",
+      year: "year",
+      projectType: "projectType",
+      visibility: "visibility",
+      sectionCount: "sections.length",
     },
-    prepare({ title, media, subtitle }) {
+    prepare({ title, media, year, projectType, visibility, sectionCount }) {
+      // 隐藏的项目在列表里本来完全看不出区别，标注出来免得改半天才发现没上线
+      const isHidden = visibility === false;
+      const meta = [
+        year ? String(year) : null,
+        projectType,
+        sectionCount ? `${sectionCount} sections` : "no content",
+      ].filter(Boolean);
+
       return {
-        title,
+        title: isHidden ? `${title ?? "Untitled"} — hidden` : (title ?? "Untitled"),
         media,
-        subtitle: subtitle ? String(subtitle) : "",
+        subtitle: meta.join(" · "),
       };
     },
   },
