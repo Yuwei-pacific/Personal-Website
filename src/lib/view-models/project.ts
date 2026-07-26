@@ -2,7 +2,13 @@ import { getSafeHref } from "@/lib/safe-url";
 import type { PROJECT_QUERY_RESULT } from "@/sanity/sanity.types";
 import { isAnimatedImage } from "@/lib/media";
 import { blocks, optionalText, stringList, text, video } from "./utils";
-import type { ProjectDetail, ProjectGalleryItem, ProjectLink } from "./types";
+import type {
+  ProjectDetail,
+  ProjectGalleryItem,
+  ProjectLink,
+  ProjectSection,
+  ProjectSectionMedia,
+} from "./types";
 
 const normalizeLinks = (links: NonNullable<NonNullable<PROJECT_QUERY_RESULT>["links"]>): ProjectLink[] =>
   links.map((link, index) => {
@@ -58,6 +64,100 @@ const normalizeGallery = (
     return [{ ...base, kind: "image" as const }];
   });
 
+// GROQ 投影出来的媒体位原始形状（三种模块共用）
+type RawSectionMedia = {
+  alt: string | null;
+  caption: string | null;
+  image: {
+    url: string | null;
+    mimeType: string | null;
+    width: number | null;
+    height: number | null;
+  } | null;
+  video: { url: string | null; mimeType: string | null } | null;
+};
+
+// 图片缺失或没有尺寸的媒体位直接丢弃：布局依赖宽高比，
+// 而视频文件本身没有尺寸元数据，只能由图片提供
+const normalizeSectionMedia = (
+  media: RawSectionMedia | null | undefined,
+  key: string
+): ProjectSectionMedia | null => {
+  const imageUrl = text(media?.image?.url);
+  const width = media?.image?.width;
+  const height = media?.image?.height;
+  if (!imageUrl || !width || !height) return null;
+
+  return {
+    key,
+    imageUrl,
+    imageAnimated: isAnimatedImage(media?.image?.mimeType),
+    width,
+    height,
+    alt: text(media?.alt),
+    caption: optionalText(media?.caption),
+    video: video(media?.video),
+  };
+};
+
+// 内容模块：按 _type 分派。任何缺少必要内容的模块都跳过而不是渲染成空壳。
+const normalizeSections = (
+  sections: NonNullable<PROJECT_QUERY_RESULT>["sections"]
+): ProjectSection[] =>
+  (sections ?? []).flatMap((section): ProjectSection[] => {
+    const key = section._key;
+
+    switch (section._type) {
+      case "richTextSection": {
+        const content = blocks(section.content);
+        if (!content.length) return [];
+        return [{ kind: "richText", key, heading: optionalText(section.heading), content }];
+      }
+
+      case "quoteSection": {
+        const quote = text(section.quote);
+        if (!quote) return [];
+        return [
+          { kind: "quote", key, quote, attribution: optionalText(section.attribution) },
+        ];
+      }
+
+      case "mediaTextSection": {
+        const content = blocks(section.content);
+        const media = normalizeSectionMedia(section.media, `${key}-media`);
+        if (!content.length || !media) return [];
+        return [
+          {
+            kind: "mediaText",
+            key,
+            heading: optionalText(section.heading),
+            content,
+            media,
+            mediaPosition: section.mediaPosition === "right" ? "right" : "left",
+          },
+        ];
+      }
+
+      case "mediaSection": {
+        const media = normalizeSectionMedia(section.media, `${key}-media`);
+        if (!media) return [];
+        return [{ kind: "media", key, media, fullWidth: section.fullWidth === true }];
+      }
+
+      case "mediaGroupSection": {
+        const items = (section.items ?? []).flatMap((item, index) => {
+          const media = normalizeSectionMedia(item, `${key}-${index}`);
+          return media ? [media] : [];
+        });
+        if (!items.length) return [];
+        return [{ kind: "mediaGroup", key, items, caption: optionalText(section.caption) }];
+      }
+
+      default:
+        return [];
+    }
+  });
+
 export function normalizeProjectDetail(
   item: PROJECT_QUERY_RESULT,
   fallbackSlug: string
@@ -92,7 +192,7 @@ export function normalizeProjectDetail(
       : null,
     coverVideo: video(item.coverVideo),
     gallery: normalizeGallery(item.gallery),
-    body: blocks(item.body),
+    sections: normalizeSections(item.sections),
     myContribution: blocks(item.myContribution),
   };
 }

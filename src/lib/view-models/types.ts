@@ -53,6 +53,53 @@ export type ProjectGalleryVideo = ProjectGalleryItemBase & {
 
 export type ProjectGalleryItem = ProjectGalleryImage | ProjectGalleryVideo;
 
+// 内容模块里的媒体位：图片必有（决定宽高比与 poster），视频可选
+export type ProjectSectionMedia = {
+  key: string;
+  imageUrl: string;
+  /** 动图（GIF）：生成 URL 时必须跳过 auto=format，否则只剩第一帧 */
+  imageAnimated: boolean;
+  width: number;
+  height: number;
+  alt: string;
+  caption: string | null;
+  video: ProjectVideo | null;
+};
+
+export type ProjectSection =
+  | {
+      kind: "richText";
+      key: string;
+      heading: string | null;
+      content: PortableTextBlock[];
+    }
+  | {
+      kind: "mediaText";
+      key: string;
+      heading: string | null;
+      content: PortableTextBlock[];
+      media: ProjectSectionMedia;
+      mediaPosition: "left" | "right";
+    }
+  | {
+      kind: "media";
+      key: string;
+      media: ProjectSectionMedia;
+      fullWidth: boolean;
+    }
+  | {
+      kind: "mediaGroup";
+      key: string;
+      items: ProjectSectionMedia[];
+      caption: string | null;
+    }
+  | {
+      kind: "quote";
+      key: string;
+      quote: string;
+      attribution: string | null;
+    };
+
 export type ProjectLink = {
   key: string;
   label: string;
@@ -80,7 +127,7 @@ export type ProjectDetail = {
   } | null;
   coverVideo: ProjectVideo | null;
   gallery: ProjectGalleryItem[];
-  body: PortableTextBlock[];
+  sections: ProjectSection[];
   myContribution: PortableTextBlock[];
 };
 

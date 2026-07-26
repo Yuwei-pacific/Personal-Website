@@ -20,6 +20,14 @@ const portableComponents: Partial<PortableTextReactComponents> = {
         {children}
       </p>
     ),
+    // 富文本里的引用块。@portabletext/react 的默认实现只渲染裸 <blockquote>，
+    // 不加样式就和普通段落混在一起——必须自己接管。
+    // 整段独立的引言建议改用 quoteSection 模块，这里是为正文内嵌引用保底。
+    blockquote: ({ children }) => (
+      <blockquote className="mt-6 border-l-2 border-design-dark-border-strong pl-5 text-base italic leading-relaxed text-design-dark-text-primary first:mt-0 sm:text-lg sm:leading-8">
+        {children}
+      </blockquote>
+    ),
   },
   marks: {
     strong: ({ children }) => <strong className="font-semibold text-design-dark-text-primary">{children}</strong>,

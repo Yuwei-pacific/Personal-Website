@@ -8,6 +8,7 @@ import type { ProjectDetail } from "@/lib/view-models/types";
 import { ProjectGallery } from "./project-gallery";
 import { DotList, MetaRow } from "./project-meta-table";
 import { ProjectRichText } from "./project-rich-text";
+import { ProjectSections } from "./project-sections";
 
 export function ProjectDetailView({ project }: { project: ProjectDetail }) {
   return (
@@ -89,13 +90,8 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
 
       <section data-overscroll-dark className="w-full bg-design-dark-bg px-container py-section text-design-dark-text-primary sm:px-container-sm sm:py-section-sm scroll-mt-24">
         <div className="mx-auto flex max-w-6xl flex-col gap-8">
-          {project.body.length ? (
-            <section>
-              <div className="text-design-dark-text-secondary">
-                <ProjectRichText blocks={project.body} />
-              </div>
-            </section>
-          ) : null}
+          {/* 正文：可增删排序的内容模块 */}
+          <ProjectSections sections={project.sections} />
 
           {project.role.length || project.tags.length || project.myContribution.length ? (
             <section className="border-t border-design-dark-border-strong pt-10">
