@@ -1,7 +1,7 @@
 import type { SanityImageSource } from "@sanity/image-url";
 import type { PortableTextBlock } from "@portabletext/types";
 
-export type ProjectCoverImage = SanityImageSource & {
+type ProjectCoverImage = SanityImageSource & {
   alt: string;
   /** 动图（GIF）：生成 URL 时必须跳过 auto=format，否则只剩第一帧 */
   animated: boolean;
@@ -28,9 +28,7 @@ export type Project = {
   coverVideo: ProjectVideo | null;
 };
 
-// 每个画廊条目都一定有一张图片：它是网格缩略图、布局宽高比的来源，
-// 视频条目里还兼任封面帧。视频只是在这之上附加的可播放源。
-type ProjectGalleryItemBase = {
+type ProjectMediaBase = {
   key: string;
   alt: string;
   caption: string | null;
@@ -41,11 +39,13 @@ type ProjectGalleryItemBase = {
   height: number;
 };
 
-export type ProjectGalleryImage = ProjectGalleryItemBase & {
+// 每个画廊条目都一定有一张图片：它是网格缩略图、布局宽高比的来源，
+// 视频条目里还兼任封面帧。视频只是在这之上附加的可播放源。
+type ProjectGalleryImage = ProjectMediaBase & {
   kind: "image";
 };
 
-export type ProjectGalleryVideo = ProjectGalleryItemBase & {
+type ProjectGalleryVideo = ProjectMediaBase & {
   kind: "video";
   videoUrl: string;
   mimeType: string;
@@ -54,15 +54,7 @@ export type ProjectGalleryVideo = ProjectGalleryItemBase & {
 export type ProjectGalleryItem = ProjectGalleryImage | ProjectGalleryVideo;
 
 // 内容模块里的媒体位：图片必有（决定宽高比与 poster），视频可选
-export type ProjectSectionMedia = {
-  key: string;
-  imageUrl: string;
-  /** 动图（GIF）：生成 URL 时必须跳过 auto=format，否则只剩第一帧 */
-  imageAnimated: boolean;
-  width: number;
-  height: number;
-  alt: string;
-  caption: string | null;
+export type ProjectSectionMedia = ProjectMediaBase & {
   video: ProjectVideo | null;
 };
 

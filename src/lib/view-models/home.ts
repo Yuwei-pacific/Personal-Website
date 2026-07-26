@@ -10,7 +10,7 @@ import { blocks, optionalText, stringList, text, video } from "./utils";
 const resumeType = (value: RESUME_QUERY_RESULT[number]["type"]): ResumeItem["type"] | null =>
   value === "education" || value === "experience" ? value : null;
 
-export function normalizeProjects(items: PROJECTS_QUERY_RESULT = []): Project[] {
+function normalizeProjects(items: PROJECTS_QUERY_RESULT = []): Project[] {
   return items.map((item) => {
     const title = text(item.title, "Untitled project");
     return {
@@ -32,7 +32,7 @@ export function normalizeProjects(items: PROJECTS_QUERY_RESULT = []): Project[] 
   });
 }
 
-export function normalizeSkillCategories(items: SKILLS_QUERY_RESULT = []): SkillCategory[] {
+function normalizeSkillCategories(items: SKILLS_QUERY_RESULT = []): SkillCategory[] {
   return items.map((item) => ({
     _id: item._id,
     title: text(item.title, "Untitled category"),
@@ -41,7 +41,7 @@ export function normalizeSkillCategories(items: SKILLS_QUERY_RESULT = []): Skill
   }));
 }
 
-export function normalizeResumeItems(items: RESUME_QUERY_RESULT = []): ResumeItem[] {
+function normalizeResumeItems(items: RESUME_QUERY_RESULT = []): ResumeItem[] {
   return items.flatMap((item) => {
     const type = resumeType(item.type);
     if (!type) return [];

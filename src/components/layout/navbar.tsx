@@ -93,17 +93,8 @@ export function Navbar() {
           需要显式抬回页面之上，混合才能以页面为底进行反色 */}
       <div className={blendActive ? "relative z-40 mix-blend-difference" : "relative z-40"}>
         <StaggeredMenu
-          isFixed
-          position="right"
           items={menuItems}
           socialItems={socialItems}
-          displaySocials
-          displayItemNumbering
-          menuButtonColor="#ffffff"
-          openMenuButtonColor="#171717"
-          changeMenuColorOnOpen
-          accentColor="#737373"
-          colors={["#dbe4ee", "#171717"]}
           onMenuOpen={handleMenuOpen}
           onMenuClose={handleMenuClose}
           onItemClick={handleMenuItemClick}

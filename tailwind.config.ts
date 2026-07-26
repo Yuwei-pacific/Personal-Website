@@ -141,14 +141,6 @@ const config: Config = {
           from: { transform: "translateX(0)" },
           to: { transform: "translateX(-50%)" },
         },
-        "marquee-vertical": {
-          from: { transform: "translateY(0)" },
-          to: { transform: "translateY(-50%)" },
-        },
-        float: {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-10px)" },
-        },
         "bounce-sine": {
           "0%, 100%": { transform: "translateY(12px)" },
           "50%": { transform: "translateY(-12px)" },
@@ -156,8 +148,6 @@ const config: Config = {
       },
       animation: {
         marquee: "marquee 46s linear infinite",
-        "marquee-vertical": "marquee-vertical 30s linear infinite",
-        float: "float 3s ease-in-out infinite",
         "bounce-sine": "bounce-sine 8s ease-in-out infinite",
       },
     },

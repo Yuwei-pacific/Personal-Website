@@ -16,7 +16,7 @@ import { SplitVerticalIcon } from "@sanity/icons/SplitVertical";
 import { TextIcon } from "@sanity/icons/Text";
 
 /** 模块内的单个媒体位：图片 / GIF 必填，可选挂视频（与 gallery 条目同构） */
-export const sectionMedia = defineType({
+const sectionMedia = defineType({
   name: "sectionMedia",
   title: "Media",
   type: "object",
@@ -65,7 +65,7 @@ export const sectionMedia = defineType({
 });
 
 /** 纯文字模块：现有 body 内容的迁移目标 */
-export const richTextSection = defineType({
+const richTextSection = defineType({
   name: "richTextSection",
   title: "Text",
   type: "object",
@@ -96,7 +96,7 @@ export const richTextSection = defineType({
 });
 
 /** 图文模块：一个媒体 + 一段文字，媒体左右由编辑者决定 */
-export const mediaTextSection = defineType({
+const mediaTextSection = defineType({
   name: "mediaTextSection",
   title: "Media + text",
   type: "object",
@@ -145,7 +145,7 @@ export const mediaTextSection = defineType({
 });
 
 /** 单媒体模块：一张大图 / 一段视频独占一段 */
-export const mediaSection = defineType({
+const mediaSection = defineType({
   name: "mediaSection",
   title: "Media",
   type: "object",
@@ -178,7 +178,7 @@ export const mediaSection = defineType({
 });
 
 /** 媒体组模块：2–3 个媒体并排 */
-export const mediaGroupSection = defineType({
+const mediaGroupSection = defineType({
   name: "mediaGroupSection",
   title: "Media group",
   type: "object",
@@ -204,7 +204,7 @@ export const mediaGroupSection = defineType({
 });
 
 /** 引言模块：现有正文里已经在用 blockquote，单独成型 */
-export const quoteSection = defineType({
+const quoteSection = defineType({
   name: "quoteSection",
   title: "Quote",
   type: "object",
