@@ -153,11 +153,11 @@ export function ProjectGallery({ items, title = "Gallery", fullWidth }: ProjectG
         componentsProps={{
           image: {
             className:
-              "rounded-card shadow-card transition-transform duration-base ease-design-out",
+              "shadow-card transition-transform duration-base ease-design-out",
           },
           button: {
             className:
-              "group rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary hover:[&_img]:scale-[0.97]",
+              "group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary hover:[&_img]:scale-[0.97]",
           },
         }}
       />
