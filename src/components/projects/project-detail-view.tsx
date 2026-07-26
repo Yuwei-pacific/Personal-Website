@@ -54,7 +54,7 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
             )}
 
             {project.coverImage && (
-              <div className="relative aspect-video w-full overflow-hidden rounded-media">
+              <div className="relative aspect-video w-full overflow-hidden">
                 {project.coverVideo ? (
                   // 有封面视频时它占据 hero 位，封面图作为 poster 首帧
                   <CoverVideo

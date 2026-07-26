@@ -19,7 +19,7 @@ type SectionMediaProps = {
 
 export function SectionMedia({ media, sizes, className, priority }: SectionMediaProps) {
   const frame = cn(
-    "relative w-full overflow-hidden rounded-media bg-design-dark-surface",
+    "relative w-full overflow-hidden bg-design-dark-surface",
     className
   );
 
