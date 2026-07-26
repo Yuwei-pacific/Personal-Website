@@ -4,6 +4,15 @@ export const project = defineType({
   name: "project",
   title: "Project",
   type: "document",
+  // Roles / Skills / My contribution 描述的是同一件事——「我在这个项目里做了什么」，
+  // 详情页也早已把三者渲染在同一个区块下。这里让表单结构追上既有的渲染事实。
+  fieldsets: [
+    {
+      name: "contribution",
+      title: "My contribution",
+      options: { collapsible: true, collapsed: false },
+    },
+  ],
   fields: [
     defineField({
       name: "title",
@@ -61,6 +70,7 @@ export const project = defineType({
       type: "array",
       of: [{ type: "string" }],
       options: { layout: "tags" },
+      fieldset: "contribution",
     }),
 
     defineField({
@@ -69,6 +79,15 @@ export const project = defineType({
       type: "array",
       of: [{ type: "string" }],
       options: { layout: "tags" },
+      fieldset: "contribution",
+    }),
+
+    defineField({
+      name: "myContribution",
+      title: "My contribution",
+      type: "array",
+      of: [{ type: "block" }],
+      fieldset: "contribution",
     }),
 
 
@@ -113,20 +132,19 @@ export const project = defineType({
         "Optional. Plays muted on hover over the project card. Keep it short and under ~10 MB; the cover image is still used everywhere a still is required.",
     }),
 
-    // 正文
+    // 正文：可增删、可排序的内容模块
     defineField({
-      name: "body",
-      title: "Description body",
+      name: "sections",
+      title: "Content sections",
       type: "array",
-      of: [{ type: "block" }],
-      description: "Full content: context, process, outcome.",
-    }),
-
-    defineField({
-      name: "myContribution",
-      title: "My contribution",
-      type: "array",
-      of: [{ type: "block" }],
+      of: [
+        { type: "richTextSection" },
+        { type: "mediaTextSection" },
+        { type: "mediaSection" },
+        { type: "mediaGroupSection" },
+        { type: "quoteSection" },
+      ],
+      description: "Context, process, outcome — built from reorderable modules.",
     }),
 
     defineField({

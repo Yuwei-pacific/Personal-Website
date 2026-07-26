@@ -15,6 +15,108 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: src/sanity/schema.json
+export type QuoteSection = {
+  _type: "quoteSection";
+  quote?: string;
+  attribution?: string;
+};
+
+export type MediaGroupSection = {
+  _type: "mediaGroupSection";
+  items?: Array<
+    {
+      _key: string;
+    } & SectionMedia
+  >;
+  caption?: string;
+};
+
+export type MediaSection = {
+  _type: "mediaSection";
+  media?: SectionMedia;
+  fullWidth?: boolean;
+};
+
+export type MediaTextSection = {
+  _type: "mediaTextSection";
+  heading?: string;
+  media?: SectionMedia;
+  content?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+  mediaPosition?: "left" | "right";
+};
+
+export type RichTextSection = {
+  _type: "richTextSection";
+  heading?: string;
+  content?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+};
+
+export type SanityImageAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+};
+
+export type SanityFileAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.fileAsset";
+};
+
+export type SectionMedia = {
+  _type: "sectionMedia";
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  video?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: "file";
+  };
+  alt?: string;
+  caption?: string;
+};
+
 export type Education = {
   _id: string;
   _type: "education";
@@ -58,20 +160,6 @@ export type SkillCategory = {
   skills?: Array<string>;
 };
 
-export type SanityImageAssetReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-};
-
-export type SanityFileAssetReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "sanity.fileAsset";
-};
-
 export type Project = {
   _id: string;
   _type: "project";
@@ -86,39 +174,6 @@ export type Project = {
   contributors?: Array<string>;
   role?: Array<string>;
   tags?: Array<string>;
-  client?: string;
-  location?: string;
-  coverImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  };
-  coverVideo?: {
-    asset?: SanityFileAssetReference;
-    media?: unknown;
-    _type: "file";
-  };
-  body?: Array<{
-    children?: Array<{
-      marks?: Array<string>;
-      text?: string;
-      _type: "span";
-      _key: string;
-    }>;
-    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
-    listItem?: "bullet" | "number";
-    markDefs?: Array<{
-      href?: string;
-      _type: "link";
-      _key: string;
-    }>;
-    level?: number;
-    _type: "block";
-    _key: string;
-  }>;
   myContribution?: Array<{
     children?: Array<{
       marks?: Array<string>;
@@ -137,6 +192,38 @@ export type Project = {
     _type: "block";
     _key: string;
   }>;
+  client?: string;
+  location?: string;
+  coverImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  coverVideo?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: "file";
+  };
+  sections?: Array<
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & MediaTextSection)
+    | ({
+        _key: string;
+      } & MediaSection)
+    | ({
+        _key: string;
+      } & MediaGroupSection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+  >;
   visibility?: boolean;
   links?: Array<{
     label?: string;
@@ -282,10 +369,16 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
-  | Education
-  | SkillCategory
+  | QuoteSection
+  | MediaGroupSection
+  | MediaSection
+  | MediaTextSection
+  | RichTextSection
   | SanityImageAssetReference
   | SanityFileAssetReference
+  | SectionMedia
+  | Education
+  | SkillCategory
   | Project
   | SanityImageCrop
   | SanityImageHotspot
@@ -370,7 +463,7 @@ export type RESUME_QUERY_RESULT = Array<{
 
 // Source: src/sanity/queries.ts
 // Variable: PROJECT_QUERY
-// Query: *[_type == "project" && slug.current == $slug && visibility != false][0]{  _id,  title,  summary,  role,  tags,  contributors,  "slug": slug.current,  year,  projectType,  client,  location,  links,  "coverImage": {    "url": coalesce(coverImage.asset->url, ""),    "alt": coverImage.alt,    "mimeType": coverImage.asset->mimeType  },  "coverVideo": coverVideo.asset->{ url, mimeType },  "gallery": gallery[]{    alt,    caption,    "image": image.asset->{      url,      mimeType,      "width": metadata.dimensions.width,      "height": metadata.dimensions.height    },    "video": video.asset->{ url, mimeType }  },  body,  myContribution}
+// Query: *[_type == "project" && slug.current == $slug && visibility != false][0]{  _id,  title,  summary,  role,  tags,  contributors,  "slug": slug.current,  year,  projectType,  client,  location,  links,  "coverImage": {    "url": coalesce(coverImage.asset->url, ""),    "alt": coverImage.alt,    "mimeType": coverImage.asset->mimeType  },  "coverVideo": coverVideo.asset->{ url, mimeType },  "gallery": gallery[]{    alt,    caption,    "image": image.asset->{      url,      mimeType,      "width": metadata.dimensions.width,      "height": metadata.dimensions.height    },    "video": video.asset->{ url, mimeType }  },  myContribution,  "sections": sections[]{    _type,    _key,    _type == "richTextSection" => { heading, content },    _type == "quoteSection" => { quote, attribution },    _type == "mediaTextSection" => {      heading,      content,      mediaPosition,      "media": media{        alt,        caption,        "image": image.asset->{          url,          mimeType,          "width": metadata.dimensions.width,          "height": metadata.dimensions.height        },        "video": video.asset->{ url, mimeType }      }    },    _type == "mediaSection" => {      fullWidth,      "media": media{        alt,        caption,        "image": image.asset->{          url,          mimeType,          "width": metadata.dimensions.width,          "height": metadata.dimensions.height        },        "video": video.asset->{ url, mimeType }      }    },    _type == "mediaGroupSection" => {      caption,      "items": items[]{        alt,        caption,        "image": image.asset->{          url,          mimeType,          "width": metadata.dimensions.width,          "height": metadata.dimensions.height        },        "video": video.asset->{ url, mimeType }      }    }  }}
 export type PROJECT_QUERY_RESULT = {
   _id: string;
   title: string | null;
@@ -411,24 +504,6 @@ export type PROJECT_QUERY_RESULT = {
       mimeType: string | null;
     } | null;
   }> | null;
-  body: Array<{
-    children?: Array<{
-      marks?: Array<string>;
-      text?: string;
-      _type: "span";
-      _key: string;
-    }>;
-    style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
-    listItem?: "bullet" | "number";
-    markDefs?: Array<{
-      href?: string;
-      _type: "link";
-      _key: string;
-    }>;
-    level?: number;
-    _type: "block";
-    _key: string;
-  }> | null;
   myContribution: Array<{
     children?: Array<{
       marks?: Array<string>;
@@ -447,6 +522,115 @@ export type PROJECT_QUERY_RESULT = {
     _type: "block";
     _key: string;
   }> | null;
+  sections: Array<
+    | {
+        _type: "mediaGroupSection";
+        _key: string;
+        caption: string | null;
+        items: Array<{
+          alt: string | null;
+          caption: string | null;
+          image: {
+            url: string | null;
+            mimeType: string | null;
+            width: number | null;
+            height: number | null;
+          } | null;
+          video: {
+            url: string | null;
+            mimeType: string | null;
+          } | null;
+        }> | null;
+      }
+    | {
+        _type: "mediaSection";
+        _key: string;
+        fullWidth: boolean | null;
+        media: {
+          alt: string | null;
+          caption: string | null;
+          image: {
+            url: string | null;
+            mimeType: string | null;
+            width: number | null;
+            height: number | null;
+          } | null;
+          video: {
+            url: string | null;
+            mimeType: string | null;
+          } | null;
+        } | null;
+      }
+    | {
+        _type: "mediaTextSection";
+        _key: string;
+        heading: string | null;
+        content: Array<{
+          children?: Array<{
+            marks?: Array<string>;
+            text?: string;
+            _type: "span";
+            _key: string;
+          }>;
+          style?:
+            "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+          listItem?: "bullet" | "number";
+          markDefs?: Array<{
+            href?: string;
+            _type: "link";
+            _key: string;
+          }>;
+          level?: number;
+          _type: "block";
+          _key: string;
+        }> | null;
+        mediaPosition: "left" | "right" | null;
+        media: {
+          alt: string | null;
+          caption: string | null;
+          image: {
+            url: string | null;
+            mimeType: string | null;
+            width: number | null;
+            height: number | null;
+          } | null;
+          video: {
+            url: string | null;
+            mimeType: string | null;
+          } | null;
+        } | null;
+      }
+    | {
+        _type: "quoteSection";
+        _key: string;
+        quote: string | null;
+        attribution: string | null;
+      }
+    | {
+        _type: "richTextSection";
+        _key: string;
+        heading: string | null;
+        content: Array<{
+          children?: Array<{
+            marks?: Array<string>;
+            text?: string;
+            _type: "span";
+            _key: string;
+          }>;
+          style?:
+            "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
+          listItem?: "bullet" | "number";
+          markDefs?: Array<{
+            href?: string;
+            _type: "link";
+            _key: string;
+          }>;
+          level?: number;
+          _type: "block";
+          _key: string;
+        }> | null;
+      }
+  > | null;
 } | null;
 
 // Source: src/sanity/queries.ts
@@ -469,7 +653,7 @@ declare module "@sanity/client" {
     '*[_type == "project" && visibility != false]\n  | order(coalesce(year, 0) desc, _createdAt desc){\n  _id,\n  title,\n  summary,\n  year,\n  projectType,\n  "slug": slug.current,\n  "coverImage": coverImage{\n    ...,\n    asset->{\n      _id,\n      url,\n      mimeType\n    }\n  },\n  "coverVideo": coverVideo.asset->{ url, mimeType }\n}': PROJECTS_QUERY_RESULT;
     '*[_type == "skillCategory"] | order(order asc){\n  _id,\n  title,\n  order,\n  skills\n}': SKILLS_QUERY_RESULT;
     '*[_type == "education"] | order(order desc){\n  _id,\n  type,\n  institution,\n  degree,\n  location,\n  period,\n  details,\n  order\n}': RESUME_QUERY_RESULT;
-    '*[_type == "project" && slug.current == $slug && visibility != false][0]{\n  _id,\n  title,\n  summary,\n  role,\n  tags,\n  contributors,\n  "slug": slug.current,\n  year,\n  projectType,\n  client,\n  location,\n  links,\n  "coverImage": {\n    "url": coalesce(coverImage.asset->url, ""),\n    "alt": coverImage.alt,\n    "mimeType": coverImage.asset->mimeType\n  },\n  "coverVideo": coverVideo.asset->{ url, mimeType },\n  "gallery": gallery[]{\n    alt,\n    caption,\n    "image": image.asset->{\n      url,\n      mimeType,\n      "width": metadata.dimensions.width,\n      "height": metadata.dimensions.height\n    },\n    "video": video.asset->{ url, mimeType }\n  },\n  body,\n  myContribution\n}': PROJECT_QUERY_RESULT;
+    '*[_type == "project" && slug.current == $slug && visibility != false][0]{\n  _id,\n  title,\n  summary,\n  role,\n  tags,\n  contributors,\n  "slug": slug.current,\n  year,\n  projectType,\n  client,\n  location,\n  links,\n  "coverImage": {\n    "url": coalesce(coverImage.asset->url, ""),\n    "alt": coverImage.alt,\n    "mimeType": coverImage.asset->mimeType\n  },\n  "coverVideo": coverVideo.asset->{ url, mimeType },\n  "gallery": gallery[]{\n    alt,\n    caption,\n    "image": image.asset->{\n      url,\n      mimeType,\n      "width": metadata.dimensions.width,\n      "height": metadata.dimensions.height\n    },\n    "video": video.asset->{ url, mimeType }\n  },\n  myContribution,\n  "sections": sections[]{\n    _type,\n    _key,\n    _type == "richTextSection" => { heading, content },\n    _type == "quoteSection" => { quote, attribution },\n    _type == "mediaTextSection" => {\n      heading,\n      content,\n      mediaPosition,\n      "media": media{\n        alt,\n        caption,\n        "image": image.asset->{\n          url,\n          mimeType,\n          "width": metadata.dimensions.width,\n          "height": metadata.dimensions.height\n        },\n        "video": video.asset->{ url, mimeType }\n      }\n    },\n    _type == "mediaSection" => {\n      fullWidth,\n      "media": media{\n        alt,\n        caption,\n        "image": image.asset->{\n          url,\n          mimeType,\n          "width": metadata.dimensions.width,\n          "height": metadata.dimensions.height\n        },\n        "video": video.asset->{ url, mimeType }\n      }\n    },\n    _type == "mediaGroupSection" => {\n      caption,\n      "items": items[]{\n        alt,\n        caption,\n        "image": image.asset->{\n          url,\n          mimeType,\n          "width": metadata.dimensions.width,\n          "height": metadata.dimensions.height\n        },\n        "video": video.asset->{ url, mimeType }\n      }\n    }\n  }\n}': PROJECT_QUERY_RESULT;
     '*[_type == "project" && defined(slug.current) && visibility != false].slug.current': PROJECT_SLUGS_QUERY_RESULT;
     '*[_type == "project" && defined(slug.current) && visibility != false]{\n  "slug": slug.current,\n  _updatedAt\n}': PROJECT_SITEMAP_QUERY_RESULT;
   }

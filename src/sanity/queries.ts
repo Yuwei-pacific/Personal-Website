@@ -76,8 +76,57 @@ export const PROJECT_QUERY = defineQuery(`*[_type == "project" && slug.current =
     },
     "video": video.asset->{ url, mimeType }
   },
-  body,
-  myContribution
+  myContribution,
+  "sections": sections[]{
+    _type,
+    _key,
+    _type == "richTextSection" => { heading, content },
+    _type == "quoteSection" => { quote, attribution },
+    _type == "mediaTextSection" => {
+      heading,
+      content,
+      mediaPosition,
+      "media": media{
+        alt,
+        caption,
+        "image": image.asset->{
+          url,
+          mimeType,
+          "width": metadata.dimensions.width,
+          "height": metadata.dimensions.height
+        },
+        "video": video.asset->{ url, mimeType }
+      }
+    },
+    _type == "mediaSection" => {
+      fullWidth,
+      "media": media{
+        alt,
+        caption,
+        "image": image.asset->{
+          url,
+          mimeType,
+          "width": metadata.dimensions.width,
+          "height": metadata.dimensions.height
+        },
+        "video": video.asset->{ url, mimeType }
+      }
+    },
+    _type == "mediaGroupSection" => {
+      caption,
+      "items": items[]{
+        alt,
+        caption,
+        "image": image.asset->{
+          url,
+          mimeType,
+          "width": metadata.dimensions.width,
+          "height": metadata.dimensions.height
+        },
+        "video": video.asset->{ url, mimeType }
+      }
+    }
+  }
 }`);
 
 // generateStaticParams：所有可见项目的 slug
