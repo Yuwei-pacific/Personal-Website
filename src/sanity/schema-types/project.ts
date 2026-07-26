@@ -7,6 +7,8 @@ import { ImagesIcon } from "@sanity/icons/Images";
 import { TextIcon } from "@sanity/icons/Text";
 import { UserIcon } from "@sanity/icons/User";
 
+import { projectTextBlock } from "./sections";
+
 export const project = defineType({
   name: "project",
   title: "Project",
@@ -14,8 +16,8 @@ export const project = defineType({
   icon: CaseIcon,
 
   // 表单按编辑流程分页：先填基本信息 → 传封面 → 写正文 → 补贡献 → 加画廊。
-  // Contribution 单独成页而不是 fieldset —— Roles / Skills / My contribution
-  // 描述的是同一件事（我在这个项目里做了什么），详情页也早已把三者渲染在
+  // Contribution 单独成页而不是 fieldset —— Contributors / My Roles / Skills /
+  // My contribution 描述的是同一件事（谁参与、我在项目里做了什么），详情页也把它们渲染在
   // 同一个区块下，独立分页比折叠组的归属感更强。
   groups: [
     { name: "overview", title: "Overview", icon: DocumentIcon, default: true },
@@ -94,7 +96,7 @@ export const project = defineType({
 
     defineField({
       name: "contributors",
-      group: "overview",
+      group: "contribution",
       title: "Contributors",
       type: "array",
       of: [{ type: "string" }],
@@ -104,7 +106,7 @@ export const project = defineType({
     defineField({
       name: "role",
       group: "contribution",
-      title: "Roles",
+      title: "My Roles",
       type: "array",
       of: [{ type: "string" }],
       options: { layout: "tags" },
@@ -113,7 +115,7 @@ export const project = defineType({
     defineField({
       name: "tags",
       group: "contribution",
-      title: "Tags / Skills",
+      title: "Skills",
       type: "array",
       of: [{ type: "string" }],
       options: { layout: "tags" },
@@ -124,7 +126,7 @@ export const project = defineType({
       group: "contribution",
       title: "My contribution",
       type: "array",
-      of: [{ type: "block" }],
+      of: [projectTextBlock()],
     }),
 
     defineField({
