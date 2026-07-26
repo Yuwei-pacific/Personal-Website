@@ -5,13 +5,13 @@ import "server-only";
 import { createClient } from "@sanity/client";
 import { apiVersion, dataset, projectId } from "@/sanity/config";
 
-const token = process.env.SANITY_READ_TOKEN?.trim() || undefined;
+export const sanityToken = process.env.SANITY_READ_TOKEN?.trim() || undefined;
 
 export const sanityClient = createClient({
   projectId,
   dataset,
   apiVersion,
-  useCdn: !token && process.env.NODE_ENV === "production",
+  useCdn: !sanityToken && process.env.NODE_ENV === "production",
   perspective: "published",
-  token,
+  token: sanityToken,
 });

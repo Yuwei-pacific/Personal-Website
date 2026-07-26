@@ -2,6 +2,7 @@ import { cache } from "react";
 import type { Metadata } from "next";
 
 import { sanityClient } from "@/sanity/client";
+import { sanityFetch } from "@/sanity/live";
 import { normalizeProjectDetail } from "@/lib/view-models/project";
 import { PROJECT_QUERY, PROJECT_SLUGS_QUERY } from "@/sanity/queries";
 import type { PROJECT_QUERY_RESULT } from "@/sanity/sanity.types";
@@ -14,7 +15,12 @@ export const fetchProject = cache(async (rawSlug?: string): Promise<ProjectDetai
   if (!slug) return null;
 
   try {
-    const result: PROJECT_QUERY_RESULT = await sanityClient.fetch(PROJECT_QUERY, { slug });
+    const { data: result }: { data: PROJECT_QUERY_RESULT } = await sanityFetch({
+      query: PROJECT_QUERY,
+      params: { slug },
+      perspective: "published",
+      stega: false,
+    });
     return normalizeProjectDetail(result, slug);
   } catch (error) {
     console.error("Failed to fetch project from Sanity", error);

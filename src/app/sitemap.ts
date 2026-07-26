@@ -1,17 +1,21 @@
 import { MetadataRoute } from 'next'
-import { sanityClient } from "@/sanity/client";
+import { sanityFetch } from "@/sanity/live";
 import { PROJECT_SITEMAP_QUERY } from "@/sanity/queries";
 
 const baseUrl = 'https://www.yuweidesign.com'
 const fallbackLastModified = new Date('2026-01-01')
 
-// Keep the generated sitemap aligned with the same CMS refresh cadence as project pages.
+// Sanity Live invalidates this query after publishes; ISR remains a fallback.
 export const revalidate = 60
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 动态获取项目页面
     try {
-        const projects = await sanityClient.fetch(PROJECT_SITEMAP_QUERY)
+        const { data: projects } = await sanityFetch({
+            query: PROJECT_SITEMAP_QUERY,
+            perspective: "published",
+            stega: false,
+        })
         const validProjects = projects.filter((project): project is { slug: string; _updatedAt: string } => Boolean(project.slug))
         const latestProjectDate = validProjects.reduce((latest, project) => {
             const updatedAt = new Date(project._updatedAt)

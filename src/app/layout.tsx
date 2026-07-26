@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd, websiteSchema } from "@/components/seo/json-ld";
 import { CustomCursor } from "@/components/ui/custom-cursor";
+import { SanityLive } from "@/sanity/live";
 import "lenis/dist/lenis.css";
 import "./globals.css";
 
@@ -105,6 +106,8 @@ export default function RootLayout({
             </div>
           </LenisProvider>
         </AppViewTransitions>
+        {/* Published Sanity changes invalidate affected query caches and refresh open pages. */}
+        <SanityLive includeDrafts={false} />
         {/* Vercel Analytics 组件：用于监测页面性能与用户行为 */}
         {process.env.NODE_ENV === "production" && <Analytics />}
         {/* Vercel Speed Insights 组件：用于性能分析 */}

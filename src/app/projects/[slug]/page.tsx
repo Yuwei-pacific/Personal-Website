@@ -11,6 +11,7 @@ import {
   fetchProjectSlugs,
 } from "./project-data";
 
+// Sanity Live handles published changes immediately; ISR is the fallback path.
 export const revalidate = 60;
 
 export async function generateStaticParams() {

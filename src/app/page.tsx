@@ -4,7 +4,7 @@ import { AboutSection } from "@/components/sections/about-section";
 import { Hero } from "@/components/sections/hero";
 import { ProjectsSection } from "@/components/sections/projects-section";
 import { JsonLd, personSchema } from "@/components/seo/json-ld";
-import { sanityClient } from "@/sanity/client";
+import { sanityFetch } from "@/sanity/live";
 import { normalizeHomeData } from "@/lib/view-models/home";
 import { PROJECTS_QUERY, RESUME_QUERY, SKILLS_QUERY } from "@/sanity/queries";
 import type {
@@ -13,7 +13,7 @@ import type {
   SKILLS_QUERY_RESULT,
 } from "@/sanity/sanity.types";
 
-// Incremental Static Regeneration: revalidate home page every 60s
+// Sanity Live updates published content immediately; ISR remains a fallback.
 export const revalidate = 60;
 
 // 页面元数据：设置首页标题与描述（用于 SEO）
@@ -29,11 +29,14 @@ export default async function HomePage() {
   let resumeItems: RESUME_QUERY_RESULT = [];
 
   try {
-    [projects, skillCategories, resumeItems] = await Promise.all([
-      sanityClient.fetch(PROJECTS_QUERY),
-      sanityClient.fetch(SKILLS_QUERY),
-      sanityClient.fetch(RESUME_QUERY),
+    const [projectsResult, skillsResult, resumeResult] = await Promise.all([
+      sanityFetch({ query: PROJECTS_QUERY, perspective: "published", stega: false }),
+      sanityFetch({ query: SKILLS_QUERY, perspective: "published", stega: false }),
+      sanityFetch({ query: RESUME_QUERY, perspective: "published", stega: false }),
     ]);
+    projects = projectsResult.data;
+    skillCategories = skillsResult.data;
+    resumeItems = resumeResult.data;
   } catch (error) {
     console.error("Failed to fetch data from Sanity", error);
   }
