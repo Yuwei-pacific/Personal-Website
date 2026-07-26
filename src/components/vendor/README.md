@@ -11,7 +11,9 @@ Before changing a vendor component:
 
 If a component starts owning core product behavior, migrate it to TSX instead of expanding this adapter layer.
 
-`StaggeredMenu` and `Masonry` crossed that line and now live as owned TSX components:
+`StaggeredMenu` crossed that line and now lives as an owned TSX component:
 
 - `components/layout/staggered-menu.tsx`
-- `components/projects/masonry.tsx`
+
+The project gallery uses the maintained `react-photo-album` package rather than
+a local vendor implementation.

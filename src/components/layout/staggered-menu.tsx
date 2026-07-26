@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { CSSProperties, MouseEvent as ReactMouseEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { gsap } from "@/lib/animation/gsap";
 
 import "./staggered-menu.css";
@@ -17,46 +17,58 @@ export type StaggeredMenuSocialItem = {
   link: string;
 };
 
-export type StaggeredMenuProps = {
-  position?: "left" | "right";
-  colors?: string[];
-  items?: StaggeredMenuItem[];
-  socialItems?: StaggeredMenuSocialItem[];
-  displaySocials?: boolean;
-  displayItemNumbering?: boolean;
-  className?: string;
-  menuButtonColor?: string;
-  openMenuButtonColor?: string;
-  accentColor?: string;
-  changeMenuColorOnOpen?: boolean;
-  isFixed?: boolean;
-  closeOnClickAway?: boolean;
+type StaggeredMenuProps = {
+  items: StaggeredMenuItem[];
+  socialItems: StaggeredMenuSocialItem[];
   onMenuOpen?: () => void;
   onMenuClose?: () => void;
   onItemClick?: (href: string, event: ReactMouseEvent<HTMLAnchorElement>) => void;
 };
 
-type StaggeredMenuStyle = CSSProperties & {
-  "--sm-accent"?: string;
+type PanelElements = {
+  itemEls: HTMLElement[];
+  numberEls: HTMLElement[];
+  socialTitle: HTMLElement | null;
+  socialLinks: HTMLElement[];
 };
 
-const DEFAULT_COLORS = ["#B497CF", "#5227FF"];
-const FALLBACK_LAYER_COLORS = ["#1e1e22", "#35353c"];
+const PRE_LAYER_COLORS = ["#dbe4ee", "#171717"];
+const MENU_BUTTON_COLOR = "#ffffff";
+const OPEN_MENU_BUTTON_COLOR = "#171717";
+const OFFSCREEN_X = 100;
 
-export function StaggeredMenu({
-  position = "right",
-  colors = DEFAULT_COLORS,
-  items = [],
-  socialItems = [],
-  displaySocials = true,
-  displayItemNumbering = true,
-  className,
-  menuButtonColor = "#fff",
-  openMenuButtonColor = "#fff",
-  accentColor = "#5227FF",
-  changeMenuColorOnOpen = true,
-  isFixed = false,
-  closeOnClickAway = true,
+const getPanelElements = (panel: HTMLElement): PanelElements => ({
+  itemEls: Array.from(panel.querySelectorAll<HTMLElement>(".sm-panel-itemLabel")),
+  numberEls: Array.from(
+    panel.querySelectorAll<HTMLElement>(".sm-panel-list[data-numbering] .sm-panel-item")
+  ),
+  socialTitle: panel.querySelector<HTMLElement>(".sm-socials-title"),
+  socialLinks: Array.from(panel.querySelectorAll<HTMLElement>(".sm-socials-link")),
+});
+
+const resetPanelContent = ({
+  itemEls,
+  numberEls,
+  socialTitle,
+  socialLinks,
+}: PanelElements) => {
+  if (itemEls.length) {
+    gsap.set(itemEls, { yPercent: 140, rotate: 10 });
+  }
+  if (numberEls.length) {
+    gsap.set(numberEls, { "--sm-num-opacity": 0 });
+  }
+  if (socialTitle) {
+    gsap.set(socialTitle, { opacity: 0 });
+  }
+  if (socialLinks.length) {
+    gsap.set(socialLinks, { y: 25, opacity: 0 });
+  }
+};
+
+function StaggeredMenu({
+  items,
+  socialItems,
   onMenuOpen,
   onMenuClose,
   onItemClick,
@@ -79,17 +91,6 @@ export function StaggeredMenu({
   const toggleBtnRef = useRef<HTMLButtonElement>(null);
   const busyRef = useRef(false);
 
-  const preLayerColors = useMemo(() => {
-    const raw = (colors.length ? colors : FALLBACK_LAYER_COLORS).slice(0, 4);
-    const resolved = [...raw];
-
-    if (resolved.length >= 3) {
-      resolved.splice(Math.floor(resolved.length / 2), 1);
-    }
-
-    return resolved;
-  }, [colors]);
-
   useLayoutEffect(() => {
     const context = gsap.context(() => {
       const panel = panelRef.current;
@@ -103,8 +104,7 @@ export function StaggeredMenu({
       const preLayers = preContainer ? Array.from(preContainer.querySelectorAll<HTMLDivElement>(".sm-prelayer")) : [];
       preLayerElsRef.current = preLayers;
 
-      const offscreen = position === "left" ? -100 : 100;
-      gsap.set([panel, ...preLayers], { xPercent: offscreen, opacity: 1 });
+      gsap.set([panel, ...preLayers], { xPercent: OFFSCREEN_X, opacity: 1 });
 
       if (preContainer) {
         gsap.set(preContainer, { xPercent: 0, opacity: 1 });
@@ -116,12 +116,12 @@ export function StaggeredMenu({
       gsap.set(textInner, { yPercent: 0 });
 
       if (toggleBtnRef.current) {
-        gsap.set(toggleBtnRef.current, { color: menuButtonColor });
+        gsap.set(toggleBtnRef.current, { color: MENU_BUTTON_COLOR });
       }
     });
 
     return () => context.revert();
-  }, [menuButtonColor, position, preLayerColors]);
+  }, []);
 
   const buildOpenTimeline = useCallback(() => {
     const panel = panelRef.current;
@@ -132,27 +132,10 @@ export function StaggeredMenu({
     closeTweenRef.current?.kill();
     closeTweenRef.current = null;
 
-    const itemEls = Array.from(panel.querySelectorAll<HTMLElement>(".sm-panel-itemLabel"));
-    const numberEls = Array.from(panel.querySelectorAll<HTMLElement>(".sm-panel-list[data-numbering] .sm-panel-item"));
-    const socialTitle = panel.querySelector<HTMLElement>(".sm-socials-title");
-    const socialLinks = Array.from(panel.querySelectorAll<HTMLElement>(".sm-socials-link"));
-
-    const offscreen = position === "left" ? -100 : 100;
-    const layerStates = layers.map((element) => ({ element, start: offscreen }));
-    const panelStart = offscreen;
-
-    if (itemEls.length) {
-      gsap.set(itemEls, { yPercent: 140, rotate: 10 });
-    }
-    if (numberEls.length) {
-      gsap.set(numberEls, { "--sm-num-opacity": 0 });
-    }
-    if (socialTitle) {
-      gsap.set(socialTitle, { opacity: 0 });
-    }
-    if (socialLinks.length) {
-      gsap.set(socialLinks, { y: 25, opacity: 0 });
-    }
+    const panelElements = getPanelElements(panel);
+    const { itemEls, numberEls, socialTitle, socialLinks } = panelElements;
+    const layerStates = layers.map((element) => ({ element, start: OFFSCREEN_X }));
+    resetPanelContent(panelElements);
 
     const timeline = gsap.timeline({ paused: true });
 
@@ -166,7 +149,7 @@ export function StaggeredMenu({
 
     timeline.fromTo(
       panel,
-      { xPercent: panelStart },
+      { xPercent: OFFSCREEN_X },
       { xPercent: 0, duration: panelDuration, ease: "power4.out" },
       panelInsertTime
     );
@@ -235,7 +218,7 @@ export function StaggeredMenu({
 
     openTlRef.current = timeline;
     return timeline;
-  }, [position]);
+  }, []);
 
   const playOpen = useCallback(() => {
     if (busyRef.current) return;
@@ -264,35 +247,17 @@ export function StaggeredMenu({
     const all: HTMLElement[] = [...layers, panel];
     closeTweenRef.current?.kill();
 
-    const offscreen = position === "left" ? -100 : 100;
     closeTweenRef.current = gsap.to(all, {
-      xPercent: offscreen,
+      xPercent: OFFSCREEN_X,
       duration: 0.32,
       ease: "power3.in",
       overwrite: "auto",
       onComplete: () => {
-        const itemEls = Array.from(panel.querySelectorAll<HTMLElement>(".sm-panel-itemLabel"));
-        const numberEls = Array.from(panel.querySelectorAll<HTMLElement>(".sm-panel-list[data-numbering] .sm-panel-item"));
-        const socialTitle = panel.querySelector<HTMLElement>(".sm-socials-title");
-        const socialLinks = Array.from(panel.querySelectorAll<HTMLElement>(".sm-socials-link"));
-
-        if (itemEls.length) {
-          gsap.set(itemEls, { yPercent: 140, rotate: 10 });
-        }
-        if (numberEls.length) {
-          gsap.set(numberEls, { "--sm-num-opacity": 0 });
-        }
-        if (socialTitle) {
-          gsap.set(socialTitle, { opacity: 0 });
-        }
-        if (socialLinks.length) {
-          gsap.set(socialLinks, { y: 25, opacity: 0 });
-        }
-
+        resetPanelContent(getPanelElements(panel));
         busyRef.current = false;
       },
     });
-  }, [position]);
+  }, []);
 
   const animateIcon = useCallback((opening: boolean) => {
     const icon = iconRef.current;
@@ -307,37 +272,18 @@ export function StaggeredMenu({
     });
   }, []);
 
-  const animateColor = useCallback(
-    (opening: boolean) => {
-      const button = toggleBtnRef.current;
-      if (!button) return;
-
-      colorTweenRef.current?.kill();
-
-      if (changeMenuColorOnOpen) {
-        colorTweenRef.current = gsap.to(button, {
-          color: opening ? openMenuButtonColor : menuButtonColor,
-          delay: 0.18,
-          duration: 0.3,
-          ease: "power2.out",
-        });
-      } else {
-        gsap.set(button, { color: menuButtonColor });
-      }
-    },
-    [changeMenuColorOnOpen, menuButtonColor, openMenuButtonColor]
-  );
-
-  useEffect(() => {
+  const animateColor = useCallback((opening: boolean) => {
     const button = toggleBtnRef.current;
     if (!button) return;
 
-    if (changeMenuColorOnOpen) {
-      gsap.set(button, { color: openRef.current ? openMenuButtonColor : menuButtonColor });
-    } else {
-      gsap.set(button, { color: menuButtonColor });
-    }
-  }, [changeMenuColorOnOpen, menuButtonColor, openMenuButtonColor]);
+    colorTweenRef.current?.kill();
+    colorTweenRef.current = gsap.to(button, {
+      color: opening ? OPEN_MENU_BUTTON_COLOR : MENU_BUTTON_COLOR,
+      delay: 0.18,
+      duration: 0.3,
+      ease: "power2.out",
+    });
+  }, []);
 
   const animateText = useCallback((opening: boolean) => {
     const inner = textInnerRef.current;
@@ -402,7 +348,7 @@ export function StaggeredMenu({
   }, [animateColor, animateIcon, animateText, onMenuClose, playClose]);
 
   useEffect(() => {
-    if (!closeOnClickAway || !open) return;
+    if (!open) return;
 
     const handleClickOutside = (event: MouseEvent) => {
       if (!(event.target instanceof Node)) return;
@@ -421,7 +367,7 @@ export function StaggeredMenu({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [closeMenu, closeOnClickAway, open]);
+  }, [closeMenu, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -460,13 +406,10 @@ export function StaggeredMenu({
     closeMenu();
   };
 
-  const rootClassName = [className, "staggered-menu-wrapper", isFixed ? "fixed-wrapper" : null].filter(Boolean).join(" ");
-  const rootStyle: StaggeredMenuStyle | undefined = accentColor ? { "--sm-accent": accentColor } : undefined;
-
   return (
-    <div className={rootClassName} style={rootStyle} data-position={position} data-open={open ? "true" : undefined}>
+    <div className="staggered-menu-wrapper" data-open={open ? "true" : undefined}>
       <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
-        {preLayerColors.map((color, index) => (
+        {PRE_LAYER_COLORS.map((color, index) => (
           <div key={`${color}-${index}`} className="sm-prelayer" style={{ background: color }} />
         ))}
       </div>
@@ -505,7 +448,7 @@ export function StaggeredMenu({
         inert={!open}
       >
         <div className="sm-panel-inner">
-          <ul className="sm-panel-list" role="list" data-numbering={displayItemNumbering ? "true" : undefined}>
+          <ul className="sm-panel-list" role="list" data-numbering="true">
             {items.length ? (
               items.map((item, index) => (
                 <li className="sm-panel-itemWrap" key={`${item.label}-${index}`}>
@@ -529,7 +472,7 @@ export function StaggeredMenu({
             )}
           </ul>
 
-          {displaySocials && socialItems.length > 0 && (
+          {socialItems.length > 0 && (
             <div className="sm-socials" aria-label="Social links">
               <h3 className="sm-socials-title">Socials</h3>
               <ul className="sm-socials-list" role="list">

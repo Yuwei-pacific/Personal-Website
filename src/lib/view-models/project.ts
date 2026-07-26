@@ -22,50 +22,8 @@ const normalizeLinks = (links: NonNullable<NonNullable<PROJECT_QUERY_RESULT>["li
     };
   });
 
-// 画廊条目：图片是每条的视觉锚点（缩略图 + 布局宽高比 + 视频封面帧），
-// 视频是可选的附加播放源。唯一的丢弃条件是「图片本身缺失或没有尺寸」——
-// 挂了视频绝不会让一条目消失。
-const normalizeGallery = (
-  gallery: NonNullable<PROJECT_QUERY_RESULT>["gallery"]
-): ProjectGalleryItem[] =>
-  (gallery ?? []).flatMap((item, index): ProjectGalleryItem[] => {
-    // alt 可留空：空串表示装饰性媒体，渲染时让屏幕阅读器跳过图片本身，
-    // 可点击按钮另给位置性名称（见 project-gallery.tsx）。
-    // 不在这里编造 "Project media 1" 之类的文案——那对读屏用户只是噪音
-    const alt = text(item.alt);
-    const caption = optionalText(item.caption);
-
-    const imageUrl = text(item.image?.url);
-    const { width, height } = item.image ?? {};
-    if (!imageUrl || !width || !height) return [];
-
-    const base = {
-      key: `gallery-${index}-${imageUrl}`,
-      alt,
-      caption,
-      imageUrl,
-      imageAnimated: isAnimatedImage(item.image?.mimeType),
-      width,
-      height,
-    };
-
-    const videoSource = video(item.video);
-    if (videoSource) {
-      return [
-        {
-          ...base,
-          kind: "video" as const,
-          videoUrl: videoSource.url,
-          mimeType: videoSource.mimeType,
-        },
-      ];
-    }
-
-    return [{ ...base, kind: "image" as const }];
-  });
-
-// GROQ 投影出来的媒体位原始形状（三种模块共用）
-type RawSectionMedia = {
+// GROQ 投影出来的媒体原始形状，gallery 与正文模块共用
+type RawProjectMedia = {
   alt: string | null;
   caption: string | null;
   image: {
@@ -79,8 +37,8 @@ type RawSectionMedia = {
 
 // 图片缺失或没有尺寸的媒体位直接丢弃：布局依赖宽高比，
 // 而视频文件本身没有尺寸元数据，只能由图片提供
-const normalizeSectionMedia = (
-  media: RawSectionMedia | null | undefined,
+const normalizeProjectMedia = (
+  media: RawProjectMedia | null | undefined,
   key: string
 ): ProjectSectionMedia | null => {
   const imageUrl = text(media?.image?.url);
@@ -99,6 +57,33 @@ const normalizeSectionMedia = (
     video: video(media?.video),
   };
 };
+
+// 画廊条目：图片是每条的视觉锚点（缩略图 + 布局宽高比 + 视频封面帧），
+// 视频是可选的附加播放源。挂了视频不会让条目消失。
+const normalizeGallery = (
+  gallery: NonNullable<PROJECT_QUERY_RESULT>["gallery"]
+): ProjectGalleryItem[] =>
+  (gallery ?? []).flatMap((item, index): ProjectGalleryItem[] => {
+    const normalized = normalizeProjectMedia(
+      item,
+      `gallery-${index}-${text(item.image?.url)}`
+    );
+    if (!normalized) return [];
+
+    const { video: videoSource, ...base } = normalized;
+    if (videoSource) {
+      return [
+        {
+          ...base,
+          kind: "video",
+          videoUrl: videoSource.url,
+          mimeType: videoSource.mimeType,
+        },
+      ];
+    }
+
+    return [{ ...base, kind: "image" }];
+  });
 
 // 内容模块：按 _type 分派。任何缺少必要内容的模块都跳过而不是渲染成空壳。
 const normalizeSections = (
@@ -124,7 +109,7 @@ const normalizeSections = (
 
       case "mediaTextSection": {
         const content = blocks(section.content);
-        const media = normalizeSectionMedia(section.media, `${key}-media`);
+        const media = normalizeProjectMedia(section.media, `${key}-media`);
         if (!content.length || !media) return [];
         return [
           {
@@ -139,14 +124,14 @@ const normalizeSections = (
       }
 
       case "mediaSection": {
-        const media = normalizeSectionMedia(section.media, `${key}-media`);
+        const media = normalizeProjectMedia(section.media, `${key}-media`);
         if (!media) return [];
         return [{ kind: "media", key, media, fullWidth: section.fullWidth === true }];
       }
 
       case "mediaGroupSection": {
         const items = (section.items ?? []).flatMap((item, index) => {
-          const media = normalizeSectionMedia(item, `${key}-${index}`);
+          const media = normalizeProjectMedia(item, `${key}-${index}`);
           return media ? [media] : [];
         });
         if (!items.length) return [];
