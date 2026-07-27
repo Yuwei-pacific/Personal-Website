@@ -91,8 +91,8 @@ export function Hero() {
             <div className="relative">
               <p className="hero-description text-pretty text-xl leading-relaxed text-design-light-text-secondary sm:text-2xl lg:text-3xl">
                 <DecryptedText
-                  text="I design and build vivid digital experiences that bring color to the ordinary."
-                  animateOn="view"
+                  text={`I design and build vivid experiences
+that bring color to the ordinary.`}
                   sequential
                   revealDirection="start"
                   speed={30}
@@ -117,7 +117,7 @@ export function Hero() {
             href="mailto:snowtime200801@gmail.com"
             className="hero-cta inline-flex h-10 items-center justify-center whitespace-nowrap rounded-button border border-design-light-border bg-design-light-bg px-4 py-2 text-small font-medium shadow-card transition-[background-color,color,transform] duration-base hover:scale-emphasis hover:bg-design-light-hover hover:text-design-light-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            Contact Me via Email
+            Email me
           </a>
         </div>
       </div>
