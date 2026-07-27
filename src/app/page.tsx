@@ -5,6 +5,7 @@ import { Hero } from "@/components/sections/hero";
 import { ProjectsSection } from "@/components/sections/projects-section";
 import { JsonLd, personSchema } from "@/components/seo/json-ld";
 import { sanityFetch } from "@/sanity/live";
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site-metadata";
 import { normalizeHomeData } from "@/lib/view-models/home";
 import { PROJECTS_QUERY, RESUME_QUERY, SKILLS_QUERY } from "@/sanity/queries";
 import type {
@@ -18,8 +19,10 @@ export const revalidate = 60;
 
 // 页面元数据：设置首页标题与描述（用于 SEO）
 export const metadata = {
-  title: "Home",
-  description: "Welcome to Yuwei Li's portfolio - Explore my design and development projects.",
+  title: {
+    absolute: SITE_TITLE,
+  },
+  description: SITE_DESCRIPTION,
 };
 
 export default async function HomePage() {
