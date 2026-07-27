@@ -102,86 +102,82 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
           data-overscroll-dark
           className="w-full bg-design-dark-bg px-container pb-section text-design-dark-text-primary sm:px-container-sm sm:pb-section-sm"
         >
-          <div className="mx-auto max-w-6xl border-t border-design-dark-border-strong pt-section sm:pt-section-sm">
-            <h2 className="text-2xl font-semibold leading-tight text-design-dark-text-primary sm:text-3xl">
-              Project credits
-            </h2>
+          <div className="mx-auto max-w-6xl">
+            {project.links.length ? (
+              <ul className="mb-6 flex flex-wrap justify-start gap-3">
+                {project.links.map((link) => {
+                  const href = link.href;
+                  const label =
+                    link.label?.trim().toLowerCase() === "official website"
+                      ? "Visit official website"
+                      : link.label || "Visit project";
 
-            <div className="mt-6 grid gap-10 sm:mt-8 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-16 lg:gap-24">
-              <div className="min-w-0">
-                {project.myContribution.length ? (
-                  <div className="text-design-dark-text-secondary">
-                    <ProjectRichText blocks={project.myContribution} scale="compact" />
-                  </div>
-                ) : null}
-              </div>
+                  return (
+                    <li key={link.key}>
+                      {href ? (
+                        <a
+                          href={href}
+                          {...getExternalLinkProps(href)}
+                          className="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-button border border-design-dark-border-strong bg-design-dark-surface px-3 py-1.5 text-xs font-medium text-design-dark-text-secondary transition-[background-color,color,transform] duration-base hover:scale-emphasis hover:bg-design-dark-elevated hover:text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-2 focus-visible:ring-offset-design-dark-bg"
+                        >
+                          {label}
+                          <span aria-hidden="true">↗</span>
+                        </a>
+                      ) : (
+                        <span className="text-small text-design-dark-text-secondary">
+                          {link.label || link.originalUrl}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
 
-              <div className="min-w-0">
-                {project.contributors.length || project.role.length || project.tags.length ? (
-                  <div className="border-t border-design-dark-border">
-                    {project.contributors.length ? (
-                      <MetaRow label="Contributors" tone="dark" density="compact">
-                        <DotList
-                          items={project.contributors}
-                          separatorClassName="text-design-dark-border-strong"
-                        />
-                      </MetaRow>
-                    ) : null}
-                    {project.role.length ? (
-                      <MetaRow label="My Roles" tone="dark" density="compact">
-                        <DotList
-                          items={project.role}
-                          separatorClassName="text-design-dark-border-strong"
-                        />
-                      </MetaRow>
-                    ) : null}
-                    {project.tags.length ? (
-                      <MetaRow label="Skills" tone="dark" density="compact">
-                        <DotList
-                          items={project.tags}
-                          separatorClassName="text-design-dark-border-strong"
-                        />
-                      </MetaRow>
-                    ) : null}
-                  </div>
-                ) : null}
+            <div className="border-t border-design-dark-border-strong pt-section sm:pt-section-sm">
+              <h2 className="text-2xl font-semibold leading-tight text-design-dark-text-primary sm:text-3xl">
+                Project credits
+              </h2>
 
-                {project.links.length ? (
-                  <ul
-                    className={`flex flex-wrap gap-3 ${
-                      project.contributors.length || project.role.length || project.tags.length
-                        ? "mt-6"
-                        : ""
-                    }`}
-                  >
-                    {project.links.map((link) => {
-                      const href = link.href;
-                      const label =
-                        link.label?.trim().toLowerCase() === "official website"
-                          ? "Visit official website"
-                          : link.label || "Visit project";
+              <div className="mt-6 grid gap-10 sm:mt-8 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-16 lg:gap-24">
+                <div className="min-w-0">
+                  {project.myContribution.length ? (
+                    <div className="text-design-dark-text-secondary">
+                      <ProjectRichText blocks={project.myContribution} scale="compact" />
+                    </div>
+                  ) : null}
+                </div>
 
-                      return (
-                        <li key={link.key}>
-                          {href ? (
-                            <a
-                              href={href}
-                              {...getExternalLinkProps(href)}
-                              className="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-button border border-design-dark-border-strong bg-design-dark-surface px-3 py-1.5 text-xs font-medium text-design-dark-text-secondary transition-[background-color,color,transform] duration-base hover:scale-emphasis hover:bg-design-dark-elevated hover:text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-2 focus-visible:ring-offset-design-dark-bg"
-                            >
-                              {label}
-                              <span aria-hidden="true">↗</span>
-                            </a>
-                          ) : (
-                            <span className="text-small text-design-dark-text-secondary">
-                              {link.label || link.originalUrl}
-                            </span>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                ) : null}
+                <div className="min-w-0">
+                  {project.contributors.length || project.role.length || project.tags.length ? (
+                    <div className="border-t border-design-dark-border">
+                      {project.contributors.length ? (
+                        <MetaRow label="Contributors" tone="dark" density="compact">
+                          <DotList
+                            items={project.contributors}
+                            separatorClassName="text-design-dark-border-strong"
+                          />
+                        </MetaRow>
+                      ) : null}
+                      {project.role.length ? (
+                        <MetaRow label="My Roles" tone="dark" density="compact">
+                          <DotList
+                            items={project.role}
+                            separatorClassName="text-design-dark-border-strong"
+                          />
+                        </MetaRow>
+                      ) : null}
+                      {project.tags.length ? (
+                        <MetaRow label="Skills" tone="dark" density="compact">
+                          <DotList
+                            items={project.tags}
+                            separatorClassName="text-design-dark-border-strong"
+                          />
+                        </MetaRow>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
