@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd, websiteSchema } from "@/components/seo/json-ld";
 import { CustomCursor } from "@/components/ui/custom-cursor";
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site-metadata";
 import { SanityLive } from "@/sanity/live";
 import "lenis/dist/lenis.css";
 import "./globals.css";
@@ -27,26 +28,26 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.yuweidesign.com'),
   title: {
-    default: "Yuwei Design | UX/UI Designer & Creative Developer",
+    default: SITE_TITLE,
     template: "%s | Yuwei Design",
   },
-  description: "Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.",
-  keywords: ["Yuwei Li", "portfolio", "designer", "developer", "creative technologist", "web development", "UI/UX design"],
+  description: SITE_DESCRIPTION,
+  keywords: ["Yuwei Li", "portfolio", "communication designer", "frontend developer", "UX/UI design", "interaction design", "web development"],
   authors: [{ name: "Yuwei Li" }],
   creator: "Yuwei Li",
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://www.yuweidesign.com",
-    title: "Yuwei Design | UX/UI Designer & Creative Developer",
-    description: "Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     siteName: "Yuwei Design",
     // 分享图由 app/opengraph-image.tsx 自动生成（1200x630 PNG）
   },
   twitter: {
     card: "summary_large_image",
-    title: "Yuwei Design | UX/UI Designer & Creative Developer",
-    description: "Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     creator: "@yuweili",
   },
   robots: {

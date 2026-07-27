@@ -1,8 +1,9 @@
 // 社交分享图（Open Graph）：构建时生成 1200x630 PNG，
 // 替代 webp 头像 —— 部分平台（LinkedIn / WhatsApp / 微信）不支持 webp 作为分享图
 import { ImageResponse } from "next/og";
+import { SITE_ROLE, SITE_TITLE } from "@/lib/site-metadata";
 
-export const alt = "Yuwei Design | UX/UI Designer & Creative Developer";
+export const alt = SITE_TITLE;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -46,7 +47,7 @@ export default function OpenGraphImage() {
           Yuwei Li
         </div>
         <div style={{ marginTop: 20, fontSize: 40, color: "#424242" }}>
-          UX/UI Designer &amp; Creative Developer
+          {SITE_ROLE}
         </div>
         <div
           style={{

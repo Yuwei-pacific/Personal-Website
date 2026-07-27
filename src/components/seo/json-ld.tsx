@@ -1,4 +1,6 @@
 // JSON-LD 结构化数据组件：帮助搜索引擎理解页面内容
+import { SITE_DESCRIPTION, SITE_ROLE } from "@/lib/site-metadata";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function JsonLd({ data }: { data: Record<string, any> }) {
     return (
@@ -20,8 +22,8 @@ export const personSchema = {
         'https://www.linkedin.com/in/yuwei081/',
         'https://www.instagram.com/yuwei081/',
     ],
-    jobTitle: 'Designer & Developer',
-    description: 'Designer, Developer, and Creative Technologist',
+    jobTitle: SITE_ROLE,
+    description: SITE_DESCRIPTION,
 }
 
 // 网站结构化数据
@@ -30,7 +32,7 @@ export const websiteSchema = {
     '@type': 'WebSite',
     name: 'Yuwei Design',
     url: 'https://www.yuweidesign.com',
-    description: 'Portfolio and background of Yuwei Li - Designer, Developer, and Creative Technologist.',
+    description: SITE_DESCRIPTION,
     image: 'https://www.yuweidesign.com/Profile_Yuwei.webp',
     logo: 'https://www.yuweidesign.com/Logo.svg',
     author: {
