@@ -23,6 +23,9 @@ export const metadata = {
     absolute: SITE_TITLE,
   },
   description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export default async function HomePage() {
