@@ -147,7 +147,7 @@ const config: Config = {
         },
       },
       animation: {
-        marquee: "marquee 46s linear infinite",
+        marquee: "marquee 23s linear infinite",
         "bounce-sine": "bounce-sine 8s ease-in-out infinite",
       },
     },

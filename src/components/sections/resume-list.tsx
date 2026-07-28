@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PortableText, type PortableTextReactComponents } from "@portabletext/react";
+import { PortableText, type PortableTextReactComponents } from "next-sanity";
 import type { ResumeItem } from "@/lib/view-models/types";
 import { StaggerReveal } from "@/components/ui/stagger-reveal";
 

@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 
 import {
@@ -33,9 +31,7 @@ const baseSkills = [
   { name: "Unity", icon: <SiUnity className="w-8 h-8" /> },
 ];
 
-const skillsGroup = [...baseSkills, ...baseSkills];
 const WAVE_DURATION_SECONDS = 8;
-const WAVE_CYCLES = 2;
 
 export function SkillsMarquee({ className }: { className?: string }) {
   return (
@@ -54,8 +50,8 @@ export function SkillsMarquee({ className }: { className?: string }) {
       <div className="flex h-full w-max animate-marquee items-center will-change-transform motion-reduce:animate-none">
         {[0, 1].map((groupIndex) => (
           <ul key={groupIndex} className="flex shrink-0 items-center gap-4 px-2">
-            {skillsGroup.map((skill, index) => {
-              const delay = `-${(index * WAVE_DURATION_SECONDS * WAVE_CYCLES) / skillsGroup.length}s`;
+            {baseSkills.map((skill, index) => {
+              const delay = `-${(index * WAVE_DURATION_SECONDS) / baseSkills.length}s`;
               return (
                 <li
                   key={`${groupIndex}-${skill.name}-${index}`}

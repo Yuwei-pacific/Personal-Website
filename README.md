@@ -11,7 +11,6 @@ Live at [yuweidesign.com](https://www.yuweidesign.com).
 - **Tailwind CSS 3** — token-driven styling (see Design Tokens below)
 - **Sanity CMS v6** — embedded Studio at `/studio`
 - **GSAP** (`@gsap/react`, ScrollTrigger) — entrance / scroll animations
-- **motion** — used by the vendored `DecryptedText` component
 - **next-view-transitions** — page transition animations
 
 ## Project Structure
@@ -58,9 +57,11 @@ Personal-Website/
   query results then pass through `src/lib/view-models/` before reaching UI components.
   Filtering (`visibility != false`) and ordering happen **in GROQ only** — never
   re-filter/re-sort in components.
-- **Types**: never hand-write raw CMS result types. Run `npm run typegen` after
-  changing a schema or query. Stable, non-nullable UI contracts live in
-  `src/lib/view-models/types.ts` and are populated only by the normalizers.
+- **Types**: prefer Sanity TypeGen query result types and run `npm run typegen`
+  after changing a schema or query. A normalizer may define a narrow local raw
+  projection shape when the generated result is not directly reusable, but it
+  must stay adjacent to that normalizer and never leak into UI contracts.
+  Stable, non-nullable UI contracts live in `src/lib/view-models/types.ts`.
 - **Theming**: the site is single-theme (no dark mode toggle). The
   `design-light-*` / `design-dark-*` Tailwind colors are fixed *surface* tokens:
   light sections use `design-light-*`, the dark Work/detail sections use
@@ -80,8 +81,10 @@ Personal-Website/
   components stay in JavaScript with local adaptation notes. Import DOM-heavy
   components dynamically with `ssr: false`.
 - **Animations**: use the primitives in `components/ui/` (ScrollReveal,
-  StaggerReveal, RevealText, Parallax). All of them respect
-  `prefers-reduced-motion`; new animations must too.
+  StaggerReveal, RevealText, Parallax), which respect
+  `prefers-reduced-motion`. Coverage is component-specific rather than global:
+  vendor, menu, media, and route-transition effects need their own guard.
+  New animations must explicitly honor the preference.
 
 ## Setup
 
@@ -118,11 +121,15 @@ npm run dev          # Website + embedded Studio → http://localhost:3000 (/stu
 ## Scripts
 
 ```bash
-npm run dev       # Development server
-npm run build     # Production build
-npm start         # Production server
-npm run lint      # ESLint
-npm run typegen   # Extract schema + regenerate src/sanity/sanity.types.ts
+npm run dev            # Development server
+npm run build          # Production build with Turbopack
+npm run build:webpack  # Production build with webpack
+npm run start          # Production server
+npm run lint           # ESLint
+npm run typecheck      # TypeScript without emitting files
+npm run check          # Lint + typecheck + production build
+npm run smoke          # Check sitemap and every published project route
+npm run typegen        # Extract schema + regenerate src/sanity/sanity.types.ts
 ```
 
 ## License & Author

@@ -1,4 +1,4 @@
-import type { PortableTextBlock } from "@portabletext/types";
+import type { PortableTextBlock } from "next-sanity";
 import type { ProjectVideo } from "./types";
 
 export const text = (value: string | null | undefined, fallback = "") =>
