@@ -1,14 +1,25 @@
 // JSON-LD 结构化数据组件：帮助搜索引擎理解页面内容
 import { SITE_DESCRIPTION, SITE_ROLE } from "@/lib/site-metadata";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function JsonLd({ data }: { data: Record<string, any> }) {
+/**
+ * JSON.stringify does not make data safe to embed in a script element:
+ * CMS text containing `</script>` would otherwise close the JSON-LD node.
+ */
+export function serializeJsonLd(data: Record<string, unknown>) {
+    return JSON.stringify(data)
+        .replace(/</g, "\\u003c")
+        .replace(/>/g, "\\u003e")
+        .replace(/\u2028/g, "\\u2028")
+        .replace(/\u2029/g, "\\u2029");
+}
+
+export function JsonLd({ data }: { data: Record<string, unknown> }) {
     return (
         <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+            dangerouslySetInnerHTML={{ __html: serializeJsonLd(data) }}
         />
-    )
+    );
 }
 
 // 个人结构化数据：用于增强 E-E-A-T 信号

@@ -5,6 +5,20 @@
 // 修改查询后运行 `npm run typegen` 重新生成 sanity.types.ts。
 import { defineQuery } from "next-sanity";
 
+// Project images, GIFs, and videos share one projection contract. Array
+// callers add `_key` so live reordering can retain stable item identity.
+const PROJECT_MEDIA_PROJECTION = /* groq */ `
+  alt,
+  caption,
+  "image": image.asset->{
+    url,
+    mimeType,
+    "width": metadata.dimensions.width,
+    "height": metadata.dimensions.height
+  },
+  "video": video.asset->{ url, mimeType }
+`;
+
 // 首页项目列表
 export const PROJECTS_QUERY = defineQuery(`*[_type == "project" && visibility != false]
   | order(coalesce(year, 0) desc, _createdAt desc){
@@ -66,15 +80,8 @@ export const PROJECT_QUERY = defineQuery(`*[_type == "project" && slug.current =
   },
   "coverVideo": coverVideo.asset->{ url, mimeType },
   "gallery": gallery[]{
-    alt,
-    caption,
-    "image": image.asset->{
-      url,
-      mimeType,
-      "width": metadata.dimensions.width,
-      "height": metadata.dimensions.height
-    },
-    "video": video.asset->{ url, mimeType }
+    _key,
+    ${PROJECT_MEDIA_PROJECTION}
   },
   myContribution,
   "sections": sections[]{
@@ -87,43 +94,20 @@ export const PROJECT_QUERY = defineQuery(`*[_type == "project" && slug.current =
       content,
       mediaPosition,
       "media": media{
-        alt,
-        caption,
-        "image": image.asset->{
-          url,
-          mimeType,
-          "width": metadata.dimensions.width,
-          "height": metadata.dimensions.height
-        },
-        "video": video.asset->{ url, mimeType }
+        ${PROJECT_MEDIA_PROJECTION}
       }
     },
     _type == "mediaSection" => {
       fullWidth,
       "media": media{
-        alt,
-        caption,
-        "image": image.asset->{
-          url,
-          mimeType,
-          "width": metadata.dimensions.width,
-          "height": metadata.dimensions.height
-        },
-        "video": video.asset->{ url, mimeType }
+        ${PROJECT_MEDIA_PROJECTION}
       }
     },
     _type == "mediaGroupSection" => {
       caption,
       "items": items[]{
-        alt,
-        caption,
-        "image": image.asset->{
-          url,
-          mimeType,
-          "width": metadata.dimensions.width,
-          "height": metadata.dimensions.height
-        },
-        "video": video.asset->{ url, mimeType }
+        _key,
+        ${PROJECT_MEDIA_PROJECTION}
       }
     }
   }

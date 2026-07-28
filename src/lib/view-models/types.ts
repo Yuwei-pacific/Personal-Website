@@ -1,5 +1,5 @@
 import type { SanityImageSource } from "@sanity/image-url";
-import type { PortableTextBlock } from "@portabletext/types";
+import type { PortableTextBlock } from "next-sanity";
 
 type ProjectCoverImage = SanityImageSource & {
   alt: string;

@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
-import { gsap } from "@/lib/animation/gsap";
+import { gsap, useGSAP } from "@/lib/animation/gsap-react";
 
 import "./staggered-menu.css";
 
@@ -76,6 +76,7 @@ function StaggeredMenu({
   const [open, setOpen] = useState(false);
   const [textLines, setTextLines] = useState(["Menu", "Close"]);
   const openRef = useRef(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const preLayersRef = useRef<HTMLDivElement>(null);
   const preLayerElsRef = useRef<HTMLDivElement[]>([]);
@@ -84,27 +85,34 @@ function StaggeredMenu({
   const iconRef = useRef<HTMLSpanElement>(null);
   const textInnerRef = useRef<HTMLSpanElement>(null);
   const openTlRef = useRef<gsap.core.Timeline | null>(null);
-  const closeTweenRef = useRef<gsap.core.Tween | null>(null);
+  const closeTlRef = useRef<gsap.core.Timeline | null>(null);
   const spinTweenRef = useRef<gsap.core.Tween | null>(null);
   const textCycleAnimRef = useRef<gsap.core.Tween | null>(null);
   const colorTweenRef = useRef<gsap.core.Tween | null>(null);
   const toggleBtnRef = useRef<HTMLButtonElement>(null);
-  const busyRef = useRef(false);
+  const playOpenRef = useRef<(() => void) | null>(null);
+  const playCloseRef = useRef<(() => void) | null>(null);
+  const animateIconRef = useRef<((opening: boolean) => void) | null>(null);
+  const animateColorRef = useRef<((opening: boolean) => void) | null>(null);
+  const animateTextRef = useRef<((opening: boolean) => void) | null>(null);
 
-  useLayoutEffect(() => {
-    const context = gsap.context(() => {
+  useGSAP(
+    (_context, contextSafe) => {
       const panel = panelRef.current;
       const preContainer = preLayersRef.current;
       const plusH = plusHRef.current;
       const plusV = plusVRef.current;
       const icon = iconRef.current;
       const textInner = textInnerRef.current;
-      if (!panel || !plusH || !plusV || !icon || !textInner) return;
+      if (!panel || !plusH || !plusV || !icon || !textInner || !contextSafe) return;
 
-      const preLayers = preContainer ? Array.from(preContainer.querySelectorAll<HTMLDivElement>(".sm-prelayer")) : [];
+      const preLayers = preContainer
+        ? Array.from(preContainer.querySelectorAll<HTMLDivElement>(".sm-prelayer"))
+        : [];
       preLayerElsRef.current = preLayers;
 
       gsap.set([panel, ...preLayers], { xPercent: OFFSCREEN_X, opacity: 1 });
+      resetPanelContent(getPanelElements(panel));
 
       if (preContainer) {
         gsap.set(preContainer, { xPercent: 0, opacity: 1 });
@@ -118,202 +126,218 @@ function StaggeredMenu({
       if (toggleBtnRef.current) {
         gsap.set(toggleBtnRef.current, { color: MENU_BUTTON_COLOR });
       }
-    });
 
-    return () => context.revert();
-  }, []);
+      playOpenRef.current = contextSafe(() => {
+        const currentPanel = panelRef.current;
+        const layers = preLayerElsRef.current;
+        if (!currentPanel) return;
 
-  const buildOpenTimeline = useCallback(() => {
-    const panel = panelRef.current;
-    const layers = preLayerElsRef.current;
-    if (!panel) return null;
+        closeTlRef.current?.kill();
+        closeTlRef.current = null;
+        openTlRef.current?.kill();
 
-    openTlRef.current?.kill();
-    closeTweenRef.current?.kill();
-    closeTweenRef.current = null;
+        const { itemEls, numberEls, socialTitle, socialLinks } =
+          getPanelElements(currentPanel);
+        const timeline = gsap.timeline({ paused: true });
 
-    const panelElements = getPanelElements(panel);
-    const { itemEls, numberEls, socialTitle, socialLinks } = panelElements;
-    const layerStates = layers.map((element) => ({ element, start: OFFSCREEN_X }));
-    resetPanelContent(panelElements);
+        layers.forEach((element, index) => {
+          timeline.to(
+            element,
+            { xPercent: 0, duration: 0.5, ease: "power4.out" },
+            index * 0.07
+          );
+        });
 
-    const timeline = gsap.timeline({ paused: true });
+        const lastTime = layers.length ? (layers.length - 1) * 0.07 : 0;
+        const panelInsertTime = lastTime + (layers.length ? 0.08 : 0);
+        const panelDuration = 0.65;
 
-    layerStates.forEach(({ element, start }, index) => {
-      timeline.fromTo(element, { xPercent: start }, { xPercent: 0, duration: 0.5, ease: "power4.out" }, index * 0.07);
-    });
-
-    const lastTime = layerStates.length ? (layerStates.length - 1) * 0.07 : 0;
-    const panelInsertTime = lastTime + (layerStates.length ? 0.08 : 0);
-    const panelDuration = 0.65;
-
-    timeline.fromTo(
-      panel,
-      { xPercent: OFFSCREEN_X },
-      { xPercent: 0, duration: panelDuration, ease: "power4.out" },
-      panelInsertTime
-    );
-
-    if (itemEls.length) {
-      const itemsStart = panelInsertTime + panelDuration * 0.15;
-
-      timeline.to(
-        itemEls,
-        {
-          yPercent: 0,
-          rotate: 0,
-          duration: 1,
-          ease: "power4.out",
-          stagger: { each: 0.1, from: "start" },
-        },
-        itemsStart
-      );
-
-      if (numberEls.length) {
         timeline.to(
-          numberEls,
-          {
-            duration: 0.6,
-            ease: "power2.out",
-            "--sm-num-opacity": 1,
-            stagger: { each: 0.08, from: "start" },
-          },
-          itemsStart + 0.1
+          currentPanel,
+          { xPercent: 0, duration: panelDuration, ease: "power4.out" },
+          panelInsertTime
         );
-      }
-    }
 
-    if (socialTitle || socialLinks.length) {
-      const socialsStart = panelInsertTime + panelDuration * 0.4;
+        if (itemEls.length) {
+          const itemsStart = panelInsertTime + panelDuration * 0.15;
 
-      if (socialTitle) {
-        timeline.to(
-          socialTitle,
-          {
-            opacity: 1,
-            duration: 0.5,
-            ease: "power2.out",
-          },
-          socialsStart
-        );
-      }
-
-      if (socialLinks.length) {
-        timeline.to(
-          socialLinks,
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.55,
-            ease: "power3.out",
-            stagger: { each: 0.08, from: "start" },
-            onComplete: () => {
-              gsap.set(socialLinks, { clearProps: "opacity" });
+          timeline.to(
+            itemEls,
+            {
+              yPercent: 0,
+              rotate: 0,
+              duration: 1,
+              ease: "power4.out",
+              stagger: { each: 0.1, from: "start" },
             },
-          },
-          socialsStart + 0.04
-        );
-      }
-    }
+            itemsStart
+          );
 
-    openTlRef.current = timeline;
-    return timeline;
-  }, []);
+          if (numberEls.length) {
+            timeline.to(
+              numberEls,
+              {
+                duration: 0.6,
+                ease: "power2.out",
+                "--sm-num-opacity": 1,
+                stagger: { each: 0.08, from: "start" },
+              },
+              itemsStart + 0.1
+            );
+          }
+        }
 
-  const playOpen = useCallback(() => {
-    if (busyRef.current) return;
+        if (socialTitle || socialLinks.length) {
+          const socialsStart = panelInsertTime + panelDuration * 0.4;
 
-    busyRef.current = true;
-    const timeline = buildOpenTimeline();
+          if (socialTitle) {
+            timeline.to(
+              socialTitle,
+              {
+                opacity: 1,
+                duration: 0.5,
+                ease: "power2.out",
+              },
+              socialsStart
+            );
+          }
 
-    if (timeline) {
-      timeline.eventCallback("onComplete", () => {
-        busyRef.current = false;
+          if (socialLinks.length) {
+            timeline.to(
+              socialLinks,
+              {
+                y: 0,
+                opacity: 1,
+                duration: 0.55,
+                ease: "power3.out",
+                stagger: { each: 0.08, from: "start" },
+              },
+              socialsStart + 0.04
+            );
+            const socialLinksEnd =
+              socialsStart + 0.04 + 0.55 + Math.max(0, socialLinks.length - 1) * 0.08;
+            timeline.set(socialLinks, { clearProps: "opacity" }, socialLinksEnd);
+          }
+        }
+
+        openTlRef.current = timeline;
+        timeline.play(0);
       });
-      timeline.play(0);
-    } else {
-      busyRef.current = false;
-    }
-  }, [buildOpenTimeline]);
 
-  const playClose = useCallback(() => {
-    openTlRef.current?.kill();
-    openTlRef.current = null;
+      playCloseRef.current = contextSafe(() => {
+        openTlRef.current?.kill();
+        openTlRef.current = null;
 
-    const panel = panelRef.current;
-    const layers = preLayerElsRef.current;
-    if (!panel) return;
+        const currentPanel = panelRef.current;
+        const layers = preLayerElsRef.current;
+        if (!currentPanel) return;
 
-    const all: HTMLElement[] = [...layers, panel];
-    closeTweenRef.current?.kill();
+        closeTlRef.current?.kill();
 
-    closeTweenRef.current = gsap.to(all, {
-      xPercent: OFFSCREEN_X,
-      duration: 0.32,
-      ease: "power3.in",
-      overwrite: "auto",
-      onComplete: () => {
-        resetPanelContent(getPanelElements(panel));
-        busyRef.current = false;
-      },
-    });
-  }, []);
+        const panelElements = getPanelElements(currentPanel);
+        const { itemEls, numberEls, socialTitle, socialLinks } = panelElements;
+        const all: HTMLElement[] = [...layers, currentPanel];
+        const timeline = gsap.timeline();
 
-  const animateIcon = useCallback((opening: boolean) => {
-    const icon = iconRef.current;
-    if (!icon) return;
+        timeline.to(all, {
+          xPercent: OFFSCREEN_X,
+          duration: 0.32,
+          ease: "power3.in",
+          overwrite: "auto",
+        });
 
-    spinTweenRef.current?.kill();
-    spinTweenRef.current = gsap.to(icon, {
-      rotate: opening ? 225 : 0,
-      duration: opening ? 0.8 : 0.35,
-      ease: opening ? "power4.out" : "power3.inOut",
-      overwrite: "auto",
-    });
-  }, []);
+        if (itemEls.length) {
+          timeline.set(itemEls, { yPercent: 140, rotate: 10 });
+        }
+        if (numberEls.length) {
+          timeline.set(numberEls, { "--sm-num-opacity": 0 });
+        }
+        if (socialTitle) {
+          timeline.set(socialTitle, { opacity: 0 });
+        }
+        if (socialLinks.length) {
+          timeline.set(socialLinks, { y: 25, opacity: 0 });
+        }
 
-  const animateColor = useCallback((opening: boolean) => {
-    const button = toggleBtnRef.current;
-    if (!button) return;
+        closeTlRef.current = timeline;
+      });
 
-    colorTweenRef.current?.kill();
-    colorTweenRef.current = gsap.to(button, {
-      color: opening ? OPEN_MENU_BUTTON_COLOR : MENU_BUTTON_COLOR,
-      delay: 0.18,
-      duration: 0.3,
-      ease: "power2.out",
-    });
-  }, []);
+      animateIconRef.current = contextSafe((opening: boolean) => {
+        const currentIcon = iconRef.current;
+        if (!currentIcon) return;
 
-  const animateText = useCallback((opening: boolean) => {
-    const inner = textInnerRef.current;
-    if (!inner) return;
+        spinTweenRef.current?.kill();
+        spinTweenRef.current = gsap.to(currentIcon, {
+          rotate: opening ? 225 : 0,
+          duration: opening ? 0.8 : 0.35,
+          ease: opening ? "power4.out" : "power3.inOut",
+          overwrite: "auto",
+        });
+      });
 
-    textCycleAnimRef.current?.kill();
+      animateColorRef.current = contextSafe((opening: boolean) => {
+        const button = toggleBtnRef.current;
+        if (!button) return;
 
-    const currentLabel = opening ? "Menu" : "Close";
-    const targetLabel = opening ? "Close" : "Menu";
-    const sequence = [currentLabel];
-    let last = currentLabel;
+        colorTweenRef.current?.kill();
+        colorTweenRef.current = gsap.to(button, {
+          color: opening ? OPEN_MENU_BUTTON_COLOR : MENU_BUTTON_COLOR,
+          delay: 0.18,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      });
 
-    for (let index = 0; index < 3; index += 1) {
-      last = last === "Menu" ? "Close" : "Menu";
-      sequence.push(last);
-    }
+      animateTextRef.current = contextSafe((opening: boolean) => {
+        const inner = textInnerRef.current;
+        if (!inner) return;
 
-    if (last !== targetLabel) {
-      sequence.push(targetLabel);
-    }
-    sequence.push(targetLabel);
-    setTextLines(sequence);
+        textCycleAnimRef.current?.kill();
 
-    gsap.set(inner, { yPercent: 0 });
-    textCycleAnimRef.current = gsap.to(inner, {
-      yPercent: -(((sequence.length - 1) / sequence.length) * 100),
-      duration: 0.5 + sequence.length * 0.07,
-      ease: "power4.out",
-    });
-  }, []);
+        const currentLabel = opening ? "Menu" : "Close";
+        const targetLabel = opening ? "Close" : "Menu";
+        const sequence = [currentLabel];
+        let last = currentLabel;
+
+        for (let index = 0; index < 3; index += 1) {
+          last = last === "Menu" ? "Close" : "Menu";
+          sequence.push(last);
+        }
+
+        if (last !== targetLabel) {
+          sequence.push(targetLabel);
+        }
+        sequence.push(targetLabel);
+        setTextLines(sequence);
+
+        gsap.set(inner, { yPercent: 0 });
+        textCycleAnimRef.current = gsap.to(inner, {
+          yPercent: -(((sequence.length - 1) / sequence.length) * 100),
+          duration: 0.5 + sequence.length * 0.07,
+          ease: "power4.out",
+        });
+      });
+
+      return () => {
+        openTlRef.current?.kill();
+        closeTlRef.current?.kill();
+        spinTweenRef.current?.kill();
+        textCycleAnimRef.current?.kill();
+        colorTweenRef.current?.kill();
+        openTlRef.current = null;
+        closeTlRef.current = null;
+        spinTweenRef.current = null;
+        textCycleAnimRef.current = null;
+        colorTweenRef.current = null;
+        playOpenRef.current = null;
+        playCloseRef.current = null;
+        animateIconRef.current = null;
+        animateColorRef.current = null;
+        animateTextRef.current = null;
+      };
+    },
+    { scope: wrapperRef }
+  );
 
   const toggleMenu = useCallback(() => {
     const target = !openRef.current;
@@ -322,17 +346,17 @@ function StaggeredMenu({
 
     if (target) {
       onMenuOpen?.();
-      playOpen();
+      playOpenRef.current?.();
     } else {
       onMenuClose?.();
-      playClose();
+      playCloseRef.current?.();
       toggleBtnRef.current?.focus();
     }
 
-    animateIcon(target);
-    animateColor(target);
-    animateText(target);
-  }, [animateColor, animateIcon, animateText, onMenuClose, onMenuOpen, playClose, playOpen]);
+    animateIconRef.current?.(target);
+    animateColorRef.current?.(target);
+    animateTextRef.current?.(target);
+  }, [onMenuClose, onMenuOpen]);
 
   const closeMenu = useCallback(() => {
     if (!openRef.current) return;
@@ -340,12 +364,12 @@ function StaggeredMenu({
     openRef.current = false;
     setOpen(false);
     onMenuClose?.();
-    playClose();
-    animateIcon(false);
-    animateColor(false);
-    animateText(false);
+    playCloseRef.current?.();
+    animateIconRef.current?.(false);
+    animateColorRef.current?.(false);
+    animateTextRef.current?.(false);
     toggleBtnRef.current?.focus();
-  }, [animateColor, animateIcon, animateText, onMenuClose, playClose]);
+  }, [onMenuClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -407,7 +431,11 @@ function StaggeredMenu({
   };
 
   return (
-    <div className="staggered-menu-wrapper" data-open={open ? "true" : undefined}>
+    <div
+      ref={wrapperRef}
+      className="staggered-menu-wrapper"
+      data-open={open ? "true" : undefined}
+    >
       <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
         {PRE_LAYER_COLORS.map((color, index) => (
           <div key={`${color}-${index}`} className="sm-prelayer" style={{ background: color }} />

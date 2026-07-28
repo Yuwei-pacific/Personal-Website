@@ -24,6 +24,7 @@ const normalizeLinks = (links: NonNullable<NonNullable<PROJECT_QUERY_RESULT>["li
 
 // GROQ 投影出来的媒体原始形状，gallery 与正文模块共用
 type RawProjectMedia = {
+  _key?: string | null;
   alt: string | null;
   caption: string | null;
   image: {
@@ -66,7 +67,7 @@ const normalizeGallery = (
   (gallery ?? []).flatMap((item, index): ProjectGalleryItem[] => {
     const normalized = normalizeProjectMedia(
       item,
-      `gallery-${index}-${text(item.image?.url)}`
+      item._key || `gallery-${index}-${text(item.image?.url)}`
     );
     if (!normalized) return [];
 
@@ -131,7 +132,10 @@ const normalizeSections = (
 
       case "mediaGroupSection": {
         const items = (section.items ?? []).flatMap((item, index) => {
-          const media = normalizeProjectMedia(item, `${key}-${index}`);
+          const media = normalizeProjectMedia(
+            item,
+            item._key || `${key}-${index}-${text(item.image?.url)}`
+          );
           return media ? [media] : [];
         });
         if (!items.length) return [];
