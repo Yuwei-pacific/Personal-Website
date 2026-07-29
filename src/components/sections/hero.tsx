@@ -114,7 +114,7 @@ that bring color to the ordinary.`}
             View work <LuArrowRight className="h-4 w-4" />
           </a>
           <a
-            href="mailto:snowtime200801@gmail.com"
+            href="mailto:yuweidesign@outlook.com"
             className="hero-cta inline-flex h-10 items-center justify-center whitespace-nowrap rounded-button border border-design-light-border bg-design-light-bg px-4 py-2 text-small font-medium shadow-card transition-[background-color,color,transform] duration-base hover:scale-emphasis hover:bg-design-light-hover hover:text-design-light-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             Email me
