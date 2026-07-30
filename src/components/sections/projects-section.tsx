@@ -1,6 +1,7 @@
 // 项目列表区：展示从 CMS 获取的项目卡片
 import Image from "next/image";
 import { ProjectCard } from "@/components/projects/project-card";
+import { MaskedSectionHeading } from "@/components/ui/masked-section-heading";
 import type { Project } from "@/lib/view-models/types";
 
 type ProjectsSectionProps = {
@@ -33,15 +34,8 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
       </div>
 
       <div className="flex w-full flex-col gap-6 pb-section pt-section sm:gap-gap-section sm:pb-section-sm sm:pt-section-sm">
-        {/* 顶部标题：与 Education / Experience 一致的大字加计数 */}
-        <div className="mx-auto flex w-full max-w-6xl items-baseline gap-1.5 px-container sm:px-container-sm">
-          <h2 className="text-3xl font-bold tracking-tight text-design-dark-text-primary sm:text-section">
-            Work
-          </h2>
-          <sup className="text-small font-semibold text-design-dark-text-muted sm:text-body">
-            ({projects.length})
-          </sup>
-        </div>
+        {/* 全宽标题：复用 Hero / 导航的遮罩滑入动画，左边缘与项目网格对齐 */}
+        <MaskedSectionHeading title="Work" count={projects.length} />
 
         {!hasProjects ? (
           /* 空状态提示：CMS 未发布时的占位 */

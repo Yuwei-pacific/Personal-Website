@@ -1,11 +1,8 @@
-// 首页 Hero 区：依赖的 Next.js 组件、图标与按钮
+// 首页 Hero 区：依赖的交互点阵与入场动画
 "use client";
 
 import dynamic from "next/dynamic";
 
-import { LuArrowRight } from "react-icons/lu";
-
-import DecryptedText from "@/components/vendor/DecryptedText";
 import { useHeroAnimation } from "@/hooks/use-hero-animation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
@@ -21,7 +18,7 @@ const DotFieldImage = dynamic(() => import("@/components/vendor/DotFieldImage"),
   ssr: false,
 });
 
-// Hero 组件：首页主视觉区，包含标题、描述与 CTA 按钮
+// Hero 组件：首页主视觉区，包含角色标题、定位文案与联系入口
 export function Hero() {
   const heroRef = useHeroAnimation<HTMLElement>();
 
@@ -33,96 +30,93 @@ export function Hero() {
   const heroImage = isTallViewport ? HERO_IMAGE_PORTRAIT : HERO_IMAGE_LANDSCAPE;
 
   return (
-    // 全屏容器：相对定位，隔离层叠上下文，居中内容
-    // 导航已改为 fixed 浮层不占文档流，hero 直接铺满整个视口
-    <section ref={heroRef} id="home" className="relative isolate flex min-h-[100svh] w-full items-center overflow-hidden px-container-sm py-16 sm:px-10 md:px-16">
-      {/* 背景装饰层：限制在 hero 内部，不影响主页后续区块
-          （背景色即统一白，不再叠加渐变） */}
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        {/* 交互点阵背景：颜色取自棱镜图对应位置的像素，鼠标划过时产生排斥波纹
-            （组件监听 window 事件，不受 pointer-events-none 影响） */}
-        {!reducedMotion && (
-          <DotFieldImage
-            dotRadius={4}
-            dotSpacing={6}
-            bulgeStrength={32}
-            glowRadius={0}
-            sparkle={true}
-            waveAmplitude={0}
-            cursorRadius={500}
-            cursorForce={0.5}
-            bulgeOnly={true}
-            imageSrc={heroImage}
-            // cover：等比缩放铺满 + 居中裁边——不变形、不随窗口尺寸漂移、不留空带；
-            // 竖屏的构图问题由竖版取色图解决（见 HERO_IMAGE_PORTRAIT）
-            imageFit="cover"
-            fallbackColor="rgba(148, 163, 184, 0.25)"
-            glowColor="#120F17"
-          />
-        )}
+    <section
+      ref={heroRef}
+      id="home"
+      className="relative isolate min-h-[100svh] w-full overflow-hidden bg-background"
+    >
+      {/* 点阵只占据 Hero 的主视觉区域；下方信息保持纯白，形成 Figma 中清晰的上下分区。 */}
+      <div className="relative h-[clamp(31rem,69svh,35.0625rem)] w-full overflow-hidden sm:h-[clamp(40rem,81.5svh,41.375rem)]">
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          {/* 交互点阵背景：颜色取自棱镜图对应位置的像素，鼠标划过时产生排斥波纹
+              （组件监听 window 事件，不受 pointer-events-none 影响） */}
+          {!reducedMotion && (
+            <DotFieldImage
+              dotRadius={4}
+              dotSpacing={6}
+              bulgeStrength={32}
+              glowRadius={0}
+              sparkle={true}
+              waveAmplitude={0}
+              cursorRadius={500}
+              cursorForce={0.5}
+              bulgeOnly={true}
+              imageSrc={heroImage}
+              imageFit="cover"
+              fallbackColor="rgba(148, 163, 184, 0.25)"
+              glowColor="#120F17"
+            />
+          )}
+        </div>
+
+        {/* 三行分别使用独立字号，保留 Figma 中明确的编辑式层级。 */}
+        <div className="relative z-10 flex h-full items-center px-6 pt-28 sm:px-16 sm:pt-32">
+          <h1
+            aria-label="Communication Designer & Frontend Developer"
+            className="hero-title w-full font-semibold text-design-light-text-primary"
+          >
+            <span className="block text-[clamp(2.625rem,10.92vw,6.173rem)] leading-[1] tracking-[-0.025em]">
+              <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
+                <span aria-hidden="true" className="hero-word relative inline-block">
+                  Communication
+                </span>
+              </span>
+            </span>
+            <span className="block text-[clamp(3.875rem,15.9vw,8.994rem)] leading-[0.99] tracking-[-0.025em]">
+              <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
+                <span aria-hidden="true" className="hero-word relative inline-block">
+                  Designer
+                </span>
+              </span>{" "}
+              <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
+                <span aria-hidden="true" className="hero-word relative inline-block">
+                  &amp;
+                </span>
+              </span>
+            </span>
+            <span className="block text-[clamp(2.125rem,8.776vw,4.961rem)] leading-[1.08] tracking-[-0.025em]">
+              <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
+                <span aria-hidden="true" className="hero-word relative inline-block">
+                  Frontend Developer
+                </span>
+              </span>
+            </span>
+          </h1>
+        </div>
       </div>
 
-      {/* 主内容区：全宽布局，与底部 Get in touch 通栏对齐 */}
-      <div className="relative z-10 flex w-full flex-col gap-8">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -inset-x-6 -top-8 bottom-20 -z-10 rounded-[3rem] bg-design-light-bg/70 blur-2xl"
-        />
-        {/* 文本内容：标签与超大角色标题（与下方区块的编辑式排版呼应） */}
-        <div className="space-y-5">
-          {/* 顶部标签：地点与工作方式，与 About me 标签同款式 */}
-          <p className="hero-label text-label font-semibold uppercase text-design-light-text-secondary">
-            Milan, Italy · Independent practice
+      {/* 定位与服务描述：移动端纵向排列，桌面端将 CTA 固定在文案右下侧。 */}
+      <div className="relative z-10 bg-background px-[2.0625rem] pb-7 pt-6 sm:px-16 sm:pb-6 sm:pt-3.5">
+        <p className="hero-label text-[0.875rem] font-semibold uppercase leading-[1.2] tracking-[0.23em] text-design-light-text-primary sm:text-base">
+          Milan, Italy · Independent practice
+        </p>
+        <div className="relative mt-3.5">
+          <p className="hero-description text-2xl leading-[1.08] tracking-[-0.02em] text-design-light-text-primary sm:pr-36 sm:text-[clamp(2rem,2.65vw,2.5rem)] sm:leading-[1.1]">
+            I create <strong className="font-bold">visual identities</strong>,{" "}
+            <strong className="font-bold">digital interfaces</strong> and{" "}
+            <strong className="font-bold">custom websites</strong>
+            <br className="sm:hidden" />
+            <span className="hidden sm:inline"> </span>
+            for creative studios and design‑led organisations.
           </p>
-          {/* 主标题：整页最大的排版时刻；移动端将长角色名拆成四行避免溢出 */}
-          <div className="relative">
-            <h1 className="hero-title text-[2.5rem] font-semibold leading-[0.95] tracking-tight text-design-light-text-primary min-[375px]:text-[2.75rem] sm:text-7xl lg:text-[7.5rem]">
-              <span className="block">Communication</span>
-              <span className="block">Designer &amp;</span>
-              <span className="block">
-                Frontend <span className="block sm:inline">Developer</span>
-              </span>
-            </h1>
-          </div>
-        </div>
-
-        {/* 细分隔线 + 描述/状态行：复用 About 区行表语言（细线、圆点分隔符） */}
-        <div className="border-t border-design-light-border pt-6">
-          <div className="flex flex-col gap-5">
-            {/* 描述句：全宽展开，进入视口时逐字“解密”，只触发一次 */}
-            <div className="relative">
-              <p className="hero-description text-pretty text-xl leading-relaxed text-design-light-text-secondary sm:text-2xl lg:text-3xl">
-                <DecryptedText
-                  text="I design visual identities, digital interfaces, and custom websites for creative studios, cultural organisations, and design-led businesses."
-                  sequential
-                  revealDirection="start"
-                  speed={30}
-                  encryptedClassName="text-design-light-text-muted/50"
-                />
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* CTA 按钮组：查看作品与联系我。
-            用原生 <a>：同页锚点由 Lenis 的 anchors 平滑滚动接管（router 会抢先拦截 hash），
-            mailto 本就不该走客户端路由 */}
-        <div className="flex flex-wrap gap-3">
-          <a
-            href="#work"
-            className="hero-cta inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-button bg-design-light-accent px-4 py-2 text-small font-medium text-design-dark-text-primary shadow-card transition-[background-color,transform] duration-base hover:scale-emphasis hover:bg-design-light-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            View work <LuArrowRight className="h-4 w-4" />
-          </a>
           <a
             href="mailto:yuweidesign@outlook.com"
-            className="hero-cta inline-flex h-10 items-center justify-center whitespace-nowrap rounded-button border border-design-light-border bg-design-light-bg px-4 py-2 text-small font-medium shadow-card transition-[background-color,color,transform] duration-base hover:scale-emphasis hover:bg-design-light-hover hover:text-design-light-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="hero-cta mt-4 inline-flex w-fit border-b-2 border-current text-[1.287rem] font-semibold leading-[1.15] tracking-[-0.04em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:absolute sm:bottom-1 sm:right-0 sm:mt-0 sm:text-xl"
           >
-            Email me
+            Get In Touch &gt;
           </a>
         </div>
       </div>
-
     </section>
   );
 }

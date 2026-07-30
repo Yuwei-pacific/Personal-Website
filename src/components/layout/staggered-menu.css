@@ -267,7 +267,7 @@
 .sm-panel-itemLabel {
   display: inline-block;
   will-change: transform;
-  transform-origin: 50% 100%;
+  transform-origin: 0% 100%;
 }
 
 .sm-panel-item:hover {
