@@ -8,10 +8,10 @@ import { RevealText } from "@/components/ui/reveal-text";
 export function AboutPreview() {
   return (
     <section id="about" className="relative z-10 w-full bg-background">
-      <div className="mx-auto w-full max-w-6xl px-6 py-48">
+      <div className="mx-auto w-full max-w-6xl px-6 py-32 sm:py-48">
         <div className="relative flex flex-col gap-8 lg:min-h-[22.9375rem] lg:gap-6">
           <div className="pointer-events-none absolute right-0 top-[8.25rem] z-0 w-[46%] max-w-44 lg:-top-[1.875rem] lg:right-0 lg:w-[30%] lg:max-w-[20.6875rem]">
-            <Parallax offset={-160}>
+            <Parallax offset={-160} mobileOffset={-64}>
               <div className="relative aspect-square overflow-hidden bg-design-light-raised shadow-card">
                 <Image
                   src="/Profile_Yuwei.webp"

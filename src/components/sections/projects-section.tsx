@@ -33,7 +33,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
         />
       </div>
 
-      <div className="flex w-full flex-col gap-6 pb-section pt-48 sm:gap-gap-section sm:pb-section-sm">
+      <div className="flex w-full flex-col gap-6 pb-section pt-32 sm:gap-gap-section sm:pb-section-sm sm:pt-48">
         {/* 全宽标题：复用 Hero / 导航的遮罩滑入动画，左边缘与项目网格对齐 */}
         <MaskedSectionHeading title="Work" count={projects.length} />
 
