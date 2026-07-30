@@ -58,8 +58,7 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
                 About me
               </h2>
               <RevealText
-                text={`I design and build vivid experiences
-that bring color to the ordinary.`}
+                text="I connect communication design and frontend development to turn ideas into clear, expressive, and maintainable digital experiences."
                 fromColor="hsl(var(--color-text-primary-light))"
                 toColor="hsl(var(--color-bg-light))"
                 className="mt-4 text-3xl font-semibold leading-[1.2] tracking-tight sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.15]"
