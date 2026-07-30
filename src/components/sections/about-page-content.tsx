@@ -34,7 +34,7 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
             <div className="pointer-events-none absolute right-0 top-1/2 w-[45%] max-w-[240px] -translate-y-1/2 sm:w-[35%] sm:max-w-[320px] lg:w-[30%] lg:max-w-[360px]">
               <Parallax offset={-160}>
                 {/* 人像是透明底抠像：容器用统一白（同页面背景），只靠阴影区分层次 */}
-                <div className="group relative aspect-square overflow-hidden rounded-media bg-design-light-raised shadow-card transition-shadow duration-slow hover:shadow-hover">
+                <div className="group relative aspect-square overflow-hidden bg-design-light-raised shadow-card transition-shadow duration-slow hover:shadow-hover">
                   <Image
                     src="/Profile_Yuwei.webp"
                     alt="Portrait of Yuwei Li"

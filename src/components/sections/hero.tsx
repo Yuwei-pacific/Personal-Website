@@ -3,6 +3,7 @@
 
 import dynamic from "next/dynamic";
 
+import DecryptedText from "@/components/vendor/DecryptedText";
 import { useHeroAnimation } from "@/hooks/use-hero-animation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
@@ -10,6 +11,13 @@ import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 // Hero 点阵取色图的 art direction：横屏用全景棱镜图，竖屏用竖版构图
 const HERO_IMAGE_LANDSCAPE = "/hero_mg.svg";
 const HERO_IMAGE_PORTRAIT = "/hero_mg_portrait.svg";
+const HERO_DESCRIPTION =
+  "I create visual identities, digital interfaces and custom websites for creative studios and design‑led organisations.";
+const HERO_DESCRIPTION_EMPHASIS = [
+  "visual identities",
+  "digital interfaces",
+  "custom websites",
+];
 
 // DotFieldImage 交互点阵背景（DotField 扩展版，支持按图片取色）：
 // canvas 渲染，关闭 SSR（避免内部随机 SVG id 造成水合不匹配）；
@@ -108,12 +116,16 @@ export function Hero() {
         </p>
         <div className="relative mt-3.5">
           <p className="hero-description text-2xl leading-[1.08] tracking-[-0.02em] text-design-light-text-primary sm:pr-36 sm:text-[clamp(2rem,2.65vw,2.5rem)] sm:leading-[1.1]">
-            I create <strong className="font-bold">visual identities</strong>,{" "}
-            <strong className="font-bold">digital interfaces</strong> and{" "}
-            <strong className="font-bold">custom websites</strong>
-            <br className="sm:hidden" />
-            <span className="hidden sm:inline"> </span>
-            for creative studios and design‑led organisations.
+            <DecryptedText
+              text={HERO_DESCRIPTION}
+              sequential
+              revealDirection="start"
+              speed={30}
+              animateOn="view"
+              emphasizedTerms={HERO_DESCRIPTION_EMPHASIS}
+              emphasizedClassName="font-bold"
+              encryptedClassName="text-design-light-text-muted/50"
+            />
           </p>
           <a
             href="mailto:yuweidesign@outlook.com"

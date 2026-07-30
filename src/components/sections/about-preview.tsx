@@ -11,7 +11,7 @@ export function AboutPreview() {
         <div className="relative flex min-h-[22.625rem] flex-col gap-6 lg:min-h-[22.9375rem]">
           <div className="pointer-events-none absolute right-4 top-4 z-0 w-[45%] max-w-[13.1875rem] lg:-top-[1.875rem] lg:right-0 lg:w-[30%] lg:max-w-[20.6875rem]">
             <Parallax offset={-160}>
-              <div className="relative aspect-square overflow-hidden rounded-media bg-design-light-raised shadow-card">
+              <div className="relative aspect-square overflow-hidden bg-design-light-raised shadow-card">
                 <Image
                   src="/Profile_Yuwei.webp"
                   alt="Portrait of Yuwei Li"

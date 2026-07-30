@@ -80,7 +80,7 @@ export function ProjectCard({ project, slug, revealDelay = 0, index = 0 }: Proje
         >
             {/* 封面图：拼贴墙的主视觉块 */}
             <div className={cn(
-                "relative overflow-hidden rounded-card border border-design-dark-border bg-design-dark-surface transition-[border-color,transform] duration-base ease-design-out group-hover:-translate-y-1 group-hover:border-design-dark-hover-border",
+                "relative overflow-hidden border border-design-dark-border bg-design-dark-surface transition-[border-color,transform] duration-base ease-design-out group-hover:-translate-y-1 group-hover:border-design-dark-hover-border",
                 layout.aspect
             )}>
                 {coverSrc ? (
@@ -109,7 +109,7 @@ export function ProjectCard({ project, slug, revealDelay = 0, index = 0 }: Proje
                 )}
                 <div className="pointer-events-none absolute inset-0 bg-design-dark-bg/0 transition-colors duration-base group-hover:bg-design-dark-bg/10" />
                 {slug && (
-                    <span className="absolute right-3 top-3 inline-flex h-9 w-9 translate-y-1 items-center justify-center rounded-full border border-design-dark-text-primary/40 bg-design-dark-bg/50 text-design-dark-text-primary opacity-0 backdrop-blur-md transition-[transform,opacity] duration-base group-hover:translate-y-0 group-hover:opacity-100">
+                    <span className="absolute right-3 top-3 inline-flex h-9 w-9 translate-y-1 items-center justify-center border border-design-dark-text-primary/40 bg-design-dark-bg/50 text-design-dark-text-primary opacity-0 backdrop-blur-md transition-[transform,opacity] duration-base group-hover:translate-y-0 group-hover:opacity-100">
                         <LuArrowUpRight className="h-4 w-4" />
                     </span>
                 )}

@@ -145,7 +145,7 @@ export function ProjectGallery({ items, title = "Gallery", fullWidth }: ProjectG
           // 视频条目盖一个播放角标，和项目卡片的箭头角标同款语言
           extras: (_props, { photo }) =>
             photo.isVideo ? (
-              <span className="pointer-events-none absolute left-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-design-dark-text-primary/40 bg-design-dark-bg/50 text-design-dark-text-primary backdrop-blur-md">
+              <span className="pointer-events-none absolute left-3 top-3 inline-flex h-9 w-9 items-center justify-center border border-design-dark-text-primary/40 bg-design-dark-bg/50 text-design-dark-text-primary backdrop-blur-md">
                 <LuPlay className="h-4 w-4" />
               </span>
             ) : null,

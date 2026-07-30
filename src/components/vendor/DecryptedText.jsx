@@ -1,9 +1,28 @@
 import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 
+const EMPTY_TERMS = [];
+
 const styles = {
   wrapper: {
     display: 'inline-block',
     whiteSpace: 'pre-wrap'
+  },
+  word: {
+    display: 'inline-block',
+    whiteSpace: 'nowrap'
+  },
+  characterSlot: {
+    position: 'relative',
+    display: 'inline-block'
+  },
+  characterAnchor: {
+    visibility: 'hidden'
+  },
+  characterValue: {
+    position: 'absolute',
+    top: 0,
+    left: '50%',
+    transform: 'translateX(-50%)'
   },
   srOnly: {
     position: 'absolute',
@@ -28,6 +47,8 @@ export default function DecryptedText({
   className = '',
   parentClassName = '',
   encryptedClassName = '',
+  emphasizedTerms = EMPTY_TERMS,
+  emphasizedClassName = '',
   animateOn = 'hover',
   clickMode = 'once',
   ...props
@@ -49,6 +70,27 @@ export default function DecryptedText({
       ? Array.from(new Set(text.split(''))).filter(char => char !== ' ')
       : characters.split('');
   }, [useOriginalCharsOnly, text, characters]);
+
+  const emphasizedIndices = useMemo(() => {
+    const indices = new Set();
+
+    emphasizedTerms.forEach(term => {
+      if (!term) return;
+
+      let start = 0;
+      while (start < text.length) {
+        const matchIndex = text.indexOf(term, start);
+        if (matchIndex === -1) break;
+
+        for (let i = matchIndex; i < matchIndex + term.length; i++) {
+          indices.add(i);
+        }
+        start = matchIndex + term.length;
+      }
+    });
+
+    return indices;
+  }, [emphasizedTerms, text]);
 
   const shuffleText = useCallback(
     (originalText, currentRevealed) => {
@@ -363,17 +405,39 @@ export default function DecryptedText({
           }
         : {};
 
+  let textOffset = 0;
+
   return (
     <span className={parentClassName} ref={containerRef} style={styles.wrapper} {...animateProps} {...props}>
-      <span style={styles.srOnly}>{displayText}</span>
+      <span style={styles.srOnly}>{text}</span>
 
       <span aria-hidden="true">
-        {displayText.split('').map((char, index) => {
-          const isRevealedOrDone = revealedIndices.has(index) || (!isAnimating && isDecrypted);
+        {text.split(/(\s+)/).map((segment, segmentIndex) => {
+          const segmentStart = textOffset;
+          textOffset += segment.length;
+
+          if (/^\s+$/.test(segment)) {
+            return segment;
+          }
 
           return (
-            <span key={index} className={isRevealedOrDone ? className : encryptedClassName}>
-              {char}
+            <span key={`${segmentStart}-${segmentIndex}`} style={styles.word}>
+              {segment.split('').map((originalChar, characterIndex) => {
+                const index = segmentStart + characterIndex;
+                const displayChar = displayText[index] ?? originalChar;
+                const isRevealedOrDone = revealedIndices.has(index) || (!isAnimating && isDecrypted);
+                const visibleClassName = isRevealedOrDone ? className : encryptedClassName;
+                const emphasisClassName = emphasizedIndices.has(index) ? emphasizedClassName : '';
+
+                return (
+                  <span key={index} className={emphasisClassName} style={styles.characterSlot}>
+                    <span style={styles.characterAnchor}>{originalChar}</span>
+                    <span className={visibleClassName} style={styles.characterValue}>
+                      {displayChar}
+                    </span>
+                  </span>
+                );
+              })}
             </span>
           );
         })}
