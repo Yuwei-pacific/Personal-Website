@@ -112,7 +112,7 @@ export function Hero() {
       {/* 定位与服务描述：移动端纵向排列，桌面端将 CTA 固定在文案右下侧。 */}
       <div className="relative z-10 shrink-0 bg-background px-6 pb-6 pt-5 sm:px-16 sm:pb-6 sm:pt-3.5">
         <p className="hero-label whitespace-nowrap text-[0.6875rem] font-semibold uppercase leading-[1.25] tracking-[0.18em] text-design-light-text-primary sm:text-base sm:tracking-[0.23em]">
-          Milan, Italy · Independent practice
+          Based in Milan and working internationally
         </p>
         <div className="relative mt-3.5">
           <p className="hero-description text-pretty text-[1.375rem] leading-[1.12] tracking-[-0.02em] text-design-light-text-primary sm:pr-36 sm:text-[clamp(2rem,2.65vw,2.5rem)] sm:leading-[1.1]">

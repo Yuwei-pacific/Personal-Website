@@ -6,12 +6,19 @@ import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/scroll-trig
 type ParallaxProps = {
   children: ReactNode;
   className?: string;
-  /** Total vertical travel in px across the scroll range (desktop only). */
+  /** Total vertical travel in px across the desktop scroll range. */
   offset?: number;
+  /** Optional lighter travel for viewports below 1024px. */
+  mobileOffset?: number;
 };
 
-// 视差滚动：桌面端随滚动以不同速度位移，让左右两栏产生层次感
-export function Parallax({ children, className, offset = 60 }: ParallaxProps) {
+// 响应式视差滚动：桌面保留完整位移，移动端可传入更轻的位移。
+export function Parallax({
+  children,
+  className,
+  offset = 60,
+  mobileOffset = 0,
+}: ParallaxProps) {
   const triggerRef = useRef<HTMLDivElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
 
@@ -25,32 +32,40 @@ export function Parallax({ children, className, offset = 60 }: ParallaxProps) {
     }
 
     const media = gsap.matchMedia();
-
-    media.add("(min-width: 1024px)", () => {
+    const createParallax = (travel: number) => {
       gsap.fromTo(
         target,
-        { y: -offset / 2 },
+        { y: -travel / 2 },
         {
-          y: offset / 2,
+          y: travel / 2,
           ease: "none",
           scrollTrigger: {
             trigger: triggerRef.current,
             // 用整个元素从视口底部进入、到完全离开顶部的范围，
-            // 让视差行程更长、更明显
+            // 让位移在完整滚动区间内保持连续。
             start: "top bottom",
             end: "bottom top",
             scrub: true,
           },
         }
       );
+    };
+
+    media.add("(min-width: 1024px)", () => {
+      createParallax(offset);
     });
 
     media.add("(max-width: 1023px)", () => {
-      gsap.set(target, { y: 0 });
+      if (mobileOffset === 0) {
+        gsap.set(target, { y: 0 });
+        return;
+      }
+
+      createParallax(mobileOffset);
     });
 
     return () => media.revert();
-  }, { scope: triggerRef, dependencies: [offset] });
+  }, { scope: triggerRef, dependencies: [offset, mobileOffset] });
 
   return (
     <div ref={triggerRef} className={className}>
