@@ -68,18 +68,20 @@ export function Hero() {
           aria-hidden
           className="pointer-events-none absolute -inset-x-6 -top-8 bottom-20 -z-10 rounded-[3rem] bg-design-light-bg/70 blur-2xl"
         />
-        {/* 文本内容：标签与超大两行标题（与下方区块的编辑式排版呼应） */}
+        {/* 文本内容：标签与超大角色标题（与下方区块的编辑式排版呼应） */}
         <div className="space-y-5">
-          {/* 顶部标签：Portfolio，与 About me 标签同款式 */}
+          {/* 顶部标签：地点与工作方式，与 About me 标签同款式 */}
           <p className="hero-label text-label font-semibold uppercase text-design-light-text-secondary">
-            Portfolio
+            Milan, Italy · Independent practice
           </p>
-          {/* 主标题：整页最大的排版时刻，两行堆叠 */}
+          {/* 主标题：整页最大的排版时刻；移动端将长角色名拆成四行避免溢出 */}
           <div className="relative">
-            <h1 className="hero-title text-[3.25rem] font-semibold leading-[0.95] tracking-tight text-design-light-text-primary sm:text-7xl lg:text-[7.5rem]">
-              Creative
-              <br />
-              Designer
+            <h1 className="hero-title text-[2.5rem] font-semibold leading-[0.95] tracking-tight text-design-light-text-primary min-[375px]:text-[2.75rem] sm:text-7xl lg:text-[7.5rem]">
+              <span className="block">Communication</span>
+              <span className="block">Designer &amp;</span>
+              <span className="block">
+                Frontend <span className="block sm:inline">Developer</span>
+              </span>
             </h1>
           </div>
         </div>
@@ -91,8 +93,7 @@ export function Hero() {
             <div className="relative">
               <p className="hero-description text-pretty text-xl leading-relaxed text-design-light-text-secondary sm:text-2xl lg:text-3xl">
                 <DecryptedText
-                  text={`I design and build vivid experiences
-that bring color to the ordinary.`}
+                  text="I design visual identities, digital interfaces, and custom websites for creative studios, cultural organisations, and design-led businesses."
                   sequential
                   revealDirection="start"
                   speed={30}
