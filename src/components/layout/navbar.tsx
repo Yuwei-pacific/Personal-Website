@@ -18,7 +18,7 @@ const StaggeredMenu = dynamic(() => import("@/components/layout/staggered-menu")
 
 const menuItems: StaggeredMenuItem[] = [
   { label: "Home", ariaLabel: "Go to home", link: "/#home" },
-  { label: "About", ariaLabel: "About Yuwei Li", link: "/#about" },
+  { label: "About", ariaLabel: "About Yuwei Li", link: "/about" },
   { label: "Work", ariaLabel: "View selected work", link: "/#work" },
 ];
 

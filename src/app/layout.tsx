@@ -85,6 +85,10 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="preconnect" href="https://cdn.sanity.io" />
+        <script
+          src="https://mcp.figma.com/mcp/html-to-design/capture.js"
+          async
+        />
         <JsonLd data={websiteSchema} />
       </head>
       <body
@@ -95,7 +99,7 @@ export default function RootLayout({
           <LenisProvider>
             <a
               href="#main-content"
-              className="sr-only fixed left-4 top-4 z-[10000] rounded-button bg-design-light-bg px-4 py-2 text-small font-semibold text-design-light-text-primary shadow-card focus:not-sr-only"
+              className="sr-only fixed left-4 top-4 z-[10000] bg-design-light-bg px-4 py-2 text-small font-semibold text-design-light-text-primary shadow-card focus:not-sr-only"
             >
               Skip to main content
             </a>

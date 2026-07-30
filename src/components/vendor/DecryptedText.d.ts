@@ -21,6 +21,10 @@ export type DecryptedTextProps = {
   parentClassName?: string;
   /** Class applied to still-encrypted characters */
   encryptedClassName?: string;
+  /** Terms that retain a separate visual emphasis while decrypting */
+  emphasizedTerms?: string[];
+  /** Class applied to characters inside emphasized terms */
+  emphasizedClassName?: string;
   animateOn?: "hover" | "view" | "click" | "inViewHover";
   clickMode?: "once" | "toggle";
 } & Omit<HTMLAttributes<HTMLSpanElement>, "className">;

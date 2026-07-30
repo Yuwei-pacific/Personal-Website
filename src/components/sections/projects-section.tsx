@@ -1,6 +1,7 @@
 // 项目列表区：展示从 CMS 获取的项目卡片
 import Image from "next/image";
 import { ProjectCard } from "@/components/projects/project-card";
+import { MaskedSectionHeading } from "@/components/ui/masked-section-heading";
 import type { Project } from "@/lib/view-models/types";
 
 type ProjectsSectionProps = {
@@ -32,25 +33,18 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
         />
       </div>
 
-      <div className="flex w-full flex-col gap-6 pb-section pt-section sm:gap-gap-section sm:pb-section-sm sm:pt-section-sm">
-        {/* 顶部标题：与 Education / Experience 一致的大字加计数 */}
-        <div className="mx-auto flex w-full max-w-6xl items-baseline gap-1.5 px-container sm:px-container-sm">
-          <h2 className="text-3xl font-bold tracking-tight text-design-dark-text-primary sm:text-section">
-            Work
-          </h2>
-          <sup className="text-small font-semibold text-design-dark-text-muted sm:text-body">
-            ({projects.length})
-          </sup>
-        </div>
+      <div className="flex w-full flex-col gap-6 pb-section pt-48 sm:gap-gap-section sm:pb-section-sm">
+        {/* 全宽标题：复用 Hero / 导航的遮罩滑入动画，左边缘与项目网格对齐 */}
+        <MaskedSectionHeading title="Work" count={projects.length} />
 
         {!hasProjects ? (
           /* 空状态提示：CMS 未发布时的占位 */
-          <div className="mx-auto mt-2 w-full max-w-6xl rounded-card border border-dashed border-design-dark-border bg-design-dark-surface/60 p-card text-small text-design-dark-text-secondary">
+          <div className="mx-auto mt-2 w-full max-w-6xl border border-dashed border-design-dark-border bg-design-dark-surface/60 p-card text-small text-design-dark-text-secondary">
             Projects will appear here once they are published in Sanity.
           </div>
         ) : (
           /* 项目列表：拼贴式项目墙，使用不同跨列宽度制造节奏 */
-          <div className="mt-4 grid w-full grid-cols-1 gap-x-3 gap-y-14 px-container sm:gap-x-4 sm:gap-y-20 sm:px-container-sm md:grid-cols-12 lg:px-8">
+          <div className="mt-4 grid w-full grid-cols-1 gap-x-3 gap-y-14 px-6 sm:gap-x-4 sm:gap-y-20 sm:px-container-sm md:grid-cols-12 lg:px-8">
             {projects.map((project, idx) => (
               <ProjectCard
                 key={project._id}
