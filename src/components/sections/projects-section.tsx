@@ -39,7 +39,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
 
         {!hasProjects ? (
           /* 空状态提示：CMS 未发布时的占位 */
-          <div className="mx-auto mt-2 w-full max-w-6xl rounded-card border border-dashed border-design-dark-border bg-design-dark-surface/60 p-card text-small text-design-dark-text-secondary">
+          <div className="mx-auto mt-2 w-full max-w-6xl border border-dashed border-design-dark-border bg-design-dark-surface/60 p-card text-small text-design-dark-text-secondary">
             Projects will appear here once they are published in Sanity.
           </div>
         ) : (
