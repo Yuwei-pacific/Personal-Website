@@ -33,10 +33,10 @@ export function Hero() {
     <section
       ref={heroRef}
       id="home"
-      className="relative isolate min-h-[100svh] w-full overflow-hidden bg-background"
+      className="relative isolate flex h-[100svh] w-full flex-col overflow-hidden bg-background"
     >
-      {/* 点阵只占据 Hero 的主视觉区域；下方信息保持纯白，形成 Figma 中清晰的上下分区。 */}
-      <div className="relative h-[clamp(31rem,69svh,35.0625rem)] w-full overflow-hidden sm:h-[clamp(40rem,81.5svh,41.375rem)]">
+      {/* 底部信息区按内容占高；点阵区自动填满 100svh 中剩余的全部空间。 */}
+      <div className="relative min-h-0 w-full flex-1 overflow-hidden">
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           {/* 交互点阵背景：颜色取自棱镜图对应位置的像素，鼠标划过时产生排斥波纹
               （组件监听 window 事件，不受 pointer-events-none 影响） */}
@@ -61,42 +61,48 @@ export function Hero() {
 
         {/* 三行分别使用独立字号，保留 Figma 中明确的编辑式层级。 */}
         <div className="relative z-10 flex h-full items-center px-6 pt-28 sm:px-16 sm:pt-32">
-          <h1
-            aria-label="Communication Designer & Frontend Developer"
-            className="hero-title w-full font-semibold text-design-light-text-primary"
-          >
-            <span className="block text-[clamp(2.625rem,10.92vw,6.173rem)] leading-[1] tracking-[-0.025em]">
-              <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
-                <span aria-hidden="true" className="hero-word relative inline-block">
-                  Communication
+          <div className="relative w-full">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-x-10 -inset-y-12 -z-10 bg-[radial-gradient(ellipse_at_32%_50%,rgba(255,255,255,0.78)_0%,rgba(255,255,255,0.58)_42%,rgba(255,255,255,0.18)_68%,transparent_82%)] blur-xl sm:-inset-x-16 sm:-inset-y-16"
+            />
+            <h1
+              aria-label="Communication Designer & Frontend Developer"
+              className="hero-title w-full font-semibold text-design-light-text-primary"
+            >
+              <span className="block text-[clamp(2.625rem,10.92vw,6.173rem)] leading-[1] tracking-[-0.025em]">
+                <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
+                  <span aria-hidden="true" className="hero-word relative inline-block">
+                    Communication
+                  </span>
                 </span>
               </span>
-            </span>
-            <span className="block text-[clamp(3.875rem,15.9vw,8.994rem)] leading-[0.99] tracking-[-0.025em]">
-              <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
-                <span aria-hidden="true" className="hero-word relative inline-block">
-                  Designer
-                </span>
-              </span>{" "}
-              <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
-                <span aria-hidden="true" className="hero-word relative inline-block">
-                  &amp;
-                </span>
-              </span>
-            </span>
-            <span className="block text-[clamp(2.125rem,8.776vw,4.961rem)] leading-[1.08] tracking-[-0.025em]">
-              <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
-                <span aria-hidden="true" className="hero-word relative inline-block">
-                  Frontend Developer
+              <span className="block text-[clamp(3.875rem,15.9vw,8.994rem)] leading-[0.99] tracking-[-0.025em]">
+                <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
+                  <span aria-hidden="true" className="hero-word relative inline-block">
+                    Designer
+                  </span>
+                </span>{" "}
+                <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
+                  <span aria-hidden="true" className="hero-word relative inline-block">
+                    &amp;
+                  </span>
                 </span>
               </span>
-            </span>
-          </h1>
+              <span className="block text-[clamp(2.125rem,8.776vw,4.961rem)] leading-[1.08] tracking-[-0.025em]">
+                <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
+                  <span aria-hidden="true" className="hero-word relative inline-block">
+                    Frontend Developer
+                  </span>
+                </span>
+              </span>
+            </h1>
+          </div>
         </div>
       </div>
 
       {/* 定位与服务描述：移动端纵向排列，桌面端将 CTA 固定在文案右下侧。 */}
-      <div className="relative z-10 bg-background px-[2.0625rem] pb-7 pt-6 sm:px-16 sm:pb-6 sm:pt-3.5">
+      <div className="relative z-10 shrink-0 bg-background px-[2.0625rem] pb-7 pt-6 sm:px-16 sm:pb-6 sm:pt-3.5">
         <p className="hero-label text-[0.875rem] font-semibold uppercase leading-[1.2] tracking-[0.23em] text-design-light-text-primary sm:text-base">
           Milan, Italy · Independent practice
         </p>
