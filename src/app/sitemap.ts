@@ -34,6 +34,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "monthly",
         priority: 1,
       },
+      {
+        url: `${baseUrl}/about`,
+        changeFrequency: "monthly",
+        priority: 0.7,
+      },
     ];
 
     routes.push(
@@ -56,6 +61,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: fallbackLastModified,
       changeFrequency: "monthly",
       priority: 1,
+    },
+    {
+      url: `${baseUrl}/about`,
+      changeFrequency: "monthly",
+      priority: 0.7,
     },
   ];
 }

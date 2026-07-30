@@ -6,6 +6,7 @@ import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/scroll-trig
 type RevealTextProps = {
   text: string;
   className?: string;
+  as?: "p" | "h1" | "h2";
   /** Color of words before they are revealed */
   fromColor?: string;
   /** Color of words once revealed */
@@ -32,10 +33,11 @@ const resolveCssColor = (color: string) => {
 export function RevealText({
   text,
   className,
+  as: Tag = "p",
   fromColor = "hsl(var(--color-border-light))",
   toColor = "hsl(var(--color-text-primary-light))",
 }: RevealTextProps) {
-  const containerRef = useRef<HTMLParagraphElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
   const words = text.split(" ");
 
   useGSAP(() => {
@@ -66,7 +68,7 @@ export function RevealText({
   }, { scope: containerRef, dependencies: [fromColor, toColor] });
 
   return (
-    <p ref={containerRef} className={className}>
+    <Tag ref={containerRef as React.Ref<never>} className={className}>
       {words.flatMap((word, i) => {
         const span = (
           <span className="reveal-word" key={`word-${i}`}>
@@ -75,6 +77,6 @@ export function RevealText({
         );
         return i < words.length - 1 ? [span, " "] : [span];
       })}
-    </p>
+    </Tag>
   );
 }

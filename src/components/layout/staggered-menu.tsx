@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { gsap, useGSAP } from "@/lib/animation/gsap-react";
+import {
+  maskedTextHiddenVars,
+  maskedTextRevealVars,
+} from "@/lib/animation/masked-text-reveal";
 
 import "./staggered-menu.css";
 
@@ -53,7 +57,7 @@ const resetPanelContent = ({
   socialLinks,
 }: PanelElements) => {
   if (itemEls.length) {
-    gsap.set(itemEls, { yPercent: 140, rotate: 10 });
+    gsap.set(itemEls, maskedTextHiddenVars());
   }
   if (numberEls.length) {
     gsap.set(numberEls, { "--sm-num-opacity": 0 });
@@ -163,13 +167,7 @@ function StaggeredMenu({
 
           timeline.to(
             itemEls,
-            {
-              yPercent: 0,
-              rotate: 0,
-              duration: 1,
-              ease: "power4.out",
-              stagger: { each: 0.1, from: "start" },
-            },
+            maskedTextRevealVars(),
             itemsStart
           );
 
@@ -247,7 +245,7 @@ function StaggeredMenu({
         });
 
         if (itemEls.length) {
-          timeline.set(itemEls, { yPercent: 140, rotate: 10 });
+          timeline.set(itemEls, maskedTextHiddenVars());
         }
         if (numberEls.length) {
           timeline.set(numberEls, { "--sm-num-opacity": 0 });
