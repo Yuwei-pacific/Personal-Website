@@ -19,7 +19,6 @@ export default function AppleIcon() {
           fontSize: 96,
           fontWeight: 600,
           fontFamily: "sans-serif",
-          borderRadius: 36,
         }}
       >
         Y

@@ -8,12 +8,12 @@ import { RevealText } from "@/components/ui/reveal-text";
 import { Parallax } from "@/components/ui/parallax";
 import { SkillsMarquee } from "@/components/ui/skills-marquee";
 
-type AboutSectionProps = {
+type AboutPageContentProps = {
   skillCategories?: SkillCategory[];
   resumeItems?: ResumeItem[];
 };
 
-export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps) {
+export function AboutPageContent({ skillCategories, resumeItems }: AboutPageContentProps) {
   // 分离 Education 和 Experience 数据
   const educations = resumeItems?.filter(item => item.type === 'education') || [];
   const experiences = resumeItems?.filter(item => item.type === 'experience') || [];
@@ -23,11 +23,8 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
     ? skillCategories
     : fallbackSkillCategories;
   return (
-    <section
-      id="about"
-      className="w-full bg-background relative z-10 scroll-mt-24"
-    >
-      <div className="mx-auto flex max-w-6xl flex-col gap-gap-section px-container pt-section pb-7 sm:gap-gap-section-sm sm:px-container-sm sm:pt-section-sm sm:pb-12">
+    <main className="relative z-10 min-h-screen w-full bg-background">
+      <div className="mx-auto flex max-w-6xl flex-col gap-gap-section px-container pb-7 pt-28 sm:gap-gap-section-sm sm:px-container-sm sm:pb-12 sm:pt-36">
         {/* Intro: 大字逐词点亮的自我介绍，人像与文字左右排版 */}
         <div className="flex flex-col gap-10">
           {/* Edwin Le style layout - Image absolutely positioned on the right, overlapping the text on the left */}
@@ -37,7 +34,7 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
             <div className="pointer-events-none absolute right-0 top-1/2 w-[45%] max-w-[240px] -translate-y-1/2 sm:w-[35%] sm:max-w-[320px] lg:w-[30%] lg:max-w-[360px]">
               <Parallax offset={-160}>
                 {/* 人像是透明底抠像：容器用统一白（同页面背景），只靠阴影区分层次 */}
-                <div className="group relative aspect-square overflow-hidden rounded-media bg-design-light-raised shadow-card transition-shadow duration-slow hover:shadow-hover">
+                <div className="group relative aspect-square overflow-hidden bg-design-light-raised shadow-card transition-shadow duration-slow hover:shadow-hover">
                   <Image
                     src="/Profile_Yuwei.webp"
                     alt="Portrait of Yuwei Li"
@@ -53,13 +50,12 @@ export function AboutSection({ skillCategories, resumeItems }: AboutSectionProps
 
             {/* Text on top — inverts over the photo via mix-blend-difference */}
             <div className="relative z-10 mix-blend-difference pr-[30%] sm:pr-[24%] lg:pr-[20%]">
-              {/* 用 h2 保证标题层级连续（h1 Hero → h2 About → h3 Education/Experience/Capabilities） */}
-              <h2 className="text-label font-semibold uppercase text-design-light-text-muted">
+              <p className="text-label font-semibold uppercase text-design-light-text-muted">
                 About me
-              </h2>
+              </p>
               <RevealText
-                text={`I design and build vivid experiences
-that bring color to the ordinary.`}
+                as="h1"
+                text="I connect communication design and frontend development to turn ideas into clear, expressive, and maintainable digital experiences."
                 fromColor="hsl(var(--color-text-primary-light))"
                 toColor="hsl(var(--color-bg-light))"
                 className="mt-4 text-3xl font-semibold leading-[1.2] tracking-tight sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.15]"
@@ -98,9 +94,9 @@ that bring color to the ordinary.`}
         <div className="flex flex-col gap-12 sm:gap-16">
           <ScrollReveal>
             <div className="flex items-baseline gap-1.5">
-              <h3 className="text-3xl font-bold tracking-tight text-design-light-text-primary sm:text-section">
+              <h2 className="text-3xl font-bold tracking-tight text-design-light-text-primary sm:text-section">
                 Education
-              </h3>
+              </h2>
               <sup className="text-small font-semibold text-design-light-text-muted sm:text-body">
                 ({educations.length})
               </sup>
@@ -109,9 +105,9 @@ that bring color to the ordinary.`}
           </ScrollReveal>
           <ScrollReveal>
             <div className="flex items-baseline gap-1.5">
-              <h3 className="text-3xl font-bold tracking-tight text-design-light-text-primary sm:text-section">
+              <h2 className="text-3xl font-bold tracking-tight text-design-light-text-primary sm:text-section">
                 Experience
-              </h3>
+              </h2>
               <sup className="text-small font-semibold text-design-light-text-muted sm:text-body">
                 ({experiences.length})
               </sup>
@@ -120,9 +116,9 @@ that bring color to the ordinary.`}
           </ScrollReveal>
           <ScrollReveal>
             <div className="flex items-baseline gap-1.5">
-              <h3 className="text-3xl font-bold tracking-tight text-design-light-text-primary sm:text-section">
+              <h2 className="text-3xl font-bold tracking-tight text-design-light-text-primary sm:text-section">
                 Capabilities
-              </h3>
+              </h2>
               <sup className="text-small font-semibold text-design-light-text-muted sm:text-body">
                 ({categoriesToRender.length})
               </sup>
@@ -153,6 +149,6 @@ that bring color to the ordinary.`}
       <div className="pb-12">
         <SkillsMarquee />
       </div>
-    </section>
+    </main>
   );
 }

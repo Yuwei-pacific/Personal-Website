@@ -118,7 +118,7 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
                         <a
                           href={href}
                           {...getExternalLinkProps(href)}
-                          className="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-button border border-design-dark-border-strong bg-design-dark-surface px-3 py-1.5 text-xs font-medium text-design-dark-text-secondary transition-[background-color,color,transform] duration-base hover:scale-emphasis hover:bg-design-dark-elevated hover:text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-2 focus-visible:ring-offset-design-dark-bg"
+                          className="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap border border-design-dark-border-strong bg-design-dark-surface px-3 py-1.5 text-xs font-medium text-design-dark-text-secondary transition-[background-color,color,transform] duration-base hover:scale-emphasis hover:bg-design-dark-elevated hover:text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-2 focus-visible:ring-offset-design-dark-bg"
                         >
                           {label}
                           <span aria-hidden="true">↗</span>

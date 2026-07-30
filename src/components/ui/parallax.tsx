@@ -16,26 +16,40 @@ export function Parallax({ children, className, offset = 60 }: ParallaxProps) {
   const targetRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
+    const target = targetRef.current;
+    if (!target) return;
+
     if (prefersReducedMotion()) {
+      gsap.set(target, { y: 0 });
       return;
     }
 
-    gsap.fromTo(
-      targetRef.current,
-      { y: -offset / 2 },
-      {
-        y: offset / 2,
-        ease: "none",
-        scrollTrigger: {
-          trigger: triggerRef.current,
-          // 用整个元素从视口底部进入、到完全离开顶部的范围，
-          // 让视差行程更长、更明显
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true,
-        },
-      }
-    );
+    const media = gsap.matchMedia();
+
+    media.add("(min-width: 1024px)", () => {
+      gsap.fromTo(
+        target,
+        { y: -offset / 2 },
+        {
+          y: offset / 2,
+          ease: "none",
+          scrollTrigger: {
+            trigger: triggerRef.current,
+            // 用整个元素从视口底部进入、到完全离开顶部的范围，
+            // 让视差行程更长、更明显
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
+        }
+      );
+    });
+
+    media.add("(max-width: 1023px)", () => {
+      gsap.set(target, { y: 0 });
+    });
+
+    return () => media.revert();
   }, { scope: triggerRef, dependencies: [offset] });
 
   return (

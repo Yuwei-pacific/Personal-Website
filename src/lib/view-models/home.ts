@@ -74,3 +74,16 @@ export function normalizeHomeData({
     resumeItems: normalizeResumeItems(resumeItems),
   };
 }
+
+export function normalizeAboutData({
+  skillCategories,
+  resumeItems,
+}: {
+  skillCategories?: SKILLS_QUERY_RESULT;
+  resumeItems?: RESUME_QUERY_RESULT;
+}) {
+  return {
+    skillCategories: normalizeSkillCategories(skillCategories),
+    resumeItems: normalizeResumeItems(resumeItems),
+  };
+}

@@ -99,7 +99,6 @@ export function CustomCursor() {
         style={{
           width: "24px",
           height: "24px",
-          borderRadius: "50%",
           backgroundColor: "hsl(var(--color-text-primary-dark))",
           transformOrigin: "center center",
         }}
