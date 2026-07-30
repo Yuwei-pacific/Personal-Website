@@ -33,7 +33,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
         />
       </div>
 
-      <div className="flex w-full flex-col gap-6 pb-section pt-section sm:gap-gap-section sm:pb-section-sm sm:pt-section-sm">
+      <div className="flex w-full flex-col gap-6 pb-section pt-48 sm:gap-gap-section sm:pb-section-sm">
         {/* 全宽标题：复用 Hero / 导航的遮罩滑入动画，左边缘与项目网格对齐 */}
         <MaskedSectionHeading title="Work" count={projects.length} />
 
@@ -44,7 +44,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
           </div>
         ) : (
           /* 项目列表：拼贴式项目墙，使用不同跨列宽度制造节奏 */
-          <div className="mt-4 grid w-full grid-cols-1 gap-x-3 gap-y-14 px-container sm:gap-x-4 sm:gap-y-20 sm:px-container-sm md:grid-cols-12 lg:px-8">
+          <div className="mt-4 grid w-full grid-cols-1 gap-x-3 gap-y-14 px-6 sm:gap-x-4 sm:gap-y-20 sm:px-container-sm md:grid-cols-12 lg:px-8">
             {projects.map((project, idx) => (
               <ProjectCard
                 key={project._id}

@@ -78,14 +78,14 @@ export function Hero() {
               aria-label="Communication Designer & Frontend Developer"
               className="hero-title w-full font-semibold text-design-light-text-primary"
             >
-              <span className="block text-[clamp(2.625rem,10.92vw,6.173rem)] leading-[1] tracking-[-0.025em]">
+              <span className="block text-[10.92vw] leading-[1] tracking-[-0.025em] sm:text-[clamp(2.625rem,10.92vw,6.173rem)]">
                 <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
                   <span aria-hidden="true" className="hero-word relative inline-block">
                     Communication
                   </span>
                 </span>
               </span>
-              <span className="block text-[clamp(3.875rem,15.9vw,8.994rem)] leading-[0.99] tracking-[-0.025em]">
+              <span className="block text-[15.9vw] leading-[0.99] tracking-[-0.025em] sm:text-[clamp(3.875rem,15.9vw,8.994rem)]">
                 <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
                   <span aria-hidden="true" className="hero-word relative inline-block">
                     Designer
@@ -97,7 +97,7 @@ export function Hero() {
                   </span>
                 </span>
               </span>
-              <span className="block text-[clamp(2.125rem,8.776vw,4.961rem)] leading-[1.08] tracking-[-0.025em]">
+              <span className="block text-[8.776vw] leading-[1.08] tracking-[-0.025em] sm:text-[clamp(2.125rem,8.776vw,4.961rem)]">
                 <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
                   <span aria-hidden="true" className="hero-word relative inline-block">
                     Frontend Developer
@@ -110,26 +110,35 @@ export function Hero() {
       </div>
 
       {/* 定位与服务描述：移动端纵向排列，桌面端将 CTA 固定在文案右下侧。 */}
-      <div className="relative z-10 shrink-0 bg-background px-[2.0625rem] pb-7 pt-6 sm:px-16 sm:pb-6 sm:pt-3.5">
-        <p className="hero-label text-[0.875rem] font-semibold uppercase leading-[1.2] tracking-[0.23em] text-design-light-text-primary sm:text-base">
+      <div className="relative z-10 shrink-0 bg-background px-6 pb-6 pt-5 sm:px-16 sm:pb-6 sm:pt-3.5">
+        <p className="hero-label whitespace-nowrap text-[0.6875rem] font-semibold uppercase leading-[1.25] tracking-[0.18em] text-design-light-text-primary sm:text-base sm:tracking-[0.23em]">
           Milan, Italy · Independent practice
         </p>
         <div className="relative mt-3.5">
-          <p className="hero-description text-2xl leading-[1.08] tracking-[-0.02em] text-design-light-text-primary sm:pr-36 sm:text-[clamp(2rem,2.65vw,2.5rem)] sm:leading-[1.1]">
-            <DecryptedText
-              text={HERO_DESCRIPTION}
-              sequential
-              revealDirection="start"
-              speed={30}
-              animateOn="view"
-              emphasizedTerms={HERO_DESCRIPTION_EMPHASIS}
-              emphasizedClassName="font-bold"
-              encryptedClassName="text-design-light-text-muted/50"
-            />
+          <p className="hero-description text-pretty text-[1.375rem] leading-[1.12] tracking-[-0.02em] text-design-light-text-primary sm:pr-36 sm:text-[clamp(2rem,2.65vw,2.5rem)] sm:leading-[1.1]">
+            {reducedMotion ? (
+              <>
+                I create <strong className="font-bold">visual identities</strong>,{" "}
+                <strong className="font-bold">digital interfaces</strong> and{" "}
+                <strong className="font-bold">custom websites</strong> for creative
+                studios and design‑led organisations.
+              </>
+            ) : (
+              <DecryptedText
+                text={HERO_DESCRIPTION}
+                sequential
+                revealDirection="start"
+                speed={30}
+                animateOn="view"
+                emphasizedTerms={HERO_DESCRIPTION_EMPHASIS}
+                emphasizedClassName="font-bold"
+                encryptedClassName="text-design-light-text-muted/50"
+              />
+            )}
           </p>
           <a
             href="mailto:yuweidesign@outlook.com"
-            className="hero-cta mt-4 inline-flex w-fit border-b-2 border-current text-[1.287rem] font-semibold leading-[1.15] tracking-[-0.04em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:absolute sm:bottom-1 sm:right-0 sm:mt-0 sm:text-xl"
+            className="hero-cta mt-2 inline-flex min-h-11 w-fit touch-manipulation items-center border-b-2 border-current text-lg font-semibold leading-[1.15] tracking-[-0.04em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:absolute sm:bottom-1 sm:right-0 sm:mt-0 sm:min-h-0 sm:text-xl"
           >
             Get In Touch &gt;
           </a>

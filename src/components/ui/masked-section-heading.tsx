@@ -54,7 +54,7 @@ export function MaskedSectionHeading({
   return (
     <div
       ref={headingRef}
-      className="w-full px-container sm:px-container-sm lg:px-8"
+      className="w-full px-6 sm:px-container-sm lg:px-8"
     >
       <div className="flex w-fit items-end gap-1">
         <h2 className="min-w-0 text-display-sm font-semibold text-design-dark-text-primary sm:text-display">
