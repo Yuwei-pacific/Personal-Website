@@ -66,15 +66,24 @@ export function Navbar() {
         if (pathname === "/") {
           const el = document.getElementById(href.slice(2));
           if (el) {
-            if (lenis) {
-              // Lenis 的 scrollTo 不读 CSS scroll-margin，手动换算成 offset
-              const offset = -parseFloat(getComputedStyle(el).scrollMarginTop || "0");
-              lenis.scrollTo(el, { offset });
-            } else {
-              const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-              el.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
-            }
             window.history.pushState(null, "", href);
+
+            // StaggeredMenu 会在 onItemClick 返回后关闭并解除滚动锁。
+            // 下一帧再执行锚点滚动，避免请求在 Lenis.stop() 期间被丢弃。
+            window.requestAnimationFrame(() => {
+              if (lenis) {
+                // Lenis 的 scrollTo 不读 CSS scroll-margin，手动换算成 offset
+                const offset = -parseFloat(
+                  getComputedStyle(el).scrollMarginTop || "0"
+                );
+                lenis.scrollTo(el, { offset, force: true });
+              } else {
+                const reduced = window.matchMedia(
+                  "(prefers-reduced-motion: reduce)"
+                ).matches;
+                el.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+              }
+            });
           }
         } else {
           router.push(href);
