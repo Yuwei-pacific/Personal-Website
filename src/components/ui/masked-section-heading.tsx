@@ -34,7 +34,7 @@ export function MaskedSectionHeading({
       if (!itemEls?.length) return;
 
       if (prefersReducedMotion()) {
-        gsap.set(itemEls, { yPercent: 0, rotation: 0 });
+        gsap.set(itemEls, { y: 0, yPercent: 0, rotation: 0 });
         return;
       }
 
