@@ -39,6 +39,19 @@ export function MaskedSectionHeading({
       }
 
       gsap.set(itemEls, maskedTextHiddenVars());
+
+      const section = headingRef.current?.closest<HTMLElement>("section[id]");
+      const isCurrentAnchor =
+        section && window.location.hash === `#${section.id}`;
+
+      // 跨路由返回 /#work 时，锚点定位发生在新页面挂载之后，
+      // ScrollTrigger 可能错过 onEnter。锚点就是当前 section 时直接播放，
+      // 仍复用完全相同的 reveal 参数。
+      if (isCurrentAnchor) {
+        gsap.to(itemEls, maskedTextRevealVars());
+        return;
+      }
+
       gsap.to(itemEls, {
         ...maskedTextRevealVars(),
         scrollTrigger: {
