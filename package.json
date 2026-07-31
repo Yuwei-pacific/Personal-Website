@@ -14,9 +14,7 @@
     "typecheck": "tsc --noEmit",
     "check": "npm run lint && npm run typecheck && npm run build",
     "smoke": "node scripts/smoke.mjs",
-    "typegen": "sanity schema extract --path=./src/sanity/schema.json --force && sanity typegen generate",
-    "migrate:i18n-content": "sanity exec scripts/migrate-sanity-localized-content.mjs --with-user-token",
-    "migrate:i18n-content:write": "SANITY_I18N_WRITE=1 sanity exec scripts/migrate-sanity-localized-content.mjs --with-user-token"
+    "typegen": "sanity schema extract --path=./src/sanity/schema.json --force && sanity typegen generate"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

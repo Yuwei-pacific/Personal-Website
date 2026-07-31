@@ -240,7 +240,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       socials: "Socials",
       socialLinksAria: "Social links",
       language: "Language",
-      switchLanguage: "Passa a Italiano",
+      switchLanguage: "Switch to Italiano",
     },
     common: {
       skipToMain: "Skip to main content",

@@ -92,6 +92,32 @@ export function Navbar({
     };
   }, []);
 
+  // 切换语言时留在原地：pathname 已经由 replaceLocale 换好，这里补上 query 与锚点。
+  // 读点击那一刻的 window.location 而不是渲染时的快照 —— 面板内的锚点跳转走的是
+  // history.pushState，不触发 hashchange/popstate，任何提前算好的 hash 都会过期。
+  // href 本身保持不带 hash，SSR 与无 JS 时仍是一个干净的语言首页链接。
+  const handleLanguageClick = useCallback(
+    (href: string, event: React.MouseEvent<HTMLAnchorElement>) => {
+      // 让浏览器自己处理「新标签页打开」这类修饰键点击
+      if (
+        event.defaultPrevented ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      const { search, hash } = window.location;
+      if (!search && !hash) return;
+
+      event.preventDefault();
+      window.location.assign(`${href}${search}${hash}`);
+    },
+    []
+  );
+
   // 面板链接点击：同页锚点平滑滚动 / 跨页用 router 跳转。
   const handleMenuItemClick = useCallback(
     (href: string, event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -145,6 +171,7 @@ export function Navbar({
           onMenuOpen={handleMenuOpen}
           onMenuClose={handleMenuClose}
           onItemClick={handleMenuItemClick}
+          onLanguageClick={handleLanguageClick}
         />
       </div>
     </div>
