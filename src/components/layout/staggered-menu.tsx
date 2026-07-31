@@ -49,6 +49,7 @@ type StaggeredMenuProps = {
   onMenuOpen?: () => void;
   onMenuClose?: () => void;
   onItemClick?: (href: string, event: ReactMouseEvent<HTMLAnchorElement>) => void;
+  onLanguageClick?: (href: string, event: ReactMouseEvent<HTMLAnchorElement>) => void;
 };
 
 type PanelElements = {
@@ -121,6 +122,7 @@ function StaggeredMenu({
   onMenuOpen,
   onMenuClose,
   onItemClick,
+  onLanguageClick,
 }: StaggeredMenuProps) {
   const [open, setOpen] = useState(false);
   const [textLines, setTextLines] = useState([labels.menu, labels.close]);
@@ -630,7 +632,10 @@ function StaggeredMenu({
                           aria-label={item.ariaLabel}
                           aria-current={item.current ? "page" : undefined}
                           className="sm-socials-link"
-                          onClick={closeMenu}
+                          onClick={(event) => {
+                            onLanguageClick?.(item.link, event);
+                            closeMenu();
+                          }}
                         >
                           {item.label}
                         </a>
