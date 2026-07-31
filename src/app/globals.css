@@ -97,6 +97,7 @@
   }
 
   html {
+    background-color: hsl(var(--color-bg-light));
     scroll-behavior: auto;
   }
 
