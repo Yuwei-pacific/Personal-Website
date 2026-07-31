@@ -1,6 +1,5 @@
 import Image from "next/image";
 import type { ResumeItem, SkillCategory } from "@/lib/view-models/types";
-import { fallbackEducation, fallbackExperience, fallbackSkillCategories } from "@/content/fallbacks";
 import { ResumeList } from "./resume-list";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { StaggerReveal } from "@/components/ui/stagger-reveal";
@@ -18,13 +17,11 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
   const educations = resumeItems?.filter(item => item.type === 'education') || [];
   const experiences = resumeItems?.filter(item => item.type === 'experience') || [];
 
-  // CMS 无数据时使用兜底内容（见 content/fallbacks.ts）
-  const categoriesToRender = skillCategories && skillCategories.length > 0
-    ? skillCategories
-    : fallbackSkillCategories;
+  // 内容来源只有 CMS：无数据时显示空状态，不再回退到仓库里的副本
+  const categoriesToRender = skillCategories ?? [];
   return (
-    <main className="relative z-10 min-h-screen w-full bg-background">
-      <div className="mx-auto flex max-w-6xl flex-col gap-gap-section px-container pb-7 pt-28 sm:gap-gap-section-sm sm:px-container-sm sm:pb-12 sm:pt-36">
+    <main id="main-content" className="relative z-10 min-h-screen w-full bg-background">
+      <div className="mx-auto flex max-w-content flex-col gap-gap-section px-container pb-7 pt-28 sm:gap-gap-section-sm sm:px-container-sm sm:pb-12 sm:pt-36">
         {/* Intro: 大字逐词点亮的自我介绍，人像与文字左右排版 */}
         <div className="flex flex-col gap-10">
           {/* Edwin Le style layout - Image absolutely positioned on the right, overlapping the text on the left */}
@@ -101,7 +98,7 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
                 ({educations.length})
               </sup>
             </div>
-            <ResumeList items={educations} fallbackData={fallbackEducation} />
+            <ResumeList items={educations} />
           </ScrollReveal>
           <ScrollReveal>
             <div className="flex items-baseline gap-1.5">
@@ -112,7 +109,7 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
                 ({experiences.length})
               </sup>
             </div>
-            <ResumeList items={experiences} fallbackData={fallbackExperience} />
+            <ResumeList items={experiences} />
           </ScrollReveal>
           <ScrollReveal>
             <div className="flex items-baseline gap-1.5">
@@ -123,6 +120,11 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
                 ({categoriesToRender.length})
               </sup>
             </div>
+            {!categoriesToRender.length ? (
+              <p className="mt-stack border-t border-design-light-border pt-4 text-small text-design-light-text-muted">
+                Capabilities will appear here once they are published in Sanity.
+              </p>
+            ) : (
             <StaggerReveal className="mt-stack border-t border-design-light-border">
               {categoriesToRender.map((category) => (
                 <div
@@ -141,6 +143,7 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
                 </div>
               ))}
             </StaggerReveal>
+            )}
           </ScrollReveal>
         </div>
       </div>

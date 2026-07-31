@@ -6,7 +6,7 @@ import type { ProjectSection } from "@/lib/view-models/types";
 import { ProjectRichText } from "./project-rich-text";
 import { SectionMedia } from "./section-media";
 
-// 文字模块铺满外层内容容器（详情页的 max-w-6xl），与迁移前的正文宽度一致。
+// 文字模块铺满外层内容容器（详情页的 max-w-content），与迁移前的正文宽度一致。
 // 若日后想收窄到更利于阅读的字数/行，改这一处即可（例如 mx-auto max-w-3xl）。
 const TEXT_COLUMN = "w-full";
 

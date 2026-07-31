@@ -20,21 +20,25 @@ Personal-Website/
 ├─ src/
 │  ├─ app/
 │  │  ├─ globals.css              # Design tokens + global styles
+│  │  ├─ error.tsx                # Route error boundary
+│  │  ├─ global-error.tsx         # Root layout error boundary
 │  │  ├─ page.tsx                 # Home data composition
 │  │  ├─ projects/[slug]/         # Project detail route and route data
 │  │  └─ studio/[[...index]]/     # Embedded Sanity Studio
 │  ├─ components/
-│  │  ├─ layout/                  # Navigation
+│  │  ├─ layout/                  # Navigation, footer
 │  │  ├─ projects/                # Project cards, detail view, gallery
 │  │  ├─ providers/               # Application providers
-│  │  ├─ sections/                # Home page sections
+│  │  ├─ sections/                # Page sections, grouped by route
+│  │  │  ├─ home/                 #   hero, about preview, work grid
+│  │  │  └─ about/                #   about page content, resume list
 │  │  ├─ seo/                     # JSON-LD
 │  │  ├─ ui/                      # Shared UI and animation primitives
 │  │  └─ vendor/                  # Low-touch third-party JSX + local .d.ts
-│  ├─ content/                    # CMS fallback content
 │  ├─ hooks/                      # Shared client hooks
 │  ├─ lib/
 │  │  ├─ animation/               # GSAP registration boundaries
+│  │  ├─ site-metadata.ts         # Single source for URL, contact, socials
 │  │  └─ view-models/             # CMS normalization + stable UI types
 │  └─ sanity/
 │     ├─ client.ts                # Server-only data client
@@ -69,10 +73,29 @@ Personal-Website/
   background matches during overscroll bounce.
 - **Design tokens**: raw values live as CSS variables in `src/app/globals.css`,
   mapped to Tailwind utilities in `tailwind.config.ts`
-  (spacing: `container/section/card/gap-*`, radius: `card/button/tag/media/panel`,
-  motion: `duration-fast/base/slow/media`, type scale: `display/section/card/body/small/label`).
+  (vertical rhythm: `section` for page-level blocks vs `panel` for padding inside a
+  block, other spacing: `container/gap-section/stack`, radius: `card/button/tag/media/panel`,
+  motion: `duration-fast/base/slow/media`, type scale: `display/display-sm/section/lead/body/small/label`,
+  display tracking: `tracking-display`,
+  layout: `max-w-content`, layering: `z-nav/z-nav-logo/z-cursor/z-skip-link`).
+  Section headings share one ramp: `text-display-sm lg:text-display` + `tracking-display`.
+  The hero's three-line title keeps its own per-line `vw` sizes — it is a one-off
+  typographic composition, not a reusable scale.
   Rule of thumb: a visual decision used 3+ times becomes a token; one-off art
-  direction (portrait offsets, collage ratios) stays inline.
+  direction (portrait offsets, collage ratios) stays inline. Only *global*
+  layering is tokenised — inside a section keep using `z-10` / `z-20`.
+  Sharp corners are the site style, but `rounded-full` stays available:
+  a circle is a shape, not a corner-radius style.
+- **Site constants**: URL, contact address, social accounts and role strings come
+  from `src/lib/site-metadata.ts`. Never hardcode the domain — `absoluteUrl()`
+  builds canonical, sitemap and JSON-LD links.
+- **Page shell**: every page renders `<Navbar />`, then a single
+  `<main id="main-content">` wrapping *all* of its content, then `<Footer />`.
+  The root layout only provides the background container, so navigation stays
+  outside the `main` landmark and the skip link has a real target.
+- **CMS is the only content source**: there is no in-repo fallback copy. When a
+  query returns nothing, render an empty state rather than shipping duplicate
+  content that can silently drift from Sanity.
 - **Owned interactive components**: `components/layout/staggered-menu.tsx` is a
   React Bits adaptation that now owns core site behavior, so its prop contract
   lives in TSX source rather than a handwritten `.d.ts` file. The project gallery

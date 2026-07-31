@@ -33,13 +33,13 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
         />
       </div>
 
-      <div className="flex w-full flex-col gap-6 pb-section pt-32 sm:gap-gap-section sm:pb-section-sm sm:pt-48">
+      <div className="flex w-full flex-col gap-6 pb-panel pt-section sm:gap-gap-section sm:pb-panel-sm sm:pt-section-sm">
         {/* 全宽标题：复用 Hero / 导航的遮罩滑入动画，左边缘与项目网格对齐 */}
         <MaskedSectionHeading title="Work" count={projects.length} />
 
         {!hasProjects ? (
           /* 空状态提示：CMS 未发布时的占位 */
-          <div className="mx-auto mt-2 w-full max-w-6xl border border-dashed border-design-dark-border bg-design-dark-surface/60 p-card text-small text-design-dark-text-secondary">
+          <div className="mx-auto mt-2 w-full max-w-content border border-dashed border-design-dark-border bg-design-dark-surface/60 p-card text-small text-design-dark-text-secondary">
             Projects will appear here once they are published in Sanity.
           </div>
         ) : (

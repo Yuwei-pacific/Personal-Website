@@ -78,14 +78,14 @@ export function Hero() {
               aria-label="Communication Designer & Frontend Developer"
               className="hero-title w-full font-semibold text-design-light-text-primary"
             >
-              <span className="block text-[10.92vw] leading-[1] tracking-[-0.025em] sm:text-[clamp(2.625rem,10.92vw,6.173rem)]">
+              <span className="block text-[10.92vw] leading-[1] tracking-display sm:text-[clamp(2.625rem,10.92vw,6.173rem)]">
                 <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
                   <span aria-hidden="true" className="hero-word relative inline-block">
                     Communication
                   </span>
                 </span>
               </span>
-              <span className="block text-[15.9vw] leading-[0.99] tracking-[-0.025em] sm:text-[clamp(3.875rem,15.9vw,8.994rem)]">
+              <span className="block text-[15.9vw] leading-[0.99] tracking-display sm:text-[clamp(3.875rem,15.9vw,8.994rem)]">
                 <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
                   <span aria-hidden="true" className="hero-word relative inline-block">
                     Designer
@@ -97,7 +97,7 @@ export function Hero() {
                   </span>
                 </span>
               </span>
-              <span className="block text-[8.776vw] leading-[1.08] tracking-[-0.025em] sm:text-[clamp(2.125rem,8.776vw,4.961rem)]">
+              <span className="block text-[8.776vw] leading-[1.08] tracking-display sm:text-[clamp(2.125rem,8.776vw,4.961rem)]">
                 <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
                   <span aria-hidden="true" className="hero-word relative inline-block">
                     Frontend Developer

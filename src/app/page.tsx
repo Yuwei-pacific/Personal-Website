@@ -1,8 +1,9 @@
 // 首页页面：依赖的展示组件与 Sanity 客户端
+import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
-import { AboutPreview } from "@/components/sections/about-preview";
-import { Hero } from "@/components/sections/hero";
-import { ProjectsSection } from "@/components/sections/projects-section";
+import { AboutPreview } from "@/components/sections/home/about-preview";
+import { Hero } from "@/components/sections/home/hero";
+import { ProjectsSection } from "@/components/sections/home/projects-section";
 import { JsonLd, personSchema } from "@/components/seo/json-ld";
 import { sanityFetch } from "@/sanity/live";
 import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site-metadata";
@@ -42,19 +43,22 @@ export default async function HomePage() {
   const homeData = normalizeHomeData({ projects });
 
   return (
-    // 页面结构：导航栏 + Hero + About 预览 + Projects 列表
+    // 页面结构：导航栏 + Hero + About 预览 + Projects 列表 + 页脚
     <div className="min-h-screen">
       {/* Person 结构化数据：增强 E-E-A-T 信号 */}
       <JsonLd data={personSchema} />
-      {/* 顶部导航，支持滚动隐藏 */}
+      {/* 顶部导航，位于 main 之外（landmark 语义 + skip link 才有意义） */}
       <Navbar />
-      {/* 首页主视觉区 */}
-      <Hero />
-      {/* 关于我预览：完整履历与能力信息位于 /about */}
-      <AboutPreview />
+      <main id="main-content">
+        {/* 首页主视觉区 */}
+        <Hero />
+        {/* 关于我预览：完整履历与能力信息位于 /about */}
+        <AboutPreview />
 
-      {/* 项目集合：从 CMS 获取的数据传入 */}
-      <ProjectsSection projects={homeData.projects} />
+        {/* 项目集合：从 CMS 获取的数据传入 */}
+        <ProjectsSection projects={homeData.projects} />
+      </main>
+      <Footer />
     </div>
   );
 }
