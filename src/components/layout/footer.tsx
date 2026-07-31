@@ -116,7 +116,7 @@ export function Footer() {
     >
       <div
         ref={innerRef}
-        className="relative z-10 min-h-[42rem] px-container pb-8 pt-8 will-change-transform sm:min-h-[48rem] sm:px-container-sm sm:pb-10 sm:pt-10"
+        className="relative z-10 min-h-[30rem] px-container pb-8 pt-8 will-change-transform sm:min-h-[48rem] sm:px-container-sm sm:pb-10 sm:pt-10"
       >
         <div className="flex min-h-[inherit] w-full flex-col">
           <div className="grid gap-5 border-t border-design-dark-border pt-5 sm:grid-cols-12 sm:gap-6">
@@ -125,9 +125,14 @@ export function Footer() {
             </p>
             <a
               href={`mailto:${SITE_EMAIL}`}
-              className="group flex w-fit max-w-full items-start gap-2 break-words text-[clamp(1.55rem,6.25vw,5rem)] font-semibold leading-[0.92] tracking-display text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-4 focus-visible:ring-offset-design-dark-bg sm:col-span-9 sm:break-normal"
+              // w-full + justify-between：邮箱靠左、↗ 顶到栏位右缘。
+              // 字号斜率按「邮箱整串必须放进 col-span-9」反推（旧的 6.25vw/上限 5rem
+              // 会让文字比列宽还长 ~80px，把箭头挤出容器右缘）。
+              className="group flex w-full items-start justify-between gap-4 break-words text-[clamp(1.55rem,4.6vw,4.25rem)] sm:justify-end font-semibold leading-[0.92] tracking-display text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-4 focus-visible:ring-offset-design-dark-bg sm:col-span-9 sm:break-normal"
             >
-              <span className="transition-opacity duration-base group-hover:opacity-60">
+              {/* min-w-0：flex item 默认 min-width:auto 不会收缩，
+                  极端窄屏下需要它才能让 break-words 生效而不是溢出 */}
+              <span className="min-w-0 transition-opacity duration-base group-hover:opacity-60">
                 {SITE_EMAIL}
               </span>
               <span
@@ -139,15 +144,16 @@ export function Footer() {
             </a>
           </div>
 
-          <div className="flex flex-1 items-center py-16 sm:py-20">
+          {/* 移动端收紧上下留白：名字本身只有 ~52px 高，py-16 + min-h 的拉伸
+              会在它上下各留出近 100px 空档 */}
+          <div className="flex flex-1 items-center py-10 sm:py-20">
             <p
               aria-hidden="true"
               className="w-full text-[clamp(4.5rem,16vw,12rem)] font-semibold uppercase leading-[0.72] tracking-[-0.075em] text-design-dark-text-primary"
             >
-              <span className="block sm:inline">Yuwei</span>{" "}
-              <span className="block text-design-dark-text-muted sm:inline">
-                Li
-              </span>
+              {/* 单行显示：375px 视口下整串仅需 ~262px，可用宽度 343px，放得下 */}
+              <span>Yuwei</span>{" "}
+              <span className="text-design-dark-text-muted">Li</span>
             </p>
           </div>
 
