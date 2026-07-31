@@ -120,7 +120,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       socials: "Social",
       socialLinksAria: "Link social",
       language: "Lingua",
-      switchLanguage: "Passa a English",
+      switchLanguage: "Passa all’inglese",
     },
     common: {
       skipToMain: "Vai al contenuto principale",
@@ -128,7 +128,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     home: {
       hero: {
-        basedIn: "A Milano, lavoro con clienti internazionali",
+        basedIn: "Lavoro da Milano con clienti internazionali",
         description:
           "Creo identità visive, interfacce digitali e siti web su misura per studi creativi e organizzazioni orientate al design.",
         emphasizedTerms: [
@@ -136,13 +136,13 @@ const dictionaries: Record<Locale, Dictionary> = {
           "interfacce digitali",
           "siti web su misura",
         ],
-        cta: "Parliamone >",
+        cta: "Parliamone →",
       },
       aboutPreview: {
         title: "Dall’idea al lancio.",
         body:
-          "Mi muovo tra sistemi visivi, progettazione di interfacce e sviluppo frontend, accompagnando le idee dalla direzione iniziale a risultati curati e facili da mantenere.",
-        cta: "Scopri di più >",
+          "Lavoro su sistemi visivi, interfacce e sviluppo frontend, trasformando le prime idee in esperienze digitali curate e facili da mantenere.",
+        cta: "Scopri di più →",
       },
       projects: {
         title: "Progetti",
@@ -201,7 +201,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       errorEyebrow: "Qualcosa è andato storto",
       errorTitle: "Impossibile caricare la pagina",
       errorBody:
-        "Si è verificato un errore imprevisto. Riprova; se il problema continua, la pagina potrebbe essere temporaneamente non disponibile.",
+        "Si è verificato un errore imprevisto. Riprova. Se il problema persiste, la pagina potrebbe essere temporaneamente non disponibile.",
       retry: "Riprova",
     },
     metadata: {
@@ -217,7 +217,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       ],
       aboutTitle: "Chi è Yuwei Li",
       aboutDescription:
-        "Scopri Yuwei Li, Communication Designer & Frontend Developer con base a Milano, tra identità visive, interfacce digitali e siti web su misura.",
+        "Portfolio di Yuwei Li, Communication Designer & Frontend Developer a Milano: identità visive, interfacce digitali e siti web su misura.",
       projectNotFound: "Progetto non trovato",
       portfolio: "Portfolio",
       basedInMilan: "A Milano",
@@ -228,7 +228,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       home: "Home",
       about: "About",
       work: "Work",
-      homeAria: "Go to home",
+      homeAria: "Go to homepage",
       aboutAria: "About Yuwei Li",
       workAria: "View selected work",
       menu: "Menu",
@@ -237,10 +237,10 @@ const dictionaries: Record<Locale, Dictionary> = {
       closeMenu: "Close menu",
       headerAria: "Main navigation",
       noItems: "No items",
-      socials: "Socials",
+      socials: "Social",
       socialLinksAria: "Social links",
       language: "Language",
-      switchLanguage: "Switch to Italiano",
+      switchLanguage: "Switch to Italian",
     },
     common: {
       skipToMain: "Skip to main content",
@@ -248,7 +248,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     home: {
       hero: {
-        basedIn: "Based in Milan and working internationally",
+        basedIn: "Based in Milan, working with international clients",
         description:
           "I create visual identities, digital interfaces and custom websites for creative studios and design-led organisations.",
         emphasizedTerms: [
@@ -256,13 +256,13 @@ const dictionaries: Record<Locale, Dictionary> = {
           "digital interfaces",
           "custom websites",
         ],
-        cta: "Get in touch >",
+        cta: "Get in touch →",
       },
       aboutPreview: {
         title: "From concept to launch.",
         body:
-          "I move between visual systems, interface design and frontend development, carrying ideas from early direction to polished, maintainable outcomes.",
-        cta: "More about me >",
+          "I work across visual systems, interface design and frontend development, turning early ideas into polished, maintainable digital experiences.",
+        cta: "More about me →",
       },
       projects: {
         title: "Work",
@@ -272,11 +272,11 @@ const dictionaries: Record<Locale, Dictionary> = {
     about: {
       eyebrow: "About me",
       intro:
-        "I connect communication design and frontend development to turn ideas into clear, expressive, and maintainable digital experiences.",
+        "I combine communication design and frontend development to turn ideas into clear, expressive and maintainable digital experiences.",
       roleLabel: "Role",
       locationLabel: "Location",
       languagesLabel: "Languages",
-      languages: ["Chinese — Native", "English — B2", "Italiano — B2"],
+      languages: ["Chinese — native", "English — B2", "Italian — B2"],
       education: "Education",
       experience: "Experience",
       capabilities: "Capabilities",
@@ -291,8 +291,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       year: "Year",
       client: "Client",
       location: "Location",
-      visitOfficial: "Visit official website",
-      visitProject: "Visit project",
+      visitOfficial: "Visit the official website",
+      visitProject: "View project",
       credits: "Project credits",
       contributors: "Contributors",
       roles: "My roles",
@@ -317,11 +317,11 @@ const dictionaries: Record<Locale, Dictionary> = {
       notFoundTitle: "Page not found",
       notFoundBody:
         "The page you are looking for doesn’t exist or may have been moved.",
-      backHome: "← Back to home",
+      backHome: "← Back home",
       errorEyebrow: "Something went wrong",
       errorTitle: "This page failed to load",
       errorBody:
-        "An unexpected error occurred. Trying again usually helps; if it keeps happening, the page may be temporarily unavailable.",
+        "An unexpected error occurred. Try again. If the problem persists, the page may be temporarily unavailable.",
       retry: "Try again",
     },
     metadata: {
