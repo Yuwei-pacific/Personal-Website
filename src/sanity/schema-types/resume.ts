@@ -33,9 +33,19 @@ export const resume = defineType({
       type: 'string',
     }),
     defineField({
+      name: 'degreeTranslations',
+      title: 'Degree / Role translations',
+      type: 'localizedString',
+    }),
+    defineField({
       name: 'period',
       title: 'Period',
       type: 'string',
+    }),
+    defineField({
+      name: 'periodTranslations',
+      title: 'Period translations',
+      type: 'localizedString',
     }),
     defineField({
       name: 'location',
@@ -43,11 +53,21 @@ export const resume = defineType({
       type: 'string',
     }),
     defineField({
+      name: 'locationTranslations',
+      title: 'Location translations',
+      type: 'localizedString',
+    }),
+    defineField({
       name: 'details',
       title: 'Details',
       type: 'array',
       of: [{ type: 'block' }],
       description: 'Additional details to show when expanded (e.g. coursework, honors, thesis)',
+    }),
+    defineField({
+      name: 'detailsTranslations',
+      title: 'Details translations',
+      type: 'localizedProjectText',
     }),
     defineField({
       name: 'order',

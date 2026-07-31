@@ -10,6 +10,9 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 import { buildCropUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
+import type { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/dictionaries";
+import { localizedPath } from "@/i18n/routing";
 
 type ProjectCardProps = {
     project: Project;
@@ -18,6 +21,8 @@ type ProjectCardProps = {
     revealDelay?: number;
     /** 当前项目在列表中的位置，用于生成拼贴式宽度节奏 */
     index?: number;
+    locale: Locale;
+    dictionary: Dictionary;
 };
 
 // 拼贴节奏：8 个槽位一个循环，每行凑满 12 列（7+5 / 4+4+4 / 5+7 / 12），
@@ -38,7 +43,14 @@ const layoutPattern = [
 // 裁切图请求宽度：足够覆盖最大槽位在 2x 屏上的显示宽度
 const COVER_CROP_WIDTH = 1600;
 
-export function ProjectCard({ project, slug, revealDelay = 0, index = 0 }: ProjectCardProps) {
+export function ProjectCard({
+    project,
+    slug,
+    revealDelay = 0,
+    index = 0,
+    locale,
+    dictionary,
+}: ProjectCardProps) {
     const meta = [project.projectType, project.year].filter(Boolean);
     const layout = layoutPattern[index % layoutPattern.length];
 
@@ -86,7 +98,11 @@ export function ProjectCard({ project, slug, revealDelay = 0, index = 0 }: Proje
                 {coverSrc ? (
                     <Image
                         src={coverSrc}
-                        alt={project.coverImage?.alt || project.title || "Project cover"}
+                        alt={
+                            project.coverImage?.alt ||
+                            project.title ||
+                            dictionary.project.projectCover
+                        }
                         fill
                         className="object-cover transition-transform duration-media ease-design-out group-hover:scale-[1.035]"
                         sizes={layout.sizes}
@@ -145,7 +161,7 @@ export function ProjectCard({ project, slug, revealDelay = 0, index = 0 }: Proje
     return (
         <ScrollReveal className={cn("block", layout.span)} delay={revealDelay}>
             <Link
-                href={`/projects/${slug}`}
+                href={localizedPath(locale, `/projects/${slug}`)}
                 className="block touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-4 focus-visible:ring-offset-design-dark-bg"
             >
                 {cardContent}

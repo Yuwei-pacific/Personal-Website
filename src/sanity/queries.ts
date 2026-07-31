@@ -8,8 +8,18 @@ import { defineQuery } from "next-sanity";
 // Project images, GIFs, and videos share one projection contract. Array
 // callers add `_key` so live reordering can retain stable item identity.
 const PROJECT_MEDIA_PROJECTION = /* groq */ `
-  alt,
-  caption,
+  "alt": coalesce(
+    select($locale == "it" => altTranslations.it, altTranslations.en),
+    altTranslations.en,
+    alt,
+    altTranslations.it
+  ),
+  "caption": coalesce(
+    select($locale == "it" => captionTranslations.it, captionTranslations.en),
+    captionTranslations.en,
+    caption,
+    captionTranslations.it
+  ),
   "image": image.asset->{
     url,
     mimeType,
@@ -23,13 +33,34 @@ const PROJECT_MEDIA_PROJECTION = /* groq */ `
 export const PROJECTS_QUERY = defineQuery(`*[_type == "project" && visibility != false]
   | order(coalesce(year, 0) desc, _createdAt desc){
   _id,
-  title,
-  summary,
+  "title": coalesce(
+    select($locale == "it" => titleTranslations.it, titleTranslations.en),
+    titleTranslations.en,
+    title,
+    titleTranslations.it
+  ),
+  "summary": coalesce(
+    select($locale == "it" => summaryTranslations.it, summaryTranslations.en),
+    summaryTranslations.en,
+    summary,
+    summaryTranslations.it
+  ),
   year,
-  projectType,
+  "projectType": coalesce(
+    select($locale == "it" => projectTypeTranslations.it, projectTypeTranslations.en),
+    projectTypeTranslations.en,
+    projectType,
+    projectTypeTranslations.it
+  ),
   "slug": slug.current,
   "coverImage": coverImage{
     ...,
+    "alt": coalesce(
+      select($locale == "it" => altTranslations.it, altTranslations.en),
+      altTranslations.en,
+      alt,
+      altTranslations.it
+    ),
     asset->{
       _id,
       url,
@@ -42,7 +73,12 @@ export const PROJECTS_QUERY = defineQuery(`*[_type == "project" && visibility !=
 // 技能分类列表
 export const SKILLS_QUERY = defineQuery(`*[_type == "skillCategory"] | order(order asc){
   _id,
-  title,
+  "title": coalesce(
+    select($locale == "it" => titleTranslations.it, titleTranslations.en),
+    titleTranslations.en,
+    title,
+    titleTranslations.it
+  ),
   order,
   skills
 }`);
@@ -52,30 +88,89 @@ export const RESUME_QUERY = defineQuery(`*[_type == "education"] | order(order d
   _id,
   type,
   institution,
-  degree,
-  location,
-  period,
-  details,
+  "degree": coalesce(
+    select($locale == "it" => degreeTranslations.it, degreeTranslations.en),
+    degreeTranslations.en,
+    degree,
+    degreeTranslations.it
+  ),
+  "location": coalesce(
+    select($locale == "it" => locationTranslations.it, locationTranslations.en),
+    locationTranslations.en,
+    location,
+    locationTranslations.it
+  ),
+  "period": coalesce(
+    select($locale == "it" => periodTranslations.it, periodTranslations.en),
+    periodTranslations.en,
+    period,
+    periodTranslations.it
+  ),
+  "details": coalesce(
+    select($locale == "it" => detailsTranslations.it, detailsTranslations.en),
+    detailsTranslations.en,
+    details,
+    detailsTranslations.it
+  ),
   order
 }`);
 
 // 项目详情页
 export const PROJECT_QUERY = defineQuery(`*[_type == "project" && slug.current == $slug && visibility != false][0]{
   _id,
-  title,
-  summary,
-  role,
+  "title": coalesce(
+    select($locale == "it" => titleTranslations.it, titleTranslations.en),
+    titleTranslations.en,
+    title,
+    titleTranslations.it
+  ),
+  "summary": coalesce(
+    select($locale == "it" => summaryTranslations.it, summaryTranslations.en),
+    summaryTranslations.en,
+    summary,
+    summaryTranslations.it
+  ),
+  "role": coalesce(
+    select($locale == "it" => roleTranslations.it, roleTranslations.en),
+    roleTranslations.en,
+    role,
+    roleTranslations.it
+  ),
   tags,
   contributors,
   "slug": slug.current,
   year,
-  projectType,
+  "projectType": coalesce(
+    select($locale == "it" => projectTypeTranslations.it, projectTypeTranslations.en),
+    projectTypeTranslations.en,
+    projectType,
+    projectTypeTranslations.it
+  ),
   client,
-  location,
-  links,
+  "location": coalesce(
+    select($locale == "it" => locationTranslations.it, locationTranslations.en),
+    locationTranslations.en,
+    location,
+    locationTranslations.it
+  ),
+  "links": links[]{
+    _key,
+    url,
+    "label": coalesce(
+      select($locale == "it" => labelTranslations.it, labelTranslations.en),
+      labelTranslations.en,
+      label,
+      labelTranslations.it
+    )
+  },
   "coverImage": {
     "url": coalesce(coverImage.asset->url, ""),
-    "alt": coverImage.alt,
+    "alt": coalesce(
+      select($locale == "it" => coverImage.altTranslations.it, coverImage.altTranslations.en),
+      coverImage.altTranslations.en,
+      coverImage.alt,
+      coverImage.altTranslations.it
+    ),
     "mimeType": coverImage.asset->mimeType
   },
   "coverVideo": coverVideo.asset->{ url, mimeType },
@@ -83,15 +178,56 @@ export const PROJECT_QUERY = defineQuery(`*[_type == "project" && slug.current =
     _key,
     ${PROJECT_MEDIA_PROJECTION}
   },
-  myContribution,
+  "myContribution": coalesce(
+    select($locale == "it" => myContributionTranslations.it, myContributionTranslations.en),
+    myContributionTranslations.en,
+    myContribution,
+    myContributionTranslations.it
+  ),
   "sections": sections[]{
     _type,
     _key,
-    _type == "richTextSection" => { heading, content },
-    _type == "quoteSection" => { quote, attribution },
+    _type == "richTextSection" => {
+      "heading": coalesce(
+        select($locale == "it" => headingTranslations.it, headingTranslations.en),
+        headingTranslations.en,
+        heading,
+        headingTranslations.it
+      ),
+      "content": coalesce(
+        select($locale == "it" => contentTranslations.it, contentTranslations.en),
+        contentTranslations.en,
+        content,
+        contentTranslations.it
+      )
+    },
+    _type == "quoteSection" => {
+      "quote": coalesce(
+        select($locale == "it" => quoteTranslations.it, quoteTranslations.en),
+        quoteTranslations.en,
+        quote,
+        quoteTranslations.it
+      ),
+      "attribution": coalesce(
+        select($locale == "it" => attributionTranslations.it, attributionTranslations.en),
+        attributionTranslations.en,
+        attribution,
+        attributionTranslations.it
+      )
+    },
     _type == "mediaTextSection" => {
-      heading,
-      content,
+      "heading": coalesce(
+        select($locale == "it" => headingTranslations.it, headingTranslations.en),
+        headingTranslations.en,
+        heading,
+        headingTranslations.it
+      ),
+      "content": coalesce(
+        select($locale == "it" => contentTranslations.it, contentTranslations.en),
+        contentTranslations.en,
+        content,
+        contentTranslations.it
+      ),
       mediaPosition,
       "media": media{
         ${PROJECT_MEDIA_PROJECTION}
@@ -104,7 +240,12 @@ export const PROJECT_QUERY = defineQuery(`*[_type == "project" && slug.current =
       }
     },
     _type == "mediaGroupSection" => {
-      caption,
+      "caption": coalesce(
+        select($locale == "it" => captionTranslations.it, captionTranslations.en),
+        captionTranslations.en,
+        caption,
+        captionTranslations.it
+      ),
       "items": items[]{
         _key,
         ${PROJECT_MEDIA_PROJECTION}

@@ -21,6 +21,7 @@ export const project = defineType({
   // 同一个区块下，独立分页比折叠组的归属感更强。
   groups: [
     { name: "overview", title: "Overview", icon: DocumentIcon, default: true },
+    { name: "translations", title: "Translations", icon: TextIcon },
     { name: "cover", title: "Cover", icon: ImageIcon },
     { name: "content", title: "Content", icon: TextIcon },
     { name: "contribution", title: "Contribution", icon: UserIcon },
@@ -66,6 +67,15 @@ export const project = defineType({
       validation: (Rule) => Rule.required(),
     }),
 
+    defineField({
+      name: "titleTranslations",
+      group: "translations",
+      title: "Title translations",
+      type: "localizedString",
+      description:
+        "Italian is the primary public language. English falls back to the legacy Title field until translated.",
+    }),
+
     // 一句话简介，用在卡片 / meta 描述
     defineField({
       name: "summary",
@@ -74,6 +84,19 @@ export const project = defineType({
       type: "string",
       description: "One-line or short paragraph used in cards and previews.",
       validation: (Rule) => Rule.max(240),
+    }),
+    defineField({
+      name: "summaryTranslations",
+      group: "translations",
+      title: "Summary translations",
+      type: "localizedString",
+      description: "Localized card and metadata summary (maximum 240 characters).",
+      validation: (Rule) =>
+        Rule.custom<{ it?: string; en?: string } | undefined>((value) =>
+          [value?.it, value?.en].some((item) => (item?.length ?? 0) > 240)
+            ? "Each translated summary must be 240 characters or fewer"
+            : true,
+        ),
     }),
 
     defineField({
@@ -93,6 +116,12 @@ export const project = defineType({
       description: "Project type or category, e.g. 'Web App', 'Branding', etc.",
       validation: (Rule) => Rule.max(240),
     }),
+    defineField({
+      name: "projectTypeTranslations",
+      group: "translations",
+      title: "Project type translations",
+      type: "localizedString",
+    }),
 
     defineField({
       name: "contributors",
@@ -111,6 +140,12 @@ export const project = defineType({
       of: [{ type: "string" }],
       options: { layout: "tags" },
     }),
+    defineField({
+      name: "roleTranslations",
+      group: "translations",
+      title: "My roles translations",
+      type: "localizedStringList",
+    }),
 
     defineField({
       name: "tags",
@@ -128,6 +163,12 @@ export const project = defineType({
       type: "array",
       of: [projectTextBlock()],
     }),
+    defineField({
+      name: "myContributionTranslations",
+      group: "translations",
+      title: "My contribution translations",
+      type: "localizedProjectText",
+    }),
 
     defineField({
       name: "client",
@@ -140,6 +181,12 @@ export const project = defineType({
       group: "overview",
       title: "Location",
       type: "string",
+    }),
+    defineField({
+      name: "locationTranslations",
+      group: "translations",
+      title: "Location translations",
+      type: "localizedString",
     }),
 
     defineField({
@@ -157,6 +204,11 @@ export const project = defineType({
           type: "string",
           description: "Describe the image for screen readers and SEO.",
           validation: (Rule) => Rule.required(),
+        },
+        {
+          name: "altTranslations",
+          title: "Alt text translations",
+          type: "localizedString",
         },
       ],
       validation: (Rule) => Rule.required(),
@@ -215,6 +267,11 @@ export const project = defineType({
           type: "object",
           fields: [
             { name: "label", title: "Label", type: "string" },
+            {
+              name: "labelTranslations",
+              title: "Label translations",
+              type: "localizedString",
+            },
             { name: "url", title: "URL", type: "url" },
           ],
         },
@@ -263,9 +320,19 @@ export const project = defineType({
                 "Describe the media for screen readers and SEO. Leave empty for purely decorative shots — the entry is then marked decorative and skipped by screen readers.",
             },
             {
+              name: "altTranslations",
+              title: "Alt text translations",
+              type: "localizedString",
+            },
+            {
               name: "caption",
               title: "Caption",
               type: "string",
+            },
+            {
+              name: "captionTranslations",
+              title: "Caption translations",
+              type: "localizedString",
             },
           ],
           preview: {

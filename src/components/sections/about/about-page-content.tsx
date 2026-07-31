@@ -6,13 +6,23 @@ import { StaggerReveal } from "@/components/ui/stagger-reveal";
 import { RevealText } from "@/components/ui/reveal-text";
 import { Parallax } from "@/components/ui/parallax";
 import { SkillsMarquee } from "@/components/ui/skills-marquee";
+import type { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/dictionaries";
+import { SITE_LOCATIONS, SITE_ROLE } from "@/lib/site-metadata";
 
 type AboutPageContentProps = {
   skillCategories?: SkillCategory[];
   resumeItems?: ResumeItem[];
+  locale: Locale;
+  dictionary: Dictionary;
 };
 
-export function AboutPageContent({ skillCategories, resumeItems }: AboutPageContentProps) {
+export function AboutPageContent({
+  skillCategories,
+  resumeItems,
+  locale,
+  dictionary,
+}: AboutPageContentProps) {
   // 分离 Education 和 Experience 数据
   const educations = resumeItems?.filter(item => item.type === 'education') || [];
   const experiences = resumeItems?.filter(item => item.type === 'experience') || [];
@@ -35,7 +45,7 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
                   <Image
                     id="about-page-portrait-mask"
                     src="/Profile_Yuwei.webp"
-                    alt="Portrait of Yuwei Li"
+                    alt={dictionary.common.portraitAlt}
                     fill
                     sizes="(min-width: 1024px) 360px, (min-width: 640px) 320px, 240px"
                     className="object-cover object-top transition-transform duration-media ease-design-out group-hover:scale-emphasis"
@@ -49,11 +59,11 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
             {/* Text on top — the portrait alpha mask supplies the cross-image contrast */}
             <div className="relative z-10 pr-[15%] sm:pr-[12%] lg:pr-[10%]">
               <p className="text-label font-semibold uppercase text-design-light-text-muted">
-                About me
+                {dictionary.about.eyebrow}
               </p>
               <RevealText
                 as="h1"
-                text="I connect communication design and frontend development to turn ideas into clear, expressive, and maintainable digital experiences."
+                text={dictionary.about.intro}
                 maskTargetId="about-page-portrait-mask"
                 maskImageSrc="/Profile_Yuwei_mask.webp"
                 className="mt-4 text-3xl font-semibold leading-[1.2] tracking-tight sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.15]"
@@ -66,17 +76,17 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
           <ScrollReveal>
             <div className="border-t border-design-light-border">
               <div className="grid grid-cols-1 gap-1 border-b border-design-light-border px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover">
-                <p className="font-semibold text-design-light-text-primary">Role</p>
-                <p className="text-small text-design-light-text-secondary sm:text-body">Communication Designer &amp; Frontend Developer</p>
+                <p className="font-semibold text-design-light-text-primary">{dictionary.about.roleLabel}</p>
+                <p className="text-small text-design-light-text-secondary sm:text-body">{SITE_ROLE}</p>
               </div>
               <div className="grid grid-cols-1 gap-1 border-b border-design-light-border px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover">
-                <p className="font-semibold text-design-light-text-primary">Location</p>
-                <p className="text-small text-design-light-text-secondary sm:text-body">Milan, Italy</p>
+                <p className="font-semibold text-design-light-text-primary">{dictionary.about.locationLabel}</p>
+                <p className="text-small text-design-light-text-secondary sm:text-body">{SITE_LOCATIONS[locale]}</p>
               </div>
               <div className="grid grid-cols-1 gap-1 border-b border-design-light-border px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover">
-                <p className="font-semibold text-design-light-text-primary">Languages</p>
+                <p className="font-semibold text-design-light-text-primary">{dictionary.about.languagesLabel}</p>
                 <div className="flex flex-wrap gap-x-2 gap-y-1.5 text-small text-design-light-text-secondary sm:text-body">
-                  {["Chinese — Native", "English — B2", "Italiano — B2"].map((lang, i) => (
+                  {dictionary.about.languages.map((lang, i) => (
                     <span key={lang} className="flex items-center gap-2">
                       {i > 0 && <span className="text-design-light-border">·</span>}
                       {lang}
@@ -93,29 +103,29 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
           <ScrollReveal>
             <div className="flex items-baseline gap-1.5">
               <h2 className="text-3xl font-bold tracking-tight text-design-light-text-primary sm:text-section">
-                Education
+                {dictionary.about.education}
               </h2>
               <sup className="text-small font-semibold text-design-light-text-muted sm:text-body">
                 ({educations.length})
               </sup>
             </div>
-            <ResumeList items={educations} />
+            <ResumeList items={educations} emptyLabel={dictionary.about.resumeEmpty} />
           </ScrollReveal>
           <ScrollReveal>
             <div className="flex items-baseline gap-1.5">
               <h2 className="text-3xl font-bold tracking-tight text-design-light-text-primary sm:text-section">
-                Experience
+                {dictionary.about.experience}
               </h2>
               <sup className="text-small font-semibold text-design-light-text-muted sm:text-body">
                 ({experiences.length})
               </sup>
             </div>
-            <ResumeList items={experiences} />
+            <ResumeList items={experiences} emptyLabel={dictionary.about.resumeEmpty} />
           </ScrollReveal>
           <ScrollReveal>
             <div className="flex items-baseline gap-1.5">
               <h2 className="text-3xl font-bold tracking-tight text-design-light-text-primary sm:text-section">
-                Capabilities
+                {dictionary.about.capabilities}
               </h2>
               <sup className="text-small font-semibold text-design-light-text-muted sm:text-body">
                 ({categoriesToRender.length})
@@ -123,7 +133,7 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
             </div>
             {!categoriesToRender.length ? (
               <p className="mt-stack border-t border-design-light-border pt-4 text-small text-design-light-text-muted">
-                Capabilities will appear here once they are published in Sanity.
+                {dictionary.about.capabilitiesEmpty}
               </p>
             ) : (
             <StaggerReveal className="mt-stack border-t border-design-light-border">
