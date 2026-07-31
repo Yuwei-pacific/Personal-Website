@@ -94,6 +94,9 @@ const config: Config = {
         "gap-inline": "var(--space-gap-inline)",
         stack: "var(--space-stack)",
       },
+      // 全站方角：把 Tailwind 的通用圆角档位归零，视觉决策统一走下面的语义 token。
+      // `full` 不归零 —— 圆形（头像、状态点、图标按钮）是形状而非圆角风格，
+      // 归零会让 rounded-full 静默失效，逼出 rounded-[50%] 这类逃逸写法。
       borderRadius: {
         none: "0px",
         DEFAULT: "0px",
@@ -103,7 +106,6 @@ const config: Config = {
         xl: "0px",
         "2xl": "0px",
         "3xl": "0px",
-        full: "0px",
         card: "var(--radius-card)",
         button: "var(--radius-button)",
         tag: "var(--radius-tag)",

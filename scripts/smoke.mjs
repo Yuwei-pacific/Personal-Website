@@ -1,6 +1,6 @@
 const baseUrl = process.env.SMOKE_BASE_URL || "http://localhost:3000";
 
-const requiredPaths = ["/", "/robots.txt", "/sitemap.xml"];
+const requiredPaths = ["/", "/about", "/robots.txt", "/sitemap.xml"];
 
 async function assertOk(path) {
   const response = await fetch(new URL(path, baseUrl), { redirect: "manual" });

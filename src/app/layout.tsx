@@ -85,10 +85,6 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="preconnect" href="https://cdn.sanity.io" />
-        <script
-          src="https://mcp.figma.com/mcp/html-to-design/capture.js"
-          async
-        />
         <JsonLd data={websiteSchema} />
       </head>
       <body
