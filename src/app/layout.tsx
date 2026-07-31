@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { JsonLd, websiteSchema } from "@/components/seo/json-ld";
 import { CustomCursor } from "@/components/ui/custom-cursor";
-import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site-metadata";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site-metadata";
 import { SanityLive } from "@/sanity/live";
 import "lenis/dist/lenis.css";
 import "./globals.css";
@@ -26,10 +26,10 @@ const geistMono = Geist_Mono({
 
 // 页面默认元数据：用于 SEO 与浏览器/系统图标
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.yuweidesign.com'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: SITE_TITLE,
-    template: "%s | Yuwei Design",
+    template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
   keywords: ["Yuwei Li", "portfolio", "communication designer", "frontend developer", "UX/UI design", "interaction design", "web development"],
@@ -38,10 +38,10 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://www.yuweidesign.com",
+    url: SITE_URL,
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    siteName: "Yuwei Design",
+    siteName: SITE_NAME,
     // 分享图由 app/opengraph-image.tsx 自动生成（1200x630 PNG）
   },
   twitter: {
@@ -85,10 +85,6 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="preconnect" href="https://cdn.sanity.io" />
-        <script
-          src="https://mcp.figma.com/mcp/html-to-design/capture.js"
-          async
-        />
         <JsonLd data={websiteSchema} />
       </head>
       <body
@@ -99,14 +95,16 @@ export default function RootLayout({
           <LenisProvider>
             <a
               href="#main-content"
-              className="sr-only fixed left-4 top-4 z-[10000] bg-design-light-bg px-4 py-2 text-small font-semibold text-design-light-text-primary shadow-card focus:not-sr-only"
+              className="sr-only fixed left-4 top-4 z-skip-link bg-design-light-bg px-4 py-2 text-small font-semibold text-design-light-text-primary shadow-card focus:not-sr-only"
             >
               Skip to main content
             </a>
             <OverscrollBackground />
             <CustomCursor />
-            {/* 显式给内容区加上背景色，这样 body 背景色变化时只会在过界回弹时露出来，而不会影响页面本身 */}
-            <div id="main-content" className="bg-background min-h-screen w-full relative z-0">
+            {/* 显式给内容区加上背景色，这样 body 背景色变化时只会在过界回弹时露出来，而不会影响页面本身。
+                这里只是布局容器：landmark 与 #main-content 锚点由各页面自己的 <main> 承担，
+                这样导航才落在 main 之外。（/studio 没有站点导航，也就不需要跳转锚点。） */}
+            <div className="bg-background min-h-screen w-full relative z-0">
               {children}
             </div>
           </LenisProvider>

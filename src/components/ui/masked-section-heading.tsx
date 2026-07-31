@@ -39,6 +39,19 @@ export function MaskedSectionHeading({
       }
 
       gsap.set(itemEls, maskedTextHiddenVars());
+
+      const section = headingRef.current?.closest<HTMLElement>("section[id]");
+      const isCurrentAnchor =
+        section && window.location.hash === `#${section.id}`;
+
+      // 跨路由返回 /#work 时，锚点定位发生在新页面挂载之后，
+      // ScrollTrigger 可能错过 onEnter。锚点就是当前 section 时直接播放，
+      // 仍复用完全相同的 reveal 参数。
+      if (isCurrentAnchor) {
+        gsap.to(itemEls, maskedTextRevealVars());
+        return;
+      }
+
       gsap.to(itemEls, {
         ...maskedTextRevealVars(),
         scrollTrigger: {
@@ -57,7 +70,7 @@ export function MaskedSectionHeading({
       className="w-full px-6 sm:px-container-sm lg:px-8"
     >
       <div className="flex w-fit items-end gap-1">
-        <h2 className="min-w-0 text-display-sm font-semibold text-design-dark-text-primary sm:text-display">
+        <h2 className="min-w-0 text-display-sm font-semibold tracking-display text-design-dark-text-primary lg:text-display">
           <span className="inline-block overflow-clip align-bottom">
             <span className="masked-section-heading-item relative inline-block">
               {title}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { ProjectDetailView } from "@/components/projects/project-detail-view";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -42,6 +43,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug?:
       <JsonLd data={buildProjectJsonLd(project)} />
       <Navbar />
       <ProjectDetailView project={project} />
+      <Footer />
     </>
   );
 }

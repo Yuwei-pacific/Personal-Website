@@ -6,7 +6,7 @@ export default function NotFound() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto flex min-h-[70vh] w-full max-w-6xl flex-col items-start justify-center gap-4 px-container sm:px-container-sm">
+      <main id="main-content" className="mx-auto flex min-h-[70vh] w-full max-w-content flex-col items-start justify-center gap-4 px-container sm:px-container-sm">
         <p className="text-label font-semibold uppercase text-design-light-text-muted">404</p>
         <h1 className="text-balance text-3xl font-semibold tracking-tight text-design-light-text-primary sm:text-section">
           Page not found

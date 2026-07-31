@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
-import { gsap, useGSAP } from "@/lib/animation/gsap-react";
+import { useLenis } from "lenis/react";
+import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/gsap-react";
 import {
   maskedTextHiddenVars,
   maskedTextRevealVars,
@@ -70,6 +71,27 @@ const resetPanelContent = ({
   }
 };
 
+// 「减弱动画」偏好下的面板内容终态：与打开时间线的最终值一致，只是瞬间到位
+const revealPanelContent = ({
+  itemEls,
+  numberEls,
+  socialTitle,
+  socialLinks,
+}: PanelElements) => {
+  if (itemEls.length) {
+    gsap.set(itemEls, { yPercent: 0, rotation: 0 });
+  }
+  if (numberEls.length) {
+    gsap.set(numberEls, { "--sm-num-opacity": 1 });
+  }
+  if (socialTitle) {
+    gsap.set(socialTitle, { opacity: 1 });
+  }
+  if (socialLinks.length) {
+    gsap.set(socialLinks, { y: 0, opacity: 1 });
+  }
+};
+
 function StaggeredMenu({
   items,
   socialItems,
@@ -79,6 +101,8 @@ function StaggeredMenu({
 }: StaggeredMenuProps) {
   const [open, setOpen] = useState(false);
   const [textLines, setTextLines] = useState(["Menu", "Close"]);
+  // Lenis 未启用（减弱动画偏好 / Studio）时为 undefined，滚动锁会走原生回退
+  const lenis = useLenis();
   const openRef = useRef(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLElement>(null);
@@ -110,6 +134,10 @@ function StaggeredMenu({
       const textInner = textInnerRef.current;
       if (!panel || !plusH || !plusV || !icon || !textInner || !contextSafe) return;
 
+      // 「减弱动画」偏好：所有开合动效改为瞬间到位（不改变任何最终状态），
+      // 这是全站动画的统一约定 —— 这里是尺度最大的一处动效，尤其需要遵守
+      const reduced = prefersReducedMotion();
+
       const preLayers = preContainer
         ? Array.from(preContainer.querySelectorAll<HTMLDivElement>(".sm-prelayer"))
         : [];
@@ -140,8 +168,16 @@ function StaggeredMenu({
         closeTlRef.current = null;
         openTlRef.current?.kill();
 
-        const { itemEls, numberEls, socialTitle, socialLinks } =
-          getPanelElements(currentPanel);
+        const panelElements = getPanelElements(currentPanel);
+        const { itemEls, numberEls, socialTitle, socialLinks } = panelElements;
+
+        if (reduced) {
+          gsap.set([...layers, currentPanel], { xPercent: 0 });
+          revealPanelContent(panelElements);
+          openTlRef.current = null;
+          return;
+        }
+
         const timeline = gsap.timeline({ paused: true });
 
         layers.forEach((element, index) => {
@@ -235,6 +271,14 @@ function StaggeredMenu({
         const panelElements = getPanelElements(currentPanel);
         const { itemEls, numberEls, socialTitle, socialLinks } = panelElements;
         const all: HTMLElement[] = [...layers, currentPanel];
+
+        if (reduced) {
+          gsap.set(all, { xPercent: OFFSCREEN_X });
+          resetPanelContent(panelElements);
+          closeTlRef.current = null;
+          return;
+        }
+
         const timeline = gsap.timeline();
 
         timeline.to(all, {
@@ -265,6 +309,13 @@ function StaggeredMenu({
         if (!currentIcon) return;
 
         spinTweenRef.current?.kill();
+
+        if (reduced) {
+          gsap.set(currentIcon, { rotate: opening ? 225 : 0 });
+          spinTweenRef.current = null;
+          return;
+        }
+
         spinTweenRef.current = gsap.to(currentIcon, {
           rotate: opening ? 225 : 0,
           duration: opening ? 0.8 : 0.35,
@@ -278,6 +329,13 @@ function StaggeredMenu({
         if (!button) return;
 
         colorTweenRef.current?.kill();
+
+        if (reduced) {
+          gsap.set(button, { color: opening ? OPEN_MENU_BUTTON_COLOR : MENU_BUTTON_COLOR });
+          colorTweenRef.current = null;
+          return;
+        }
+
         colorTweenRef.current = gsap.to(button, {
           color: opening ? OPEN_MENU_BUTTON_COLOR : MENU_BUTTON_COLOR,
           delay: 0.18,
@@ -294,6 +352,14 @@ function StaggeredMenu({
 
         const currentLabel = opening ? "Menu" : "Close";
         const targetLabel = opening ? "Close" : "Menu";
+
+        if (reduced) {
+          // 不做滚动式换字，直接显示目标标签
+          setTextLines([targetLabel]);
+          gsap.set(inner, { yPercent: 0 });
+          textCycleAnimRef.current = null;
+          return;
+        }
         const sequence = [currentLabel];
         let last = currentLabel;
 
@@ -368,6 +434,25 @@ function StaggeredMenu({
     animateTextRef.current?.(false);
     toggleBtnRef.current?.focus();
   }, [onMenuClose]);
+
+  // 菜单打开时锁住背景滚动。
+  // Lenis 虚拟化了滚轮事件，CSS 的 overflow 锁不住它 —— 必须调它自己的 stop()
+  // （lenis.css 的 .lenis-stopped 会同时把 overflow 设为 clip）。
+  // Lenis 未启用时（减弱动画偏好 / Studio）回退到原生 overflow 锁。
+  useEffect(() => {
+    if (!open) return;
+
+    if (lenis) {
+      lenis.stop();
+      return () => lenis.start();
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [lenis, open]);
 
   useEffect(() => {
     if (!open) return;

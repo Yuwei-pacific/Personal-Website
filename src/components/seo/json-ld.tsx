@@ -1,5 +1,14 @@
 // JSON-LD 结构化数据组件：帮助搜索引擎理解页面内容
-import { SITE_DESCRIPTION, SITE_ROLE } from "@/lib/site-metadata";
+import {
+  SITE_AUTHOR,
+  SITE_DESCRIPTION,
+  SITE_EMAIL,
+  SITE_NAME,
+  SITE_ROLE,
+  SITE_URL,
+  SOCIAL_LINKS,
+  absoluteUrl,
+} from "@/lib/site-metadata";
 
 /**
  * JSON.stringify does not make data safe to embed in a script element:
@@ -26,36 +35,33 @@ export function JsonLd({ data }: { data: Record<string, unknown> }) {
 export const personSchema = {
     '@context': 'https://schema.org',
     '@type': 'Person',
-    name: 'Yuwei Li',
-    url: 'https://www.yuweidesign.com',
-    sameAs: [
-        'https://github.com/Yuwei-pacific',
-        'https://www.linkedin.com/in/yuwei081/',
-        'https://www.instagram.com/yuwei081/',
-    ],
+    name: SITE_AUTHOR,
+    url: SITE_URL,
+    sameAs: SOCIAL_LINKS.map((link) => link.href),
     jobTitle: SITE_ROLE,
     description: SITE_DESCRIPTION,
+    email: `mailto:${SITE_EMAIL}`,
 }
 
 // 网站结构化数据
 export const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Yuwei Design',
-    url: 'https://www.yuweidesign.com',
+    name: SITE_NAME,
+    url: SITE_URL,
     description: SITE_DESCRIPTION,
-    image: 'https://www.yuweidesign.com/Profile_Yuwei.webp',
-    logo: 'https://www.yuweidesign.com/Logo.svg',
+    image: absoluteUrl('/Profile_Yuwei.webp'),
+    logo: absoluteUrl('/Logo.svg'),
     author: {
         '@type': 'Person',
-        name: 'Yuwei Li',
+        name: SITE_AUTHOR,
     },
     publisher: {
         '@type': 'Organization',
-        name: 'Yuwei Li',
+        name: SITE_AUTHOR,
         logo: {
             '@type': 'ImageObject',
-            url: 'https://www.yuweidesign.com/Logo.svg',
+            url: absoluteUrl('/Logo.svg'),
         },
     },
 }

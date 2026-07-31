@@ -7,8 +7,7 @@ import { normalizeProjectDetail } from "@/lib/view-models/project";
 import { PROJECT_QUERY, PROJECT_SLUGS_QUERY } from "@/sanity/queries";
 import type { PROJECT_QUERY_RESULT } from "@/sanity/sanity.types";
 import type { ProjectDetail } from "@/lib/view-models/types";
-
-const SITE_URL = "https://www.yuweidesign.com";
+import { SITE_AUTHOR, SITE_URL, absoluteUrl } from "@/lib/site-metadata";
 
 export const fetchProject = cache(async (rawSlug?: string): Promise<ProjectDetail | null> => {
   const slug = rawSlug?.toString().trim();
@@ -37,14 +36,14 @@ export async function fetchProjectSlugs() {
   }
 }
 
-const projectUrl = (project: ProjectDetail) => `${SITE_URL}/projects/${project.slug}`;
+const projectUrl = (project: ProjectDetail) => absoluteUrl(`/projects/${project.slug}`);
 
 export function buildProjectMetadata(project: ProjectDetail): Metadata {
   const projectTitle = project.title || "Project";
   const url = projectUrl(project);
 
   return {
-    title: `${projectTitle} | Yuwei Li`,
+    title: `${projectTitle} | ${SITE_AUTHOR}`,
     description: project.summary || undefined,
     alternates: {
       canonical: url,
@@ -52,7 +51,7 @@ export function buildProjectMetadata(project: ProjectDetail): Metadata {
     openGraph: {
       type: "article",
       url,
-      title: `${projectTitle} | Yuwei Li`,
+      title: `${projectTitle} | ${SITE_AUTHOR}`,
       description: project.summary || undefined,
       images: project.coverImage
         ? [
@@ -78,7 +77,7 @@ export function buildProjectJsonLd(project: ProjectDetail) {
     image: project.coverImage?.url,
     creator: {
       "@type": "Person",
-      name: "Yuwei Li",
+      name: SITE_AUTHOR,
       url: SITE_URL,
     },
     dateCreated: project.year ? String(project.year) : undefined,
