@@ -2,12 +2,18 @@
 // 替代 webp 头像 —— 部分平台（LinkedIn / WhatsApp / 微信）不支持 webp 作为分享图
 import { ImageResponse } from "next/og";
 import { SITE_DOMAIN, SITE_ROLE, SITE_TITLE } from "@/lib/site-metadata";
-import { defaultLocale, isLocale } from "@/i18n/config";
+import { defaultLocale, isLocale, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 
 export const alt = SITE_TITLE;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+
+// 没有这个，带 [locale] 动态段的图片路由只能按请求现生成（build 输出里的 ƒ）。
+// 两种语言都在构建时烘出来，分享卡片就不必等一次 Satori 渲染。
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
 
 export default async function OpenGraphImage({
   params,
