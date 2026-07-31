@@ -6,16 +6,11 @@ export const skillCategory = defineType({
   type: 'document',
   fields: [
     defineField({
-      name: 'title',
-      title: 'Category Title',
-      type: 'string',
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
       name: 'titleTranslations',
-      title: 'Category title translations',
+      title: 'Category title',
       type: 'localizedString',
       description: 'Italian and English display labels for this capability group.',
+      validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'order',
@@ -33,4 +28,17 @@ export const skillCategory = defineType({
       }
     }),
   ],
+  preview: {
+    select: {
+      titleIt: 'titleTranslations.it',
+      titleEn: 'titleTranslations.en',
+      order: 'order',
+    },
+    prepare({titleIt, titleEn, order}) {
+      return {
+        title: titleIt || titleEn || 'Untitled skill category',
+        subtitle: typeof order === 'number' ? `Order ${order}` : undefined,
+      }
+    },
+  },
 })

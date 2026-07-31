@@ -76,33 +76,30 @@ const sectionMedia = defineType({
         "Optional. When set, the image becomes the poster and the video plays in place. MP4 or WebM, ideally under ~10 MB.",
     }),
     defineField({
-      name: "alt",
+      name: "altTranslations",
       title: "Alt text (optional)",
-      type: "string",
+      type: "localizedString",
       description:
         "Describe the media for screen readers and SEO. Leave empty for purely decorative shots.",
     }),
     defineField({
-      name: "altTranslations",
-      title: "Alt text translations",
-      type: "localizedString",
-    }),
-    defineField({
-      name: "caption",
-      title: "Caption (optional)",
-      type: "string",
-    }),
-    defineField({
       name: "captionTranslations",
-      title: "Caption translations",
+      title: "Caption (optional)",
       type: "localizedString",
     }),
   ],
   preview: {
-    select: { media: "image", title: "caption", alt: "alt", video: "video" },
-    prepare({ media, title, alt, video }) {
+    select: {
+      media: "image",
+      captionIt: "captionTranslations.it",
+      captionEn: "captionTranslations.en",
+      altIt: "altTranslations.it",
+      altEn: "altTranslations.en",
+      video: "video",
+    },
+    prepare({ media, captionIt, captionEn, altIt, altEn, video }) {
       return {
-        title: title || alt || "Media",
+        title: captionIt || captionEn || altIt || altEn || "Media",
         subtitle: video ? "Image + video" : undefined,
         media,
       };
@@ -117,28 +114,28 @@ const richTextSection = defineType({
   type: "object",
   icon: TextIcon,
   fields: [
-    defineField({ name: "heading", title: "Heading (optional)", type: "string" }),
     defineField({
       name: "headingTranslations",
-      title: "Heading translations",
+      title: "Heading (optional)",
       type: "localizedString",
     }),
     defineField({
-      name: "content",
-      title: "Content",
-      type: "array",
-      of: [projectTextBlock()],
-      validation: (Rule) => Rule.required().min(1),
-    }),
-    defineField({
       name: "contentTranslations",
-      title: "Content translations",
+      title: "Content",
       type: "localizedProjectText",
+      validation: (Rule) => Rule.required(),
     }),
   ],
   preview: {
-    select: { heading: "heading", content: "content" },
-    prepare({ heading, content }) {
+    select: {
+      headingIt: "headingTranslations.it",
+      headingEn: "headingTranslations.en",
+      contentIt: "contentTranslations.it",
+      contentEn: "contentTranslations.en",
+    },
+    prepare({ headingIt, headingEn, contentIt, contentEn }) {
+      const heading = headingIt || headingEn;
+      const content = contentIt || contentEn;
       const firstBlock = Array.isArray(content)
         ? content.find((block: { _type?: string }) => block._type === "block")
         : undefined;
@@ -158,10 +155,9 @@ const mediaTextSection = defineType({
   type: "object",
   icon: SplitVerticalIcon,
   fields: [
-    defineField({ name: "heading", title: "Heading (optional)", type: "string" }),
     defineField({
       name: "headingTranslations",
-      title: "Heading translations",
+      title: "Heading (optional)",
       type: "localizedString",
     }),
     defineField({
@@ -171,16 +167,10 @@ const mediaTextSection = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "content",
-      title: "Content",
-      type: "array",
-      of: [projectTextBlock()],
-      validation: (Rule) => Rule.required().min(1),
-    }),
-    defineField({
       name: "contentTranslations",
-      title: "Content translations",
+      title: "Content",
       type: "localizedProjectText",
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "mediaPosition",
@@ -199,10 +189,15 @@ const mediaTextSection = defineType({
     }),
   ],
   preview: {
-    select: { heading: "heading", media: "media.image", position: "mediaPosition" },
-    prepare({ heading, media, position }) {
+    select: {
+      headingIt: "headingTranslations.it",
+      headingEn: "headingTranslations.en",
+      media: "media.image",
+      position: "mediaPosition",
+    },
+    prepare({ headingIt, headingEn, media, position }) {
       return {
-        title: heading || "Media + text",
+        title: headingIt || headingEn || "Media + text",
         subtitle: `Media + text · media ${position ?? "left"}`,
         media,
       };
@@ -232,10 +227,15 @@ const mediaSection = defineType({
     }),
   ],
   preview: {
-    select: { media: "media.image", caption: "media.caption", fullWidth: "fullWidth" },
-    prepare({ media, caption, fullWidth }) {
+    select: {
+      media: "media.image",
+      captionIt: "media.captionTranslations.it",
+      captionEn: "media.captionTranslations.en",
+      fullWidth: "fullWidth",
+    },
+    prepare({ media, captionIt, captionEn, fullWidth }) {
       return {
-        title: caption || "Media",
+        title: captionIt || captionEn || "Media",
         subtitle: fullWidth ? "Media · full width" : "Media",
         media,
       };
@@ -258,18 +258,26 @@ const mediaGroupSection = defineType({
       description: "Two or three items shown side by side.",
       validation: (Rule) => Rule.required().min(2).max(3),
     }),
-    defineField({ name: "caption", title: "Caption (optional)", type: "string" }),
     defineField({
       name: "captionTranslations",
-      title: "Caption translations",
+      title: "Caption (optional)",
       type: "localizedString",
     }),
   ],
   preview: {
-    select: { items: "items", media: "items.0.image", caption: "caption" },
-    prepare({ items, media, caption }) {
+    select: {
+      items: "items",
+      media: "items.0.image",
+      captionIt: "captionTranslations.it",
+      captionEn: "captionTranslations.en",
+    },
+    prepare({ items, media, captionIt, captionEn }) {
       const count = Array.isArray(items) ? items.length : 0;
-      return { title: caption || "Media group", subtitle: `Media group · ${count} items`, media };
+      return {
+        title: captionIt || captionEn || "Media group",
+        subtitle: `Media group · ${count} items`,
+        media,
+      };
     },
   },
 });
@@ -282,27 +290,27 @@ const quoteSection = defineType({
   icon: BlockquoteIcon,
   fields: [
     defineField({
-      name: "quote",
+      name: "quoteTranslations",
       title: "Quote",
-      type: "text",
-      rows: 3,
+      type: "localizedText",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "quoteTranslations",
-      title: "Quote translations",
-      type: "localizedText",
-    }),
-    defineField({ name: "attribution", title: "Attribution (optional)", type: "string" }),
-    defineField({
       name: "attributionTranslations",
-      title: "Attribution translations",
+      title: "Attribution (optional)",
       type: "localizedString",
     }),
   ],
   preview: {
-    select: { quote: "quote", attribution: "attribution" },
-    prepare({ quote, attribution }) {
+    select: {
+      quoteIt: "quoteTranslations.it",
+      quoteEn: "quoteTranslations.en",
+      attributionIt: "attributionTranslations.it",
+      attributionEn: "attributionTranslations.en",
+    },
+    prepare({ quoteIt, quoteEn, attributionIt, attributionEn }) {
+      const quote = quoteIt || quoteEn;
+      const attribution = attributionIt || attributionEn;
       return { title: quote?.slice(0, 60) || "Quote", subtitle: attribution || "Quote" };
     },
   },
