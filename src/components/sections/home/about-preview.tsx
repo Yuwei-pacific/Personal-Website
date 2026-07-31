@@ -31,7 +31,9 @@ export function AboutPreview() {
               text="From concept to launch."
               className="text-balance text-display-sm font-semibold leading-[1.1] tracking-display text-design-light-text-primary lg:text-display"
             />
-            <div className="relative z-10 w-full lg:max-w-[63rem]">
+            {/* 右侧留白给人像让位：不留的话正文会整段压在人像上，
+                穿过轮廓的反差字太多反而看不清。lg 起人像更小、文字有 max-w 限宽，不需要 */}
+            <div className="relative z-10 w-full pr-[12.5%] sm:pr-[7.5%] lg:max-w-[63rem] lg:pr-0">
               <RevealText
                 as="p"
                 text="I move between visual systems, interface design and frontend development, carrying ideas from early direction to polished, maintainable outcomes."

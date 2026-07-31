@@ -33,7 +33,9 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
         />
       </div>
 
-      <div className="flex w-full flex-col gap-6 pb-panel pt-section sm:gap-gap-section sm:pb-panel-sm sm:pt-section-sm">
+      {/* 深浅分界处两块直接相接，这里的上下留白属于深色区块自身的内边距（panel 档），
+          而不是 section 之间的呼吸 —— 用 section 档会在分界线下方留出过大的空档 */}
+      <div className="flex w-full flex-col gap-6 py-panel sm:gap-gap-section sm:py-panel-sm">
         {/* 全宽标题：复用 Hero / 导航的遮罩滑入动画，左边缘与项目网格对齐 */}
         <MaskedSectionHeading title="Work" count={projects.length} />
 
