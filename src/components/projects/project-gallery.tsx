@@ -7,7 +7,7 @@
 //
 // 视频条目在网格里只显示 poster 缩略图（加播放角标），点开才在 lightbox 里播放——
 // 网格里同时自动播放多个视频对低端机器是灾难。
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
 import { LuPlay } from "react-icons/lu";
 import { RowsPhotoAlbum } from "react-photo-album";
@@ -24,6 +24,7 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/captions.css";
 import "yet-another-react-lightbox/plugins/counter.css";
+import { ScrollTrigger } from "@/lib/animation/scroll-trigger";
 
 // 组件入参：
 // - items：媒体列表（图片 / GIF / 视频）
@@ -116,6 +117,7 @@ export function ProjectGallery({
   fullWidth,
 }: ProjectGalleryProps) {
   const galleryItems = useMemo(() => items ?? [], [items]);
+  const galleryRef = useRef<HTMLElement>(null);
 
   const photos = useMemo(
     () =>
@@ -142,10 +144,36 @@ export function ProjectGallery({
     return () => lenis.start();
   }, [lightboxOpen, lenis]);
 
+  // RowsPhotoAlbum 会在客户端拿到真实容器宽度后重新排版。跨路由进入项目页时，
+  // Footer 的 ScrollTrigger 可能早于这次高度变化完成初始化，继续使用旧的起止位置。
+  // 监听画廊自身尺寸并在下一帧统一 refresh，避免 Footer 内容停在上移状态。
+  useEffect(() => {
+    const gallery = galleryRef.current;
+    if (!gallery) return;
+
+    let frame = 0;
+    const scheduleRefresh = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        ScrollTrigger.refresh();
+      });
+    };
+
+    const resizeObserver = new ResizeObserver(scheduleRefresh);
+    resizeObserver.observe(gallery);
+    scheduleRefresh();
+
+    return () => {
+      cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+    };
+  }, [galleryItems.length]);
+
   if (!galleryItems.length) return null;
 
   return (
-    <section className={`space-y-4 ${fullWidth ? "w-full" : ""}`}>
+    <section ref={galleryRef} className={`space-y-4 ${fullWidth ? "w-full" : ""}`}>
       <div className="text-center">
         <h2 className="text-3xl font-bold text-design-dark-text-primary mb-2">{title}</h2>
       </div>
