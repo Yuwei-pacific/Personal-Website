@@ -2,21 +2,23 @@ import type { MetadataRoute } from "next";
 
 import { sanityClient } from "@/sanity/client";
 import { PROJECT_SITEMAP_QUERY } from "@/sanity/queries";
+import { SITE_URL, absoluteUrl } from "@/lib/site-metadata";
 
-const baseUrl = "https://www.yuweidesign.com";
+const baseUrl = SITE_URL;
 const fallbackLastModified = new Date("2026-01-01");
 const sitemapClient = sanityClient.withConfig({ useCdn: false });
 
-// A sitemap has no mounted SanityLive client, so read published content directly
-// instead of relying on its long-lived query cache.
-export const dynamic = "force-dynamic";
+// sitemap 没有挂载 SanityLive，拿不到它的缓存失效信号，所以自己读已发布内容。
+// 但也不必每次抓取都打一次 Content Lake：项目更新频率远低于爬虫抓取频率，
+// 用 1 小时的时间兜底即可（内容有变最迟 1 小时后进入 sitemap）。
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const projects = await sitemapClient.fetch(
       PROJECT_SITEMAP_QUERY,
       {},
-      { cache: "no-store" },
+      { next: { revalidate } },
     );
     const validProjects = projects.filter(
       (project): project is { slug: string; _updatedAt: string } =>
@@ -35,7 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 1,
       },
       {
-        url: `${baseUrl}/about`,
+        url: absoluteUrl("/about"),
         changeFrequency: "monthly",
         priority: 0.7,
       },
@@ -43,7 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     routes.push(
       ...validProjects.map((project) => ({
-        url: `${baseUrl}/projects/${project.slug}`,
+        url: absoluteUrl(`/projects/${project.slug}`),
         lastModified: new Date(project._updatedAt),
         changeFrequency: "monthly" as const,
         priority: 0.8,
@@ -63,7 +65,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
-      url: `${baseUrl}/about`,
+      url: absoluteUrl("/about"),
       changeFrequency: "monthly",
       priority: 0.7,
     },

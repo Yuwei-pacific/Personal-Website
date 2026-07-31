@@ -85,7 +85,7 @@ export function CustomCursor() {
   return (
     <div
       ref={cursorRef}
-      className="pointer-events-none fixed top-0 left-0 z-[9999] hidden md:block"
+      className="pointer-events-none fixed top-0 left-0 z-cursor hidden md:block"
       style={{
         marginLeft: "-12px",
         marginTop: "-12px",

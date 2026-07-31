@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 
 import { Navbar } from "@/components/layout/navbar";
-import { AboutPageContent } from "@/components/sections/about-page-content";
+import { AboutPageContent } from "@/components/sections/about/about-page-content";
+import { Footer } from "@/components/layout/footer";
 import { JsonLd, personSchema } from "@/components/seo/json-ld";
 import { normalizeAboutData } from "@/lib/view-models/home";
 import { sanityFetch } from "@/sanity/live";
@@ -61,6 +62,7 @@ export default async function AboutPage() {
         skillCategories={aboutData.skillCategories}
         resumeItems={aboutData.resumeItems}
       />
+      <Footer />
     </>
   );
 }

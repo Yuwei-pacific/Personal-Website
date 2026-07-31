@@ -10,6 +10,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Link } from "next-view-transitions";
 import { useLenis } from "lenis/react";
 import type { StaggeredMenuItem, StaggeredMenuSocialItem } from "@/components/layout/staggered-menu";
+import { SOCIAL_LINKS } from "@/lib/site-metadata";
 
 // 组件在 effect 里操作 DOM，关闭 SSR 避免 useLayoutEffect 服务端警告
 const StaggeredMenu = dynamic(() => import("@/components/layout/staggered-menu"), {
@@ -22,11 +23,11 @@ const menuItems: StaggeredMenuItem[] = [
   { label: "Work", ariaLabel: "View selected work", link: "/#work" },
 ];
 
-const socialItems: StaggeredMenuSocialItem[] = [
-  { label: "GitHub", link: "https://github.com/Yuwei-pacific" },
-  { label: "LinkedIn", link: "https://www.linkedin.com/in/yuwei081/" },
-  { label: "Instagram", link: "https://www.instagram.com/yuwei081/" },
-];
+// 社交账号的唯一出处在 lib/site-metadata（footer 与 JSON-LD 共用同一份）
+const socialItems: StaggeredMenuSocialItem[] = SOCIAL_LINKS.map(({ label, href }) => ({
+  label,
+  link: href,
+}));
 
 export function Navbar() {
   const pathname = usePathname();
@@ -86,12 +87,12 @@ export function Navbar() {
   return (
     <div>
       {/* 站点 Logo：invert 转白后配合差值混合，在深浅背景上都可读 */}
-      <Link href="/" aria-label="Home" className="fixed left-6 top-6 z-50 mix-blend-difference sm:left-8 sm:top-6">
+      <Link href="/" aria-label="Home" className="fixed left-6 top-6 z-nav-logo mix-blend-difference sm:left-8 sm:top-6">
         <Image src="/Logo.svg" alt="Yuwei Li" width={48} height={48} className="h-12 w-12 invert" priority />
       </Link>
-      {/* relative z-40 必不可少：加了混合后整组会被压平成静态层级、被页面内容盖住，
+      {/* relative z-nav 必不可少：加了混合后整组会被压平成静态层级、被页面内容盖住，
           需要显式抬回页面之上，混合才能以页面为底进行反色 */}
-      <div className={blendActive ? "relative z-40 mix-blend-difference" : "relative z-40"}>
+      <div className={blendActive ? "relative z-nav mix-blend-difference" : "relative z-nav"}>
         <StaggeredMenu
           items={menuItems}
           socialItems={socialItems}

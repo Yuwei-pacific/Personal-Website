@@ -19,20 +19,27 @@ const portableComponents: Partial<PortableTextReactComponents> = {
 
 type ResumeListProps = {
   items: ResumeItem[];
-  fallbackData: ResumeItem[];
 };
 
-export function ResumeList({ items, fallbackData }: ResumeListProps) {
-  const displayData = items && items.length > 0 ? items : fallbackData;
+export function ResumeList({ items }: ResumeListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const toggleExpand = (id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
+  // 内容来源只有 CMS：没有条目就不渲染表格，而不是回退到仓库里的副本
+  if (!items.length) {
+    return (
+      <p className="mt-stack border-t border-design-light-border pt-4 text-small text-design-light-text-muted">
+        Entries will appear here once they are published in Sanity.
+      </p>
+    );
+  }
+
   return (
     <StaggerReveal className="mt-stack border-t border-design-light-border">
-      {displayData.map((edu, idx) => {
+      {items.map((edu, idx) => {
         const id = edu._id || `edu-${idx}`;
         const hasDetails = edu.details.length > 0;
         const isExpanded = expandedId === id;
