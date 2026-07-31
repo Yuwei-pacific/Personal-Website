@@ -92,6 +92,7 @@ type Dictionary = {
     retry: string;
   };
   metadata: {
+    siteTitle: string;
     siteDescription: string;
     keywords: string[];
     aboutTitle: string;
@@ -205,6 +206,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       retry: "Riprova",
     },
     metadata: {
+      siteTitle: "Yuwei Li | Communication Designer e Frontend Developer",
       siteDescription:
         "Communication Designer & Frontend Developer con base a Milano. Progetto identità visive, interfacce digitali e siti web su misura per studi e organizzazioni.",
       keywords: [
@@ -325,6 +327,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       retry: "Try again",
     },
     metadata: {
+      siteTitle: "Yuwei Li | Communication Designer & Frontend Developer",
       siteDescription:
         "Milan-based Communication Designer & Frontend Developer creating visual identities, digital interfaces and custom websites for studios and organisations.",
       keywords: [

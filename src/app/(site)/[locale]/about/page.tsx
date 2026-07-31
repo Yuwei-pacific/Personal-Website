@@ -8,6 +8,7 @@ import { JsonLd, personSchema } from "@/components/seo/json-ld";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import {
+  SITE_NAME,
   getSiteMetadata,
   languageAlternates,
   localizedAbsoluteUrl,
@@ -48,11 +49,13 @@ export async function generateMetadata({
       url: localizedAbsoluteUrl(rawLocale, path),
       title: dictionary.metadata.aboutTitle,
       description: dictionary.metadata.aboutDescription,
+      siteName: SITE_NAME,
     },
     twitter: {
       card: "summary_large_image",
       title: dictionary.metadata.aboutTitle,
       description: dictionary.metadata.aboutDescription,
+      creator: "@yuweili",
     },
   };
 }
