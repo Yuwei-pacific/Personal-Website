@@ -47,7 +47,7 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
             </div>
 
             {/* Text on top — the portrait alpha mask supplies the cross-image contrast */}
-            <div className="relative z-10 pr-[30%] sm:pr-[24%] lg:pr-[20%]">
+            <div className="relative z-10 pr-[15%] sm:pr-[12%] lg:pr-[10%]">
               <p className="text-label font-semibold uppercase text-design-light-text-muted">
                 About me
               </p>

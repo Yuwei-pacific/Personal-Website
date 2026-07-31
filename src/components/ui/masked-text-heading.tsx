@@ -35,7 +35,7 @@ export function MaskedTextHeading({
       if (!wordEls?.length) return;
 
       if (prefersReducedMotion()) {
-        gsap.set(wordEls, { yPercent: 0, rotation: 0 });
+        gsap.set(wordEls, { y: 0, yPercent: 0, rotation: 0 });
         return;
       }
 
