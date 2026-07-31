@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/scroll-trigger";
+import { cn } from "@/lib/utils";
 
 type RevealTextProps = {
   text: string;
@@ -11,6 +12,14 @@ type RevealTextProps = {
   fromColor?: string;
   /** Color of words once revealed */
   toColor?: string;
+  /** Element whose rendered image supplies the alpha mask for contrast text */
+  maskTargetId?: string;
+  /** Transparent image used by the mask target */
+  maskImageSrc?: string;
+  /** Color of masked words before they are revealed */
+  contrastFromColor?: string;
+  /** Color of masked words once revealed */
+  contrastToColor?: string;
 };
 
 const resolveCssColor = (color: string) => {
@@ -36,37 +45,114 @@ export function RevealText({
   as: Tag = "p",
   fromColor = "hsl(var(--color-border-light))",
   toColor = "hsl(var(--color-text-primary-light))",
+  maskTargetId,
+  maskImageSrc,
+  contrastFromColor = "hsl(var(--color-text-primary-light))",
+  contrastToColor = "hsl(var(--color-bg-light))",
 }: RevealTextProps) {
-  const containerRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const words = text.split(" ");
+  const usesContrastMask = Boolean(maskTargetId && maskImageSrc);
+
+  useEffect(() => {
+    if (!maskTargetId || !maskImageSrc || !containerRef.current) return;
+
+    const target = document.getElementById(maskTargetId);
+    const contrastLayer =
+      containerRef.current.querySelector<HTMLElement>(".reveal-contrast-layer");
+    if (!target || !contrastLayer) return;
+
+    let frame = 0;
+    const maskUrl = `url("${maskImageSrc}")`;
+
+    const updateMasks = () => {
+      frame = 0;
+      const targetRect = target.getBoundingClientRect();
+
+      const layerRect = contrastLayer.getBoundingClientRect();
+      const intersects = !(
+        layerRect.right <= targetRect.left ||
+        layerRect.left >= targetRect.right ||
+        layerRect.bottom <= targetRect.top ||
+        layerRect.top >= targetRect.bottom
+      );
+
+      if (!intersects) {
+        contrastLayer.style.display = "none";
+        contrastLayer.style.opacity = "1";
+        return;
+      }
+
+      const clipTop = Math.max(0, targetRect.top - layerRect.top);
+      const clipRight = Math.max(0, layerRect.right - targetRect.right);
+      const clipBottom = Math.max(0, layerRect.bottom - targetRect.bottom);
+      const clipLeft = Math.max(0, targetRect.left - layerRect.left);
+      const maskPosition = `${targetRect.left - layerRect.left}px ${targetRect.top - layerRect.top}px`;
+      const maskSize = `${targetRect.width}px auto`;
+
+      contrastLayer.style.display = "block";
+      contrastLayer.style.clipPath =
+        `inset(${clipTop}px ${clipRight}px ${clipBottom}px ${clipLeft}px)`;
+      contrastLayer.style.setProperty("-webkit-mask-image", maskUrl);
+      contrastLayer.style.setProperty("-webkit-mask-position", maskPosition);
+      contrastLayer.style.setProperty("-webkit-mask-repeat", "no-repeat");
+      contrastLayer.style.setProperty("-webkit-mask-size", maskSize);
+      contrastLayer.style.setProperty("mask-image", maskUrl);
+      contrastLayer.style.setProperty("mask-mode", "alpha");
+      contrastLayer.style.setProperty("mask-position", maskPosition);
+      contrastLayer.style.setProperty("mask-repeat", "no-repeat");
+      contrastLayer.style.setProperty("mask-size", maskSize);
+      contrastLayer.style.opacity = "1";
+    };
+
+    const scheduleMaskUpdate = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(updateMasks);
+    };
+
+    const resizeObserver = new ResizeObserver(scheduleMaskUpdate);
+    resizeObserver.observe(target);
+    resizeObserver.observe(containerRef.current);
+    window.addEventListener("resize", scheduleMaskUpdate);
+    window.addEventListener("scroll", scheduleMaskUpdate, { passive: true });
+    target.addEventListener("load", scheduleMaskUpdate);
+    scheduleMaskUpdate();
+
+    return () => {
+      cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", scheduleMaskUpdate);
+      window.removeEventListener("scroll", scheduleMaskUpdate);
+      target.removeEventListener("load", scheduleMaskUpdate);
+    };
+  }, [maskImageSrc, maskTargetId, text]);
 
   useGSAP(() => {
-    const wordEls = Array.from(
-      containerRef.current?.querySelectorAll<HTMLElement>(".reveal-word") ?? [],
+    const baseWordEls = Array.from(
+      containerRef.current?.querySelectorAll<HTMLElement>(".reveal-word-base") ?? [],
     );
-    if (!wordEls.length) return;
+    const contrastWordEls = Array.from(
+      containerRef.current?.querySelectorAll<HTMLElement>(".reveal-word-contrast") ?? [],
+    );
+    if (!baseWordEls.length) return;
 
     const resolvedFromColor = resolveCssColor(fromColor);
     const resolvedToColor = resolveCssColor(toColor);
+    const resolvedContrastFromColor = resolveCssColor(contrastFromColor);
+    const resolvedContrastToColor = resolveCssColor(contrastToColor);
 
-    if (prefersReducedMotion()) {
-      wordEls.forEach((wordEl) => {
-        wordEl.style.color = resolvedToColor;
-      });
-      return;
-    }
-
-    // Normalize the SSR token value before GSAP reads it. Safari exposes the
-    // inline `hsl(var(--token))` string here, which GSAP's color parser cannot
-    // interpolate reliably even though the browser resolves it to a valid RGB.
-    wordEls.forEach((wordEl) => {
-      wordEl.style.color = resolvedFromColor;
+    baseWordEls.forEach((wordEl) => {
+      wordEl.style.color = prefersReducedMotion() ? resolvedToColor : resolvedFromColor;
+    });
+    contrastWordEls.forEach((wordEl) => {
+      wordEl.style.color = prefersReducedMotion()
+        ? resolvedContrastToColor
+        : resolvedContrastFromColor;
     });
 
-    gsap.to(wordEls, {
-      color: resolvedToColor,
-      stagger: 0.04,
-      ease: "none",
+    if (prefersReducedMotion()) return;
+
+    const timeline = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top 85%",
@@ -74,18 +160,56 @@ export function RevealText({
         scrub: true,
       },
     });
-  }, { scope: containerRef, dependencies: [fromColor, toColor] });
+
+    timeline.to(baseWordEls, {
+      color: resolvedToColor,
+      duration: 0.5,
+      stagger: 0.04,
+      ease: "none",
+    }, 0);
+
+    if (contrastWordEls.length) {
+      timeline.to(contrastWordEls, {
+        color: resolvedContrastToColor,
+        duration: 0.5,
+        stagger: 0.04,
+        ease: "none",
+      }, 0);
+    }
+  }, {
+    scope: containerRef,
+    dependencies: [contrastFromColor, contrastToColor, fromColor, text, toColor],
+  });
+
+  const renderWords = (wordClassName: string, color: string) =>
+    words.flatMap((word, i) => {
+      const span = (
+        <span className={wordClassName} key={`word-${i}`} style={{ color }}>
+          {word}
+        </span>
+      );
+      return i < words.length - 1 ? [span, " "] : [span];
+    });
 
   return (
-    <Tag ref={containerRef as React.Ref<never>} className={className}>
-      {words.flatMap((word, i) => {
-        const span = (
-          <span className="reveal-word" key={`word-${i}`} style={{ color: fromColor }}>
-            {word}
-          </span>
-        );
-        return i < words.length - 1 ? [span, " "] : [span];
-      })}
-    </Tag>
+    <div ref={containerRef} className="relative flow-root">
+      <Tag className={className}>
+        {renderWords("reveal-word-base", fromColor)}
+      </Tag>
+      {usesContrastMask && (
+        // 反差层必须与 base 层逐像素重合，因此沿用完全相同的 className
+        // （含其中的外边距）——wrapper 的 flow-root 把 base 的 margin 收在内部，
+        // 若在这里用 !mt-0 抹掉，两层就会正好错开一个 margin 的距离。
+        <Tag
+          aria-hidden="true"
+          className={cn(
+            className,
+            "reveal-contrast-layer pointer-events-none absolute inset-0 select-none opacity-0",
+          )}
+        >
+          {renderWords("reveal-word-contrast", contrastFromColor)}
+        </Tag>
+      )}
+    </div>
   );
 }
