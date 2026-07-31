@@ -13,14 +13,9 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(redirectUrl, 308);
   }
 
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-site-locale", pathLocale);
-
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  // 语言从路由段本身读（见 src/app/(site)/[locale]/layout.tsx），不再往下游传 header：
+  // 之前 root layout 靠 headers() 拿 locale，而那会把整棵路由树变成 dynamic。
+  return NextResponse.next();
 }
 
 export const config = {
