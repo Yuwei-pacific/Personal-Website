@@ -9,8 +9,19 @@ import { ProjectGallery } from "./project-gallery";
 import { DotList, MetaRow } from "./project-meta-table";
 import { ProjectRichText } from "./project-rich-text";
 import { ProjectSections } from "./project-sections";
+import type { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/dictionaries";
+import { localizedPath } from "@/i18n/routing";
 
-export function ProjectDetailView({ project }: { project: ProjectDetail }) {
+export function ProjectDetailView({
+  project,
+  locale,
+  dictionary,
+}: {
+  project: ProjectDetail;
+  locale: Locale;
+  dictionary: Dictionary;
+}) {
   const hasContribution =
     project.contributors.length ||
     project.role.length ||
@@ -36,12 +47,12 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
       <div className="w-full bg-design-light-bg px-container pb-panel pt-24 sm:px-container-sm sm:pb-panel-sm sm:pt-28">
         <div className="mx-auto max-w-content flex flex-col gap-12">
           <section className="flex flex-col gap-6">
-            <Link href="/#work" className="text-small font-medium text-design-light-text-secondary transition-colors duration-base hover:text-design-light-text-primary">
-              ← Back to projects
+            <Link href={`${localizedPath(locale)}#work`} className="text-small font-medium text-design-light-text-secondary transition-colors duration-base hover:text-design-light-text-primary">
+              {dictionary.project.back}
             </Link>
 
             <div className="space-y-5">
-              <p className="text-label font-semibold uppercase text-design-light-text-muted">Project</p>
+              <p className="text-label font-semibold uppercase text-design-light-text-muted">{dictionary.project.eyebrow}</p>
               <h1 className="text-balance text-4xl font-semibold tracking-tight text-design-light-text-primary sm:text-5xl lg:text-6xl">
                 {project.title}
               </h1>
@@ -66,6 +77,8 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
                       animated: project.coverImage.animated,
                     })}
                     className="h-full w-full object-cover"
+                    playLabel={dictionary.project.playVideo}
+                    pauseLabel={dictionary.project.pauseVideo}
                   />
                 ) : (
                   <Image
@@ -83,10 +96,10 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
             )}
 
             <div className="grid grid-cols-2 gap-x-6 border-t border-design-light-border sm:gap-x-12">
-              {project.projectType && <MetaRow label="Type">{project.projectType}</MetaRow>}
-              {project.year && <MetaRow label="Year">{project.year}</MetaRow>}
-              {project.client && <MetaRow label="Client">{project.client}</MetaRow>}
-              {project.location && <MetaRow label="Location">{project.location}</MetaRow>}
+              {project.projectType && <MetaRow label={dictionary.project.type}>{project.projectType}</MetaRow>}
+              {project.year && <MetaRow label={dictionary.project.year}>{project.year}</MetaRow>}
+              {project.client && <MetaRow label={dictionary.project.client}>{project.client}</MetaRow>}
+              {project.location && <MetaRow label={dictionary.project.location}>{project.location}</MetaRow>}
             </div>
           </section>
         </div>
@@ -95,7 +108,7 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
       <section data-overscroll-dark className="w-full bg-design-dark-bg px-container py-panel text-design-dark-text-primary sm:px-container-sm sm:py-panel-sm scroll-mt-24">
         <div className="mx-auto max-w-content">
           {/* 正文：可增删排序的内容模块 */}
-          <ProjectSections sections={project.sections} />
+          <ProjectSections sections={project.sections} labels={dictionary.project} />
         </div>
       </section>
 
@@ -110,9 +123,11 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
                 {project.links.map((link) => {
                   const href = link.href;
                   const label =
-                    link.label?.trim().toLowerCase() === "official website"
-                      ? "Visit official website"
-                      : link.label || "Visit project";
+                    ["official website", "sito ufficiale"].includes(
+                      link.label?.trim().toLowerCase() ?? "",
+                    )
+                      ? dictionary.project.visitOfficial
+                      : link.label || dictionary.project.visitProject;
 
                   return (
                     <li key={link.key}>
@@ -138,7 +153,7 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
 
             <div className="border-t border-design-dark-border-strong pt-panel sm:pt-panel-sm">
               <h2 className="text-2xl font-semibold leading-tight text-design-dark-text-primary sm:text-3xl">
-                Project credits
+                {dictionary.project.credits}
               </h2>
 
               <div className="mt-6 grid gap-10 sm:mt-8 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-16 lg:gap-24">
@@ -154,7 +169,7 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
                   {project.contributors.length || project.role.length || project.tags.length ? (
                     <div className="border-t border-design-dark-border">
                       {project.contributors.length ? (
-                        <MetaRow label="Contributors" tone="dark" density="compact">
+                        <MetaRow label={dictionary.project.contributors} tone="dark" density="compact">
                           <DotList
                             items={project.contributors}
                             separatorClassName="text-design-dark-border-strong"
@@ -162,7 +177,7 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
                         </MetaRow>
                       ) : null}
                       {project.role.length ? (
-                        <MetaRow label="My Roles" tone="dark" density="compact">
+                        <MetaRow label={dictionary.project.roles} tone="dark" density="compact">
                           <DotList
                             items={project.role}
                             separatorClassName="text-design-dark-border-strong"
@@ -170,7 +185,7 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
                         </MetaRow>
                       ) : null}
                       {project.tags.length ? (
-                        <MetaRow label="Skills" tone="dark" density="compact">
+                        <MetaRow label={dictionary.project.skills} tone="dark" density="compact">
                           <DotList
                             items={project.tags}
                             separatorClassName="text-design-dark-border-strong"
@@ -192,7 +207,13 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
           className="w-full bg-design-dark-bg px-container pb-panel text-design-dark-text-primary sm:px-container-sm sm:pb-panel-sm"
         >
           <div className="-mx-4 px-4 sm:-mx-6 sm:px-10">
-            <ProjectGallery items={project.gallery} fullWidth />
+            <ProjectGallery
+              items={project.gallery}
+              title={dictionary.project.gallery}
+              playVideoLabel={dictionary.project.playGalleryVideo}
+              viewImageLabel={dictionary.project.viewGalleryImage}
+              fullWidth
+            />
           </div>
         </section>
       ) : null}

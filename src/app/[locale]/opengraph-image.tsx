@@ -2,12 +2,22 @@
 // 替代 webp 头像 —— 部分平台（LinkedIn / WhatsApp / 微信）不支持 webp 作为分享图
 import { ImageResponse } from "next/og";
 import { SITE_DOMAIN, SITE_ROLE, SITE_TITLE } from "@/lib/site-metadata";
+import { defaultLocale, isLocale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
 
 export const alt = SITE_TITLE;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OpenGraphImage() {
+export default async function OpenGraphImage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale: rawLocale } = await params;
+  const locale = isLocale(rawLocale) ? rawLocale : defaultLocale;
+  const dictionary = getDictionary(locale);
+
   return new ImageResponse(
     (
       <div
@@ -33,7 +43,7 @@ export default function OpenGraphImage() {
             color: "#424242",
           }}
         >
-          Portfolio
+          {dictionary.metadata.portfolio}
         </div>
         <div
           style={{
@@ -60,7 +70,7 @@ export default function OpenGraphImage() {
           }}
         >
           <span>{SITE_DOMAIN}</span>
-          <span>Based in Milan</span>
+          <span>{dictionary.metadata.basedInMilan}</span>
         </div>
       </div>
     ),

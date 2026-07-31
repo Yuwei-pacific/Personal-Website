@@ -1,11 +1,13 @@
 // 全局布局：配置字体、默认元数据与基础样式
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { JsonLd, websiteSchema } from "@/components/seo/json-ld";
 import { CustomCursor } from "@/components/ui/custom-cursor";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site-metadata";
+import { isLocale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
+import { SITE_URL } from "@/lib/site-metadata";
 import { SanityLive } from "@/sanity/live";
 import "lenis/dist/lenis.css";
 import "./globals.css";
@@ -27,29 +29,8 @@ const geistMono = Geist_Mono({
 // 页面默认元数据：用于 SEO 与浏览器/系统图标
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: {
-    default: SITE_TITLE,
-    template: `%s | ${SITE_NAME}`,
-  },
-  description: SITE_DESCRIPTION,
-  keywords: ["Yuwei Li", "portfolio", "communication designer", "frontend developer", "UX/UI design", "interaction design", "web development"],
   authors: [{ name: "Yuwei Li" }],
   creator: "Yuwei Li",
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: SITE_URL,
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    siteName: SITE_NAME,
-    // 分享图由 app/opengraph-image.tsx 自动生成（1200x630 PNG）
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    creator: "@yuweili",
-  },
   robots: {
     index: true,
     follow: true,
@@ -76,16 +57,21 @@ import { AppViewTransitions } from "@/components/providers/view-transitions-prov
 import { LenisProvider } from "@/components/providers/lenis-provider";
 import { OverscrollBackground } from "@/components/ui/overscroll-background";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const requestHeaders = await headers();
+  const requestedLocale = requestHeaders.get("x-site-locale");
+  // /studio is intentionally outside the public locale router and uses English UI.
+  const locale = isLocale(requestedLocale) ? requestedLocale : "en";
+  const dictionary = getDictionary(locale);
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         <link rel="preconnect" href="https://cdn.sanity.io" />
-        <JsonLd data={websiteSchema} />
       </head>
       <body
         // 将两种字体的 CSS 变量应用到 body，并设置全局基础样式
@@ -97,7 +83,7 @@ export default function RootLayout({
               href="#main-content"
               className="sr-only fixed left-4 top-4 z-skip-link bg-design-light-bg px-4 py-2 text-small font-semibold text-design-light-text-primary shadow-card focus:not-sr-only"
             >
-              Skip to main content
+              {dictionary.common.skipToMain}
             </a>
             <OverscrollBackground />
             <CustomCursor />

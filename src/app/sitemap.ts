@@ -2,9 +2,12 @@ import type { MetadataRoute } from "next";
 
 import { sanityClient } from "@/sanity/client";
 import { PROJECT_SITEMAP_QUERY } from "@/sanity/queries";
-import { SITE_URL, absoluteUrl } from "@/lib/site-metadata";
+import { locales } from "@/i18n/config";
+import {
+  languageAlternates,
+  localizedAbsoluteUrl,
+} from "@/lib/site-metadata";
 
-const baseUrl = SITE_URL;
 const fallbackLastModified = new Date("2026-01-01");
 const sitemapClient = sanityClient.withConfig({ useCdn: false });
 
@@ -29,27 +32,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return updatedAt > latest ? updatedAt : latest;
     }, fallbackLastModified);
 
-    const routes: MetadataRoute.Sitemap = [
+    const routes: MetadataRoute.Sitemap = locales.flatMap((locale) => [
       {
-        url: baseUrl,
+        url: localizedAbsoluteUrl(locale),
         lastModified: latestProjectDate,
-        changeFrequency: "monthly",
+        changeFrequency: "monthly" as const,
         priority: 1,
+        alternates: { languages: languageAlternates() },
       },
       {
-        url: absoluteUrl("/about"),
-        changeFrequency: "monthly",
+        url: localizedAbsoluteUrl(locale, "/about"),
+        changeFrequency: "monthly" as const,
         priority: 0.7,
+        alternates: { languages: languageAlternates("/about") },
       },
-    ];
+    ]);
 
     routes.push(
-      ...validProjects.map((project) => ({
-        url: absoluteUrl(`/projects/${project.slug}`),
-        lastModified: new Date(project._updatedAt),
-        changeFrequency: "monthly" as const,
-        priority: 0.8,
-      })),
+      ...validProjects.flatMap((project) => {
+        const path = `/projects/${project.slug}`;
+        return locales.map((locale) => ({
+          url: localizedAbsoluteUrl(locale, path),
+          lastModified: new Date(project._updatedAt),
+          changeFrequency: "monthly" as const,
+          priority: 0.8,
+          alternates: { languages: languageAlternates(path) },
+        }));
+      }),
     );
 
     return routes;
@@ -57,17 +66,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Failed to fetch projects for sitemap", error);
   }
 
-  return [
+  return locales.flatMap((locale) => [
     {
-      url: baseUrl,
+      url: localizedAbsoluteUrl(locale),
       lastModified: fallbackLastModified,
-      changeFrequency: "monthly",
+      changeFrequency: "monthly" as const,
       priority: 1,
+      alternates: { languages: languageAlternates() },
     },
     {
-      url: absoluteUrl("/about"),
-      changeFrequency: "monthly",
+      url: localizedAbsoluteUrl(locale, "/about"),
+      changeFrequency: "monthly" as const,
       priority: 0.7,
+      alternates: { languages: languageAlternates("/about") },
     },
-  ];
+  ]);
 }

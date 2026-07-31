@@ -19,9 +19,10 @@ const portableComponents: Partial<PortableTextReactComponents> = {
 
 type ResumeListProps = {
   items: ResumeItem[];
+  emptyLabel: string;
 };
 
-export function ResumeList({ items }: ResumeListProps) {
+export function ResumeList({ items, emptyLabel }: ResumeListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const toggleExpand = (id: string) => {
@@ -32,7 +33,7 @@ export function ResumeList({ items }: ResumeListProps) {
   if (!items.length) {
     return (
       <p className="mt-stack border-t border-design-light-border pt-4 text-small text-design-light-text-muted">
-        Entries will appear here once they are published in Sanity.
+        {emptyLabel}
       </p>
     );
   }
