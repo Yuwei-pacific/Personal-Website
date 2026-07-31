@@ -31,7 +31,9 @@ import "yet-another-react-lightbox/plugins/counter.css";
 // - fullWidth：是否整屏宽度展示
 type ProjectGalleryProps = {
   items?: ProjectGalleryItem[];
-  title?: string;
+  title: string;
+  playVideoLabel: string;
+  viewImageLabel: string;
   fullWidth?: boolean;
 };
 
@@ -56,7 +58,11 @@ const DEFAULT_CONTAINER_WIDTH = 1200;
 // 网格缩略图：视频用它的 poster，图片用自身
 type GalleryPhoto = Photo & { isVideo: boolean };
 
-const buildPhoto = (item: ProjectGalleryItem, index: number): GalleryPhoto => {
+const buildPhoto = (
+  item: ProjectGalleryItem,
+  index: number,
+  labels: { playVideo: string; viewImage: string },
+): GalleryPhoto => {
   const isVideo = item.kind === "video";
   const { imageUrl, imageAnimated, width, height } = item;
 
@@ -68,7 +74,9 @@ const buildPhoto = (item: ProjectGalleryItem, index: number): GalleryPhoto => {
     // alt 为空 = 装饰性，屏幕阅读器跳过图片；
     // label 始终有值，保证可点击按钮对键盘/读屏用户仍有可读名称
     alt: item.alt,
-    label: item.alt || `${isVideo ? "Play video" : "View image"} ${index + 1}`,
+    label:
+      item.alt ||
+      `${isVideo ? labels.playVideo : labels.viewImage} ${index + 1}`,
     isVideo,
     srcSet: buildSrcSet({ url: imageUrl, width, height, animated: imageAnimated }, THUMB_WIDTHS),
   };
@@ -100,10 +108,25 @@ const buildSlide = (item: ProjectGalleryItem): SlideImage | SlideVideo => {
   };
 };
 
-export function ProjectGallery({ items, title = "Gallery", fullWidth }: ProjectGalleryProps) {
+export function ProjectGallery({
+  items,
+  title,
+  playVideoLabel,
+  viewImageLabel,
+  fullWidth,
+}: ProjectGalleryProps) {
   const galleryItems = useMemo(() => items ?? [], [items]);
 
-  const photos = useMemo(() => galleryItems.map(buildPhoto), [galleryItems]);
+  const photos = useMemo(
+    () =>
+      galleryItems.map((item, index) =>
+        buildPhoto(item, index, {
+          playVideo: playVideoLabel,
+          viewImage: viewImageLabel,
+        }),
+      ),
+    [galleryItems, playVideoLabel, viewImageLabel],
+  );
   const slides = useMemo(() => galleryItems.map(buildSlide), [galleryItems]);
 
   // 当前打开的媒体索引；-1 表示 lightbox 关闭

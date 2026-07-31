@@ -16,7 +16,7 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html lang="en">
+    <html lang="it">
       <body
         style={{
           margin: 0,
@@ -42,10 +42,10 @@ export default function GlobalError({
             color: "#737373",
           }}
         >
-          Something went wrong
+          Qualcosa è andato storto
         </p>
         <h1 style={{ margin: 0, fontSize: "2rem", fontWeight: 600 }}>
-          This page failed to load
+          Impossibile caricare la pagina
         </h1>
         <button
           type="button"
@@ -62,7 +62,7 @@ export default function GlobalError({
             color: "inherit",
           }}
         >
-          Try again
+          Riprova
         </button>
       </body>
     </html>

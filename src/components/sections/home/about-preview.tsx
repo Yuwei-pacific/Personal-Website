@@ -4,8 +4,19 @@ import { Link } from "next-view-transitions";
 import { Parallax } from "@/components/ui/parallax";
 import { MaskedTextHeading } from "@/components/ui/masked-text-heading";
 import { RevealText } from "@/components/ui/reveal-text";
+import type { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/dictionaries";
+import { localizedPath } from "@/i18n/routing";
 
-export function AboutPreview() {
+export function AboutPreview({
+  locale,
+  dictionary,
+}: {
+  locale: Locale;
+  dictionary: Dictionary;
+}) {
+  const content = dictionary.home.aboutPreview;
+
   return (
     <section id="about" className="relative z-10 w-full bg-background">
       <div className="mx-auto w-full max-w-content px-6 py-section sm:py-section-sm">
@@ -17,7 +28,7 @@ export function AboutPreview() {
                 <Image
                   id="about-preview-portrait-mask"
                   src="/Profile_Yuwei.webp"
-                  alt="Portrait of Yuwei Li"
+                  alt={dictionary.common.portraitAlt}
                   fill
                   sizes="(min-width: 1024px) 331px, 45vw"
                   className="object-cover object-top"
@@ -28,7 +39,7 @@ export function AboutPreview() {
 
           <div className="relative">
             <MaskedTextHeading
-              text="From concept to launch."
+              text={content.title}
               className="text-balance text-display-sm font-semibold leading-[1.1] tracking-display text-design-light-text-primary lg:text-display"
             />
             {/* 右侧留白给人像让位：不留的话正文会整段压在人像上，
@@ -36,7 +47,7 @@ export function AboutPreview() {
             <div className="relative z-10 w-full pr-[12.5%] sm:pr-[7.5%] lg:max-w-[63rem] lg:pr-0">
               <RevealText
                 as="p"
-                text="I move between visual systems, interface design and frontend development, carrying ideas from early direction to polished, maintainable outcomes."
+                text={content.body}
                 maskTargetId="about-preview-portrait-mask"
                 maskImageSrc="/Profile_Yuwei_mask.webp"
                 className="mt-4 text-pretty text-lead font-semibold tracking-display lg:text-display-sm lg:leading-[1.245]"
@@ -45,10 +56,10 @@ export function AboutPreview() {
           </div>
 
           <Link
-            href="/about"
+            href={localizedPath(locale, "/about")}
             className="relative z-20 inline-flex min-h-11 w-fit touch-manipulation items-center border-b-2 border-current text-lg font-semibold leading-[1.15] tracking-[-0.04em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 lg:min-h-0 lg:text-[2.5rem]"
           >
-            More about me &gt;
+            {content.cta}
           </Link>
         </div>
       </div>

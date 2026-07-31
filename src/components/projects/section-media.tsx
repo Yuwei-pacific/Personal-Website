@@ -15,9 +15,18 @@ type SectionMediaProps = {
   sizes: string;
   className?: string;
   priority?: boolean;
+  playLabel: string;
+  pauseLabel: string;
 };
 
-export function SectionMedia({ media, sizes, className, priority }: SectionMediaProps) {
+export function SectionMedia({
+  media,
+  sizes,
+  className,
+  priority,
+  playLabel,
+  pauseLabel,
+}: SectionMediaProps) {
   const frame = cn(
     "relative w-full overflow-hidden bg-design-dark-surface",
     className
@@ -31,6 +40,8 @@ export function SectionMedia({ media, sizes, className, priority }: SectionMedia
             src={media.video.url}
             poster={buildScaledUrl(media.imageUrl, { width: 1600, animated: false })}
             className="h-full w-full object-cover"
+            playLabel={playLabel}
+            pauseLabel={pauseLabel}
           />
         ) : (
           <Image

@@ -12,6 +12,12 @@ export const skillCategory = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: 'titleTranslations',
+      title: 'Category title translations',
+      type: 'localizedString',
+      description: 'Italian and English display labels for this capability group.',
+    }),
+    defineField({
       name: 'order',
       title: 'Order',
       type: 'number',

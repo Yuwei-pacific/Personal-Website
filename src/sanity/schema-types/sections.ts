@@ -83,9 +83,19 @@ const sectionMedia = defineType({
         "Describe the media for screen readers and SEO. Leave empty for purely decorative shots.",
     }),
     defineField({
+      name: "altTranslations",
+      title: "Alt text translations",
+      type: "localizedString",
+    }),
+    defineField({
       name: "caption",
       title: "Caption (optional)",
       type: "string",
+    }),
+    defineField({
+      name: "captionTranslations",
+      title: "Caption translations",
+      type: "localizedString",
     }),
   ],
   preview: {
@@ -109,11 +119,21 @@ const richTextSection = defineType({
   fields: [
     defineField({ name: "heading", title: "Heading (optional)", type: "string" }),
     defineField({
+      name: "headingTranslations",
+      title: "Heading translations",
+      type: "localizedString",
+    }),
+    defineField({
       name: "content",
       title: "Content",
       type: "array",
       of: [projectTextBlock()],
       validation: (Rule) => Rule.required().min(1),
+    }),
+    defineField({
+      name: "contentTranslations",
+      title: "Content translations",
+      type: "localizedProjectText",
     }),
   ],
   preview: {
@@ -140,6 +160,11 @@ const mediaTextSection = defineType({
   fields: [
     defineField({ name: "heading", title: "Heading (optional)", type: "string" }),
     defineField({
+      name: "headingTranslations",
+      title: "Heading translations",
+      type: "localizedString",
+    }),
+    defineField({
       name: "media",
       title: "Media",
       type: "sectionMedia",
@@ -151,6 +176,11 @@ const mediaTextSection = defineType({
       type: "array",
       of: [projectTextBlock()],
       validation: (Rule) => Rule.required().min(1),
+    }),
+    defineField({
+      name: "contentTranslations",
+      title: "Content translations",
+      type: "localizedProjectText",
     }),
     defineField({
       name: "mediaPosition",
@@ -229,6 +259,11 @@ const mediaGroupSection = defineType({
       validation: (Rule) => Rule.required().min(2).max(3),
     }),
     defineField({ name: "caption", title: "Caption (optional)", type: "string" }),
+    defineField({
+      name: "captionTranslations",
+      title: "Caption translations",
+      type: "localizedString",
+    }),
   ],
   preview: {
     select: { items: "items", media: "items.0.image", caption: "caption" },
@@ -253,7 +288,17 @@ const quoteSection = defineType({
       rows: 3,
       validation: (Rule) => Rule.required(),
     }),
+    defineField({
+      name: "quoteTranslations",
+      title: "Quote translations",
+      type: "localizedText",
+    }),
     defineField({ name: "attribution", title: "Attribution (optional)", type: "string" }),
+    defineField({
+      name: "attributionTranslations",
+      title: "Attribution translations",
+      type: "localizedString",
+    }),
   ],
   preview: {
     select: { quote: "quote", attribution: "attribution" },

@@ -7,16 +7,25 @@ import { normalizeProjectDetail } from "@/lib/view-models/project";
 import { PROJECT_QUERY, PROJECT_SLUGS_QUERY } from "@/sanity/queries";
 import type { PROJECT_QUERY_RESULT } from "@/sanity/sanity.types";
 import type { ProjectDetail } from "@/lib/view-models/types";
-import { SITE_AUTHOR, SITE_URL, absoluteUrl } from "@/lib/site-metadata";
+import type { Locale } from "@/i18n/config";
+import {
+  SITE_AUTHOR,
+  getSiteMetadata,
+  languageAlternates,
+  localizedAbsoluteUrl,
+} from "@/lib/site-metadata";
 
-export const fetchProject = cache(async (rawSlug?: string): Promise<ProjectDetail | null> => {
+export const fetchProject = cache(async (
+  rawSlug: string | undefined,
+  locale: Locale,
+): Promise<ProjectDetail | null> => {
   const slug = rawSlug?.toString().trim();
   if (!slug) return null;
 
   try {
     const { data: result }: { data: PROJECT_QUERY_RESULT } = await sanityFetch({
       query: PROJECT_QUERY,
-      params: { slug },
+      params: { slug, locale },
       perspective: "published",
       stega: false,
     });
@@ -36,20 +45,24 @@ export async function fetchProjectSlugs() {
   }
 }
 
-const projectUrl = (project: ProjectDetail) => absoluteUrl(`/projects/${project.slug}`);
+const projectPath = (project: ProjectDetail) => `/projects/${project.slug}`;
 
-export function buildProjectMetadata(project: ProjectDetail): Metadata {
+export function buildProjectMetadata(project: ProjectDetail, locale: Locale): Metadata {
   const projectTitle = project.title || "Project";
-  const url = projectUrl(project);
+  const url = localizedAbsoluteUrl(locale, projectPath(project));
+  const siteMetadata = getSiteMetadata(locale);
 
   return {
-    title: `${projectTitle} | ${SITE_AUTHOR}`,
+    title: { absolute: `${projectTitle} | ${SITE_AUTHOR}` },
     description: project.summary || undefined,
     alternates: {
       canonical: url,
+      languages: languageAlternates(projectPath(project)),
     },
     openGraph: {
       type: "article",
+      locale: siteMetadata.openGraphLocale,
+      alternateLocale: [siteMetadata.alternateOpenGraphLocale],
       url,
       title: `${projectTitle} | ${SITE_AUTHOR}`,
       description: project.summary || undefined,
@@ -67,18 +80,19 @@ export function buildProjectMetadata(project: ProjectDetail): Metadata {
   };
 }
 
-export function buildProjectJsonLd(project: ProjectDetail) {
+export function buildProjectJsonLd(project: ProjectDetail, locale: Locale) {
   return {
     "@context": "https://schema.org",
     "@type": "CreativeWork",
     name: project.title || "Project",
     description: project.summary || undefined,
-    url: projectUrl(project),
+    url: localizedAbsoluteUrl(locale, projectPath(project)),
+    inLanguage: locale,
     image: project.coverImage?.url,
     creator: {
       "@type": "Person",
       name: SITE_AUTHOR,
-      url: SITE_URL,
+      url: localizedAbsoluteUrl(locale),
     },
     dateCreated: project.year ? String(project.year) : undefined,
     keywords: project.tags.length ? project.tags.join(", ") : undefined,
