@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { ProjectDetailView } from "@/components/projects/project-detail-view";
+import { ProjectScrollReset } from "@/components/projects/project-scroll-reset";
 import { JsonLd } from "@/components/seo/json-ld";
 import { isLocale, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -54,6 +55,7 @@ export default async function ProjectPage({
   return (
     <>
       <JsonLd data={buildProjectJsonLd(project, rawLocale)} />
+      <ProjectScrollReset />
       <Navbar locale={rawLocale} dictionary={dictionary} />
       <ProjectDetailView
         project={project}
