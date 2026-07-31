@@ -7,8 +7,6 @@ import { ImagesIcon } from "@sanity/icons/Images";
 import { TextIcon } from "@sanity/icons/Text";
 import { UserIcon } from "@sanity/icons/User";
 
-import { projectTextBlock } from "./sections";
-
 export const project = defineType({
   name: "project",
   title: "Project",
@@ -21,7 +19,6 @@ export const project = defineType({
   // 同一个区块下，独立分页比折叠组的归属感更强。
   groups: [
     { name: "overview", title: "Overview", icon: DocumentIcon, default: true },
-    { name: "translations", title: "Translations", icon: TextIcon },
     { name: "cover", title: "Cover", icon: ImageIcon },
     { name: "content", title: "Content", icon: TextIcon },
     { name: "contribution", title: "Contribution", icon: UserIcon },
@@ -39,7 +36,11 @@ export const project = defineType({
         { field: "_createdAt", direction: "desc" },
       ],
     },
-    { title: "Title (A–Z)", name: "titleAsc", by: [{ field: "title", direction: "asc" }] },
+    {
+      title: "Title (A–Z)",
+      name: "titleAsc",
+      by: [{ field: "titleTranslations.it", direction: "asc" }],
+    },
     {
       title: "Recently updated",
       name: "updatedDesc",
@@ -49,10 +50,10 @@ export const project = defineType({
 
   fields: [
     defineField({
-      name: "title",
+      name: "titleTranslations",
       group: "overview",
       title: "Title",
-      type: "string",
+      type: "localizedString",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -61,36 +62,19 @@ export const project = defineType({
       title: "Slug",
       type: "slug",
       options: {
-        source: "title",
+        source: "titleTranslations.it",
         maxLength: 96,
       },
       validation: (Rule) => Rule.required(),
     }),
 
-    defineField({
-      name: "titleTranslations",
-      group: "translations",
-      title: "Title translations",
-      type: "localizedString",
-      description:
-        "Italian is the primary public language. English falls back to the legacy Title field until translated.",
-    }),
-
     // 一句话简介，用在卡片 / meta 描述
     defineField({
-      name: "summary",
+      name: "summaryTranslations",
       group: "overview",
       title: "Summary",
-      type: "string",
-      description: "One-line or short paragraph used in cards and previews.",
-      validation: (Rule) => Rule.max(240),
-    }),
-    defineField({
-      name: "summaryTranslations",
-      group: "translations",
-      title: "Summary translations",
       type: "localizedString",
-      description: "Localized card and metadata summary (maximum 240 characters).",
+      description: "One-line or short paragraph used in cards and metadata (maximum 240 characters).",
       validation: (Rule) =>
         Rule.custom<{ it?: string; en?: string } | undefined>((value) =>
           [value?.it, value?.en].some((item) => (item?.length ?? 0) > 240)
@@ -109,18 +93,11 @@ export const project = defineType({
     }),
 
     defineField({
-      name: "projectType",
+      name: "projectTypeTranslations",
       group: "overview",
       title: "Project type",
-      type: "string",
-      description: "Project type or category, e.g. 'Web App', 'Branding', etc.",
-      validation: (Rule) => Rule.max(240),
-    }),
-    defineField({
-      name: "projectTypeTranslations",
-      group: "translations",
-      title: "Project type translations",
       type: "localizedString",
+      description: "Project type or category, e.g. 'Web App', 'Branding', etc.",
     }),
 
     defineField({
@@ -133,17 +110,9 @@ export const project = defineType({
     }),
 
     defineField({
-      name: "role",
-      group: "contribution",
-      title: "My Roles",
-      type: "array",
-      of: [{ type: "string" }],
-      options: { layout: "tags" },
-    }),
-    defineField({
       name: "roleTranslations",
-      group: "translations",
-      title: "My roles translations",
+      group: "contribution",
+      title: "My roles",
       type: "localizedStringList",
     }),
 
@@ -157,16 +126,9 @@ export const project = defineType({
     }),
 
     defineField({
-      name: "myContribution",
+      name: "myContributionTranslations",
       group: "contribution",
       title: "My contribution",
-      type: "array",
-      of: [projectTextBlock()],
-    }),
-    defineField({
-      name: "myContributionTranslations",
-      group: "translations",
-      title: "My contribution translations",
       type: "localizedProjectText",
     }),
 
@@ -177,15 +139,9 @@ export const project = defineType({
       type: "string",
     }),
     defineField({
-      name: "location",
+      name: "locationTranslations",
       group: "overview",
       title: "Location",
-      type: "string",
-    }),
-    defineField({
-      name: "locationTranslations",
-      group: "translations",
-      title: "Location translations",
       type: "localizedString",
     }),
 
@@ -199,16 +155,11 @@ export const project = defineType({
         "Still image or animated GIF. Always required: this is what social shares and structured data use.",
       fields: [
         {
-          name: "alt",
+          name: "altTranslations",
           title: "Alt text",
-          type: "string",
+          type: "localizedString",
           description: "Describe the image for screen readers and SEO.",
           validation: (Rule) => Rule.required(),
-        },
-        {
-          name: "altTranslations",
-          title: "Alt text translations",
-          type: "localizedString",
         },
       ],
       validation: (Rule) => Rule.required(),
@@ -266,10 +217,9 @@ export const project = defineType({
         {
           type: "object",
           fields: [
-            { name: "label", title: "Label", type: "string" },
             {
               name: "labelTranslations",
-              title: "Label translations",
+              title: "Label",
               type: "localizedString",
             },
             { name: "url", title: "URL", type: "url" },
@@ -313,33 +263,30 @@ export const project = defineType({
                 "Optional. When set, the thumbnail gets a play badge and the video plays in the lightbox. MP4 or WebM, ideally under ~10 MB.",
             },
             {
-              name: "alt",
+              name: "altTranslations",
               title: "Alt text (optional)",
-              type: "string",
+              type: "localizedString",
               description:
                 "Describe the media for screen readers and SEO. Leave empty for purely decorative shots — the entry is then marked decorative and skipped by screen readers.",
             },
             {
-              name: "altTranslations",
-              title: "Alt text translations",
-              type: "localizedString",
-            },
-            {
-              name: "caption",
-              title: "Caption",
-              type: "string",
-            },
-            {
               name: "captionTranslations",
-              title: "Caption translations",
+              title: "Caption",
               type: "localizedString",
             },
           ],
           preview: {
-            select: { media: "image", title: "caption", alt: "alt", video: "video" },
-            prepare({ media, title, alt, video }) {
+            select: {
+              media: "image",
+              captionIt: "captionTranslations.it",
+              captionEn: "captionTranslations.en",
+              altIt: "altTranslations.it",
+              altEn: "altTranslations.en",
+              video: "video",
+            },
+            prepare({ media, captionIt, captionEn, altIt, altEn, video }) {
               return {
-                title: title || alt || "Gallery item",
+                title: captionIt || captionEn || altIt || altEn || "Gallery item",
                 subtitle: video ? "Image + video" : undefined,
                 media,
               };
@@ -348,23 +295,32 @@ export const project = defineType({
         },
       ],
     }),
-
   ],
-
-
-
   preview: {
     select: {
-      title: "title",
+      titleIt: "titleTranslations.it",
+      titleEn: "titleTranslations.en",
       media: "coverImage",
       year: "year",
-      projectType: "projectType",
+      projectTypeIt: "projectTypeTranslations.it",
+      projectTypeEn: "projectTypeTranslations.en",
       visibility: "visibility",
       sectionCount: "sections.length",
     },
-    prepare({ title, media, year, projectType, visibility, sectionCount }) {
+    prepare({
+      titleIt,
+      titleEn,
+      media,
+      year,
+      projectTypeIt,
+      projectTypeEn,
+      visibility,
+      sectionCount,
+    }) {
       // 隐藏的项目在列表里本来完全看不出区别，标注出来免得改半天才发现没上线
       const isHidden = visibility === false;
+      const title = titleIt || titleEn;
+      const projectType = projectTypeIt || projectTypeEn;
       const meta = [
         year ? String(year) : null,
         projectType,

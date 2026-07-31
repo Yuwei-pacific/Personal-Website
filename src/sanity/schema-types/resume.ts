@@ -28,46 +28,25 @@ export const resume = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: 'degree',
-      title: 'Degree / Role',
-      type: 'string',
-    }),
-    defineField({
       name: 'degreeTranslations',
-      title: 'Degree / Role translations',
+      title: 'Degree / Role',
       type: 'localizedString',
-    }),
-    defineField({
-      name: 'period',
-      title: 'Period',
-      type: 'string',
     }),
     defineField({
       name: 'periodTranslations',
-      title: 'Period translations',
+      title: 'Period',
       type: 'localizedString',
-    }),
-    defineField({
-      name: 'location',
-      title: 'Location',
-      type: 'string',
     }),
     defineField({
       name: 'locationTranslations',
-      title: 'Location translations',
+      title: 'Location',
       type: 'localizedString',
     }),
     defineField({
-      name: 'details',
-      title: 'Details',
-      type: 'array',
-      of: [{ type: 'block' }],
-      description: 'Additional details to show when expanded (e.g. coursework, honors, thesis)',
-    }),
-    defineField({
       name: 'detailsTranslations',
-      title: 'Details translations',
+      title: 'Details',
       type: 'localizedProjectText',
+      description: 'Additional details to show when expanded (e.g. coursework, honors, thesis)',
     }),
     defineField({
       name: 'order',
@@ -79,7 +58,11 @@ export const resume = defineType({
   preview: {
     select: {
       title: 'institution',
-      subtitle: 'degree',
+      degreeIt: 'degreeTranslations.it',
+      degreeEn: 'degreeTranslations.en',
+    },
+    prepare({title, degreeIt, degreeEn}) {
+      return {title, subtitle: degreeIt || degreeEn}
     },
   },
 })
