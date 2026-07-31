@@ -94,9 +94,9 @@ Personal-Website/
   lives in `src/i18n/dictionaries.ts`. Sanity keeps one shared document for media,
   dates and ordering while each `*Translations` field stores a readable object such
   as `{it: "…", en: "…"}`. The Studio language toolbar shows one locale at a time.
-  Queries prefer the requested locale, then English translations, then the legacy
-  English field. This compatibility layer lets translations be authored without
-  rewriting the content used by the current production branch.
+  Queries prefer the requested locale and fall back to the other localized value;
+  there are no parallel legacy text fields. Localized inputs stay in the semantic
+  Studio group they belong to (Overview, Cover, Content, Contribution, or Gallery).
 - **Page shell**: every page renders `<Navbar />`, then a single
   `<main id="main-content">` wrapping *all* of its content, then `<Footer />`.
   The root layout only provides the background container, so navigation stays
