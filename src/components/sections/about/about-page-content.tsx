@@ -30,9 +30,10 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
               owns the transform (drifts upward on scroll) so they don't conflict */}
             <div className="pointer-events-none absolute right-0 top-1/2 w-[45%] max-w-[240px] -translate-y-1/2 sm:w-[35%] sm:max-w-[320px] lg:w-[30%] lg:max-w-[360px]">
               <Parallax offset={-160}>
-                {/* 人像是透明底抠像：容器用统一白（同页面背景），只靠阴影区分层次 */}
-                <div className="group relative aspect-square overflow-hidden bg-design-light-raised shadow-card transition-shadow duration-slow hover:shadow-hover">
+                {/* 抠像人像直接落在页面白底上：不加卡片底色与阴影 */}
+                <div className="group relative aspect-square overflow-hidden">
                   <Image
+                    id="about-page-portrait-mask"
                     src="/Profile_Yuwei.webp"
                     alt="Portrait of Yuwei Li"
                     fill
@@ -45,7 +46,7 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
               </Parallax>
             </div>
 
-            {/* Text on top — direct token colors keep the reveal consistent across browsers */}
+            {/* Text on top — the portrait alpha mask supplies the cross-image contrast */}
             <div className="relative z-10 pr-[30%] sm:pr-[24%] lg:pr-[20%]">
               <p className="text-label font-semibold uppercase text-design-light-text-muted">
                 About me
@@ -53,6 +54,8 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
               <RevealText
                 as="h1"
                 text="I connect communication design and frontend development to turn ideas into clear, expressive, and maintainable digital experiences."
+                maskTargetId="about-page-portrait-mask"
+                maskImageSrc="/Profile_Yuwei_mask.webp"
                 className="mt-4 text-3xl font-semibold leading-[1.2] tracking-tight sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.15]"
               />
             </div>
