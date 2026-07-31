@@ -56,7 +56,7 @@ export function getSiteMetadata(locale: Locale) {
   const dictionary = getDictionary(locale);
 
   return {
-    title: SITE_TITLE,
+    title: dictionary.metadata.siteTitle,
     description: dictionary.metadata.siteDescription,
     keywords: dictionary.metadata.keywords,
     location: SITE_LOCATIONS[locale],

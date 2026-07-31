@@ -200,7 +200,7 @@ export function RevealText({
         // 反差层必须与 base 层逐像素重合，因此沿用完全相同的 className
         // （含其中的外边距）——wrapper 的 flow-root 把 base 的 margin 收在内部，
         // 若在这里用 !mt-0 抹掉，两层就会正好错开一个 margin 的距离。
-        <Tag
+        <div
           aria-hidden="true"
           className={cn(
             className,
@@ -208,7 +208,7 @@ export function RevealText({
           )}
         >
           {renderWords("reveal-word-contrast", contrastFromColor)}
-        </Tag>
+        </div>
       )}
     </div>
   );

@@ -7,7 +7,6 @@ import {
   SOCIAL_LINKS,
   absoluteUrl,
   getSiteMetadata,
-  localizedAbsoluteUrl,
 } from "@/lib/site-metadata";
 import type { Locale } from "@/i18n/config";
 
@@ -39,8 +38,9 @@ export const personSchema = (locale: Locale) => {
     return {
         '@context': 'https://schema.org',
         '@type': 'Person',
+        '@id': absoluteUrl('/#person'),
         name: SITE_AUTHOR,
-        url: localizedAbsoluteUrl(locale),
+        url: absoluteUrl(),
         sameAs: SOCIAL_LINKS.map((link) => link.href),
         jobTitle: SITE_ROLE,
         description: metadata.description,
@@ -50,29 +50,25 @@ export const personSchema = (locale: Locale) => {
 }
 
 // 网站结构化数据
-export const websiteSchema = (locale: Locale) => {
-    const metadata = getSiteMetadata(locale);
+export const websiteSchema = () => {
+    const person = {
+        '@type': 'Person',
+        '@id': absoluteUrl('/#person'),
+        name: SITE_AUTHOR,
+        url: absoluteUrl(),
+    };
 
     return {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
+        '@id': absoluteUrl('/#website'),
         name: SITE_NAME,
-        url: localizedAbsoluteUrl(locale),
-        description: metadata.description,
-        inLanguage: locale,
+        alternateName: SITE_AUTHOR,
+        url: absoluteUrl(),
+        inLanguage: ['it', 'en'],
         image: absoluteUrl('/Profile_Yuwei.webp'),
         logo: absoluteUrl('/Logo.svg'),
-        author: {
-            '@type': 'Person',
-            name: SITE_AUTHOR,
-        },
-        publisher: {
-            '@type': 'Organization',
-            name: SITE_AUTHOR,
-            logo: {
-                '@type': 'ImageObject',
-                url: absoluteUrl('/Logo.svg'),
-            },
-        },
+        author: person,
+        publisher: person,
     };
 }
