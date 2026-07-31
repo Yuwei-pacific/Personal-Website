@@ -10,6 +10,8 @@ import type { ProjectDetail } from "@/lib/view-models/types";
 import type { Locale } from "@/i18n/config";
 import {
   SITE_AUTHOR,
+  SITE_NAME,
+  absoluteUrl,
   getSiteMetadata,
   languageAlternates,
   localizedAbsoluteUrl,
@@ -51,9 +53,20 @@ export function buildProjectMetadata(project: ProjectDetail, locale: Locale): Me
   const projectTitle = project.title || "Project";
   const url = localizedAbsoluteUrl(locale, projectPath(project));
   const siteMetadata = getSiteMetadata(locale);
+  const title = `${projectTitle} | ${SITE_AUTHOR}`;
+  const images = project.coverImage
+    ? [
+        {
+          url: `${project.coverImage.url}?w=1200&h=630&fit=crop&auto=format`,
+          width: 1200,
+          height: 630,
+          alt: projectTitle,
+        },
+      ]
+    : undefined;
 
   return {
-    title: { absolute: `${projectTitle} | ${SITE_AUTHOR}` },
+    title: { absolute: title },
     description: project.summary || undefined,
     alternates: {
       canonical: url,
@@ -64,18 +77,17 @@ export function buildProjectMetadata(project: ProjectDetail, locale: Locale): Me
       locale: siteMetadata.openGraphLocale,
       alternateLocale: [siteMetadata.alternateOpenGraphLocale],
       url,
-      title: `${projectTitle} | ${SITE_AUTHOR}`,
+      title,
       description: project.summary || undefined,
-      images: project.coverImage
-        ? [
-            {
-              url: `${project.coverImage.url}?w=1200&h=630&fit=crop&auto=format`,
-              width: 1200,
-              height: 630,
-              alt: projectTitle,
-            },
-          ]
-        : undefined,
+      siteName: SITE_NAME,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: project.summary || undefined,
+      creator: "@yuweili",
+      images,
     },
   };
 }
@@ -91,8 +103,9 @@ export function buildProjectJsonLd(project: ProjectDetail, locale: Locale) {
     image: project.coverImage?.url,
     creator: {
       "@type": "Person",
+      "@id": absoluteUrl("/#person"),
       name: SITE_AUTHOR,
-      url: localizedAbsoluteUrl(locale),
+      url: absoluteUrl(),
     },
     dateCreated: project.year ? String(project.year) : undefined,
     keywords: project.tags.length ? project.tags.join(", ") : undefined,

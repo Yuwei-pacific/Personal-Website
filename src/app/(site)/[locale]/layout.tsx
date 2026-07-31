@@ -14,14 +14,12 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { AppViewTransitions } from "@/components/providers/view-transitions-provider";
 import { LenisProvider } from "@/components/providers/lenis-provider";
-import { JsonLd, websiteSchema } from "@/components/seo/json-ld";
 import { CustomCursor } from "@/components/ui/custom-cursor";
 import { OverscrollBackground } from "@/components/ui/overscroll-background";
 import { isLocale, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import {
   SITE_NAME,
-  SITE_TITLE,
   SITE_URL,
   getSiteMetadata,
   languageAlternates,
@@ -84,7 +82,7 @@ export async function generateMetadata({
       // Apple touch icon 由 app/apple-icon.tsx 自动生成（180x180 PNG）
     },
     title: {
-      default: SITE_TITLE,
+      default: metadata.title,
       template: `%s | ${SITE_NAME}`,
     },
     description: metadata.description,
@@ -98,13 +96,13 @@ export async function generateMetadata({
       locale: metadata.openGraphLocale,
       alternateLocale: [metadata.alternateOpenGraphLocale],
       url: localizedAbsoluteUrl(rawLocale),
-      title: SITE_TITLE,
+      title: metadata.title,
       description: metadata.description,
       siteName: SITE_NAME,
     },
     twitter: {
       card: "summary_large_image",
-      title: SITE_TITLE,
+      title: metadata.title,
       description: metadata.description,
       creator: "@yuweili",
     },
@@ -132,7 +130,6 @@ export default async function SiteLayout({
         // 将两种字体的 CSS 变量应用到 body，并设置全局基础样式
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background text-foreground antialiased`}
       >
-        <JsonLd data={websiteSchema(rawLocale)} />
         <AppViewTransitions>
           <LenisProvider>
             <a

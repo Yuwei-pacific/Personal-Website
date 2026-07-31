@@ -7,12 +7,12 @@ import { Navbar } from "@/components/layout/navbar";
 import { AboutPreview } from "@/components/sections/home/about-preview";
 import { Hero } from "@/components/sections/home/hero";
 import { ProjectsSection } from "@/components/sections/home/projects-section";
-import { JsonLd, personSchema } from "@/components/seo/json-ld";
+import { JsonLd, personSchema, websiteSchema } from "@/components/seo/json-ld";
 import { sanityFetch } from "@/sanity/live";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import {
-  SITE_TITLE,
+  SITE_NAME,
   getSiteMetadata,
   languageAlternates,
   localizedAbsoluteUrl,
@@ -37,22 +37,26 @@ export async function generateMetadata({
   const siteMetadata = getSiteMetadata(rawLocale);
 
   return {
-    title: { absolute: SITE_TITLE },
+    title: { absolute: siteMetadata.title },
     description: dictionary.metadata.siteDescription,
     alternates: {
       canonical: localizedAbsoluteUrl(rawLocale),
       languages: languageAlternates(),
     },
     openGraph: {
+      type: "website",
       locale: siteMetadata.openGraphLocale,
       alternateLocale: [siteMetadata.alternateOpenGraphLocale],
       url: localizedAbsoluteUrl(rawLocale),
-      title: SITE_TITLE,
+      title: siteMetadata.title,
       description: dictionary.metadata.siteDescription,
+      siteName: SITE_NAME,
     },
     twitter: {
-      title: SITE_TITLE,
+      card: "summary_large_image",
+      title: siteMetadata.title,
       description: dictionary.metadata.siteDescription,
+      creator: "@yuweili",
     },
   };
 }
@@ -87,6 +91,7 @@ export default async function HomePage({
     // 页面结构：导航栏 + Hero + About 预览 + Projects 列表 + 页脚
     <div className="min-h-screen">
       {/* Person 结构化数据：增强 E-E-A-T 信号 */}
+      <JsonLd data={websiteSchema()} />
       <JsonLd data={personSchema(rawLocale)} />
       {/* 顶部导航，位于 main 之外（landmark 语义 + skip link 才有意义） */}
       <Navbar locale={rawLocale} dictionary={dictionary} />
