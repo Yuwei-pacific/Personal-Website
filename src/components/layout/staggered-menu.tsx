@@ -22,9 +22,30 @@ export type StaggeredMenuSocialItem = {
   link: string;
 };
 
+export type StaggeredMenuLanguageItem = {
+  label: string;
+  link: string;
+  ariaLabel: string;
+  current: boolean;
+};
+
+type StaggeredMenuLabels = {
+  menu: string;
+  close: string;
+  openMenu: string;
+  closeMenu: string;
+  headerAria: string;
+  noItems: string;
+  socials: string;
+  socialLinksAria: string;
+  language: string;
+};
+
 type StaggeredMenuProps = {
   items: StaggeredMenuItem[];
   socialItems: StaggeredMenuSocialItem[];
+  languageItems: StaggeredMenuLanguageItem[];
+  labels: StaggeredMenuLabels;
   onMenuOpen?: () => void;
   onMenuClose?: () => void;
   onItemClick?: (href: string, event: ReactMouseEvent<HTMLAnchorElement>) => void;
@@ -95,12 +116,14 @@ const revealPanelContent = ({
 function StaggeredMenu({
   items,
   socialItems,
+  languageItems,
+  labels,
   onMenuOpen,
   onMenuClose,
   onItemClick,
 }: StaggeredMenuProps) {
   const [open, setOpen] = useState(false);
-  const [textLines, setTextLines] = useState(["Menu", "Close"]);
+  const [textLines, setTextLines] = useState([labels.menu, labels.close]);
   // Lenis 未启用（减弱动画偏好 / Studio）时为 undefined，滚动锁会走原生回退
   const lenis = useLenis();
   const openRef = useRef(false);
@@ -350,8 +373,8 @@ function StaggeredMenu({
 
         textCycleAnimRef.current?.kill();
 
-        const currentLabel = opening ? "Menu" : "Close";
-        const targetLabel = opening ? "Close" : "Menu";
+        const currentLabel = opening ? labels.menu : labels.close;
+        const targetLabel = opening ? labels.close : labels.menu;
 
         if (reduced) {
           // 不做滚动式换字，直接显示目标标签
@@ -364,7 +387,7 @@ function StaggeredMenu({
         let last = currentLabel;
 
         for (let index = 0; index < 3; index += 1) {
-          last = last === "Menu" ? "Close" : "Menu";
+          last = last === labels.menu ? labels.close : labels.menu;
           sequence.push(last);
         }
 
@@ -400,7 +423,7 @@ function StaggeredMenu({
         animateTextRef.current = null;
       };
     },
-    { scope: wrapperRef }
+    { scope: wrapperRef, dependencies: [labels.menu, labels.close] }
   );
 
   const toggleMenu = useCallback(() => {
@@ -525,11 +548,11 @@ function StaggeredMenu({
         ))}
       </div>
 
-      <header className="staggered-menu-header" aria-label="Main navigation header">
+      <header className="staggered-menu-header" aria-label={labels.headerAria}>
         <button
           ref={toggleBtnRef}
           className="sm-toggle"
-          aria-label={open ? "Close menu" : "Open menu"}
+          aria-label={open ? labels.closeMenu : labels.openMenu}
           aria-expanded={open}
           aria-controls="staggered-menu-panel"
           onClick={toggleMenu}
@@ -577,15 +600,15 @@ function StaggeredMenu({
             ) : (
               <li className="sm-panel-itemWrap" aria-hidden="true">
                 <span className="sm-panel-item">
-                  <span className="sm-panel-itemLabel">No items</span>
+                  <span className="sm-panel-itemLabel">{labels.noItems}</span>
                 </span>
               </li>
             )}
           </ul>
 
           {socialItems.length > 0 && (
-            <div className="sm-socials" aria-label="Social links">
-              <h3 className="sm-socials-title">Socials</h3>
+            <div className="sm-socials" aria-label={labels.socialLinksAria}>
+              <h3 className="sm-socials-title">{labels.socials}</h3>
               <ul className="sm-socials-list" role="list">
                 {socialItems.map((item, index) => (
                   <li key={`${item.label}-${index}`} className="sm-socials-item">
@@ -595,6 +618,27 @@ function StaggeredMenu({
                   </li>
                 ))}
               </ul>
+
+              {languageItems.length > 0 && (
+                <div className="sm-language">
+                  <h3 className="sm-socials-title">{labels.language}</h3>
+                  <ul className="sm-socials-list" role="list">
+                    {languageItems.map((item) => (
+                      <li key={item.link} className="sm-socials-item">
+                        <a
+                          href={item.link}
+                          aria-label={item.ariaLabel}
+                          aria-current={item.current ? "page" : undefined}
+                          className="sm-socials-link"
+                          onClick={closeMenu}
+                        >
+                          {item.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </div>

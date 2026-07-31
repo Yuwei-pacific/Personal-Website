@@ -3,12 +3,16 @@ import Image from "next/image";
 import { ProjectCard } from "@/components/projects/project-card";
 import { MaskedSectionHeading } from "@/components/ui/masked-section-heading";
 import type { Project } from "@/lib/view-models/types";
+import type { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/dictionaries";
 
 type ProjectsSectionProps = {
   projects: Project[];
+  locale: Locale;
+  dictionary: Dictionary;
 };
 
-export function ProjectsSection({ projects }: ProjectsSectionProps) {
+export function ProjectsSection({ projects, locale, dictionary }: ProjectsSectionProps) {
   // 可见性过滤与年份排序都在 GROQ 里完成（见 sanity/queries.ts），这里直接渲染
   const hasProjects = projects.length > 0;
 
@@ -37,12 +41,12 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
           而不是 section 之间的呼吸 —— 用 section 档会在分界线下方留出过大的空档 */}
       <div className="flex w-full flex-col gap-6 py-panel sm:gap-gap-section sm:py-panel-sm">
         {/* 全宽标题：复用 Hero / 导航的遮罩滑入动画，左边缘与项目网格对齐 */}
-        <MaskedSectionHeading title="Work" count={projects.length} />
+        <MaskedSectionHeading title={dictionary.home.projects.title} count={projects.length} />
 
         {!hasProjects ? (
           /* 空状态提示：CMS 未发布时的占位 */
           <div className="mx-auto mt-2 w-full max-w-content border border-dashed border-design-dark-border bg-design-dark-surface/60 p-card text-small text-design-dark-text-secondary">
-            Projects will appear here once they are published in Sanity.
+            {dictionary.home.projects.empty}
           </div>
         ) : (
           /* 项目列表：拼贴式项目墙，使用不同跨列宽度制造节奏 */
@@ -54,6 +58,8 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
                 slug={project.slug ?? undefined}
                 revealDelay={idx === 0 ? 0 : 0.1}
                 index={idx}
+                locale={locale}
+                dictionary={dictionary}
               />
             ))}
           </div>

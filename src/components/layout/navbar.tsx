@@ -9,7 +9,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Link } from "next-view-transitions";
 import { useLenis } from "lenis/react";
-import type { StaggeredMenuItem, StaggeredMenuSocialItem } from "@/components/layout/staggered-menu";
+import type {
+  StaggeredMenuItem,
+  StaggeredMenuLanguageItem,
+  StaggeredMenuSocialItem,
+} from "@/components/layout/staggered-menu";
+import { localeLabels, locales, type Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/dictionaries";
+import { localizedPath, replaceLocale } from "@/i18n/routing";
 import { SOCIAL_LINKS } from "@/lib/site-metadata";
 
 // 组件在 effect 里操作 DOM，关闭 SSR 避免 useLayoutEffect 服务端警告
@@ -17,23 +24,50 @@ const StaggeredMenu = dynamic(() => import("@/components/layout/staggered-menu")
   ssr: false,
 });
 
-const menuItems: StaggeredMenuItem[] = [
-  { label: "Home", ariaLabel: "Go to home", link: "/#home" },
-  { label: "About", ariaLabel: "About Yuwei Li", link: "/about" },
-  { label: "Work", ariaLabel: "View selected work", link: "/#work" },
-];
-
 // 社交账号的唯一出处在 lib/site-metadata（footer 与 JSON-LD 共用同一份）
 const socialItems: StaggeredMenuSocialItem[] = SOCIAL_LINKS.map(({ label, href }) => ({
   label,
   link: href,
 }));
 
-export function Navbar() {
+export function Navbar({
+  locale,
+  dictionary,
+}: {
+  locale: Locale;
+  dictionary: Dictionary;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   // Lenis 未启用（减弱动画 / Studio）时为 undefined，回退到原生滚动
   const lenis = useLenis();
+  const homePath = localizedPath(locale);
+  const menuItems: StaggeredMenuItem[] = [
+    {
+      label: dictionary.navigation.home,
+      ariaLabel: dictionary.navigation.homeAria,
+      link: `${homePath}#home`,
+    },
+    {
+      label: dictionary.navigation.about,
+      ariaLabel: dictionary.navigation.aboutAria,
+      link: localizedPath(locale, "/about"),
+    },
+    {
+      label: dictionary.navigation.work,
+      ariaLabel: dictionary.navigation.workAria,
+      link: `${homePath}#work`,
+    },
+  ];
+  const languageItems: StaggeredMenuLanguageItem[] = locales.map((targetLocale) => ({
+    label: localeLabels[targetLocale],
+    link: replaceLocale(pathname, targetLocale),
+    ariaLabel:
+      targetLocale === locale
+        ? localeLabels[targetLocale]
+        : dictionary.navigation.switchLanguage,
+    current: targetLocale === locale,
+  }));
 
   // 差值混合开关：菜单关闭时开启（toggle 白字反色自适应深浅背景，与 logo 同款）；
   // 打开时关闭混合（否则白色面板会被反色），按钮文字由菜单自己的开/关变色逻辑切成深色。
@@ -61,12 +95,13 @@ export function Navbar() {
   // 面板链接点击：同页锚点平滑滚动 / 跨页用 router 跳转。
   const handleMenuItemClick = useCallback(
     (href: string, event: React.MouseEvent<HTMLAnchorElement>) => {
-      if (href.startsWith("/#")) {
+      const targetUrl = new URL(href, window.location.origin);
+      if (targetUrl.hash) {
         event.preventDefault();
-        if (pathname === "/") {
-          const el = document.getElementById(href.slice(2));
+        if (pathname === targetUrl.pathname) {
+          const el = document.getElementById(targetUrl.hash.slice(1));
           if (el) {
-            window.history.pushState(null, "", href);
+            window.history.pushState(null, "", `${targetUrl.pathname}${targetUrl.hash}`);
 
             // StaggeredMenu 会在 onItemClick 返回后关闭并解除滚动锁。
             // 下一帧再执行锚点滚动，避免请求在 Lenis.stop() 期间被丢弃。
@@ -86,7 +121,7 @@ export function Navbar() {
             });
           }
         } else {
-          router.push(href);
+          router.push(`${targetUrl.pathname}${targetUrl.hash}`);
         }
       }
     },
@@ -96,7 +131,7 @@ export function Navbar() {
   return (
     <div>
       {/* 站点 Logo：invert 转白后配合差值混合，在深浅背景上都可读 */}
-      <Link href="/" aria-label="Home" className="fixed left-6 top-6 z-nav-logo mix-blend-difference sm:left-8 sm:top-6">
+      <Link href={homePath} aria-label={dictionary.navigation.homeAria} className="fixed left-6 top-6 z-nav-logo mix-blend-difference sm:left-8 sm:top-6">
         <Image src="/Logo.svg" alt="Yuwei Li" width={48} height={48} className="h-12 w-12 invert" priority />
       </Link>
       {/* relative z-nav 必不可少：加了混合后整组会被压平成静态层级、被页面内容盖住，
@@ -105,6 +140,8 @@ export function Navbar() {
         <StaggeredMenu
           items={menuItems}
           socialItems={socialItems}
+          languageItems={languageItems}
+          labels={dictionary.navigation}
           onMenuOpen={handleMenuOpen}
           onMenuClose={handleMenuClose}
           onItemClick={handleMenuItemClick}

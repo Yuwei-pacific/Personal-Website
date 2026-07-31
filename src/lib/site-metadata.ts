@@ -1,6 +1,10 @@
 // 站点级常量的唯一出处。
-// 换域名、改简介、加社交账号都只动这个文件 —— metadata、JSON-LD、sitemap、
-// robots、footer、导航面板全部从这里取值，不再各自硬编码。
+// 换域名、改简介、加社交账号都只动这里或 i18n 字典 —— metadata、JSON-LD、
+// sitemap、robots、footer、导航面板全部从同一份数据读取。
+
+import { getDictionary } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/config";
+import { localizedPath } from "@/i18n/routing";
 
 export const SITE_URL = "https://www.yuweidesign.com";
 
@@ -16,12 +20,17 @@ export const SITE_TITLE =
 
 export const SITE_ROLE = "Communication Designer & Frontend Developer";
 
-export const SITE_DESCRIPTION =
-  "Milan-based Communication Designer & Frontend Developer creating visual identities, digital interfaces and custom websites for studios and organisations.";
-
 export const SITE_EMAIL = "yuweidesign@outlook.com";
 
-export const SITE_LOCATION = "Milan, Italy";
+export const SITE_LOCATIONS: Record<Locale, string> = {
+  it: "Milano, Italia",
+  en: "Milan, Italy",
+};
+
+export const OPEN_GRAPH_LOCALES: Record<Locale, string> = {
+  it: "it_IT",
+  en: "en_US",
+};
 
 export const SOCIAL_LINKS = [
   { label: "GitHub", href: "https://github.com/Yuwei-pacific" },
@@ -31,3 +40,27 @@ export const SOCIAL_LINKS = [
 
 /** 相对路径 → 绝对 URL（sitemap、canonical、JSON-LD 用） */
 export const absoluteUrl = (path = "/") => new URL(path, SITE_URL).toString();
+
+export const localizedAbsoluteUrl = (locale: Locale, path = "/") =>
+  absoluteUrl(localizedPath(locale, path));
+
+export function languageAlternates(path = "/") {
+  return {
+    it: localizedAbsoluteUrl("it", path),
+    en: localizedAbsoluteUrl("en", path),
+    "x-default": localizedAbsoluteUrl("it", path),
+  };
+}
+
+export function getSiteMetadata(locale: Locale) {
+  const dictionary = getDictionary(locale);
+
+  return {
+    title: SITE_TITLE,
+    description: dictionary.metadata.siteDescription,
+    keywords: dictionary.metadata.keywords,
+    location: SITE_LOCATIONS[locale],
+    openGraphLocale: OPEN_GRAPH_LOCALES[locale],
+    alternateOpenGraphLocale: OPEN_GRAPH_LOCALES[locale === "it" ? "en" : "it"],
+  };
+}

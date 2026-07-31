@@ -12,16 +12,13 @@ import {
   SITE_AUTHOR,
   SITE_DOMAIN,
   SITE_EMAIL,
-  SITE_LOCATION,
+  SITE_LOCATIONS,
   SITE_ROLE,
   SOCIAL_LINKS,
 } from "@/lib/site-metadata";
-
-const siteLinks = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Work", href: "/#work" },
-];
+import type { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/dictionaries";
+import { localizedPath } from "@/i18n/routing";
 
 const footerLinkClassName =
   "group flex w-fit items-center gap-2 text-small text-design-dark-text-secondary transition-colors duration-base hover:text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-4 focus-visible:ring-offset-design-dark-bg";
@@ -42,11 +39,23 @@ function FooterLinkLabel({ children }: { children: string }) {
   );
 }
 
-export function Footer() {
+export function Footer({
+  locale,
+  dictionary,
+}: {
+  locale: Locale;
+  dictionary: Dictionary;
+}) {
   const year = new Date().getFullYear();
   const footerRef = useRef<HTMLElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const homePath = localizedPath(locale);
+  const siteLinks = [
+    { label: dictionary.navigation.home, href: homePath },
+    { label: dictionary.navigation.about, href: localizedPath(locale, "/about") },
+    { label: dictionary.navigation.work, href: `${homePath}#work` },
+  ];
 
   useGSAP(
     () => {
@@ -121,7 +130,7 @@ export function Footer() {
         <div className="flex min-h-[inherit] w-full flex-col">
           <div className="grid gap-5 border-t border-design-dark-border pt-5 sm:grid-cols-12 sm:gap-6">
             <p className="text-label font-semibold uppercase text-design-dark-text-muted sm:col-span-3">
-              Get in touch
+              {dictionary.footer.getInTouch}
             </p>
             <a
               href={`mailto:${SITE_EMAIL}`}
@@ -158,9 +167,9 @@ export function Footer() {
           </div>
 
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 border-t border-design-dark-border pt-6 sm:grid-cols-12">
-            <nav aria-label="Footer" className="sm:col-span-3">
+            <nav aria-label={dictionary.footer.aria} className="sm:col-span-3">
               <p className="text-label font-semibold uppercase text-design-dark-text-muted">
-                Site
+                {dictionary.footer.site}
               </p>
               <ul className="mt-4 flex flex-col gap-2">
                 {siteLinks.map((link) => (
@@ -175,7 +184,7 @@ export function Footer() {
 
             <div className="sm:col-span-3">
               <p className="text-label font-semibold uppercase text-design-dark-text-muted">
-                Elsewhere
+                {dictionary.footer.elsewhere}
               </p>
               <ul className="mt-4 flex flex-col gap-2">
                 {SOCIAL_LINKS.map((social) => (
@@ -195,19 +204,19 @@ export function Footer() {
 
             <div className="sm:col-span-3">
               <p className="text-label font-semibold uppercase text-design-dark-text-muted">
-                Based in
+                {dictionary.footer.basedIn}
               </p>
               <p className="mt-4 text-small text-design-dark-text-secondary">
-                {SITE_LOCATION}
+                {SITE_LOCATIONS[locale]}
                 <br />
-                Working internationally
+                {dictionary.footer.workingInternationally}
               </p>
             </div>
 
             <div className="flex flex-col justify-end gap-2 text-small text-design-dark-text-muted sm:col-span-3 sm:items-end sm:text-right">
               <p>
                 {SITE_AUTHOR}
-                <br />© {year} All rights reserved
+                <br />© {year} {dictionary.footer.rights}
               </p>
               <p>{SITE_DOMAIN}</p>
             </div>

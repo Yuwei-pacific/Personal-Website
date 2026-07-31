@@ -14,9 +14,17 @@ type CoverVideoProps = {
   src: string;
   poster: string;
   className?: string;
+  playLabel: string;
+  pauseLabel: string;
 };
 
-export function CoverVideo({ src, poster, className }: CoverVideoProps) {
+export function CoverVideo({
+  src,
+  poster,
+  className,
+  playLabel,
+  pauseLabel,
+}: CoverVideoProps) {
   const reducedMotion = usePrefersReducedMotion();
   const videoRef = useRef<HTMLVideoElement>(null);
   const userPausedRef = useRef(false);
@@ -71,7 +79,7 @@ export function CoverVideo({ src, poster, className }: CoverVideoProps) {
       <button
         type="button"
         onClick={togglePlayback}
-        aria-label={isPlaying ? "Pause cover video" : "Play cover video"}
+        aria-label={isPlaying ? pauseLabel : playLabel}
         className="absolute bottom-4 right-4 inline-flex h-10 w-10 items-center justify-center border border-design-dark-text-primary/40 bg-design-dark-bg/60 text-design-dark-text-primary backdrop-blur-md transition-colors duration-base hover:bg-design-dark-bg/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-2 focus-visible:ring-offset-design-dark-bg"
       >
         {isPlaying ? (

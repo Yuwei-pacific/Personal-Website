@@ -2,6 +2,7 @@
 // 模块之间的间距统一在这里控制，模块自身不带外边距——
 // 这样新增模块类型时不用重新协调上下间隔。
 import type { ProjectSection } from "@/lib/view-models/types";
+import type { Dictionary } from "@/i18n/dictionaries";
 
 import { ProjectRichText } from "./project-rich-text";
 import { SectionMedia } from "./section-media";
@@ -18,7 +19,15 @@ function SectionHeading({ children }: { children: string }) {
   );
 }
 
-function Section({ section, index }: { section: ProjectSection; index: number }) {
+function Section({
+  section,
+  index,
+  labels,
+}: {
+  section: ProjectSection;
+  index: number;
+  labels: Dictionary["project"];
+}) {
   // 首个模块的媒体参与首屏，交给 Next 优先加载
   const priority = index === 0;
 
@@ -61,6 +70,8 @@ function Section({ section, index }: { section: ProjectSection; index: number })
                 media={section.media}
                 priority={priority}
                 sizes="(min-width: 768px) 50vw, 100vw"
+                playLabel={labels.playVideo}
+                pauseLabel={labels.pauseVideo}
               />
             </div>
             <div
@@ -77,7 +88,13 @@ function Section({ section, index }: { section: ProjectSection; index: number })
     case "media":
       return section.fullWidth ? (
         <div className="w-full">
-          <SectionMedia media={section.media} priority={priority} sizes="100vw" />
+          <SectionMedia
+            media={section.media}
+            priority={priority}
+            sizes="100vw"
+            playLabel={labels.playVideo}
+            pauseLabel={labels.pauseVideo}
+          />
         </div>
       ) : (
         // 非全宽：收窄并居中，与铺满容器的全宽模块形成对比
@@ -86,6 +103,8 @@ function Section({ section, index }: { section: ProjectSection; index: number })
             media={section.media}
             priority={priority}
             sizes="(min-width: 896px) 896px, 100vw"
+            playLabel={labels.playVideo}
+            pauseLabel={labels.pauseVideo}
           />
         </div>
       );
@@ -102,6 +121,8 @@ function Section({ section, index }: { section: ProjectSection; index: number })
               <SectionMedia
                 key={item.key}
                 media={item}
+                playLabel={labels.playVideo}
+                pauseLabel={labels.pauseVideo}
                 sizes={
                   section.items.length === 2
                     ? "(min-width: 640px) 50vw, 100vw"
@@ -120,13 +141,19 @@ function Section({ section, index }: { section: ProjectSection; index: number })
   }
 }
 
-export function ProjectSections({ sections }: { sections: ProjectSection[] }) {
+export function ProjectSections({
+  sections,
+  labels,
+}: {
+  sections: ProjectSection[];
+  labels: Dictionary["project"];
+}) {
   if (!sections.length) return null;
 
   return (
     <div className="flex w-full flex-col gap-16 sm:gap-24">
       {sections.map((section, index) => (
-        <Section key={section.key} section={section} index={index} />
+        <Section key={section.key} section={section} index={index} labels={labels} />
       ))}
     </div>
   );
