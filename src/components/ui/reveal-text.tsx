@@ -41,18 +41,27 @@ export function RevealText({
   const words = text.split(" ");
 
   useGSAP(() => {
-    const wordEls = containerRef.current?.querySelectorAll<HTMLElement>(".reveal-word");
-    if (!wordEls?.length) return;
+    const wordEls = Array.from(
+      containerRef.current?.querySelectorAll<HTMLElement>(".reveal-word") ?? [],
+    );
+    if (!wordEls.length) return;
 
     const resolvedFromColor = resolveCssColor(fromColor);
     const resolvedToColor = resolveCssColor(toColor);
 
     if (prefersReducedMotion()) {
-      gsap.set(wordEls, { color: resolvedToColor });
+      wordEls.forEach((wordEl) => {
+        wordEl.style.color = resolvedToColor;
+      });
       return;
     }
 
-    gsap.set(wordEls, { color: resolvedFromColor });
+    // Normalize the SSR token value before GSAP reads it. Safari exposes the
+    // inline `hsl(var(--token))` string here, which GSAP's color parser cannot
+    // interpolate reliably even though the browser resolves it to a valid RGB.
+    wordEls.forEach((wordEl) => {
+      wordEl.style.color = resolvedFromColor;
+    });
 
     gsap.to(wordEls, {
       color: resolvedToColor,
@@ -71,7 +80,7 @@ export function RevealText({
     <Tag ref={containerRef as React.Ref<never>} className={className}>
       {words.flatMap((word, i) => {
         const span = (
-          <span className="reveal-word" key={`word-${i}`}>
+          <span className="reveal-word" key={`word-${i}`} style={{ color: fromColor }}>
             {word}
           </span>
         );

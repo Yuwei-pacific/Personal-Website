@@ -20,7 +20,7 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
   // 内容来源只有 CMS：无数据时显示空状态，不再回退到仓库里的副本
   const categoriesToRender = skillCategories ?? [];
   return (
-    <main id="main-content" className="relative z-10 isolate min-h-screen w-full bg-background">
+    <main id="main-content" className="relative z-10 min-h-screen w-full bg-background">
       <div className="mx-auto flex max-w-content flex-col gap-gap-section px-container pb-7 pt-28 sm:gap-gap-section-sm sm:px-container-sm sm:pb-12 sm:pt-36">
         {/* Intro: 大字逐词点亮的自我介绍，人像与文字左右排版 */}
         <div className="flex flex-col gap-10">
@@ -45,16 +45,14 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
               </Parallax>
             </div>
 
-            {/* Text on top — inverts over the photo via mix-blend-difference */}
-            <div className="relative z-10 mix-blend-difference pr-[30%] sm:pr-[24%] lg:pr-[20%]">
+            {/* Text on top — direct token colors keep the reveal consistent across browsers */}
+            <div className="relative z-10 pr-[30%] sm:pr-[24%] lg:pr-[20%]">
               <p className="text-label font-semibold uppercase text-design-light-text-muted">
                 About me
               </p>
               <RevealText
                 as="h1"
                 text="I connect communication design and frontend development to turn ideas into clear, expressive, and maintainable digital experiences."
-                fromColor="hsl(var(--color-text-primary-light))"
-                toColor="hsl(var(--color-bg-light))"
                 className="mt-4 text-3xl font-semibold leading-[1.2] tracking-tight sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.15]"
               />
             </div>
