@@ -13,39 +13,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // 全局默认值：body 底色/文字、全站描边、焦点环
         border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
-        },
+        // 分区色板：浅色区用 design-light-*，深色区用 design-dark-*
         design: {
           light: {
             bg: hslVar("--color-bg-light"),
@@ -82,18 +55,33 @@ const config: Config = {
         },
       },
       spacing: {
+        // 页面级大区块之间的呼吸
         section: "var(--space-section-y)",
         "section-sm": "var(--space-section-y-sm)",
+        // 区块内部的内边距（详情页深色面板、页脚）
+        panel: "var(--space-panel-y)",
+        "panel-sm": "var(--space-panel-y-sm)",
         container: "var(--space-container-x)",
         "container-sm": "var(--space-container-x-sm)",
         card: "var(--space-card)",
-        "card-lg": "var(--space-card-lg)",
         "gap-section": "var(--space-gap-section)",
         "gap-section-sm": "var(--space-gap-section-sm)",
-        "gap-card": "var(--space-gap-card)",
-        "gap-inline": "var(--space-gap-inline)",
         stack: "var(--space-stack)",
       },
+      maxWidth: {
+        // 内容栏 measure：页面主体、页脚、详情页正文共用
+        content: "var(--layout-content)",
+      },
+      zIndex: {
+        // 跨组件的全局浮层契约（区块内部层叠仍用 Tailwind 默认档位）
+        nav: "var(--z-nav)",
+        "nav-logo": "var(--z-nav-logo)",
+        cursor: "var(--z-cursor)",
+        "skip-link": "var(--z-skip-link)",
+      },
+      // 全站方角：把 Tailwind 的通用圆角档位归零，视觉决策统一走下面的语义 token。
+      // `full` 不归零 —— 圆形（头像、状态点、图标按钮）是形状而非圆角风格，
+      // 归零会让 rounded-full 静默失效，逼出 rounded-[50%] 这类逃逸写法。
       borderRadius: {
         none: "0px",
         DEFAULT: "0px",
@@ -103,7 +91,6 @@ const config: Config = {
         xl: "0px",
         "2xl": "0px",
         "3xl": "0px",
-        full: "0px",
         card: "var(--radius-card)",
         button: "var(--radius-button)",
         tag: "var(--radius-tag)",
@@ -113,13 +100,16 @@ const config: Config = {
       boxShadow: {
         card: "var(--shadow-card)",
         hover: "var(--shadow-hover)",
-        nav: "var(--shadow-nav)",
+      },
+      letterSpacing: {
+        display: "var(--tracking-display)",
       },
       fontSize: {
         display: ["3.75rem", { lineHeight: "1.1", letterSpacing: "0" }],
         "display-sm": ["3rem", { lineHeight: "1.15", letterSpacing: "0" }],
         section: ["2.25rem", { lineHeight: "1.15", letterSpacing: "0" }],
-        card: ["1.5rem", { lineHeight: "1.25", letterSpacing: "0" }],
+        // section 引言：紧跟大标题的那句导语
+        lead: ["1.65rem", { lineHeight: "1.18", letterSpacing: "0" }],
         body: ["1rem", { lineHeight: "1.75", letterSpacing: "0" }],
         small: ["0.875rem", { lineHeight: "1.5", letterSpacing: "0" }],
         label: ["0.75rem", { lineHeight: "1.35", letterSpacing: "0.3em" }],
@@ -131,11 +121,9 @@ const config: Config = {
         media: "var(--motion-duration-media)",
       },
       transitionTimingFunction: {
-        standard: "var(--motion-ease-standard)",
         "design-out": "var(--motion-ease-out)",
       },
       scale: {
-        hover: "var(--motion-scale-hover)",
         emphasis: "var(--motion-scale-emphasis)",
       },
       fontFamily: {

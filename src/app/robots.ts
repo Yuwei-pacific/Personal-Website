@@ -1,5 +1,7 @@
 import { MetadataRoute } from 'next'
 
+import { absoluteUrl } from '@/lib/site-metadata'
+
 export default function robots(): MetadataRoute.Robots {
     return {
         rules: {
@@ -7,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: ['/api/', '/studio'],
         },
-        sitemap: 'https://www.yuweidesign.com/sitemap.xml',
+        sitemap: absoluteUrl('/sitemap.xml'),
     }
 }

@@ -19,7 +19,9 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
   const hasProjectCredits = hasContribution || project.links.length;
 
   return (
-    <div className="relative min-h-screen text-design-light-text-primary">
+    // main 覆盖整篇正文：浅色信息区 + 深色内容区 + 画廊都属于页面主体，
+    // 只包住头部会让 landmark 只覆盖到很小一部分内容
+    <main id="main-content" className="relative min-h-screen text-design-light-text-primary">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0" />
         <Image
@@ -31,8 +33,8 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
         />
       </div>
 
-      <main className="w-full bg-design-light-bg px-container pb-section pt-24 sm:px-container-sm sm:pb-section-sm sm:pt-28">
-        <div className="mx-auto max-w-6xl flex flex-col gap-12">
+      <div className="w-full bg-design-light-bg px-container pb-panel pt-24 sm:px-container-sm sm:pb-panel-sm sm:pt-28">
+        <div className="mx-auto max-w-content flex flex-col gap-12">
           <section className="flex flex-col gap-6">
             <Link href="/#work" className="text-small font-medium text-design-light-text-secondary transition-colors duration-base hover:text-design-light-text-primary">
               ← Back to projects
@@ -88,10 +90,10 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
             </div>
           </section>
         </div>
-      </main>
+      </div>
 
-      <section data-overscroll-dark className="w-full bg-design-dark-bg px-container py-section text-design-dark-text-primary sm:px-container-sm sm:py-section-sm scroll-mt-24">
-        <div className="mx-auto max-w-6xl">
+      <section data-overscroll-dark className="w-full bg-design-dark-bg px-container py-panel text-design-dark-text-primary sm:px-container-sm sm:py-panel-sm scroll-mt-24">
+        <div className="mx-auto max-w-content">
           {/* 正文：可增删排序的内容模块 */}
           <ProjectSections sections={project.sections} />
         </div>
@@ -100,9 +102,9 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
       {hasProjectCredits ? (
         <section
           data-overscroll-dark
-          className="w-full bg-design-dark-bg px-container pb-section text-design-dark-text-primary sm:px-container-sm sm:pb-section-sm"
+          className="w-full bg-design-dark-bg px-container pb-panel text-design-dark-text-primary sm:px-container-sm sm:pb-panel-sm"
         >
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-content">
             {project.links.length ? (
               <ul className="mb-6 flex flex-wrap justify-start gap-3">
                 {project.links.map((link) => {
@@ -134,7 +136,7 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
               </ul>
             ) : null}
 
-            <div className="border-t border-design-dark-border-strong pt-section sm:pt-section-sm">
+            <div className="border-t border-design-dark-border-strong pt-panel sm:pt-panel-sm">
               <h2 className="text-2xl font-semibold leading-tight text-design-dark-text-primary sm:text-3xl">
                 Project credits
               </h2>
@@ -187,13 +189,13 @@ export function ProjectDetailView({ project }: { project: ProjectDetail }) {
       {project.gallery.length ? (
         <section
           data-overscroll-dark
-          className="w-full bg-design-dark-bg px-container pb-section text-design-dark-text-primary sm:px-container-sm sm:pb-section-sm"
+          className="w-full bg-design-dark-bg px-container pb-panel text-design-dark-text-primary sm:px-container-sm sm:pb-panel-sm"
         >
           <div className="-mx-4 px-4 sm:-mx-6 sm:px-10">
             <ProjectGallery items={project.gallery} fullWidth />
           </div>
         </section>
       ) : null}
-    </div>
+    </main>
   );
 }

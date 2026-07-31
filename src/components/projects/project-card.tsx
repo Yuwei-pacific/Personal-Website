@@ -109,7 +109,7 @@ export function ProjectCard({ project, slug, revealDelay = 0, index = 0 }: Proje
                 )}
                 <div className="pointer-events-none absolute inset-0 bg-design-dark-bg/0 transition-colors duration-base group-hover:bg-design-dark-bg/10" />
                 {slug && (
-                    <span className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center border border-design-dark-text-primary/40 bg-design-dark-bg/50 text-design-dark-text-primary opacity-100 backdrop-blur-md transition-[transform,opacity] duration-base md:translate-y-1 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
+                    <span className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-design-dark-text-primary/40 bg-design-dark-bg/50 text-design-dark-text-primary opacity-100 backdrop-blur-md transition-[transform,opacity] duration-base md:translate-y-1 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
                         <LuArrowUpRight aria-hidden="true" className="h-4 w-4" />
                     </span>
                 )}

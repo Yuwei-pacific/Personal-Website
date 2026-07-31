@@ -32,17 +32,35 @@
     --color-hover-border-dark: 0 0% 45%;
     --color-active-dark: 0 0% 100%;
 
-    --space-section-y: 3.5rem;
-    --space-section-y-sm: 5rem;
+    /* 垂直节奏分两档，名字对应实际用途：
+       - section：页面级大区块之间的呼吸（首页 About / Work 等整屏级区块）
+       - panel：区块内部的内边距（详情页深色面板、页脚）
+       两者的 `-sm` 后缀都表示「sm 断点起用的值」，不是尺寸大小。 */
+    --space-section-y: 8rem;
+    --space-section-y-sm: 12rem;
+    --space-panel-y: 3.5rem;
+    --space-panel-y-sm: 5rem;
     --space-container-x: 1rem;
     --space-container-x-sm: 1.5rem;
     --space-card: 1.5rem;
-    --space-card-lg: 2rem;
     --space-gap-section: 2.5rem;
     --space-gap-section-sm: 3.5rem;
-    --space-gap-card: 1.5rem;
-    --space-gap-inline: 0.75rem;
     --space-stack: 1.5rem;
+
+    /* display 级排版统一的字距收紧（hero 标题、section 大标题共用） */
+    --tracking-display: -0.025em;
+
+    /* 内容栏最大宽度：页面主体、页脚、详情页正文共用同一条 measure */
+    --layout-content: 72rem;
+
+    /* 全局浮层层级。只登记跨组件的层级契约 —— 区块内部的相对层叠
+       （z-10 / z-20 / -z-10）继续用 Tailwind 默认档位，不必 token 化。
+       注意：--z-cursor 与 lightbox（YARL portal，同为 9999）同级，
+       两者共存时以渲染顺序决定先后。 */
+    --z-nav: 40;
+    --z-nav-logo: 50;
+    --z-cursor: 9999;
+    --z-skip-link: 10000;
 
     /* 全站统一方角：保留语义化 radius token，值归零以避免组件重新引入圆角。 */
     --radius-card: 0rem;
@@ -53,38 +71,21 @@
 
     --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.08), 0 2px 4px -2px hsl(0 0% 0% / 0.08);
     --shadow-hover: 0 20px 25px -5px hsl(0 0% 0% / 0.12), 0 8px 10px -6px hsl(0 0% 0% / 0.12);
-    --shadow-nav: 0 10px 30px hsl(0 0% 0% / 0.06);
 
     --motion-duration-fast: 200ms;
     --motion-duration-base: 300ms;
     --motion-duration-slow: 500ms;
     --motion-duration-media: 700ms;
-    --motion-ease-standard: ease-in-out;
     --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
-    --motion-scale-hover: 1.04;
     --motion-scale-emphasis: 1.05;
-    --motion-shift-hover: 0.25rem;
 
+    /* 全局默认值：body 底色/文字与全站描边、焦点环。
+       （原 shadcn 那套 card / popover / primary / secondary / muted /
+       accent / destructive 语义色已随 Button 组件一起移除，此处不再保留。） */
     --background: var(--color-bg-light);
     --foreground: var(--color-text-primary-light);
-    --card: var(--color-surface-light);
-    --card-foreground: var(--color-text-primary-light);
-    --popover: 0 0% 100%;
-    --popover-foreground: var(--color-text-primary-light);
-    --primary: var(--color-accent-light);
-    --primary-foreground: 0 0% 98%;
-    --secondary: var(--color-active-light);
-    --secondary-foreground: var(--color-text-primary-light);
-    --muted: var(--color-active-light);
-    --muted-foreground: var(--color-text-muted-light);
-    --accent: var(--color-hover-bg-light);
-    --accent-foreground: var(--color-text-primary-light);
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
     --border: var(--color-border-light);
-    --input: var(--color-border-light);
     --ring: var(--color-accent-light);
-    --radius: var(--radius-button);
   }
 
   /* 本站不做主题切换（无 dark mode）：
@@ -96,6 +97,7 @@
   }
 
   html {
+    background-color: hsl(var(--color-bg-light));
     scroll-behavior: auto;
   }
 
