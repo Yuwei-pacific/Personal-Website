@@ -24,7 +24,9 @@ const contentSecurityPolicy = [
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
-  "upgrade-insecure-requests",
+  // Safari 会严格升级 localhost 的 CSS/JS 请求，导致本地 HTTP 开发页失去样式。
+  // 生产环境仍保留该策略；开发环境由 Next.js dev server 继续使用 HTTP。
+  ...(isDev ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
 const nextConfig: NextConfig = {

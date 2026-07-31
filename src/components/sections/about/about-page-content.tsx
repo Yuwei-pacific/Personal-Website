@@ -20,7 +20,7 @@ export function AboutPageContent({ skillCategories, resumeItems }: AboutPageCont
   // 内容来源只有 CMS：无数据时显示空状态，不再回退到仓库里的副本
   const categoriesToRender = skillCategories ?? [];
   return (
-    <main id="main-content" className="relative z-10 min-h-screen w-full bg-background">
+    <main id="main-content" className="relative z-10 isolate min-h-screen w-full bg-background">
       <div className="mx-auto flex max-w-content flex-col gap-gap-section px-container pb-7 pt-28 sm:gap-gap-section-sm sm:px-container-sm sm:pb-12 sm:pt-36">
         {/* Intro: 大字逐词点亮的自我介绍，人像与文字左右排版 */}
         <div className="flex flex-col gap-10">
