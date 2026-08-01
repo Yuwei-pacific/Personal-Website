@@ -99,6 +99,13 @@
   html {
     background-color: hsl(var(--color-bg-light));
     scroll-behavior: auto;
+    /* 滚动条槽位常驻。菜单 / lightbox 打开时要锁背景滚动（Lenis 的 .lenis-stopped
+       会给 html 加 overflow: clip，无 Lenis 时回退到锁 body 的 overflow），滚动条
+       随之消失，视口凭空变宽一条滚动条 —— 整页会横向跳一下。stable 让这段宽度
+       始终保留，锁滚动前后 body、fixed 元素和 100vw 的计算宽度都不变。
+       仅对经典滚动条（Windows、macOS「总是显示滚动条」）有影响；macOS 默认的
+       悬浮滚动条本来就不占宽度。 */
+    scrollbar-gutter: stable;
   }
 
   body {
