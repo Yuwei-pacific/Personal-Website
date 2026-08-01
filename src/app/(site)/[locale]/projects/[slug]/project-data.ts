@@ -11,6 +11,7 @@ import type { Locale } from "@/i18n/config";
 import {
   SITE_AUTHOR,
   SITE_NAME,
+  SITE_TWITTER_HANDLE,
   absoluteUrl,
   getSiteMetadata,
   languageAlternates,
@@ -86,7 +87,7 @@ export function buildProjectMetadata(project: ProjectDetail, locale: Locale): Me
       card: "summary_large_image",
       title,
       description: project.summary || undefined,
-      creator: "@yuweili",
+      creator: SITE_TWITTER_HANDLE,
       images,
     },
   };
