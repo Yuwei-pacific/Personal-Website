@@ -201,13 +201,6 @@ export const project = defineType({
       initialValue: true,
     }),
 
-    // defineField({
-    //   name: "order",
-    //   title: "Manual order",
-    //   type: "number",
-    //   description: "Lower numbers appear first in lists.",
-    // }),
-
     defineField({
       name: "links",
       group: "overview",
