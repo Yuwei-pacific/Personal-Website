@@ -139,9 +139,21 @@ export function ProjectGallery({
   const lenis = useLenis();
   const lightboxOpen = activeIndex >= 0;
   useEffect(() => {
-    if (!lightboxOpen || !lenis) return;
-    lenis.stop();
-    return () => lenis.start();
+    if (!lightboxOpen) return;
+
+    lenis?.stop();
+
+    // 锁滚动时滚动条消失，globals.css 里常驻的 scrollbar-gutter 会在右侧留下一条空槽，
+    // 露出 html 的浅色画布底 —— 紧挨着深色 lightbox 会看见一条白边。
+    // lightbox 期间把画布换成深色分区底色，关闭时还原。
+    const html = document.documentElement;
+    const previousBackground = html.style.backgroundColor;
+    html.style.backgroundColor = "hsl(var(--color-bg-dark))";
+
+    return () => {
+      lenis?.start();
+      html.style.backgroundColor = previousBackground;
+    };
   }, [lightboxOpen, lenis]);
 
   // RowsPhotoAlbum 会在客户端拿到真实容器宽度后重新排版。跨路由进入项目页时，
