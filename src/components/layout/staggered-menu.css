@@ -1,5 +1,7 @@
 .staggered-menu-wrapper {
-  --sm-accent: #737373;
+  /* 站点适配：上游默认是 #5227ff / #ff0000，这里接站点灰阶 token
+     （--color-text-muted-light 即原先硬编码的 #737373）。 */
+  --sm-accent: hsl(var(--color-text-muted-light));
   position: fixed;
   top: 0;
   left: 0;
@@ -160,7 +162,7 @@
   margin: 0;
   font-size: 1rem;
   font-weight: 500;
-  color: var(--sm-accent, #ff0000);
+  color: var(--sm-accent, hsl(var(--color-text-muted-light)));
 }
 
 .sm-language {
@@ -203,7 +205,7 @@
 }
 
 .sm-socials-link:focus-visible {
-  outline: 2px solid var(--sm-accent, #ff0000);
+  outline: 2px solid var(--sm-accent, hsl(var(--color-text-muted-light)));
   outline-offset: 3px;
 }
 
@@ -230,7 +232,7 @@
 }
 
 .sm-socials-link:hover {
-  color: var(--sm-accent, #ff0000);
+  color: var(--sm-accent, hsl(var(--color-text-muted-light)));
 }
 
 .sm-panel-list {
@@ -285,7 +287,7 @@
 }
 
 .sm-panel-item:hover {
-  color: var(--sm-accent, #5227ff);
+  color: var(--sm-accent, hsl(var(--color-text-muted-light)));
 }
 
 .sm-panel-list[data-numbering] {
@@ -300,7 +302,7 @@
   right: 2.8em;
   font-size: 18px;
   font-weight: 400;
-  color: var(--sm-accent, #5227ff);
+  color: var(--sm-accent, hsl(var(--color-text-muted-light)));
   letter-spacing: 0;
   pointer-events: none;
   user-select: none;
