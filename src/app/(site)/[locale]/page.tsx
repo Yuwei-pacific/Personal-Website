@@ -13,6 +13,7 @@ import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import {
   SITE_NAME,
+  SITE_TWITTER_HANDLE,
   getSiteMetadata,
   languageAlternates,
   localizedAbsoluteUrl,
@@ -56,7 +57,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: siteMetadata.title,
       description: dictionary.metadata.siteDescription,
-      creator: "@yuweili",
+      creator: SITE_TWITTER_HANDLE,
     },
   };
 }

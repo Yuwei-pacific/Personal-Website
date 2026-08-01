@@ -20,6 +20,7 @@ import { isLocale, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import {
   SITE_NAME,
+  SITE_TWITTER_HANDLE,
   SITE_URL,
   getSiteMetadata,
   languageAlternates,
@@ -104,7 +105,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: metadata.title,
       description: metadata.description,
-      creator: "@yuweili",
+      creator: SITE_TWITTER_HANDLE,
     },
   };
 }

@@ -27,6 +27,17 @@ export const SITE_LOCATIONS: Record<Locale, string> = {
   en: "Milan, Italy",
 };
 
+/** JSON-LD 的 PostalAddress.addressLocality（城市名单独一份，展示串不可直接拆） */
+export const SITE_ADDRESS_LOCALITY: Record<Locale, string> = {
+  it: "Milano",
+  en: "Milan",
+};
+
+export const SITE_COUNTRY_CODE = "IT";
+
+/** X 账号：twitter:creator 与 sameAs 共用同一份，避免再次写错 */
+export const SITE_TWITTER_HANDLE = "@Li_Yuwei_";
+
 export const OPEN_GRAPH_LOCALES: Record<Locale, string> = {
   it: "it_IT",
   en: "en_US",
@@ -36,6 +47,7 @@ export const SOCIAL_LINKS = [
   { label: "GitHub", href: "https://github.com/Yuwei-pacific" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/yuwei081/" },
   { label: "Instagram", href: "https://www.instagram.com/yuwei081/" },
+  { label: "X", href: "https://x.com/Li_Yuwei_" },
 ] as const;
 
 /** 相对路径 → 绝对 URL（sitemap、canonical、JSON-LD 用） */
