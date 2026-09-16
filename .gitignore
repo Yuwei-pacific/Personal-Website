@@ -54,3 +54,6 @@ next-env.d.ts
 /.claude/skills/
 /.claude/settings.local.json
 /skills-lock.json
+
+# Playwright MCP runtime output（浏览器 console 日志与页面快照，属工具产物）
+/.playwright-mcp/
