@@ -30,6 +30,12 @@ const contentSecurityPolicy = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // 未命中的 URL 走 src/app/global-not-found.tsx，而不是 Next 内置的英文默认页。
+    // 需要这个开关是因为本站有多个 root layout（(site)/(studio)）且 root layout
+    // 落在 [locale] 之下 —— 没有单一 layout 能组装全局 404。
+    globalNotFound: true,
+  },
   images: {
     remotePatterns: [
       {
