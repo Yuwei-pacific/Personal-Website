@@ -5,6 +5,7 @@ import { sanityClient } from "@/sanity/client";
 import { sanityFetch } from "@/sanity/live";
 import { normalizeProjectDetail } from "@/lib/view-models/project";
 import { PROJECT_QUERY, PROJECT_SLUGS_QUERY } from "@/sanity/queries";
+import type { PROJECT_QUERY_RESULT } from "@/sanity/sanity.types";
 import type { ProjectDetail } from "@/lib/view-models/types";
 import type { Locale } from "@/i18n/config";
 import {
@@ -28,7 +29,13 @@ export const fetchProject = cache(async (
   // 由 normalizeProjectDetail 归一成 null 再走 404。取数失败则抛出，
   // 交给 error.tsx。把两者都塞成 null 会让一次网络抖动把已有项目变成
   // 真 404 —— 爬虫据此判定删除并掉出索引，而站点其实好着。
-  const { data: result } = await sanityFetch({
+  // 显式传入结果类型：PROJECT_QUERY 太长，超出了 TypeScript 模板字面量类型的
+  // 替换量预算，导致它无法与 typegen 生成的 SanityQueries key 对上，推断会退化成
+  // unknown。这里补上 typegen 的类型，保持端到端有类型（详见 live.ts 的说明）。
+  const { data: result } = await sanityFetch<
+    typeof PROJECT_QUERY,
+    PROJECT_QUERY_RESULT
+  >({
     query: PROJECT_QUERY,
     params: { slug, locale },
     perspective: "published",
