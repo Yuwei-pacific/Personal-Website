@@ -82,7 +82,13 @@ export function ProjectDetailView({
                   />
                 ) : (
                   <Image
-                    src={project.coverImage.url}
+                    // 同上：先预裁再交优化器。这张带 priority，是详情页的 LCP 元素，
+                    // 喂裸原图等于让优化器每次都去拉全分辨率再重编码，代价最大。
+                    // 2048 与画廊 lightbox 的最大档（project-gallery 的 SLIDE_WIDTHS）一致。
+                    src={buildScaledUrl(project.coverImage.url, {
+                      width: 2048,
+                      animated: project.coverImage.animated,
+                    })}
                     alt={project.coverImage.alt}
                     fill
                     priority
