@@ -135,7 +135,7 @@ export default async function SiteLayout({
           <LenisProvider>
             <a
               href="#main-content"
-              className="sr-only fixed left-4 top-4 z-skip-link bg-design-light-bg px-4 py-2 text-small font-semibold text-design-light-text-primary shadow-card focus:not-sr-only"
+              className="skip-link bg-design-light-bg text-small font-semibold text-design-light-text-primary shadow-card"
             >
               {dictionary.common.skipToMain}
             </a>

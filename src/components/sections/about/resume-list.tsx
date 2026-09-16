@@ -75,6 +75,11 @@ export function ResumeList({ items, emptyLabel }: ResumeListProps) {
             {hasDetails && (
               <div
                 id={`resume-details-${id}`}
+                // grid-rows-[0fr] + opacity-0 只是视觉折叠，内容仍在无障碍树里：
+                // 读屏会念出全部详情，与按钮上的 aria-expanded="false" 自相矛盾，
+                // 里面若出现链接还会变成不可见的焦点目标。inert 不影响布局，
+                // 因此展开动画照常。
+                inert={!isExpanded}
                 className={`grid overflow-hidden px-1 transition-[grid-template-rows,opacity,padding] duration-base ease-design-out ${isExpanded ? 'grid-rows-[1fr] pb-4 opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
               >
                 <div className="overflow-hidden">

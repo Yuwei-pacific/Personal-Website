@@ -8,7 +8,11 @@ type RevealTextProps = {
   text: string;
   className?: string;
   as?: "p" | "h1" | "h2";
-  /** Color of words before they are revealed */
+  /**
+   * Color of words before they are revealed.
+   * 必须自身满足正文对比度（≥4.5:1）：这个值是写成内联 style 进 SSR HTML 的，
+   * 且 reveal-word-base 没有任何样式表兜底 —— 无 JS 时它就是最终颜色。
+   */
   fromColor?: string;
   /** Color of words once revealed */
   toColor?: string;
@@ -43,7 +47,7 @@ export function RevealText({
   text,
   className,
   as: Tag = "p",
-  fromColor = "hsl(var(--color-border-light))",
+  fromColor = "hsl(var(--color-text-muted-light))",
   toColor = "hsl(var(--color-text-primary-light))",
   maskTargetId,
   maskImageSrc,

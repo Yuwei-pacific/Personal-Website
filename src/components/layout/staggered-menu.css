@@ -12,6 +12,16 @@
   overflow: hidden;
 }
 
+/* 打开时这一层接管整屏指针事件，充当遮罩。
+   面板只有 clamp(260px, 38vw, 420px) 宽，若这一层始终 pointer-events: none，
+   余下那片视口的点击会穿透到下层页面；而 closeMenu 绑在 mousedown 上，
+   于是一次点击会「关掉抽屉」并「激活底下那个元素」—— 比如直接跳进某个项目页。
+   打开态同时给个浅色底当作可见遮罩；关闭态保持 none，不挡页面。 */
+.staggered-menu-wrapper[data-open="true"] {
+  pointer-events: auto;
+  background-color: hsl(var(--color-bg-dark) / 0.2);
+}
+
 .staggered-menu-header {
   position: absolute;
   top: 0;

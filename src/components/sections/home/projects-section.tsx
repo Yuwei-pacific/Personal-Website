@@ -41,7 +41,11 @@ export function ProjectsSection({ projects, locale, dictionary }: ProjectsSectio
           而不是 section 之间的呼吸 —— 用 section 档会在分界线下方留出过大的空档 */}
       <div className="flex w-full flex-col gap-6 py-panel sm:gap-gap-section sm:py-panel-sm">
         {/* 全宽标题：复用 Hero / 导航的遮罩滑入动画，左边缘与项目网格对齐 */}
-        <MaskedSectionHeading title={dictionary.home.projects.title} count={projects.length} />
+        <MaskedSectionHeading
+          title={dictionary.home.projects.title}
+          count={projects.length}
+          countAriaLabel={`${projects.length} ${dictionary.home.projects.countLabel}`}
+        />
 
         {!hasProjects ? (
           /* 空状态提示：CMS 未发布时的占位 */

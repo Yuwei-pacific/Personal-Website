@@ -38,6 +38,8 @@ type Dictionary = {
     projects: {
       title: string;
       empty: string;
+      /** 标题旁计数的量词，供辅助技术拼出可读的标签（如 "5 progetti"） */
+      countLabel: string;
     };
   };
   about: {
@@ -148,6 +150,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       projects: {
         title: "Progetti",
         empty: "I progetti appariranno qui dopo la pubblicazione in Sanity.",
+        countLabel: "progetti",
       },
     },
     about: {
@@ -269,6 +272,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       projects: {
         title: "Work",
         empty: "Projects will appear here once they are published in Sanity.",
+        countLabel: "projects",
       },
     },
     about: {

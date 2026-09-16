@@ -479,6 +479,32 @@ function StaggeredMenu({
     };
   }, [lenis, open]);
 
+  // 菜单打开时把页面主体移出无障碍树与 Tab 序列。
+  //
+  // 不能给 layout 里那层内容容器（layout.tsx 的 relative z-0 那层）加 inert ——
+  // 本组件渲染在 Navbar 内部，而 Navbar 就在那层容器里，加了会把菜单自己也废掉。
+  // 因此按站点骨架约定定位：每个页面都渲染 <main id="main-content">，
+  // 页脚是 <footer>。导航栏自身保持可交互 —— logo 与关闭按钮同属 header，合理。
+  // 此前只有关闭态的面板带 inert，背景内容始终在无障碍树里，
+  // 读屏用户可以越过覆盖层直接浏览进 hero、项目网格和页脚。
+  useEffect(() => {
+    const targets = [
+      document.getElementById("main-content"),
+      document.querySelector("footer"),
+    ].filter((el): el is HTMLElement => el !== null);
+
+    if (!open) {
+      targets.forEach((el) => el.removeAttribute("inert"));
+      return;
+    }
+
+    targets.forEach((el) => el.setAttribute("inert", ""));
+
+    return () => {
+      targets.forEach((el) => el.removeAttribute("inert"));
+    };
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
 
