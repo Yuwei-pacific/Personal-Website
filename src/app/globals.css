@@ -108,6 +108,34 @@
   }
 }
 
+/* 跳过导航链接。刻意手写而不是用 Tailwind 的 sr-only / focus:not-sr-only：
+   后者在聚焦时会同时把 position 改成 static 并清空 padding，它作为 :focus 变体
+   在 specificity（0,2,0）上压过元素上的 .fixed / .left-4 / .px-4（0,1,0），
+   结果是 fixed/left/top/z-index/padding 全部失效，链接落回正常流，
+   键盘用户 Tab 到它时整页会下跳一行。这里把两种状态写全，不参与博弈。 */
+@layer components {
+  .skip-link {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .skip-link:focus {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    padding: 0.5rem 1rem;
+    z-index: var(--z-skip-link);
+  }
+}
+
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;

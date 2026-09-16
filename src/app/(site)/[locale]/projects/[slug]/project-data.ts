@@ -25,27 +25,30 @@ export const fetchProject = cache(async (
   const slug = rawSlug?.toString().trim();
   if (!slug) return null;
 
-  try {
-    const { data: result }: { data: PROJECT_QUERY_RESULT } = await sanityFetch({
-      query: PROJECT_QUERY,
-      params: { slug, locale },
-      perspective: "published",
-      stega: false,
-    });
-    return normalizeProjectDetail(result, slug);
-  } catch (error) {
-    console.error("Failed to fetch project from Sanity", error);
-    return null;
-  }
+  // 不 try/catch：PROJECT_QUERY 是 `[0]`，文档真的不存在时返回 null，
+  // 由 normalizeProjectDetail 归一成 null 再走 404。取数失败则抛出，
+  // 交给 error.tsx。把两者都塞成 null 会让一次网络抖动把已有项目变成
+  // 真 404 —— 爬虫据此判定删除并掉出索引，而站点其实好着。
+  // 显式传入结果类型：PROJECT_QUERY 太长，超出了 TypeScript 模板字面量类型的
+  // 替换量预算，导致它无法与 typegen 生成的 SanityQueries key 对上，推断会退化成
+  // unknown。这里补上 typegen 的类型，保持端到端有类型（详见 live.ts 的说明）。
+  const { data: result } = await sanityFetch<
+    typeof PROJECT_QUERY,
+    PROJECT_QUERY_RESULT
+  >({
+    query: PROJECT_QUERY,
+    params: { slug, locale },
+    perspective: "published",
+    stega: false,
+  });
+  return normalizeProjectDetail(result, slug);
 });
 
 export async function fetchProjectSlugs() {
-  try {
-    const slugs = await sanityClient.fetch(PROJECT_SLUGS_QUERY);
-    return slugs.filter((slug): slug is string => Boolean(slug));
-  } catch {
-    return [];
-  }
+  // 供 generateStaticParams 使用。这里同样不吞异常：返回 [] 会让构建
+  // "成功"但一个项目页都不生成，故障被藏进产物里；让构建失败才是响亮的。
+  const slugs = await sanityClient.fetch(PROJECT_SLUGS_QUERY);
+  return slugs.filter((slug): slug is string => Boolean(slug));
 }
 
 const projectPath = (project: ProjectDetail) => `/projects/${project.slug}`;

@@ -30,12 +30,22 @@ const contentSecurityPolicy = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // 未命中的 URL 走 src/app/global-not-found.tsx，而不是 Next 内置的英文默认页。
+    // 需要这个开关是因为本站有多个 root layout（(site)/(studio)）且 root layout
+    // 落在 [locale] 之下 —— 没有单一 layout 能组装全局 404。
+    globalNotFound: true,
+  },
   images: {
     remotePatterns: [
       {
+        // 收敛到本项目：cdn.sanity.io 是多租户的，只写 hostname 意味着任何人都能
+        // 用自己免费注册的 Sanity 项目往 /_next/image 喂图。路径形如
+        // /images/<projectId>/<dataset>/<assetId>-<w>x<h>.<ext>。
+        // 动图走 unoptimized 直连 CDN，不经过这里，因此不受影响。
         protocol: "https",
         hostname: "cdn.sanity.io",
-        pathname: "/images/**",
+        pathname: "/images/ubdc9y57/**",
       },
     ],
   },

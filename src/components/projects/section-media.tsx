@@ -45,7 +45,14 @@ export function SectionMedia({
           />
         ) : (
           <Image
-            src={media.imageUrl}
+            // 先按用途预裁再交给 next/image：media.imageUrl 是裸的 CDN 原图地址
+            // （见 view-models/project.ts），直接传会让优化器去拉全分辨率原图再重编码。
+            // 动图尤其要紧 —— unoptimized 会完全绕过 /_next/image，没有任何一层会帮它缩。
+            // 1600 与上面的视频 poster 同档；fit=max 不会放大，小图不受影响。
+            src={buildScaledUrl(media.imageUrl, {
+              width: 1600,
+              animated: media.imageAnimated,
+            })}
             alt={media.alt}
             fill
             sizes={sizes}

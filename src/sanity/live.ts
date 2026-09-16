@@ -33,8 +33,19 @@ type PublishedFetchOptions<QueryString extends string> = {
   requestTag?: string;
 };
 
-type PublishedFetchResult<QueryString extends string> = {
-  data: ClientReturn<QueryString, unknown>;
+/**
+ * `Result` 默认由查询字面量经 SanityQueries 映射解析出来（typegen 生成）。
+ *
+ * 之所以允许调用方显式覆盖：TypeScript 对模板字面量类型有替换量预算，
+ * PROJECT_QUERY 这种超长查询（内含约 15 处插值）会超出预算而被降级，
+ * 字面量与 typegen 生成的 key 不再逐字符相等，映射查不到，data 退化成 unknown。
+ * 这种查询在调用处显式传入 typegen 类型即可（见 project-data.ts）。
+ */
+type PublishedFetchResult<
+  QueryString extends string,
+  Result = ClientReturn<QueryString, unknown>,
+> = {
+  data: Result;
   sourceMap: ContentSourceMap | null;
   tags: string[];
 };
@@ -58,14 +69,17 @@ type PublishedFetchResult<QueryString extends string> = {
  *  2. 官方默认值不再是 `revalidate: false`。
  * 升级 next-sanity 时请重新核对上面那个文件，确认本镜像是否仍与官方一致。
  */
-export async function sanityFetch<const QueryString extends string>({
+export async function sanityFetch<
+  const QueryString extends string,
+  Result = ClientReturn<QueryString, unknown>,
+>({
   query,
   params = {},
   perspective,
   stega,
   tags = [],
   requestTag = "portfolio.fetch",
-}: PublishedFetchOptions<QueryString>): Promise<PublishedFetchResult<QueryString>> {
+}: PublishedFetchOptions<QueryString>): Promise<PublishedFetchResult<QueryString, Result>> {
   const resolvedParams = await params;
   const cacheMode =
     process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD ? undefined : ("noStale" as const);
