@@ -20,7 +20,6 @@ import {
 } from "@/lib/site-metadata";
 import { normalizeHomeData } from "@/lib/view-models/home";
 import { PROJECTS_QUERY } from "@/sanity/queries";
-import type { PROJECTS_QUERY_RESULT } from "@/sanity/sanity.types";
 
 // Sanity Live updates published content immediately; ISR remains a fallback.
 export const revalidate = 60;
@@ -71,20 +70,18 @@ export default async function HomePage({
   if (!isLocale(rawLocale)) notFound();
 
   const dictionary = getDictionary(rawLocale);
-  // 过滤与排序都在 GROQ 里完成（见 sanity/queries.ts），这里只兜底请求失败
-  let projects: PROJECTS_QUERY_RESULT = [];
-
-  try {
-    const projectsResult = await sanityFetch({
-      query: PROJECTS_QUERY,
-      params: { locale: rawLocale },
-      perspective: "published",
-      stega: false,
-    });
-    projects = projectsResult.data;
-  } catch (error) {
-    console.error("Failed to fetch data from Sanity", error);
-  }
+  // 过滤与排序都在 GROQ 里完成（见 sanity/queries.ts）。
+  //
+  // 这里刻意不 try/catch：吞掉异常会让一次 CDN 抖动渲染成"空项目"页面，
+  // 而那是 200 + indexable 的，会被搜索收录并顶掉好页面 —— 空结果和取数失败
+  // 必须区分开。抛出后由 error.tsx 接管；若该页已有 ISR 缓存，Next 在重新生成
+  // 失败时会继续服务上一次的好版本，冷缓存才落到错误页。
+  const { data: projects } = await sanityFetch({
+    query: PROJECTS_QUERY,
+    params: { locale: rawLocale },
+    perspective: "published",
+    stega: false,
+  });
 
   const homeData = normalizeHomeData({ projects });
 

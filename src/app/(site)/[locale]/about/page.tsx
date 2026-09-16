@@ -17,10 +17,6 @@ import {
 import { normalizeAboutData } from "@/lib/view-models/home";
 import { sanityFetch } from "@/sanity/live";
 import { RESUME_QUERY, SKILLS_QUERY } from "@/sanity/queries";
-import type {
-  RESUME_QUERY_RESULT,
-  SKILLS_QUERY_RESULT,
-} from "@/sanity/sanity.types";
 
 export const revalidate = 60;
 
@@ -70,29 +66,24 @@ export default async function AboutPage({
   if (!isLocale(rawLocale)) notFound();
 
   const dictionary = getDictionary(rawLocale);
-  let skillCategories: SKILLS_QUERY_RESULT = [];
-  let resumeItems: RESUME_QUERY_RESULT = [];
-
-  try {
-    const [skillsResult, resumeResult] = await Promise.all([
-      sanityFetch({
-        query: SKILLS_QUERY,
-        params: { locale: rawLocale },
-        perspective: "published",
-        stega: false,
-      }),
-      sanityFetch({
-        query: RESUME_QUERY,
-        params: { locale: rawLocale },
-        perspective: "published",
-        stega: false,
-      }),
-    ]);
-    skillCategories = skillsResult.data;
-    resumeItems = resumeResult.data;
-  } catch (error) {
-    console.error("Failed to fetch About data from Sanity", error);
-  }
+  // 同首页：不吞异常（见 page.tsx 的说明）。这里两个查询共用一次 await，
+  // 任一失败都会让整页走 error.tsx —— 这是刻意的，半空的 /about 比错误页更糟。
+  const [skillsResult, resumeResult] = await Promise.all([
+    sanityFetch({
+      query: SKILLS_QUERY,
+      params: { locale: rawLocale },
+      perspective: "published",
+      stega: false,
+    }),
+    sanityFetch({
+      query: RESUME_QUERY,
+      params: { locale: rawLocale },
+      perspective: "published",
+      stega: false,
+    }),
+  ]);
+  const skillCategories = skillsResult.data;
+  const resumeItems = resumeResult.data;
 
   const aboutData = normalizeAboutData({ skillCategories, resumeItems });
 

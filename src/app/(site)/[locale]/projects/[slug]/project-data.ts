@@ -5,7 +5,6 @@ import { sanityClient } from "@/sanity/client";
 import { sanityFetch } from "@/sanity/live";
 import { normalizeProjectDetail } from "@/lib/view-models/project";
 import { PROJECT_QUERY, PROJECT_SLUGS_QUERY } from "@/sanity/queries";
-import type { PROJECT_QUERY_RESULT } from "@/sanity/sanity.types";
 import type { ProjectDetail } from "@/lib/view-models/types";
 import type { Locale } from "@/i18n/config";
 import {
@@ -25,27 +24,24 @@ export const fetchProject = cache(async (
   const slug = rawSlug?.toString().trim();
   if (!slug) return null;
 
-  try {
-    const { data: result }: { data: PROJECT_QUERY_RESULT } = await sanityFetch({
-      query: PROJECT_QUERY,
-      params: { slug, locale },
-      perspective: "published",
-      stega: false,
-    });
-    return normalizeProjectDetail(result, slug);
-  } catch (error) {
-    console.error("Failed to fetch project from Sanity", error);
-    return null;
-  }
+  // 不 try/catch：PROJECT_QUERY 是 `[0]`，文档真的不存在时返回 null，
+  // 由 normalizeProjectDetail 归一成 null 再走 404。取数失败则抛出，
+  // 交给 error.tsx。把两者都塞成 null 会让一次网络抖动把已有项目变成
+  // 真 404 —— 爬虫据此判定删除并掉出索引，而站点其实好着。
+  const { data: result } = await sanityFetch({
+    query: PROJECT_QUERY,
+    params: { slug, locale },
+    perspective: "published",
+    stega: false,
+  });
+  return normalizeProjectDetail(result, slug);
 });
 
 export async function fetchProjectSlugs() {
-  try {
-    const slugs = await sanityClient.fetch(PROJECT_SLUGS_QUERY);
-    return slugs.filter((slug): slug is string => Boolean(slug));
-  } catch {
-    return [];
-  }
+  // 供 generateStaticParams 使用。这里同样不吞异常：返回 [] 会让构建
+  // "成功"但一个项目页都不生成，故障被藏进产物里；让构建失败才是响亮的。
+  const slugs = await sanityClient.fetch(PROJECT_SLUGS_QUERY);
+  return slugs.filter((slug): slug is string => Boolean(slug));
 }
 
 const projectPath = (project: ProjectDetail) => `/projects/${project.slug}`;
