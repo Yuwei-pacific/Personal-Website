@@ -23,6 +23,8 @@ export type DotFieldImageProps = {
   imageFit?: "contain" | "cover" | "fill";
   /** Color for dots on transparent / uncovered areas of the image */
   fallbackColor?: string;
+  /** Site adaptation: dot budget. Above it, radius and spacing scale up together so large screens keep the same pattern with fewer dots. Default: unlimited */
+  maxDots?: number;
   className?: string;
   style?: CSSProperties;
 };

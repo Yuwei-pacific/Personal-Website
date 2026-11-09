@@ -56,8 +56,9 @@ Personal-Website/
 ## Conventions
 
 - **Data flow**: pages (Server Components) fetch through
-  `src/sanity/live.ts` using queries from `src/sanity/queries.ts`.
-  `SanityLive` invalidates affected query caches when published content changes;
+  `src/sanity/fetch.ts` using queries from `src/sanity/queries.ts`.
+  A Sanity publish webhook (`src/app/api/revalidate`) expires the shared cache tag,
+  with a 60-second time fallback;
   query results then pass through `src/lib/view-models/` before reaching UI components.
   Filtering (`visibility != false`) and ordering happen **in GROQ only** — never
   re-filter/re-sort in components.
@@ -141,6 +142,8 @@ NEXT_PUBLIC_SANITY_DATASET=personal_website
 NEXT_PUBLIC_SANITY_API_VERSION=2024-01-01
 # Only needed to read drafts / private datasets:
 SANITY_READ_TOKEN=...
+# Shared secret for the Sanity publish webhook (src/app/api/revalidate)
+SANITY_REVALIDATE_SECRET=...
 ```
 
 ### Development

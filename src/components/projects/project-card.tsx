@@ -4,7 +4,7 @@
 import { useRef } from "react";
 import { Link } from "next-view-transitions";
 import { LuArrowUpRight } from "react-icons/lu";
-import Image from "next/image";
+import { SanityImage } from "@/components/ui/sanity-image";
 import type { Project } from "@/lib/view-models/types";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
@@ -96,7 +96,7 @@ export function ProjectCard({
                 layout.aspect
             )}>
                 {coverSrc ? (
-                    <Image
+                    <SanityImage
                         src={coverSrc}
                         alt={
                             project.coverImage?.alt ||

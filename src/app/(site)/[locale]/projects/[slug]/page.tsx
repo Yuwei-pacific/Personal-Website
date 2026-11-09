@@ -15,7 +15,7 @@ import {
   fetchProjectSlugs,
 } from "./project-data";
 
-// Sanity Live handles published changes immediately; ISR is the fallback path.
+// 内容发布由 webhook 即时失效缓存（见 sanity/fetch.ts）；这里是页面级时间兜底。
 export const revalidate = 60;
 
 export async function generateStaticParams() {

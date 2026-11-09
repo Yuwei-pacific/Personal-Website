@@ -26,14 +26,18 @@ export function ProjectsSection({ projects, locale, dictionary }: ProjectsSectio
       className="w-full bg-design-dark-bg text-design-dark-text-primary relative z-10 scroll-mt-24"
       style={{ clipPath: "inset(0)" }}
     >
-      {/* 背景装饰图形：使用 fixed 定位，并通过 clipPath 限制只在 work section 内部可见 */}
+      {/* 背景装饰图形：使用 fixed 定位，并通过 clipPath 限制只在 work section 内部可见。
+          预模糊的装饰图：模糊已烘焙进 webp（由 hero_mg.svg 生成，960px、高斯 σ≈8，
+          对应桌面 1440px 宽下的 CSS blur(12px)），不再用实时 filter —— 全屏 fixed 层上的
+          blur 滤镜在滚动时开销很大，手机 Safari 尤甚。图很小且本身是糊的，跳过优化器。
+          改了 hero_mg.svg 记得重新生成这张图。 */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <Image
-          src="/hero_mg.svg"
+          src="/hero_mg_blur.webp"
           alt=""
           fill
-          sizes="100vw"
-          className="select-none object-contain object-center opacity-[0.22] blur-md"
+          unoptimized
+          className="select-none object-contain object-center opacity-[0.22]"
         />
       </div>
 

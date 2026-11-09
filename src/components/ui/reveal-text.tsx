@@ -61,19 +61,27 @@ export function RevealText({
   useEffect(() => {
     if (!maskTargetId || !maskImageSrc || !containerRef.current) return;
 
+    const container = containerRef.current;
     const target = document.getElementById(maskTargetId);
     const contrastLayer =
-      containerRef.current.querySelector<HTMLElement>(".reveal-contrast-layer");
+      container.querySelector<HTMLElement>(".reveal-contrast-layer");
     if (!target || !contrastLayer) return;
 
     let frame = 0;
     const maskUrl = `url("${maskImageSrc}")`;
+    // 目标图还没画出来之前不能显示反差层：反差字在点亮后是背景色（白），
+    // 人像缺席时就成了白底白字，首屏会看到几个字母"消失"。图片 load 后由下方监听重新计算。
+    const isTargetPainted = () =>
+      !(target instanceof HTMLImageElement) ||
+      (target.complete && target.naturalWidth > 0);
 
     const updateMasks = () => {
       frame = 0;
       const targetRect = target.getBoundingClientRect();
 
-      const layerRect = contrastLayer.getBoundingClientRect();
+      // 量容器而不是反差层：反差层 absolute inset-0 与容器重合，但它被 display:none
+      // 隐藏后尺寸为 0，再拿它判断相交会永远为假，层就再也出不来了。
+      const layerRect = container.getBoundingClientRect();
       const intersects = !(
         layerRect.right <= targetRect.left ||
         layerRect.left >= targetRect.right ||
@@ -81,7 +89,7 @@ export function RevealText({
         layerRect.top >= targetRect.bottom
       );
 
-      if (!intersects) {
+      if (!intersects || !isTargetPainted()) {
         contrastLayer.style.display = "none";
         contrastLayer.style.opacity = "1";
         return;

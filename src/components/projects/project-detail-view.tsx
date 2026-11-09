@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Link } from "next-view-transitions";
 
+import { SanityImage } from "@/components/ui/sanity-image";
 import { buildScaledUrl } from "@/lib/media";
 import { getExternalLinkProps } from "@/lib/safe-url";
 import { CoverVideo } from "./cover-video";
@@ -35,12 +36,18 @@ export function ProjectDetailView({
     <main id="main-content" className="relative min-h-screen text-design-light-text-primary">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0" />
+        {/* 预模糊的装饰图：模糊已烘焙进 webp（由 hero_mg.svg 生成，960px、高斯 σ≈8，
+            对应桌面 1440px 宽下的 CSS blur(12px)），不再用实时 filter —— 全屏 fixed 层上的
+            blur 滤镜在滚动时开销很大，手机 Safari 尤甚。图很小且本身是糊的，跳过优化器。
+            改了 hero_mg.svg 记得重新生成这张图。
+            fixed 层始终在首屏内，所以 eager：它常被浏览器判定为 LCP 元素。 */}
         <Image
-          src="/hero_mg.svg"
+          src="/hero_mg_blur.webp"
           alt=""
           fill
-          sizes="100vw"
-          className="select-none object-contain object-[50%_10%] opacity-50 blur-md"
+          unoptimized
+          loading="eager"
+          className="select-none object-contain object-[50%_10%] opacity-50"
         />
       </div>
 
@@ -81,10 +88,10 @@ export function ProjectDetailView({
                     pauseLabel={dictionary.project.pauseVideo}
                   />
                 ) : (
-                  <Image
-                    // 同上：先预裁再交优化器。这张带 priority，是详情页的 LCP 元素，
-                    // 喂裸原图等于让优化器每次都去拉全分辨率再重编码，代价最大。
-                    // 2048 与画廊 lightbox 的最大档（project-gallery 的 SLIDE_WIDTHS）一致。
+                  <SanityImage
+                    // 这张带 priority，是详情页的 LCP 元素，由浏览器按 srcset 直连 Sanity CDN。
+                    // 2048 是 loader 的宽度上限，与画廊 lightbox 的最大档
+                    // （project-gallery 的 SLIDE_WIDTHS）一致。
                     src={buildScaledUrl(project.coverImage.url, {
                       width: 2048,
                       animated: project.coverImage.animated,
@@ -92,8 +99,6 @@ export function ProjectDetailView({
                     alt={project.coverImage.alt}
                     fill
                     priority
-                    // 动图（GIF）必须跳过 Next 的图片优化，否则动画会被压成静帧
-                    unoptimized={project.coverImage.animated}
                     className="object-cover"
                     sizes="(min-width: 1024px) 1152px, 100vw"
                   />

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { sanityClient } from "@/sanity/client";
+import { SANITY_CACHE_TAG } from "@/sanity/fetch";
 import { PROJECT_SITEMAP_QUERY } from "@/sanity/queries";
 import { locales } from "@/i18n/config";
 import {
@@ -11,9 +12,9 @@ import {
 const fallbackLastModified = new Date("2026-01-01");
 const sitemapClient = sanityClient.withConfig({ useCdn: false });
 
-// sitemap 没有挂载 SanityLive，拿不到它的缓存失效信号，所以自己读已发布内容。
-// 但也不必每次抓取都打一次 Content Lake：项目更新频率远低于爬虫抓取频率，
-// 用 1 小时的时间兜底即可（内容有变最迟 1 小时后进入 sitemap）。
+// sitemap 直连 Content Lake（不走 CDN）读已发布内容，并挂上与页面相同的 cache tag：
+// 发布 webhook（src/app/api/revalidate）会让它和页面一起失效。
+// 时间兜底放宽到 1 小时 —— 项目更新频率远低于爬虫抓取频率。
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -25,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const projects = await sitemapClient.fetch(
     PROJECT_SITEMAP_QUERY,
     {},
-    { next: { revalidate } },
+    { next: { revalidate, tags: [SANITY_CACHE_TAG] } },
   );
   const validProjects = projects.filter(
     (project): project is { slug: string; _updatedAt: string } =>

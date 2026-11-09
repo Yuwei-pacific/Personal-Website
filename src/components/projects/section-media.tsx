@@ -1,7 +1,8 @@
 // 内容模块里的单个媒体位：有视频就播视频（图片作 poster），否则渲染图片。
 // 视频行为与详情页封面一致——静音自动循环、进入视口才播、离开即暂停，
-// 并尊重「减弱动画」偏好。图片走 Next 优化，动图（GIF）跳过优化保住动画。
-import Image from "next/image";
+// 并尊重「减弱动画」偏好。图片由浏览器按 srcset 直连 Sanity CDN（见 sanityImageLoader），
+// 动图（GIF）不加 auto=format 以保住动画。
+import { SanityImage } from "@/components/ui/sanity-image";
 
 import type { ProjectSectionMedia } from "@/lib/view-models/types";
 import { buildScaledUrl } from "@/lib/media";
@@ -44,11 +45,10 @@ export function SectionMedia({
             pauseLabel={pauseLabel}
           />
         ) : (
-          <Image
-            // 先按用途预裁再交给 next/image：media.imageUrl 是裸的 CDN 原图地址
-            // （见 view-models/project.ts），直接传会让优化器去拉全分辨率原图再重编码。
-            // 动图尤其要紧 —— unoptimized 会完全绕过 /_next/image，没有任何一层会帮它缩。
-            // 1600 与上面的视频 poster 同档；fit=max 不会放大，小图不受影响。
+          <SanityImage
+            // media.imageUrl 是裸的 CDN 原图地址（见 view-models/project.ts）。
+            // 这里的 1600 是 loader 的宽度上限，与上面的视频 poster 同档；
+            // fit=max 不会放大，小图不受影响。
             src={buildScaledUrl(media.imageUrl, {
               width: 1600,
               animated: media.imageAnimated,
@@ -57,8 +57,6 @@ export function SectionMedia({
             fill
             sizes={sizes}
             priority={priority}
-            // 动图必须跳过 Next 的图片优化，否则动画会被压成静帧
-            unoptimized={media.imageAnimated}
             className="object-cover"
           />
         )}

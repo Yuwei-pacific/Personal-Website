@@ -1,7 +1,8 @@
 "use client";
 
 // 路由级错误边界：渲染期异常不再冒到 Next 默认错误页，
-// 保持站点视觉并给出重试入口。（数据请求本身已在 page 层 try/catch。）
+// 保持站点视觉并给出重试入口。Sanity 取数失败也会落到这里：page 层刻意不 try/catch，
+// 以免把取数失败渲染成 200 的空页面（见 [locale]/page.tsx 的说明）。
 import { useEffect } from "react";
 import { Link } from "next-view-transitions";
 import { usePathname } from "next/navigation";

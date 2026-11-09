@@ -3,6 +3,7 @@
 // 动图（GIF）的关键约束：Sanity 资源 CDN 支持返回动画，但 `auto=format` 会把
 // GIF 转成 WebP 并只输出第一帧，动画就没了。所以凡是动图，一律不加 auto=format
 // （其余尺寸/裁切参数不影响动画）。判断依据是资源的 mimeType。
+import type { ImageLoaderProps } from "next/image";
 import { urlFor } from "@/sanity/image";
 import type { SanityImageSource } from "@sanity/image-url";
 
@@ -54,4 +55,37 @@ export function buildSrcSet(
       width: w,
       height: Math.round((height / width) * w),
     }));
+}
+
+/**
+ * next/image 的 Sanity loader：让浏览器按 srcset 档位直连 Sanity CDN 取图，
+ * 不再经过 /_next/image。
+ *
+ * 为什么不交给 Next 优化器：优化器回源时不声明 webp，`auto=format` 于是回落成
+ * 原始 PNG（一张 1600 宽的封面约 1MB），再由优化器重编码一遍 —— 双重处理、
+ * 慢（本地实测出现过回源超时、封面整排空白），还消耗 Vercel 图片优化额度。
+ * Sanity CDN 本身就能缩放和协商格式，浏览器直连时会拿到 webp/avif。
+ *
+ * 约定：src 是 buildCropUrl / buildScaledUrl 生成的地址。
+ * - 其中的 w 视为上限：档位宽于它时不放大（裁切图会被 Sanity 放大，原样照搬会浪费）
+ * - 带 h（定比例裁切）时按同一比例换算新的 h，保住裁切框
+ * - auto=format 是否存在由调用方按 mimeType 决定（动图不加），这里不碰
+ */
+export function sanityImageLoader({ src, width, quality }: ImageLoaderProps) {
+  if (!isSanityCdn(src)) return src;
+
+  const url = new URL(src);
+  const params = url.searchParams;
+  const maxWidth = Number(params.get("w")) || Infinity;
+  const baseHeight = Number(params.get("h"));
+  const targetWidth = Math.min(width, maxWidth);
+
+  if (baseHeight && Number.isFinite(maxWidth)) {
+    params.set("h", String(Math.round((targetWidth * baseHeight) / maxWidth)));
+  }
+  params.set("w", String(targetWidth));
+  if (!params.has("fit")) params.set("fit", "max");
+  if (quality) params.set("q", String(quality));
+
+  return url.toString();
 }
