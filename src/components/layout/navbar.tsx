@@ -158,7 +158,7 @@ export function Navbar({
     <div>
       {/* 站点 Logo：invert 转白后配合差值混合，在深浅背景上都可读 */}
       <Link href={homePath} aria-label={dictionary.navigation.homeAria} className="fixed left-6 top-6 z-nav-logo mix-blend-difference sm:left-8 sm:top-6">
-        <Image src="/Logo.svg" alt="Yuwei Li" width={48} height={48} className="h-12 w-12 invert" priority />
+        <Image src="/Logo.svg" alt="Yuwei Li" width={48} height={48} className="invert" priority />
       </Link>
       {/* relative z-nav 必不可少：加了混合后整组会被压平成静态层级、被页面内容盖住，
           需要显式抬回页面之上，混合才能以页面为底进行反色 */}

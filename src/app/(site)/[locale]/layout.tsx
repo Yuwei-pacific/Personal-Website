@@ -67,12 +67,11 @@ export async function generateMetadata({
     metadataBase: new URL(SITE_URL),
     authors: [{ name: "Yuwei Li" }],
     creator: "Yuwei Li",
+    // 不显式写 index/follow：它们本就是默认值，而写出来的 "index, follow" 会被
+    // 继承进 notFound() 渲染的 404 文档，和 Next 自动加的 noindex 并存成两条互相
+    // 矛盾的 robots 标签。这里只保留真正改变默认行为的 googlebot 预览指令。
     robots: {
-      index: true,
-      follow: true,
       googleBot: {
-        index: true,
-        follow: true,
         "max-video-preview": -1,
         "max-image-preview": "large",
         "max-snippet": -1,

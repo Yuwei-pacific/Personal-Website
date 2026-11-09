@@ -41,8 +41,10 @@ There is **no `src/app/layout.tsx`**. Each route group supplies its own `<html>`
 - `src/app/(studio)/layout.tsx` — the Sanity Studio, deliberately outside the locale routes.
 
 `src/proxy.ts` (Next 16's `middleware.ts` replacement) 308-redirects any unprefixed path to the
-default locale (`/about` → `/it/about`). It only redirects; it does not inject a locale header.
-Matcher excludes `/studio`, `/_next`, and anything with a file extension.
+default locale (`/about` → `/it/about`). For prefixed paths it also forwards an `x-site-locale`
+request header, read **only** by `src/app/global-not-found.tsx` (that document bypasses every
+layout and has no `params`). Site pages must keep reading the locale from `params`.
+Matcher excludes `/api`, `/studio`, `/_next`, `/apple-icon`, and anything with a file extension.
 
 Every public page renders `<Navbar />`, then one `<main id="main-content">` wrapping **all** of its
 content, then `<Footer />`. The layout's wrapping `<div>` is only a background container — the
