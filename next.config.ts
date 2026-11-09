@@ -8,7 +8,8 @@ const isDev = process.env.NODE_ENV === "development";
 // - 'unsafe-inline' (script)：Next.js 的启动脚本与 flight 数据、以及 JSON-LD 都是内联的。
 //   要彻底去掉需要走 middleware 下发 nonce，属于后续独立改造。
 // - api.sanity.io：<SanityLive /> 在浏览器里用 EventSource 订阅内容更新，不放行会静默失效。
-// - cdn.sanity.io：项目封面 / 画廊图与视频（GIF 与 unoptimized 图片直连 CDN，不过 /_next/image）。
+// - cdn.sanity.io：项目封面 / 画廊图与视频。站点里的 Sanity 图片都由浏览器直连 CDN
+//   （next/image 挂 sanityImageLoader，见 src/lib/media.ts），不过 /_next/image。
 // - vercel：Analytics 与 Speed Insights 的脚本与上报端点。
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -42,7 +43,8 @@ const nextConfig: NextConfig = {
         // 收敛到本项目：cdn.sanity.io 是多租户的，只写 hostname 意味着任何人都能
         // 用自己免费注册的 Sanity 项目往 /_next/image 喂图。路径形如
         // /images/<projectId>/<dataset>/<assetId>-<w>x<h>.<ext>。
-        // 动图走 unoptimized 直连 CDN，不经过这里，因此不受影响。
+        // 正常路径下 Sanity 图片走 SanityImage（自定义 loader 直连 CDN），不经过这里；
+        // 这条只是有人误用普通 next/image 时的兜底，仍收敛在本项目内。
         protocol: "https",
         hostname: "cdn.sanity.io",
         pathname: "/images/ubdc9y57/**",

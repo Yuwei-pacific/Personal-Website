@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Link } from "next-view-transitions";
 
+import { SanityImage } from "@/components/ui/sanity-image";
 import { buildScaledUrl } from "@/lib/media";
 import { getExternalLinkProps } from "@/lib/safe-url";
 import { CoverVideo } from "./cover-video";
@@ -81,10 +82,10 @@ export function ProjectDetailView({
                     pauseLabel={dictionary.project.pauseVideo}
                   />
                 ) : (
-                  <Image
-                    // 同上：先预裁再交优化器。这张带 priority，是详情页的 LCP 元素，
-                    // 喂裸原图等于让优化器每次都去拉全分辨率再重编码，代价最大。
-                    // 2048 与画廊 lightbox 的最大档（project-gallery 的 SLIDE_WIDTHS）一致。
+                  <SanityImage
+                    // 这张带 priority，是详情页的 LCP 元素，由浏览器按 srcset 直连 Sanity CDN。
+                    // 2048 是 loader 的宽度上限，与画廊 lightbox 的最大档
+                    // （project-gallery 的 SLIDE_WIDTHS）一致。
                     src={buildScaledUrl(project.coverImage.url, {
                       width: 2048,
                       animated: project.coverImage.animated,
@@ -92,8 +93,6 @@ export function ProjectDetailView({
                     alt={project.coverImage.alt}
                     fill
                     priority
-                    // 动图（GIF）必须跳过 Next 的图片优化，否则动画会被压成静帧
-                    unoptimized={project.coverImage.animated}
                     className="object-cover"
                     sizes="(min-width: 1024px) 1152px, 100vw"
                   />
