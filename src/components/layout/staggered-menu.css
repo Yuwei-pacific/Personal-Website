@@ -10,6 +10,13 @@
   z-index: 40;
   pointer-events: none;
   overflow: hidden;
+  /* 遮罩淡入淡出，节奏跟随面板（transition 取的是「目标状态」那条规则的值）：
+     - 收起（本条）：面板是 0.32s 的 power3.in —— 前半程几乎不动、后半程才加速离场。
+       遮罩若用 ease-out，前 100ms 就褪掉大半，面板还在屏上遮罩已经没了，
+       看起来就像没有淡出。所以这里用等价的 ease-in 三次曲线、同样的时长。
+     - 打开（下方 data-open）：slow + ease-out，与面板 0.5–0.65s 的滑入同步。 */
+  background-color: transparent;
+  transition: background-color 0.32s cubic-bezier(0.32, 0, 0.67, 0);
 }
 
 /* 打开时这一层接管整屏指针事件，充当遮罩。
@@ -20,6 +27,14 @@
 .staggered-menu-wrapper[data-open="true"] {
   pointer-events: auto;
   background-color: hsl(var(--color-bg-dark) / 0.2);
+  transition-duration: var(--motion-duration-slow);
+  transition-timing-function: var(--motion-ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .staggered-menu-wrapper {
+    transition: none;
+  }
 }
 
 .staggered-menu-header {

@@ -4,11 +4,18 @@ import './DotField.css';
 
 const TWO_PI = Math.PI * 2;
 
+const quantize = (value, step) => Math.min(255, Math.round(value / step) * step);
+const quantizedRgba = (r, g, b, a) =>
+  `rgba(${quantize(r, 8)}, ${quantize(g, 8)}, ${quantize(b, 8)}, ${(Math.round((a / 255) * 20) / 20).toFixed(2)})`;
+
 // 基于 React Bits DotField 的扩展版：支持用图片为点阵着色。
 // - imageSrc：图片按 imageFit（contain/cover）适配容器后，每个点取其所在位置的像素颜色
 // - 图片透明/未覆盖区域的点用 fallbackColor 绘制，保持完整点阵场
 // - 未传 imageSrc 或图片未加载完成时，退回原版的 gradientFrom/To 线性渐变
 // - 站点适配：离屏/后台暂停；静止时只局部更新 sparkle，交互与回弹仍逐帧绘制
+// - 站点适配：取色量化 + 按颜色合批。原版每个取色点都单独 fillStyle + fill，
+//   1440px 下约 2400 次/帧；Safari/Firefox 的单次 Canvas 调用开销远高于 Chrome，
+//   鼠标划过时会掉帧。颜色量化到 8 级步长后同色点合并成一条 Path2D，调用降到几十次
 // - 站点适配：maxDots 点数预算。点数按画布面积增长，大屏（2560px @2x 约 3.2 万点）
 //   鼠标划过时每帧整屏重绘要 30ms 以上。超出预算时点径与点距等比放大，
 //   图案比例不变，只是更"粗"一些
@@ -191,8 +198,10 @@ const DotFieldImage = memo(
           const py = Math.min(h - 1, Math.max(0, Math.round(d.ay)));
           const o = (py * w + px) * 4;
           const a = data[o + 3];
-          // 近透明区域 → 用备用色（color 置空）
-          d.color = a < 16 ? null : `rgba(${data[o]}, ${data[o + 1]}, ${data[o + 2]}, ${(a / 255).toFixed(3)})`;
+          // 近透明区域 → 用备用色（color 置空）。
+          // 量化（RGB 步长 8、alpha 步长 0.05）让相近颜色共用同一个字符串，
+          // 绘制时才能按颜色合批；差异肉眼不可见
+          d.color = a < 16 ? null : quantizedRgba(data[o], data[o + 1], data[o + 2], a);
         }
         colorsReadyRef.current = true;
       }
@@ -216,33 +225,27 @@ const DotFieldImage = memo(
 
       let frameCount = 0;
 
-      function drawDot(dot, radius, fillStyle) {
-        ctx.fillStyle = fillStyle;
-        ctx.beginPath();
-        ctx.arc(dot.ax, dot.ay, radius, 0, TWO_PI);
-        ctx.fill();
-      }
-
+      // 闪烁帧的局部重绘同样按颜色合批（无取色时整组用渐变填充）
       function drawStaticDots(indices, radius, p, useImageColors, gradient) {
-        const sharedPath = new Path2D();
-        let hasSharedDots = false;
+        const paths = new Map();
 
         for (const index of indices) {
           const dot = dotsRef.current[index];
           if (!dot) continue;
 
-          if (useImageColors && dot.color) {
-            drawDot(dot, radius, dot.color);
-          } else {
-            sharedPath.moveTo(dot.ax + radius, dot.ay);
-            sharedPath.arc(dot.ax, dot.ay, radius, 0, TWO_PI);
-            hasSharedDots = true;
+          const key = useImageColors ? dot.color ?? p.fallbackColor : gradient;
+          let path = paths.get(key);
+          if (!path) {
+            path = new Path2D();
+            paths.set(key, path);
           }
+          path.moveTo(dot.ax + radius, dot.ay);
+          path.arc(dot.ax, dot.ay, radius, 0, TWO_PI);
         }
 
-        if (hasSharedDots) {
-          ctx.fillStyle = useImageColors ? p.fallbackColor : gradient;
-          ctx.fill(sharedPath);
+        for (const [fillStyle, path] of paths) {
+          ctx.fillStyle = fillStyle;
+          ctx.fill(path);
         }
       }
 
@@ -341,8 +344,8 @@ const DotFieldImage = memo(
         const crSq = cr * cr;
         const rad = (p.dotRadius * gridScaleRef.current) / 2;
         const isBulge = p.bulgeOnly;
-        // 备用色的点集中到同一条路径一次填充，只有取到图片颜色的点才逐个填充
-        const fallbackPath = useImageColors ? new Path2D() : null;
+        // 按颜色合批：同色点进同一条路径，每种颜色只 fill 一次（备用色也是其中一组）
+        const colorPaths = useImageColors ? new Map() : null;
         const nextSparkleIndices = p.sparkle ? [] : null;
 
         for (let i = 0; i < len; i++) {
@@ -400,15 +403,14 @@ const DotFieldImage = memo(
           }
 
           if (useImageColors) {
-            if (d.color) {
-              ctx.fillStyle = d.color;
-              ctx.beginPath();
-              ctx.arc(drawX, drawY, r, 0, TWO_PI);
-              ctx.fill();
-            } else {
-              fallbackPath.moveTo(drawX + r, drawY);
-              fallbackPath.arc(drawX, drawY, r, 0, TWO_PI);
+            const key = d.color ?? p.fallbackColor;
+            let path = colorPaths.get(key);
+            if (!path) {
+              path = new Path2D();
+              colorPaths.set(key, path);
             }
+            path.moveTo(drawX + r, drawY);
+            path.arc(drawX, drawY, r, 0, TWO_PI);
           } else {
             ctx.moveTo(drawX + r, drawY);
             ctx.arc(drawX, drawY, r, 0, TWO_PI);
@@ -416,8 +418,10 @@ const DotFieldImage = memo(
         }
 
         if (useImageColors) {
-          ctx.fillStyle = p.fallbackColor;
-          ctx.fill(fallbackPath);
+          for (const [color, path] of colorPaths) {
+            ctx.fillStyle = color;
+            ctx.fill(path);
+          }
         } else {
           ctx.fill();
         }

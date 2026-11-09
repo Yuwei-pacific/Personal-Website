@@ -92,7 +92,7 @@ export function ProjectCard({
         >
             {/* 封面图：拼贴墙的主视觉块 */}
             <div className={cn(
-                "relative overflow-hidden border border-design-dark-border bg-design-dark-surface transition-[border-color,transform] duration-base ease-design-out group-hover:-translate-y-1 group-hover:border-design-dark-hover-border",
+                "relative overflow-hidden border border-design-dark-border bg-design-dark-surface transition-transform duration-base ease-design-out group-hover:-translate-y-1",
                 layout.aspect
             )}>
                 {coverSrc ? (
