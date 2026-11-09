@@ -1,7 +1,7 @@
 // Sanity Studio 的 root layout。
 //
 // Studio 不在 [locale] 语言路由里，所以它需要自己的 <html>/<body>。这里刻意保持
-// 最小：不挂站点字体、Lenis、自定义光标、view transitions 或 SanityLive ——
+// 最小：不挂站点字体、Lenis、自定义光标或 view transitions ——
 // Studio 自带完整的 UI 与内部滚动容器，站点那套外壳只会和它抢滚轮与指针。
 // （拆分之前这些都是靠各 provider 里的 pathname.startsWith("/studio") 运行时判断
 // 绕开的；现在由路由边界本身保证，Studio 根本不会渲染它们。）

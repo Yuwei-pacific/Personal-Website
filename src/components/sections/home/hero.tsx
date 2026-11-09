@@ -62,6 +62,10 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
             <DotFieldImage
               dotRadius={4}
               dotSpacing={6}
+              // 点数预算：整屏重绘的开销主要按点数增长。实测（M 系列 Mac，@2x）
+              // 2560px 宽约 3.2 万点、每帧 33ms；限到 1 万点后约 15ms。
+              // 1440px 笔记本本身约 1 万点，基本不受影响；更大的屏幕点径与点距等比放大
+              maxDots={10000}
               bulgeStrength={32}
               glowRadius={0}
               sparkle={true}

@@ -54,7 +54,7 @@ content, then `<Footer />`. The layout's wrapping `<div>` is only a background c
 
 ```
 page.tsx (Server Component)
-  └─ sanityFetch()            src/sanity/live.ts    ← the only read path
+  └─ sanityFetch()            src/sanity/fetch.ts   ← the only read path
        └─ query               src/sanity/queries.ts ← the only place GROQ lives
   └─ normalize*()             src/lib/view-models/ ← CMS shape → UI contract
        └─ components           src/lib/view-models/types.ts ← stable UI types
@@ -70,21 +70,22 @@ Rules that keep this from drifting:
   declare a narrow local `Raw…` shape for its projection, but that shape must not leak into UI props.
 - `src/sanity/client.ts` imports `server-only` so a client component that imports it fails at build
   time instead of leaking `SANITY_READ_TOKEN`. Read data through `sanityFetch`, not the raw client
-  (the one exception is `fetchProjectSlugs`, which only needs static slugs).
+  (exceptions: `fetchProjectSlugs`, which only needs static slugs, and `sitemap.ts`, which reads
+  Content Lake directly but carries the same cache tag).
 - **The CMS is the only content source.** There is no in-repo fallback copy — when a query returns
   nothing, render an empty state.
 
-### `sanityFetch` in `src/sanity/live.ts` is a deliberate fork
+### Cache invalidation: webhook + time fallback (no `<SanityLive />`)
 
-It mirrors next-sanity's `defineLive().sanityFetch` with one change: the inner data fetch gets
-`revalidate: 60` instead of the upstream hardcoded `revalidate: false`. Rationale — if a `SanityLive`
-event is ever missed, the Data Cache entry would otherwise never expire, and a page-level
-`export const revalidate` cannot reach that inner fetch record. Sync tags are preserved exactly, so
-`<SanityLive />` invalidation still works. The file documents the two conditions under which the fork
-can be deleted; **re-verify against `next-sanity@13.2.1` whenever that dependency is upgraded.**
+Every Sanity read carries one Next cache tag, `SANITY_CACHE_TAG` (`src/sanity/fetch.ts`), plus a
+60-second `revalidate` fallback. A Sanity publish webhook hits `src/app/api/revalidate/route.ts`,
+which verifies the signature against `SANITY_REVALIDATE_SECRET` and expires that tag — the whole
+content set at once, which is fine at this content size. The webhook setup is documented in that
+route file; without it the site still self-heals within ~60 s.
 
-`<SanityLive />` is mounted once in the site layout with `includeDrafts={false}`, so published edits
-reach open pages without a rebuild.
+`<SanityLive />` was removed on purpose: it shipped a Sanity client (~33 KB gzip) and a persistent
+EventSource connection to every visitor only so already-open pages could refresh live. Do not
+reintroduce it for the public site; `api.sanity.io` is no longer in the CSP `connect-src` either.
 
 ### Localization
 

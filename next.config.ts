@@ -7,7 +7,6 @@ const isDev = process.env.NODE_ENV === "development";
 // 说明几个必须放行的来源，改动前先确认不是它们：
 // - 'unsafe-inline' (script)：Next.js 的启动脚本与 flight 数据、以及 JSON-LD 都是内联的。
 //   要彻底去掉需要走 middleware 下发 nonce，属于后续独立改造。
-// - api.sanity.io：<SanityLive /> 在浏览器里用 EventSource 订阅内容更新，不放行会静默失效。
 // - cdn.sanity.io：项目封面 / 画廊图与视频。站点里的 Sanity 图片都由浏览器直连 CDN
 //   （next/image 挂 sanityImageLoader，见 src/lib/media.ts），不过 /_next/image。
 // - vercel：Analytics 与 Speed Insights 的脚本与上报端点。
@@ -18,7 +17,7 @@ const contentSecurityPolicy = [
   "img-src 'self' data: blob: https://cdn.sanity.io",
   "media-src 'self' blob: https://cdn.sanity.io",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.api.sanity.io wss://*.api.sanity.io https://*.apicdn.sanity.io https://cdn.sanity.io https://va.vercel-scripts.com https://vitals.vercel-insights.com",
+  "connect-src 'self' https://cdn.sanity.io https://va.vercel-scripts.com https://vitals.vercel-insights.com",
   // 'self'：留出同源 /studio 里 Presentation 预览本站的可能，同时挡掉跨站点击劫持
   "frame-ancestors 'self'",
   "frame-src 'self'",

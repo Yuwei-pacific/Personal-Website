@@ -9,6 +9,9 @@ const TWO_PI = Math.PI * 2;
 // - 图片透明/未覆盖区域的点用 fallbackColor 绘制，保持完整点阵场
 // - 未传 imageSrc 或图片未加载完成时，退回原版的 gradientFrom/To 线性渐变
 // - 站点适配：离屏/后台暂停；静止时只局部更新 sparkle，交互与回弹仍逐帧绘制
+// - 站点适配：maxDots 点数预算。点数按画布面积增长，大屏（2560px @2x 约 3.2 万点）
+//   鼠标划过时每帧整屏重绘要 30ms 以上。超出预算时点径与点距等比放大，
+//   图案比例不变，只是更"粗"一些
 // 交互逻辑（bulge/repel、光晕、波动、闪烁）与原版一致。
 const DotFieldImage = memo(
   ({
@@ -27,6 +30,7 @@ const DotFieldImage = memo(
     imageSrc,
     imageFit = 'contain',
     fallbackColor = 'rgba(148, 163, 184, 0.3)',
+    maxDots = Infinity,
     ...rest
   }) => {
     const canvasRef = useRef(null);
@@ -50,11 +54,14 @@ const DotFieldImage = memo(
       gradientFrom,
       gradientTo,
       imageFit,
-      fallbackColor
+      fallbackColor,
+      maxDots
     };
     const rebuildRef = useRef(null);
     const imageRef = useRef(null);
     const colorsReadyRef = useRef(false);
+    // 超出 maxDots 时点径/点距的放大倍数，由 buildDots 按当前画布尺寸计算
+    const gridScaleRef = useRef(1);
     const glowIdRef = useRef(`dot-field-glow-${Math.random().toString(36).slice(2, 9)}`);
 
     // 加载取色图片；加载完成后为已有点阵重新着色
@@ -115,7 +122,11 @@ const DotFieldImage = memo(
 
       function buildDots(w, h) {
         const p = propsRef.current;
-        const step = p.dotRadius + p.dotSpacing;
+        const baseStep = p.dotRadius + p.dotSpacing;
+        const baseCount = Math.floor(w / baseStep) * Math.floor(h / baseStep);
+        gridScaleRef.current =
+          baseCount > p.maxDots ? Math.sqrt(baseCount / p.maxDots) : 1;
+        const step = baseStep * gridScaleRef.current;
         const cols = Math.floor(w / step);
         const rows = Math.floor(h / step);
         const padX = (w % step) / 2;
@@ -238,10 +249,11 @@ const DotFieldImage = memo(
       function drawIdleSparkleFrame(p) {
         const dots = dotsRef.current;
         const { w, h } = sizeRef.current;
-        const rad = p.dotRadius / 2;
+        const scale = gridScaleRef.current;
+        const rad = (p.dotRadius * scale) / 2;
         const sparkleRad = rad * 1.8;
         const clearRad = sparkleRad + 1;
-        if (clearRad + rad >= p.dotRadius + p.dotSpacing) return false;
+        if (clearRad + rad >= (p.dotRadius + p.dotSpacing) * scale) return false;
 
         const useImageColors = colorsReadyRef.current;
         let gradient = null;
@@ -327,7 +339,7 @@ const DotFieldImage = memo(
 
         const cr = p.cursorRadius;
         const crSq = cr * cr;
-        const rad = p.dotRadius / 2;
+        const rad = (p.dotRadius * gridScaleRef.current) / 2;
         const isBulge = p.bulgeOnly;
         // 备用色的点集中到同一条路径一次填充，只有取到图片颜色的点才逐个填充
         const fallbackPath = useImageColors ? new Path2D() : null;
@@ -475,7 +487,7 @@ const DotFieldImage = memo(
 
     useEffect(() => {
       rebuildRef.current?.();
-    }, [dotRadius, dotSpacing]);
+    }, [dotRadius, dotSpacing, maxDots]);
 
     return (
       <div className="dot-field-container" {...rest}>

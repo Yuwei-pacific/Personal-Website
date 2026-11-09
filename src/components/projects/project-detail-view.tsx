@@ -36,12 +36,18 @@ export function ProjectDetailView({
     <main id="main-content" className="relative min-h-screen text-design-light-text-primary">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0" />
+        {/* 预模糊的装饰图：模糊已烘焙进 webp（由 hero_mg.svg 生成，960px、高斯 σ≈8，
+            对应桌面 1440px 宽下的 CSS blur(12px)），不再用实时 filter —— 全屏 fixed 层上的
+            blur 滤镜在滚动时开销很大，手机 Safari 尤甚。图很小且本身是糊的，跳过优化器。
+            改了 hero_mg.svg 记得重新生成这张图。
+            fixed 层始终在首屏内，所以 eager：它常被浏览器判定为 LCP 元素。 */}
         <Image
-          src="/hero_mg.svg"
+          src="/hero_mg_blur.webp"
           alt=""
           fill
-          sizes="100vw"
-          className="select-none object-contain object-[50%_10%] opacity-50 blur-md"
+          unoptimized
+          loading="eager"
+          className="select-none object-contain object-[50%_10%] opacity-50"
         />
       </div>
 

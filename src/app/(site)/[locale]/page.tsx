@@ -8,7 +8,7 @@ import { AboutPreview } from "@/components/sections/home/about-preview";
 import { Hero } from "@/components/sections/home/hero";
 import { ProjectsSection } from "@/components/sections/home/projects-section";
 import { JsonLd, personSchema, websiteSchema } from "@/components/seo/json-ld";
-import { sanityFetch } from "@/sanity/live";
+import { sanityFetch } from "@/sanity/fetch";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import {
@@ -21,7 +21,7 @@ import {
 import { normalizeHomeData } from "@/lib/view-models/home";
 import { PROJECTS_QUERY } from "@/sanity/queries";
 
-// Sanity Live updates published content immediately; ISR remains a fallback.
+// 内容发布由 webhook 即时失效缓存（见 sanity/fetch.ts）；这里是页面级时间兜底。
 export const revalidate = 60;
 
 // 页面元数据：设置首页标题与描述（用于 SEO）
@@ -79,8 +79,6 @@ export default async function HomePage({
   const { data: projects } = await sanityFetch({
     query: PROJECTS_QUERY,
     params: { locale: rawLocale },
-    perspective: "published",
-    stega: false,
   });
 
   const homeData = normalizeHomeData({ projects });

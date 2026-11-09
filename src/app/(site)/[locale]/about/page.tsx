@@ -15,7 +15,7 @@ import {
   localizedAbsoluteUrl,
 } from "@/lib/site-metadata";
 import { normalizeAboutData } from "@/lib/view-models/home";
-import { sanityFetch } from "@/sanity/live";
+import { sanityFetch } from "@/sanity/fetch";
 import { RESUME_QUERY, SKILLS_QUERY } from "@/sanity/queries";
 
 export const revalidate = 60;
@@ -72,14 +72,10 @@ export default async function AboutPage({
     sanityFetch({
       query: SKILLS_QUERY,
       params: { locale: rawLocale },
-      perspective: "published",
-      stega: false,
     }),
     sanityFetch({
       query: RESUME_QUERY,
       params: { locale: rawLocale },
-      perspective: "published",
-      stega: false,
     }),
   ]);
   const skillCategories = skillsResult.data;
