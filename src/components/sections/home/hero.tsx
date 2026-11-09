@@ -82,11 +82,11 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
         </div>
 
         {/* 三行分别使用独立字号，保留 Figma 中明确的编辑式层级。 */}
-        <div className="relative z-10 flex h-full items-center px-6 pt-28 sm:px-16 sm:pt-32">
+        <div className="relative z-10 flex h-full items-center px-edge pt-28 sm:px-edge-sm sm:pt-32">
           <div className="relative w-full">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -inset-x-10 -inset-y-12 -z-10 bg-[radial-gradient(ellipse_at_32%_50%,rgba(255,255,255,0.78)_0%,rgba(255,255,255,0.58)_42%,rgba(255,255,255,0.18)_68%,transparent_82%)] blur-xl sm:-inset-x-16 sm:-inset-y-16"
+              className="pointer-events-none absolute -inset-x-6 -inset-y-12 -z-10 bg-[radial-gradient(ellipse_at_32%_50%,rgba(255,255,255,0.78)_0%,rgba(255,255,255,0.58)_42%,rgba(255,255,255,0.18)_68%,transparent_82%)] blur-xl sm:-inset-x-8 sm:-inset-y-16"
             />
             <h1
               aria-label={SITE_ROLE}
@@ -123,13 +123,14 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
         </div>
       </div>
 
-      {/* 定位与服务描述：移动端纵向排列，桌面端将 CTA 固定在文案右下侧。 */}
-      <div className="relative z-10 shrink-0 bg-background px-6 pb-6 pt-5 sm:px-16 sm:pb-6 sm:pt-3.5">
-        <p className="hero-label whitespace-nowrap text-[0.6875rem] font-semibold uppercase leading-[1.25] tracking-[0.18em] text-design-light-text-primary sm:text-base sm:tracking-[0.23em]">
-          {hero.basedIn}
-        </p>
-        <div className="relative mt-3.5">
-          <p className="hero-description text-pretty text-[1.375rem] leading-[1.12] tracking-[-0.02em] text-design-light-text-primary sm:pr-36 sm:text-[clamp(2rem,2.65vw,2.5rem)] sm:leading-[1.1]">
+      {/* 底部信息区：一条 12 列的基线带，按重要性分成两组 ——
+          左侧是定位文案（主信息），右侧一栏只放联系入口（动作）。
+          所在地标签不在这里：它跟着 About 预览里的浮动人像走（见 about-preview.tsx）。
+          文案字号刻意低于标题第三行一档，不和 h1 抢层级；CTA 放大到本区最重的一级。
+          DOM 顺序即阅读顺序，移动端直接纵向堆叠。 */}
+      <div className="relative z-10 shrink-0 bg-background px-edge pb-6 pt-5 sm:px-edge-sm sm:pb-8 sm:pt-6">
+        <div className="flex flex-col gap-5 sm:grid sm:grid-cols-12 sm:items-end sm:gap-x-4">
+          <p className="hero-description text-pretty text-[1.375rem] leading-[1.12] tracking-[-0.02em] text-design-light-text-primary sm:col-span-8 sm:text-[clamp(1.5rem,2.2vw,2rem)] sm:leading-[1.15]">
             {reducedMotion ? (
               <EmphasizedDescription
                 text={hero.description}
@@ -148,12 +149,14 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
               />
             )}
           </p>
-          <a
-            href={`mailto:${SITE_EMAIL}`}
-            className="hero-cta mt-2 inline-flex min-h-11 w-fit touch-manipulation items-center border-b-2 border-current text-lg font-semibold leading-[1.15] tracking-[-0.04em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:absolute sm:bottom-1 sm:right-0 sm:mt-0 sm:min-h-0 sm:text-xl"
-          >
-            {hero.cta}
-          </a>
+          <div className="flex sm:col-span-4 sm:col-start-9 lg:col-span-3 lg:col-start-10">
+            <a
+              href={`mailto:${SITE_EMAIL}`}
+              className="hero-cta inline-flex min-h-11 w-fit touch-manipulation items-center border-b-2 border-current text-2xl font-semibold leading-[1.15] tracking-[-0.04em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:min-h-0 sm:text-[clamp(1.5rem,2.2vw,2rem)]"
+            >
+              {hero.cta}
+            </a>
+          </div>
         </div>
       </div>
     </section>

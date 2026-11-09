@@ -57,8 +57,8 @@ export function ProjectsSection({ projects, locale, dictionary }: ProjectsSectio
             {dictionary.home.projects.empty}
           </div>
         ) : (
-          /* 项目列表：拼贴式项目墙，使用不同跨列宽度制造节奏 */
-          <div className="mt-4 grid w-full grid-cols-1 gap-x-3 gap-y-14 px-6 sm:gap-x-4 sm:gap-y-20 sm:px-container-sm md:grid-cols-12 lg:px-8">
+          /* 项目列表：拼贴式项目墙，按行编排的宽度与错位节奏见 project-card.tsx 的 planLayout */
+          <div className="mt-4 grid w-full grid-cols-1 gap-x-3 gap-y-14 px-edge sm:gap-x-4 sm:gap-y-20 sm:px-edge-sm md:grid-cols-12">
             {projects.map((project, idx) => (
               <ProjectCard
                 key={project._id}
@@ -66,6 +66,7 @@ export function ProjectsSection({ projects, locale, dictionary }: ProjectsSectio
                 slug={project.slug ?? undefined}
                 revealDelay={idx === 0 ? 0 : 0.1}
                 index={idx}
+                total={projects.length}
                 locale={locale}
                 dictionary={dictionary}
               />

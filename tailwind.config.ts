@@ -58,6 +58,9 @@ const config: Config = {
         "panel-sm": "var(--space-panel-y-sm)",
         container: "var(--space-container-x)",
         "container-sm": "var(--space-container-x-sm)",
+        // 全幅区块的页面边距，与固定导航对齐
+        edge: "var(--space-edge-x)",
+        "edge-sm": "var(--space-edge-x-sm)",
         card: "var(--space-card)",
         "gap-section": "var(--space-gap-section)",
         "gap-section-sm": "var(--space-gap-section-sm)",

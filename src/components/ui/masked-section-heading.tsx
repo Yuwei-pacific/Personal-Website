@@ -73,7 +73,7 @@ export function MaskedSectionHeading({
   return (
     <div
       ref={headingRef}
-      className="w-full px-6 sm:px-container-sm lg:px-8"
+      className="w-full px-edge sm:px-edge-sm"
     >
       <div className="flex w-fit items-end gap-1">
         {/* 可访问名放在 h2 上，视觉层整体 aria-hidden —— 与同目录已写对的
