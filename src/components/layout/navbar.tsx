@@ -75,12 +75,54 @@ export function Navbar({
   const [blendActive, setBlendActive] = useState(true);
   const blendTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // 向下滚动时收起导航、向上滚动时放回：logo 与 Menu 没有底色，常驻的话会直接
+  // 压在 section 标题和项目标题上。菜单打开期间不收起（此时滚动本就被锁定）。
+  const [navHidden, setNavHidden] = useState(false);
+  const menuOpenRef = useRef(false);
+
+  useEffect(() => {
+    // 顶部这段距离内始终显示；之后累计滚过 SCROLL_DELTA 才切换，避免触控板抖动来回闪
+    const SHOW_ABOVE = 120;
+    const SCROLL_DELTA = 8;
+    let lastY = window.scrollY;
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      const y = window.scrollY;
+      if (menuOpenRef.current || y <= SHOW_ABOVE) {
+        setNavHidden(false);
+        lastY = y;
+        return;
+      }
+      if (Math.abs(y - lastY) < SCROLL_DELTA) return;
+      setNavHidden(y > lastY);
+      lastY = y;
+    };
+
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  // 键盘焦点落到 logo 或 Menu 按钮上时放回导航，不让焦点停在屏幕外的元素上
+  const handleNavFocus = useCallback(() => setNavHidden(false), []);
+
   const handleMenuOpen = useCallback(() => {
     if (blendTimerRef.current) clearTimeout(blendTimerRef.current);
+    menuOpenRef.current = true;
+    setNavHidden(false);
     setBlendActive(false);
   }, []);
 
   const handleMenuClose = useCallback(() => {
+    menuOpenRef.current = false;
     // 等面板滑出动画（0.32s）结束再恢复混合，避免白色面板在退场时被反色成黑块
     if (blendTimerRef.current) clearTimeout(blendTimerRef.current);
     blendTimerRef.current = setTimeout(() => setBlendActive(true), 400);
@@ -155,14 +197,26 @@ export function Navbar({
   );
 
   return (
-    <div>
-      {/* 站点 Logo：invert 转白后配合差值混合，在深浅背景上都可读 */}
-      <Link href={homePath} aria-label={dictionary.navigation.homeAria} className="fixed left-6 top-6 z-nav-logo mix-blend-difference sm:left-8 sm:top-6">
+    <div onFocus={handleNavFocus}>
+      {/* 站点 Logo：invert 转白后配合差值混合，在深浅背景上都可读。
+          收起时整体上移出视口；减弱动画偏好下不做过渡，直接切换 */}
+      <Link
+        href={homePath}
+        aria-label={dictionary.navigation.homeAria}
+        className={`fixed left-edge top-6 z-nav-logo mix-blend-difference transition-transform duration-base ease-design-out motion-reduce:transition-none sm:left-edge-sm ${
+          navHidden ? "-translate-y-[calc(100%+1.5rem)]" : "translate-y-0"
+        }`}
+      >
         <Image src="/Logo.svg" alt="Yuwei Li" width={48} height={48} className="invert" priority />
       </Link>
       {/* relative z-nav 必不可少：加了混合后整组会被压平成静态层级、被页面内容盖住，
           需要显式抬回页面之上，混合才能以页面为底进行反色 */}
-      <div className={blendActive ? "relative z-nav mix-blend-difference" : "relative z-nav"}>
+      {/* 收起状态用 data 属性交给 staggered-menu.css 处理：这层 div 不能加 transform，
+          否则会成为内部 fixed 菜单容器的包含块，菜单会跟着页面滚走 */}
+      <div
+        data-nav-hidden={navHidden}
+        className={blendActive ? "relative z-nav mix-blend-difference" : "relative z-nav"}
+      >
         <StaggeredMenu
           items={menuItems}
           socialItems={socialItems}

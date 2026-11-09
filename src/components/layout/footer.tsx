@@ -125,7 +125,7 @@ export function Footer({
     >
       <div
         ref={innerRef}
-        className="relative z-10 min-h-[30rem] px-container pb-8 pt-8 will-change-transform sm:min-h-[48rem] sm:px-container-sm sm:pb-10 sm:pt-10"
+        className="relative z-10 min-h-[30rem] px-edge pb-8 pt-8 will-change-transform sm:min-h-[48rem] sm:px-edge-sm sm:pb-10 sm:pt-10"
       >
         <div className="flex min-h-[inherit] w-full flex-col">
           <div className="grid gap-5 border-t border-design-dark-border pt-5 sm:grid-cols-12 sm:gap-6">

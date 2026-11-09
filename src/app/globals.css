@@ -37,6 +37,10 @@
     --space-panel-y-sm: 5rem;
     --space-container-x: 1rem;
     --space-container-x-sm: 1.5rem;
+    /* 全幅区块（首页 Hero / About / Work、页脚）的页面边距，与固定导航的 logo、
+       Menu 按钮落在同一条竖线上；限宽居中的内容页仍用 container 档 */
+    --space-edge-x: 1.5rem;
+    --space-edge-x-sm: 2rem;
     --space-card: 1.5rem;
     --space-gap-section: 2.5rem;
     --space-gap-section-sm: 3.5rem;

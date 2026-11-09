@@ -19,9 +19,15 @@ export function AboutPreview({
 
   return (
     <section id="about" className="relative z-10 w-full bg-background">
-      <div className="mx-auto w-full max-w-content px-6 py-section sm:py-section-sm">
+      {/* 限宽并居中：这是一段阅读型文字，宽屏下左对齐会在右侧留出一大片空白。
+          视口窄于限宽时，左边缘自然落在与 Hero / Work / 页脚相同的页面边距上。
+          上下留白不对称：上方与 Hero 底部的定位文案同为白底、字号相近，只能靠距离分段，
+          sm 起用 section-sm；下方紧接深色区，色块切换本身就是分隔，保持 section 基础档 */}
+      <div className="mx-auto w-full max-w-content px-edge py-section sm:px-edge-sm sm:pt-section-sm">
         <div className="relative flex flex-col gap-8 lg:min-h-[22.9375rem] lg:gap-6">
-          <div className="pointer-events-none absolute right-0 top-[8.25rem] z-0 w-[46%] max-w-44 lg:-top-[1.875rem] lg:right-0 lg:w-[30%] lg:max-w-[20.6875rem]">
+          {/* 窄屏按底边定位：人像下方的标签要落在 CTA 那一行右侧的空位里。
+              按顶边定位的话，标签会压在正文最后几行上（英文版正文更长，直接重叠） */}
+          <div className="pointer-events-none absolute bottom-0 right-0 z-0 w-[46%] max-w-44 lg:-top-[1.875rem] lg:bottom-auto lg:right-0 lg:w-[30%] lg:max-w-[20.6875rem]">
             <Parallax offset={-160} mobileOffset={-64}>
               {/* 抠像人像直接落在页面白底上：不加卡片底色与阴影 */}
               <div className="relative aspect-square overflow-hidden">
@@ -34,6 +40,12 @@ export function AboutPreview({
                   className="object-cover object-top"
                 />
               </div>
+              {/* 所在地标签：人像的图注，放在 Parallax 内部，跟着人像一起上浮。
+                  靠右对齐，避开从左侧穿过人像的正文。文案仍取自 hero 字典键（OG 图也在用） */}
+              {/* 窄屏限宽：人像只占半栏，标签收成更窄的一列，不伸进左侧正文的行尾 */}
+              <p className="ml-auto mt-3 max-w-[7.75rem] text-balance text-right lg:max-w-none text-[0.6875rem] font-semibold uppercase leading-[1.35] tracking-[0.18em] text-design-light-text-primary lg:text-xs">
+                {dictionary.home.hero.basedIn}
+              </p>
             </Parallax>
           </div>
 

@@ -49,6 +49,18 @@
   background: transparent;
   pointer-events: none;
   z-index: 20;
+  transition: transform var(--motion-duration-base) var(--motion-ease-out);
+}
+
+/* 向下滚动时由 Navbar 收起（见 navbar.tsx 的 navHidden），与 logo 同步上移出视口 */
+[data-nav-hidden="true"] .staggered-menu-header {
+  transform: translateY(-100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .staggered-menu-header {
+    transition: none;
+  }
 }
 
 .staggered-menu-header > * {
