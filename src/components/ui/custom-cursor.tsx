@@ -31,7 +31,12 @@ export function CustomCursor() {
     let isInteractive = false;
     let hoverTween: gsap.core.Tween | null = null;
 
-    const onMouseMove = (e: MouseEvent) => {
+    // 只跟随真正的鼠标。用 pointer 事件而不是 mouse 事件：触屏点一下，浏览器会补发一组
+    // 模拟的 mousemove，方块就会出现在点击处并一直停在那里 —— 接了触控板或键盘的 iPad
+    // 主指针是 fine，上面的 (pointer: coarse) 拦不住它。
+    const onPointerMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+
       if (!hasPositioned) {
         // Snap to the first position instantly to avoid flying in from the corner
         gsap.set(cursor, { x: e.clientX, y: e.clientY });
@@ -52,6 +57,14 @@ export function CustomCursor() {
       isVisible = false;
     };
 
+    // 混合输入设备上改用手指或触控笔时，把跟随方块收起来，不留在最后的鼠标位置
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType === "mouse" || !isVisible) return;
+      gsap.set(cursor, { autoAlpha: 0 });
+      isVisible = false;
+      hasPositioned = false;
+    };
+
     const onMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const nextIsInteractive = Boolean(
@@ -68,12 +81,14 @@ export function CustomCursor() {
       });
     };
 
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("pointerdown", onPointerDown, { passive: true });
     document.addEventListener("mouseleave", onMouseLeave);
     document.addEventListener("mouseover", onMouseOver);
 
     return () => {
-      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("mouseleave", onMouseLeave);
       document.removeEventListener("mouseover", onMouseOver);
       hoverTween?.kill();
