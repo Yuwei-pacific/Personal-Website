@@ -65,9 +65,12 @@ export function RevealText({
     const target = document.getElementById(maskTargetId);
     const contrastLayer =
       container.querySelector<HTMLElement>(".reveal-contrast-layer");
-    if (!target || !contrastLayer) return;
+    // base 文字层：与反差层逐像素重合（同一套 className，含外边距），用它来量反差层的盒子
+    const baseLayer = container.firstElementChild;
+    if (!target || !contrastLayer || !baseLayer) return;
 
-    let frame = 0;
+    // 上一次写入的几何，没变就不碰样式（逐帧运行时绝大多数帧都是这种情况）
+    let lastGeometry = "";
     const maskUrl = `url("${maskImageSrc}")`;
     // 目标图还没画出来之前不能显示反差层：反差字在点亮后是背景色（白），
     // 人像缺席时就成了白底白字，首屏会看到几个字母"消失"。图片 load 后由下方监听重新计算。
@@ -76,12 +79,14 @@ export function RevealText({
       (target.complete && target.naturalWidth > 0);
 
     const updateMasks = () => {
-      frame = 0;
       const targetRect = target.getBoundingClientRect();
 
-      // 量容器而不是反差层：反差层 absolute inset-0 与容器重合，但它被 display:none
-      // 隐藏后尺寸为 0，再拿它判断相交会永远为假，层就再也出不来了。
-      const layerRect = container.getBoundingClientRect();
+      // 遮罩和裁剪的坐标都以反差层自己的盒子为原点，所以必须量到那个盒子。
+      // 不能量反差层本身：它被 display:none 隐藏后尺寸为 0，相交判断会永远为假。
+      // 也不能量外层容器：className 里的外边距（如 mt-4）让反差层比容器低一截，
+      // 以容器为原点算出来的遮罩就整体下移同样的距离 —— 人像肩线处的字母会漏出半个黑字。
+      // base 文字层和反差层共用 className、位置完全重合，量它正好。
+      const layerRect = baseLayer.getBoundingClientRect();
       const intersects = !(
         layerRect.right <= targetRect.left ||
         layerRect.left >= targetRect.right ||
@@ -90,8 +95,11 @@ export function RevealText({
       );
 
       if (!intersects || !isTargetPainted()) {
-        contrastLayer.style.display = "none";
-        contrastLayer.style.opacity = "1";
+        if (lastGeometry !== "hidden") {
+          lastGeometry = "hidden";
+          contrastLayer.style.display = "none";
+          contrastLayer.style.opacity = "1";
+        }
         return;
       }
 
@@ -101,10 +109,14 @@ export function RevealText({
       const clipLeft = Math.max(0, targetRect.left - layerRect.left);
       const maskPosition = `${targetRect.left - layerRect.left}px ${targetRect.top - layerRect.top}px`;
       const maskSize = `${targetRect.width}px auto`;
+      const clipPath = `inset(${clipTop}px ${clipRight}px ${clipBottom}px ${clipLeft}px)`;
+
+      const geometry = `${clipPath}|${maskPosition}|${maskSize}`;
+      if (geometry === lastGeometry) return;
+      lastGeometry = geometry;
 
       contrastLayer.style.display = "block";
-      contrastLayer.style.clipPath =
-        `inset(${clipTop}px ${clipRight}px ${clipBottom}px ${clipLeft}px)`;
+      contrastLayer.style.clipPath = clipPath;
       contrastLayer.style.setProperty("-webkit-mask-image", maskUrl);
       contrastLayer.style.setProperty("-webkit-mask-position", maskPosition);
       contrastLayer.style.setProperty("-webkit-mask-repeat", "no-repeat");
@@ -117,25 +129,40 @@ export function RevealText({
       contrastLayer.style.opacity = "1";
     };
 
-    const scheduleMaskUpdate = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(updateMasks);
+    // 逐帧跟随，而不是监听 scroll：人像的位置由 GSAP（Parallax 的 scrub）在它的 ticker 里
+    // 写入 transform。在 scroll 事件后另排一帧去量，可能量到上一帧的人像，而滚动一停就不再
+    // 有事件来纠正。挂在同一个 ticker 上、排在 GSAP 自己的更新之后，每帧量到的都是这一帧
+    // 已经落定的位置。只在文字靠近视口时才运行，离开后摘掉。
+    let ticking = false;
+    const startTicking = () => {
+      if (ticking) return;
+      ticking = true;
+      gsap.ticker.add(updateMasks);
+    };
+    const stopTicking = () => {
+      if (!ticking) return;
+      ticking = false;
+      gsap.ticker.remove(updateMasks);
     };
 
-    const resizeObserver = new ResizeObserver(scheduleMaskUpdate);
-    resizeObserver.observe(target);
-    resizeObserver.observe(containerRef.current);
-    window.addEventListener("resize", scheduleMaskUpdate);
-    window.addEventListener("scroll", scheduleMaskUpdate, { passive: true });
-    target.addEventListener("load", scheduleMaskUpdate);
-    scheduleMaskUpdate();
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          startTicking();
+        } else {
+          stopTicking();
+        }
+      },
+      { rootMargin: "50% 0px" },
+    );
+    visibilityObserver.observe(container);
+    target.addEventListener("load", updateMasks);
+    updateMasks();
 
     return () => {
-      cancelAnimationFrame(frame);
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", scheduleMaskUpdate);
-      window.removeEventListener("scroll", scheduleMaskUpdate);
-      target.removeEventListener("load", scheduleMaskUpdate);
+      stopTicking();
+      visibilityObserver.disconnect();
+      target.removeEventListener("load", updateMasks);
     };
   }, [maskImageSrc, maskTargetId, text]);
 
