@@ -21,21 +21,6 @@ const DotFieldImage = dynamic(() => import("@/components/vendor/DotFieldImage"),
 });
 
 // Hero 组件：首页主视觉区，包含角色标题、定位文案与联系入口
-function EmphasizedDescription({ text, terms }: { text: string; terms: string[] }) {
-  const escapedTerms = terms.map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-  const parts = text.split(new RegExp(`(${escapedTerms.join("|")})`, "g"));
-
-  return parts.map((part, index) =>
-    terms.includes(part) ? (
-      <strong key={`${part}-${index}`} className="font-bold">
-        {part}
-      </strong>
-    ) : (
-      part
-    )
-  );
-}
-
 export function Hero({ dictionary }: { dictionary: Dictionary }) {
   const heroRef = useHeroAnimation<HTMLElement>();
   const hero = dictionary.home.hero;
@@ -124,18 +109,17 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
       </div>
 
       {/* 底部信息区：一条 12 列的基线带，按重要性分成两组 ——
-          左侧是定位文案（主信息），右侧一栏只放联系入口（动作）。
+          左侧是定位文案（主信息），右侧一栏只放联系入口（动作），贴右边距、与 Menu 按钮同一条线。
           所在地标签不在这里：它跟着 About 预览里的浮动人像走（见 about-preview.tsx）。
           文案字号刻意低于标题第三行一档，不和 h1 抢层级；CTA 放大到本区最重的一级。
           DOM 顺序即阅读顺序，移动端直接纵向堆叠。 */}
       <div className="relative z-10 shrink-0 bg-background px-edge pb-6 pt-5 sm:px-edge-sm sm:pb-8 sm:pt-6">
         <div className="flex flex-col gap-5 sm:grid sm:grid-cols-12 sm:items-end sm:gap-x-4">
           <p className="hero-description text-pretty text-[1.375rem] leading-[1.12] tracking-[-0.02em] text-design-light-text-primary sm:col-span-8 sm:text-[clamp(1.5rem,2.2vw,2rem)] sm:leading-[1.15]">
+            {/* 整句统一字重，不做关键词加粗：粗细混排叠上逐字符解码会显得杂，
+                动效留给解码，强调留给句子本身。减弱动画偏好下直接输出文字 */}
             {reducedMotion ? (
-              <EmphasizedDescription
-                text={hero.description}
-                terms={hero.emphasizedTerms}
-              />
+              hero.description
             ) : (
               <DecryptedText
                 text={hero.description}
@@ -143,13 +127,11 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
                 revealDirection="start"
                 speed={30}
                 animateOn="view"
-                emphasizedTerms={hero.emphasizedTerms}
-                emphasizedClassName="font-bold"
                 encryptedClassName="text-design-light-text-muted/50"
               />
             )}
           </p>
-          <div className="flex sm:col-span-4 sm:col-start-9 lg:col-span-3 lg:col-start-10">
+          <div className="flex sm:col-span-4 sm:col-start-9 sm:justify-end lg:col-span-3 lg:col-start-10">
             <a
               href={`mailto:${SITE_EMAIL}`}
               className="hero-cta inline-flex min-h-11 w-fit touch-manipulation items-center border-b-2 border-current text-2xl font-semibold leading-[1.15] tracking-[-0.04em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:min-h-0 sm:text-[clamp(1.5rem,2.2vw,2rem)]"

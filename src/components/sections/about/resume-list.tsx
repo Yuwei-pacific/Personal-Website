@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { LuArrowDown } from "react-icons/lu";
 import { PortableText, type PortableTextReactComponents } from "next-sanity";
 import type { ResumeItem } from "@/lib/view-models/types";
 import { StaggerReveal } from "@/components/ui/stagger-reveal";
+import { cn } from "@/lib/utils";
+import { infoListClassName, infoRowFocusClassName } from "./info-list";
 
 const portableComponents: Partial<PortableTextReactComponents> = {
   block: {
@@ -39,13 +42,15 @@ export function ResumeList({ items, emptyLabel }: ResumeListProps) {
   }
 
   return (
-    <StaggerReveal className="mt-stack border-t border-design-light-border">
+    <StaggerReveal className={cn("mt-stack border-t border-design-light-border", infoListClassName)}>
       {items.map((edu, idx) => {
         const id = edu._id || `edu-${idx}`;
         const hasDetails = edu.details.length > 0;
         const isExpanded = expandedId === id;
 
-        const rowClassName = "group grid grid-cols-1 gap-1.5 px-1 py-5 transition-[padding,background-color] duration-base sm:grid-cols-[1.4fr_1.6fr_1fr_0.8fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover";
+        // 最后一列留给展开箭头；不可展开的行也占着这一列，各行的内容列才能对齐。
+        // 窄屏单列时箭头绝对定位在右上角，右内边距给它让位。
+        const rowClassName = "grid grid-cols-1 gap-1.5 py-5 pl-1 pr-8 sm:grid-cols-[1.4fr_1.6fr_1fr_0.8fr_1.25rem] sm:items-center sm:gap-4 sm:pr-1";
         const rowContent = (
           <>
             <p className="font-semibold text-design-light-text-primary">{edu.institution}</p>
@@ -57,19 +62,38 @@ export function ResumeList({ items, emptyLabel }: ResumeListProps) {
 
         return (
           <div key={id} className="border-b border-design-light-border">
+            {/* 悬停聚焦加在这一层而不是外层：外层是 StaggerReveal 的直接子元素（见 info-list.ts）。
+                展开中的条目不参与变淡 —— 正在读的内容不该因为鼠标移到别处而暗下去 */}
+            <div className={cn(infoRowFocusClassName, isExpanded && "!opacity-100")}>
             {hasDetails ? (
-              // 可展开条目：使用 button 保证键盘可达，并暴露展开状态给辅助技术
+              // 可展开条目：使用 button 保证键盘可达，并暴露展开状态给辅助技术。
+              // 只有可展开的行才有箭头、悬停右移和手型光标 —— 这三样就是「能点」的全部信号
               <button
                 type="button"
                 onClick={() => toggleExpand(id)}
                 aria-expanded={isExpanded}
                 aria-controls={`resume-details-${id}`}
-                className={`${rowClassName} w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-design-light-accent`}
+                className={cn(
+                  rowClassName,
+                  "group/row relative w-full cursor-pointer text-left transition-[padding] duration-base hover:pl-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-design-light-accent motion-reduce:transition-none",
+                )}
               >
                 {rowContent}
+                <LuArrowDown
+                  aria-hidden="true"
+                  className={cn(
+                    "absolute right-1 top-5 h-4 w-4 transition-[transform,color] duration-base ease-design-out group-hover/row:text-design-light-text-primary motion-reduce:transition-none sm:static sm:justify-self-end",
+                    isExpanded
+                      ? "rotate-180 text-design-light-text-primary"
+                      : "text-design-light-text-muted",
+                  )}
+                />
               </button>
             ) : (
-              <div className={rowClassName}>{rowContent}</div>
+              <div className={rowClassName}>
+                {rowContent}
+                <span aria-hidden="true" className="hidden sm:block" />
+              </div>
             )}
 
             {hasDetails && (
@@ -87,6 +111,7 @@ export function ResumeList({ items, emptyLabel }: ResumeListProps) {
                 </div>
               </div>
             )}
+            </div>
           </div>
         );
       })}

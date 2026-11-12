@@ -200,16 +200,17 @@ export function Navbar({
     <div onFocus={handleNavFocus}>
       {/* 站点 Logo：invert 转白后配合差值混合，在深浅背景上都可读。
           混合与位移分在两层：外层 fixed 只负责定位和 mix-blend，永远不动；
-          收起的 transform 过渡加在内层 Link 上。两者写在同一个元素上时，
-          带混合模式的 fixed 元素在 iOS Safari 惯性滚动中无法独立合成，
-          过渡会停在半路（Menu 按钮本来就是这种两层结构，所以它没有这个问题）。
+          收起的过渡加在内层 Link 上（与 Menu 按钮的结构一致）。
+          收起时除了上移还要淡出到透明：iOS Safari 会把视口顶边以外的页面内容继续画在
+          状态栏下方那一条里，只靠位移的话，移出视口的 Logo 会原样出现在时间旁边。
+          用 opacity 而不是 visibility，元素仍可获得键盘焦点，聚焦时由 onFocus 放回。
           减弱动画偏好下不做过渡，直接切换 */}
       <div className="pointer-events-none fixed left-edge top-6 z-nav-logo mix-blend-difference sm:left-edge-sm">
         <Link
           href={homePath}
           aria-label={dictionary.navigation.homeAria}
-          className={`pointer-events-auto block transition-transform duration-base ease-design-out will-change-transform motion-reduce:transition-none ${
-            navHidden ? "-translate-y-[calc(100%+1.5rem)]" : "translate-y-0"
+          className={`pointer-events-auto block transition-[transform,opacity] duration-base ease-design-out will-change-transform motion-reduce:transition-none ${
+            navHidden ? "-translate-y-[calc(100%+1.5rem)] opacity-0" : "translate-y-0 opacity-100"
           }`}
         >
           <Image src="/Logo.svg" alt="Yuwei Li" width={48} height={48} className="invert" priority />

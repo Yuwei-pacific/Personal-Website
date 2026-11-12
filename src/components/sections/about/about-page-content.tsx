@@ -1,6 +1,8 @@
 import Image from "next/image";
 import type { ResumeItem, SkillCategory } from "@/lib/view-models/types";
 import { ResumeList } from "./resume-list";
+import { infoListClassName, infoRowFocusClassName } from "./info-list";
+import { cn } from "@/lib/utils";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { StaggerReveal } from "@/components/ui/stagger-reveal";
 import { RevealText } from "@/components/ui/reveal-text";
@@ -29,6 +31,11 @@ export function AboutPageContent({
 
   // 内容来源只有 CMS：无数据时显示空状态，不再回退到仓库里的副本
   const categoriesToRender = skillCategories ?? [];
+  // 基本信息行：纯展示，不可点，所以没有悬停右移和底色，只参与列表的悬停聚焦
+  const basicRowClassName = cn(
+    "grid grid-cols-1 gap-1 border-b border-design-light-border px-1 py-4 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4",
+    infoRowFocusClassName,
+  );
   return (
     <main id="main-content" className="relative z-10 min-h-screen w-full bg-background">
       <div className="mx-auto flex max-w-content flex-col gap-gap-section px-container pb-7 pt-28 sm:gap-gap-section-sm sm:px-container-sm sm:pb-12 sm:pt-36">
@@ -74,16 +81,16 @@ export function AboutPageContent({
 
           {/* Basic info — same row-table style as Education / Experience / Capabilities */}
           <ScrollReveal>
-            <div className="border-t border-design-light-border">
-              <div className="grid grid-cols-1 gap-1 border-b border-design-light-border px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover">
+            <div className={cn("border-t border-design-light-border", infoListClassName)}>
+              <div className={basicRowClassName}>
                 <p className="font-semibold text-design-light-text-primary">{dictionary.about.roleLabel}</p>
                 <p className="text-small text-design-light-text-secondary sm:text-body">{SITE_ROLE}</p>
               </div>
-              <div className="grid grid-cols-1 gap-1 border-b border-design-light-border px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover">
+              <div className={basicRowClassName}>
                 <p className="font-semibold text-design-light-text-primary">{dictionary.about.locationLabel}</p>
                 <p className="text-small text-design-light-text-secondary sm:text-body">{SITE_LOCATIONS[locale]}</p>
               </div>
-              <div className="grid grid-cols-1 gap-1 border-b border-design-light-border px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover">
+              <div className={basicRowClassName}>
                 <p className="font-semibold text-design-light-text-primary">{dictionary.about.languagesLabel}</p>
                 <div className="flex flex-wrap gap-x-2 gap-y-1.5 text-small text-design-light-text-secondary sm:text-body">
                   {dictionary.about.languages.map((lang, i) => (
@@ -136,11 +143,15 @@ export function AboutPageContent({
                 {dictionary.about.capabilitiesEmpty}
               </p>
             ) : (
-            <StaggerReveal className="mt-stack border-t border-design-light-border">
+            <StaggerReveal className={cn("mt-stack border-t border-design-light-border", infoListClassName)}>
               {categoriesToRender.map((category) => (
+                // 外层是 StaggerReveal 的直接子元素，悬停聚焦加在内层（见 info-list.ts）
+                <div key={category._id} className="border-b border-design-light-border">
                 <div
-                  key={category._id}
-                  className="grid grid-cols-1 gap-2 border-b border-design-light-border px-1 py-4 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 sm:hover:bg-design-light-hover"
+                  className={cn(
+                    "grid grid-cols-1 gap-2 px-1 py-4 sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4",
+                    infoRowFocusClassName,
+                  )}
                 >
                   <p className="font-semibold text-design-light-text-primary">{category.title}</p>
                   <div className="flex flex-wrap gap-x-2 gap-y-1.5 text-small text-design-light-text-secondary">
@@ -151,6 +162,7 @@ export function AboutPageContent({
                       </span>
                     ))}
                   </div>
+                </div>
                 </div>
               ))}
             </StaggerReveal>
