@@ -29,13 +29,11 @@ import { ScrollTrigger } from "@/lib/animation/scroll-trigger";
 // 组件入参：
 // - items：媒体列表（图片 / GIF / 视频）
 // - title：标题文案
-// - fullWidth：是否整屏宽度展示
 type ProjectGalleryProps = {
   items?: ProjectGalleryItem[];
   title: string;
   playVideoLabel: string;
   viewImageLabel: string;
-  fullWidth?: boolean;
 };
 
 // lightbox 大图的 srcSet 档位
@@ -114,7 +112,6 @@ export function ProjectGallery({
   title,
   playVideoLabel,
   viewImageLabel,
-  fullWidth,
 }: ProjectGalleryProps) {
   const galleryItems = useMemo(() => items ?? [], [items]);
   const galleryRef = useRef<HTMLElement>(null);
@@ -185,11 +182,17 @@ export function ProjectGallery({
   if (!galleryItems.length) return null;
 
   return (
-    <section ref={galleryRef} className={`space-y-4 ${fullWidth ? "w-full" : ""}`}>
-      <div className="text-center">
-        <h2 className="text-3xl font-bold text-design-dark-text-primary mb-2">{title}</h2>
+    <section ref={galleryRef} className="w-full">
+      {/* 与正文章节同一套抬头：细线 + 左对齐标题，数量沿用首页 Work 标题旁的计数写法 */}
+      <div className="mb-6 h-px w-full bg-design-dark-border-strong sm:mb-8" />
+      <div className="mb-8 flex items-end gap-1">
+        <h2 className="text-2xl font-semibold leading-[1.1] tracking-[-0.02em] text-design-dark-text-primary sm:text-3xl lg:text-section">
+          {title}
+        </h2>
+        <span aria-hidden="true" className="font-mono text-small text-design-dark-text-muted">
+          ({galleryItems.length})
+        </span>
       </div>
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-design-dark-text-primary/50 to-transparent" />
 
       <RowsPhotoAlbum
         photos={photos}
@@ -198,10 +201,10 @@ export function ProjectGallery({
         rowConstraints={{ singleRowMaxHeight: 420 }}
         spacing={12}
         defaultContainerWidth={DEFAULT_CONTAINER_WIDTH}
-        // 容器实际占宽：外层是 px-4 / sm:px-10 的通栏
+        // 容器实际占宽：通栏减去两侧页边距（px-edge / sm:px-edge-sm）
         sizes={{
-          size: "calc(100vw - 5rem)",
-          sizes: [{ viewport: "(max-width: 640px)", size: "calc(100vw - 2rem)" }],
+          size: "calc(100vw - 4rem)",
+          sizes: [{ viewport: "(max-width: 640px)", size: "calc(100vw - 3rem)" }],
         }}
         onClick={({ index }) => setActiveIndex(index)}
         render={{

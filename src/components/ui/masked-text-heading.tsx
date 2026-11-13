@@ -15,12 +15,15 @@ import {
 type MaskedTextHeadingProps = {
   text: string;
   className?: string;
+  /** 标题层级：页面主标题传 "h1"，默认是区块标题 */
+  as?: "h1" | "h2";
 };
 
 // 通用标题遮罩揭示：与 Hero、导航和 Work 标题共享同一组运动参数。
 export function MaskedTextHeading({
   text,
   className,
+  as: Heading = "h2",
 }: MaskedTextHeadingProps) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const words = text.trim().split(/\s+/);
@@ -53,7 +56,7 @@ export function MaskedTextHeading({
   );
 
   return (
-    <h2 ref={headingRef} aria-label={text} className={className}>
+    <Heading ref={headingRef} aria-label={text} className={className}>
       {words.map((word, index) => (
         <span key={`${word}-${index}`}>
           <span
@@ -67,6 +70,6 @@ export function MaskedTextHeading({
           {index < words.length - 1 ? " " : null}
         </span>
       ))}
-    </h2>
+    </Heading>
   );
 }

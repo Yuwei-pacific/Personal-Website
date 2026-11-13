@@ -149,3 +149,18 @@
     scrollbar-width: none;
   }
 }
+
+/* 封面共享过渡（首页卡片 / 「下一个项目」缩略图 → 详情页封面），命名逻辑见
+   components/projects/cover-transition.tsx。两端的裁切比例不同，所以让新旧快照都铺满
+   过渡盒并按 cover 裁切，而不是被拉伸变形。减弱动画时来源一侧不会认领这个名字，
+   这组规则自然不生效。 */
+::view-transition-group(project-cover) {
+  animation-duration: 450ms;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+::view-transition-old(project-cover),
+::view-transition-new(project-cover) {
+  height: 100%;
+  object-fit: cover;
+}

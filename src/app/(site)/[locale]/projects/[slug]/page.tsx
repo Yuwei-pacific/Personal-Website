@@ -11,6 +11,7 @@ import { getDictionary } from "@/i18n/dictionaries";
 import {
   buildProjectJsonLd,
   buildProjectMetadata,
+  fetchNextProject,
   fetchProject,
   fetchProjectSlugs,
 } from "./project-data";
@@ -52,13 +53,19 @@ export default async function ProjectPage({
 
   if (!project) notFound();
 
+  const next = await fetchNextProject(project.slug, rawLocale);
+
   return (
     <>
       <JsonLd data={buildProjectJsonLd(project, rawLocale)} />
       <ProjectScrollReset />
       <Navbar locale={rawLocale} dictionary={dictionary} />
       <ProjectDetailView
+        // 按项目重建：从「下一个项目」跳转时路由组件不变，不加 key 的话封面容器会被复用，
+        // 带着上一页释放掉的过渡名进入新页（见 cover-transition.tsx）
+        key={project.slug}
         project={project}
+        next={next}
         locale={rawLocale}
         dictionary={dictionary}
       />

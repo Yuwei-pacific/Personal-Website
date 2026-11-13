@@ -9,6 +9,7 @@ import type { Project } from "@/lib/view-models/types";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 import { buildCropUrl } from "@/lib/media";
+import { claimCoverTransition } from "./cover-transition";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -133,6 +134,8 @@ export function ProjectCard({
     // 视频的 poster 用同一张裁切图，避免缓冲期间闪出黑块
     const reducedMotion = usePrefersReducedMotion();
     const videoRef = useRef<HTMLVideoElement>(null);
+    // 封面共享过渡的起点：点击时才认领过渡名（见 cover-transition.tsx）
+    const coverRef = useRef<HTMLDivElement>(null);
     const hoverVideo = reducedMotion ? null : project.coverVideo;
 
     const playHoverVideo = () => {
@@ -167,7 +170,7 @@ export function ProjectCard({
                 </span>
             )}
             {/* 封面图：拼贴墙的主视觉块 */}
-            <div className={cn(
+            <div ref={coverRef} data-cover-transition className={cn(
                 "relative overflow-hidden border border-design-dark-border bg-design-dark-surface transition-transform duration-base ease-design-out group-hover:-translate-y-1",
                 layout.aspect
             )}>
@@ -238,6 +241,7 @@ export function ProjectCard({
         <ScrollReveal className={slotClassName} delay={revealDelay}>
             <Link
                 href={localizedPath(locale, `/projects/${slug}`)}
+                onClick={() => claimCoverTransition(coverRef.current)}
                 className="block touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-4 focus-visible:ring-offset-design-dark-bg"
             >
                 {cardContent}

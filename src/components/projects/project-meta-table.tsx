@@ -1,66 +1,52 @@
 import type { ReactNode } from "react";
 
-const metaRowTones = {
+const metaItemTones = {
   light: {
-    row: "border-design-light-border sm:hover:bg-design-light-hover",
-    label: "text-design-light-text-primary",
-    value: "text-design-light-text-secondary",
+    border: "border-design-light-border-strong",
+    label: "text-design-light-text-muted",
+    value: "text-design-light-text-primary",
   },
   dark: {
-    row: "border-design-dark-border sm:hover:bg-design-dark-surface",
-    label: "text-design-dark-text-primary",
-    value: "text-design-dark-text-secondary",
+    border: "border-design-dark-border-strong",
+    label: "text-design-dark-text-muted",
+    value: "text-design-dark-text-primary",
   },
 } as const;
 
-const metaRowDensities = {
-  default: {
-    row: "py-4",
-    label: "",
-    value: "text-small sm:text-body",
-  },
-  compact: {
-    row: "py-3",
-    label: "text-small",
-    value: "text-small leading-5",
-  },
-} as const;
+export type MetaTone = keyof typeof metaItemTones;
 
-type MetaRowProps = {
-  label: string;
-  tone?: keyof typeof metaRowTones;
-  density?: keyof typeof metaRowDensities;
-  children: ReactNode;
-};
-
-export function MetaRow({
-  label,
-  tone = "light",
-  density = "default",
+// 元信息列表：首屏（浅色）与 Credits（深色）共用同一套「标签 / 值」行。
+// 每行只画上边线，最后一条底线由 MetaList 补上。
+export function MetaList({
+  tone,
+  className = "",
   children,
-}: MetaRowProps) {
-  const t = metaRowTones[tone];
-  const d = metaRowDensities[density];
+}: {
+  tone: MetaTone;
+  className?: string;
+  children: ReactNode;
+}) {
+  return <dl className={`border-b ${metaItemTones[tone].border} ${className}`}>{children}</dl>;
+}
+
+export function MetaItem({
+  label,
+  tone,
+  children,
+}: {
+  label: string;
+  tone: MetaTone;
+  children: ReactNode;
+}) {
+  const t = metaItemTones[tone];
 
   return (
-    <div
-      className={`grid grid-cols-1 gap-1 border-b px-1 transition-[padding,background-color] duration-base sm:grid-cols-[1fr_3fr] sm:items-center sm:gap-4 sm:hover:pl-3 ${d.row} ${t.row}`}
-    >
-      <p className={`font-semibold ${d.label} ${t.label}`}>{label}</p>
-      <div className={`${d.value} ${t.value}`}>{children}</div>
+    <div className={`grid grid-cols-[7rem_1fr] gap-4 border-t py-3 text-small sm:grid-cols-[9rem_1fr] ${t.border}`}>
+      <dt className={t.label}>{label}</dt>
+      <dd className={t.value}>{children}</dd>
     </div>
   );
 }
 
-export function DotList({ items, separatorClassName }: { items: string[]; separatorClassName: string }) {
-  return (
-    <div className="flex flex-wrap gap-x-2 gap-y-1.5">
-      {items.map((item, index) => (
-        <span key={item} className="flex items-center gap-2">
-          {index > 0 && <span className={separatorClassName}>·</span>}
-          {item}
-        </span>
-      ))}
-    </div>
-  );
-}
+/** 多值字段（角色、合作者、技能）统一用间隔号连接 */
+export const joinMeta = (items: string[]) => items.join(" · ");

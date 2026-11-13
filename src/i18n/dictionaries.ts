@@ -57,7 +57,6 @@ type Dictionary = {
   };
   project: {
     back: string;
-    eyebrow: string;
     type: string;
     year: string;
     client: string;
@@ -69,6 +68,8 @@ type Dictionary = {
     roles: string;
     skills: string;
     gallery: string;
+    links: string;
+    nextProject: string;
     projectCover: string;
     playVideo: string;
     pauseVideo: string;
@@ -170,7 +171,6 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     project: {
       back: "← Torna ai progetti",
-      eyebrow: "Progetto",
       type: "Tipologia",
       year: "Anno",
       client: "Cliente",
@@ -182,6 +182,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       roles: "I miei ruoli",
       skills: "Competenze",
       gallery: "Galleria",
+      links: "Link",
+      nextProject: "Prossimo progetto",
       projectCover: "Copertina del progetto",
       playVideo: "Riproduci il video di copertina",
       pauseVideo: "Metti in pausa il video di copertina",
@@ -292,7 +294,6 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     project: {
       back: "← Back to projects",
-      eyebrow: "Project",
       type: "Type",
       year: "Year",
       client: "Client",
@@ -304,6 +305,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       roles: "My roles",
       skills: "Skills",
       gallery: "Gallery",
+      links: "Links",
+      nextProject: "Next project",
       projectCover: "Project cover",
       playVideo: "Play cover video",
       pauseVideo: "Pause cover video",
