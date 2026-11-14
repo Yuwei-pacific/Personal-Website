@@ -13,13 +13,16 @@
 // 一屏里有三处化开（标志、墨线、color 一词），是品牌手册「一个画面只化开一处」的唯一例外：
 // 三者是同一滴墨 —— 墨线从标志流出来，color 是这句话里被染到的那个词。
 //
-// 入场（不减弱动画时）：标志与 color 由 InkMark / InkWord 自带的「显影」漫开；
-// 口号先浮现，墨线随后从标志一侧向左流出，最后是身份段和联系方式。
+// 标志和墨线画在同一块铺满首屏的画布上（HeroInk），排版里只放两个占位：InkMarkSlot（墨迹框）
+// 和 InkLineSlot（墨线所在的那一行）。墨线右端流进「i」的竖笔，两者的晕连成一片。
+//
+// 入场（不减弱动画时）：水落在标志上，漫开时顺着墨线往左流出去（HeroInk 自带的显影），
+// color 一词同样显影；口号先浮现，最后是身份段和联系方式。
 "use client";
 
 import { useRef } from "react";
 
-import { InkLine, InkMark, InkWord, MARK_INK_BOX } from "@/components/ui/ink-mark";
+import { HeroInk, InkLineSlot, InkMarkSlot, InkWord } from "@/components/ui/ink-mark";
 import { ScrollBadge } from "@/components/ui/scroll-badge";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/gsap-react";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -43,14 +46,11 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
       if (prefersReducedMotion()) return;
 
       gsap.set(".hero-slogan", { autoAlpha: 0, y: 24 });
-      gsap.set(".hero-line", { clipPath: "inset(0 0 0 100%)" });
       gsap.set(".hero-details", { autoAlpha: 0, y: 16 });
 
       gsap
         .timeline({ defaults: { ease: "power2.out" } })
         .to(".hero-slogan", { autoAlpha: 1, y: 0, duration: 0.9 }, 0.15)
-        // 墨线从标志一侧（右）向页面左缘流出去
-        .to(".hero-line", { clipPath: "inset(0 0 0 0%)", duration: 1.5, ease: "power2.inOut" }, 0.9)
         .to(".hero-details", { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.12 }, 1.9);
     },
     { scope: ref },
@@ -62,13 +62,14 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
       id="home"
       className={`relative isolate flex h-[100svh] min-h-[36rem] w-full flex-col overflow-hidden bg-background px-edge sm:px-edge-sm ${MARK_VARS}`}
     >
-      {/* 化开的标志：lg 起贴右、垂直居中，与口号同排。
+      {/* 化开的标志和墨线：一块画布铺满首屏，压在文字下面 */}
+      <HeroInk className="absolute inset-0" />
+
+      {/* 标志的占位：lg 起贴右、垂直居中，与口号同排。
           lg 以下（含平板竖屏）标志和口号排不下同一行，就不显示标志（用户的决定：挤到口号上方只会占掉
           一大块空间，显影前那里还是空的）。墨线保留，作为口号和信息之间的分隔 */}
-      <InkMark
-        viewBox={MARK_INK_BOX}
-        bleed
-        className="absolute right-[var(--mark-r)] top-1/2 z-10 hidden h-[var(--mark-h)] w-[var(--mark-w)] -translate-y-1/2 lg:block"
+      <InkMarkSlot
+        className="absolute right-[var(--mark-r)] top-1/2 hidden h-[var(--mark-h)] w-[var(--mark-w)] -translate-y-1/2 lg:block"
         label="L·i"
       />
 
@@ -79,13 +80,14 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
           <span className="sr-only">{accent}</span>
           <InkWord word={accent} className="ml-[0.04em] inline-block h-[1.02em] w-auto align-[-0.06em]" />
           {after}
-          <br />
-          {end}
+          {/* 第二行从 end 起；手机上一行放不下「Bring color to the」，强制换行会让 the 单独成行，
+              所以窄屏不强制，让句子自然折成两行 */}
+          <br className="hidden sm:inline" /> {end}
         </h1>
 
-        {/* 墨线：左端越过页边距贴到视口左缘，右端伸进标志墨迹约 44%（被标志盖住）。
-            lg 以下不显示标志，线就贯穿全宽 */}
-        <InkLine className="hero-line relative -ml-edge my-[clamp(1.5rem,3.4svh,2.5rem)] h-[22px] w-[100vw] sm:-ml-edge-sm lg:w-[calc(100vw-var(--mark-r)-var(--mark-w)*0.56)]" />
+        {/* 墨线这一行：线画在它的竖向中线上，左端贴视口左缘、右端流进标志的「i」。
+            行高要装得下两侧的晕，晕才不会压到口号和身份段上。宽度只给 SVG 兜底用 */}
+        <InkLineSlot className="-ml-edge h-[clamp(5.5rem,14svh,8.5rem)] w-[100vw] sm:-ml-edge-sm lg:w-[calc(100vw-var(--mark-r)-var(--mark-w)*0.56)]" />
 
         {/* 宽度不超过标志左缘（留 3rem），中等宽度的屏幕上身份段不会钻到标志底下 */}
         <p className="hero-details max-w-[46ch] text-pretty lg:max-w-[min(46ch,calc(100vw-var(--mark-r)-var(--mark-w)-6rem))] text-[1.25rem] leading-snug sm:text-2xl">

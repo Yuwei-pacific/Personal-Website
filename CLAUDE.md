@@ -126,6 +126,23 @@ Brand rules that code must respect: Geist is used at Regular only (Tailwind's `f
 are mapped to 400 on purpose), Fraunces (`font-display`) is for large titles only, and `accent`
 (Cobalt in light, Coral in dark) goes on lines and dots, never on text.
 
+The "inked" effect (the bloomed L·i mark, the hero ink line and the inked slogan word) renders with
+WebGL2 in `src/components/ui/ink/` (`ink-gl.ts` renderer, `ink-surface.tsx` wrapper); `ui/ink-mark.tsx`
+exposes `InkMark` / `InkWord` and keeps the old SVG-filter version only as a static fallback
+when WebGL2 is unavailable. Do not animate the SVG filter version — it rasterizes on the CPU and drops
+frames. Blur fields are computed once per resize; per frame the shader adds slow flow, a "breathing"
+noise that thickens and thins the bloom, and the pointer "stir" field: moving the cursor (no clicks)
+pushes the ink aside and cuts a gap along its path, which decays so the ink flows back together.
+The stir field lives in 8-bit ping-pong textures, so its decay must step at least one quantum per
+frame or small offsets get stuck. Reduced motion renders one static frame. Colors come from the shared
+tables in `ui/ink/ink-tables.ts`.
+
+The hero draws the mark and the ink line on **one** canvas (`HeroInk`, covering the section) so their
+blooms merge where the line runs into the "i" stem. Layout only places two empty slots,
+`InkMarkSlot` (`data-ink="mark"`, the ink box) and `InkLineSlot` (`data-ink="line"`, the line runs on
+its vertical center); `buildHero` reads their rects and ends the line on the stem's centerline. When
+WebGL2 is missing, `HeroInk` renders nothing and the slots show the SVG fallbacks.
+
 `src/components/ui/sheet.tsx` (experimental, home page only) stacks sections like sheets of paper
 with `position: sticky`; siblings must share one parent and each sheet is at least one viewport tall.
 
