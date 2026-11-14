@@ -62,16 +62,17 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
       id="home"
       className={`relative isolate flex h-[100svh] min-h-[36rem] w-full flex-col overflow-hidden bg-background px-edge sm:px-edge-sm ${MARK_VARS}`}
     >
-      {/* 化开的标志：md 起贴右、垂直居中，浮在版面之外；
-          窄屏上参与排版 —— 导航下方、口号上方、靠右，不会压到文字 */}
+      {/* 化开的标志：lg 起贴右、垂直居中，与口号同排。
+          lg 以下（含平板竖屏）标志和口号排不下同一行，就不显示标志（用户的决定：挤到口号上方只会占掉
+          一大块空间，显影前那里还是空的）。墨线保留，作为口号和信息之间的分隔 */}
       <InkMark
         viewBox={MARK_INK_BOX}
         bleed
-        className="relative z-10 mt-24 h-[24svh] w-[calc(24svh*196/228)] self-end md:absolute md:right-[var(--mark-r)] md:top-1/2 md:mt-0 md:h-[var(--mark-h)] md:w-[var(--mark-w)] md:-translate-y-1/2 md:self-auto"
+        className="absolute right-[var(--mark-r)] top-1/2 z-10 hidden h-[var(--mark-h)] w-[var(--mark-w)] -translate-y-1/2 lg:block"
         label="L·i"
       />
 
-      <div className="relative flex flex-1 flex-col justify-end pb-24 pt-8 md:justify-center md:pb-20 md:pt-28">
+      <div className="relative flex flex-1 flex-col justify-center pb-24 pt-28 md:pb-20">
         <h1 className="hero-slogan max-w-[12ch] font-display text-[clamp(2.75rem,min(7.3vw,11.7svh),8rem)] leading-[0.98] tracking-display text-design-light-text-primary">
           {before}
           {/* 化开的词按行内元素排进句子，基线对齐；视觉上是 SVG，读屏读这份真实文字 */}
@@ -83,11 +84,11 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
         </h1>
 
         {/* 墨线：左端越过页边距贴到视口左缘，右端伸进标志墨迹约 44%（被标志盖住）。
-            窄屏上标志不在这一行，线就贯穿全宽 */}
-        <InkLine className="hero-line relative -ml-edge my-[clamp(1.5rem,3.4svh,2.5rem)] h-[22px] w-[100vw] sm:-ml-edge-sm md:w-[calc(100vw-var(--mark-r)-var(--mark-w)*0.56)]" />
+            lg 以下不显示标志，线就贯穿全宽 */}
+        <InkLine className="hero-line relative -ml-edge my-[clamp(1.5rem,3.4svh,2.5rem)] h-[22px] w-[100vw] sm:-ml-edge-sm lg:w-[calc(100vw-var(--mark-r)-var(--mark-w)*0.56)]" />
 
         {/* 宽度不超过标志左缘（留 3rem），中等宽度的屏幕上身份段不会钻到标志底下 */}
-        <p className="hero-details max-w-[46ch] text-pretty md:max-w-[min(46ch,calc(100vw-var(--mark-r)-var(--mark-w)-6rem))] text-[1.25rem] leading-snug sm:text-2xl">
+        <p className="hero-details max-w-[46ch] text-pretty lg:max-w-[min(46ch,calc(100vw-var(--mark-r)-var(--mark-w)-6rem))] text-[1.25rem] leading-snug sm:text-2xl">
           <span className="text-design-light-text-primary">{hero.identity.lead}</span>
           <span className="text-design-light-text-muted">{hero.identity.rest}</span>
         </p>
