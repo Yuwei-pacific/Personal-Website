@@ -1,5 +1,4 @@
 // 项目列表区：展示从 CMS 获取的项目卡片
-import Image from "next/image";
 import { ProjectCard } from "@/components/projects/project-card";
 import { MaskedSectionHeading } from "@/components/ui/masked-section-heading";
 import type { Project } from "@/lib/view-models/types";
@@ -17,30 +16,11 @@ export function ProjectsSection({ projects, locale, dictionary }: ProjectsSectio
   const hasProjects = projects.length > 0;
 
   return (
-    // 外层区块：深色背景，带滚动定位锚点 "work"
+    // 外层区块：带滚动定位锚点 "work"。底色由外层的表面（surface-*）决定
     <section
       id="work"
-      // data-overscroll-dark：告知 OverscrollBackground 本区块为深色，
-      // 区块在视口内时 body 背景切深色（只在过界回弹时可见）
-      data-overscroll-dark
       className="w-full bg-design-dark-bg text-design-dark-text-primary relative z-10 scroll-mt-24"
-      style={{ clipPath: "inset(0)" }}
     >
-      {/* 背景装饰图形：使用 fixed 定位，并通过 clipPath 限制只在 work section 内部可见。
-          预模糊的装饰图：模糊已烘焙进 webp（由 hero_mg.svg 生成，960px、高斯 σ≈8，
-          对应桌面 1440px 宽下的 CSS blur(12px)），不再用实时 filter —— 全屏 fixed 层上的
-          blur 滤镜在滚动时开销很大，手机 Safari 尤甚。图很小且本身是糊的，跳过优化器。
-          改了 hero_mg.svg 记得重新生成这张图。 */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <Image
-          src="/hero_mg_blur.webp"
-          alt=""
-          fill
-          unoptimized
-          className="select-none object-contain object-center opacity-[0.22]"
-        />
-      </div>
-
       {/* 深浅分界处两块直接相接，这里的上下留白属于深色区块自身的内边距（panel 档），
           而不是 section 之间的呼吸 —— 用 section 档会在分界线下方留出过大的空档 */}
       <div className="flex w-full flex-col gap-6 py-panel sm:gap-gap-section sm:py-panel-sm">

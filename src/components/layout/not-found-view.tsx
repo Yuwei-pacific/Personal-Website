@@ -23,7 +23,7 @@ export function NotFoundView({ locale }: { locale: Locale }) {
       <p className="text-label font-semibold uppercase text-design-light-text-muted">
         404
       </p>
-      <h1 className="text-balance text-3xl font-semibold tracking-tight text-design-light-text-primary sm:text-section">
+      <h1 className="text-balance font-display text-display-sm tracking-display text-design-light-text-primary sm:text-display">
         {dictionary.errors.notFoundTitle}
       </h1>
       <p className="max-w-xl text-body text-design-light-text-secondary">

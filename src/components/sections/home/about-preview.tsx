@@ -52,7 +52,7 @@ export function AboutPreview({
           <div className="relative">
             <MaskedTextHeading
               text={content.title}
-              className="text-balance text-display-sm font-semibold leading-[1.1] tracking-display text-design-light-text-primary lg:text-display"
+              className="text-balance font-display text-display-sm leading-[1.1] tracking-display text-design-light-text-primary lg:text-display"
             />
             {/* 右侧留白给人像让位：不留的话正文会整段压在人像上，
                 穿过轮廓的反差字太多反而看不清。lg 起人像更小、文字有 max-w 限宽，不需要 */}
@@ -69,7 +69,7 @@ export function AboutPreview({
 
           <Link
             href={localizedPath(locale, "/about")}
-            className="relative z-20 inline-flex min-h-11 w-fit touch-manipulation items-center border-b-2 border-current text-lg font-semibold leading-[1.15] tracking-[-0.04em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 lg:min-h-0 lg:text-[2.5rem]"
+            className="relative z-20 inline-flex min-h-11 w-fit touch-manipulation items-center border-b-2 border-accent text-lg font-semibold leading-[1.15] tracking-[-0.04em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 lg:min-h-0 lg:text-[2.5rem]"
           >
             {content.cta}
           </Link>

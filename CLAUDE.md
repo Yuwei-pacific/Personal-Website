@@ -102,10 +102,32 @@ reintroduce it for the public site; `api.sanity.io` is no longer in the CSP `con
 
 ### Theming and design tokens
 
-Single theme — there is no dark-mode toggle. The `design-light-*` and `design-dark-*` Tailwind
-colors are fixed **surface** tokens: light sections use `design-light-*`, the Work grid and project
-detail sections use `design-dark-*`. A dark section declares `data-overscroll-dark` so the body
-background matches during overscroll bounce.
+Two themes, light ("paper") and dark ("night"), following the system by default; the menu has a
+manual switch (`src/hooks/use-theme.ts`) that writes `<html data-theme>` and `localStorage.theme`.
+An inline script in `[locale]/layout.tsx` applies the stored choice before first paint.
+
+Colors are layered in `src/app/globals.css`:
+
+1. Raw values `--s-<surface>-*` for three surfaces — `base` (Paper / Ink), `alt` (Paper 2 / Ink 2),
+   `inv` (the inverse). **Only this layer changes between themes.**
+2. The Tailwind colors `design-light-*` and `design-dark-*`. The names are historical: they no longer
+   mean light/dark, they mean **primary surface / alternate surface**. By default `design-light-*`
+   reads `base` and `design-dark-*` reads `alt`.
+3. `.surface-base` / `.surface-alt` / `.surface-inverse` re-point both families (and `bg-background`,
+   `text-foreground`, `border-border`, `accent`) for everything inside a block. Use them on a
+   section's outermost element to arrange alternation. The footer is `surface-inverse` — the one
+   inverted block per page.
+
+Whole pages follow the theme; there are no fixed dark sections. `--color-ink` and `--color-paper`
+are theme-invariant, for things that must stay dark or light (the lightbox, text over the portrait,
+the blend-mode cursor). Colors resolved in JS (GSAP tweens) must be re-read when the theme changes.
+
+Brand rules that code must respect: Geist is used at Regular only (Tailwind's `font-medium|semibold|bold`
+are mapped to 400 on purpose), Fraunces (`font-display`) is for large titles only, and `accent`
+(Cobalt in light, Coral in dark) goes on lines and dots, never on text.
+
+`src/components/ui/sheet.tsx` (experimental, home page only) stacks sections like sheets of paper
+with `position: sticky`; siblings must share one parent and each sheet is at least one viewport tall.
 
 Raw values are CSS variables in `src/app/globals.css`, mapped to utilities in `tailwind.config.ts`.
 Use the semantic tokens rather than raw Tailwind scale values: spacing (`section`/`panel` for

@@ -18,6 +18,9 @@ type Dictionary = {
     socialLinksAria: string;
     language: string;
     switchLanguage: string;
+    theme: string;
+    themeLight: string;
+    themeDark: string;
   };
   common: {
     skipToMain: string;
@@ -26,9 +29,12 @@ type Dictionary = {
   home: {
     hero: {
       basedIn: string;
-      description: string;
-      emphasizedTerms: string[];
+      /** 口号拆成四段：before + 化开的 accent + after 是第一行，end 是第二行 */
+      slogan: { before: string; accent: string; after: string; end: string };
+      /** 身份段：lead 用墨色（谁、做什么、现在在哪），rest 用淡墨（给谁做） */
+      identity: { lead: string; rest: string };
       cta: string;
+      scrollDown: string;
     };
     aboutPreview: {
       title: string;
@@ -125,6 +131,9 @@ const dictionaries: Record<Locale, Dictionary> = {
       socialLinksAria: "Link social",
       language: "Lingua",
       switchLanguage: "Passa all’inglese",
+      theme: "Tema",
+      themeLight: "Chiaro",
+      themeDark: "Scuro",
     },
     common: {
       skipToMain: "Vai al contenuto principale",
@@ -133,14 +142,13 @@ const dictionaries: Record<Locale, Dictionary> = {
     home: {
       hero: {
         basedIn: "Lavoro da Milano con clienti internazionali",
-        description:
-          "Creo identità visive, interfacce digitali e siti web su misura per studi creativi e organizzazioni orientate al design.",
-        emphasizedTerms: [
-          "identità visive",
-          "interfacce digitali",
-          "siti web su misura",
-        ],
+        slogan: { before: "Dare ", accent: "colore", after: "", end: "all’ordinario." },
+        identity: {
+          lead: "Yuwei Li è communication designer e frontend developer a Milano, oggi a POLI.design.",
+          rest: " Identità visive, interfacce e siti web per studi creativi e organizzazioni orientate al design.",
+        },
         cta: "Parliamone →",
+        scrollDown: "Scorri",
       },
       aboutPreview: {
         title: "Dall’idea al lancio.",
@@ -248,6 +256,9 @@ const dictionaries: Record<Locale, Dictionary> = {
       socialLinksAria: "Social links",
       language: "Language",
       switchLanguage: "Switch to Italian",
+      theme: "Theme",
+      themeLight: "Light",
+      themeDark: "Dark",
     },
     common: {
       skipToMain: "Skip to main content",
@@ -256,14 +267,13 @@ const dictionaries: Record<Locale, Dictionary> = {
     home: {
       hero: {
         basedIn: "Based in Milan, working with international clients",
-        description:
-          "I create visual identities, digital interfaces and custom websites for creative studios and design-led organisations.",
-        emphasizedTerms: [
-          "visual identities",
-          "digital interfaces",
-          "custom websites",
-        ],
+        slogan: { before: "Bring ", accent: "color", after: " to the", end: "ordinary." },
+        identity: {
+          lead: "Yuwei Li is a communication designer and frontend developer in Milan, currently at POLI.design.",
+          rest: " Visual identities, interfaces and websites for creative studios and design-led organisations.",
+        },
         cta: "Get in touch →",
+        scrollDown: "Scroll Down",
       },
       aboutPreview: {
         title: "From concept to launch.",

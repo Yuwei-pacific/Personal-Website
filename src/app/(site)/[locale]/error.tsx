@@ -38,7 +38,7 @@ export default function Error({
         <p className="text-label font-semibold uppercase text-design-light-text-muted">
           {dictionary.errors.errorEyebrow}
         </p>
-        <h1 className="text-balance text-3xl font-semibold tracking-tight text-design-light-text-primary sm:text-section">
+        <h1 className="text-balance font-display text-display-sm tracking-display text-design-light-text-primary sm:text-display">
           {dictionary.errors.errorTitle}
         </h1>
         <p className="max-w-xl text-body text-design-light-text-secondary">
@@ -48,7 +48,7 @@ export default function Error({
           <button
             type="button"
             onClick={reset}
-            className="border-b-2 border-current text-small font-semibold text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"
+            className="border-b-2 border-accent text-small font-semibold text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"
           >
             {dictionary.errors.retry}
           </button>

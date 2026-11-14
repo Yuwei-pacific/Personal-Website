@@ -7,6 +7,7 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { StaggerReveal } from "@/components/ui/stagger-reveal";
 import { RevealText } from "@/components/ui/reveal-text";
 import { Parallax } from "@/components/ui/parallax";
+import { Sheet } from "@/components/ui/sheet";
 import { SkillsMarquee } from "@/components/ui/skills-marquee";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -37,10 +38,12 @@ export function AboutPageContent({
     infoRowFocusClassName,
   );
   return (
+    // 两张纸叠放（见 ui/sheet.tsx）：自我介绍（纸）被履历（纸 2）盖住
     <main id="main-content" className="relative z-10 min-h-screen w-full bg-background">
-      <div className="mx-auto flex max-w-content flex-col gap-gap-section px-container pb-7 pt-28 sm:gap-gap-section-sm sm:px-container-sm sm:pb-12 sm:pt-36">
-        {/* Intro: 大字逐词点亮的自我介绍，人像与文字左右排版 */}
-        <div className="flex flex-col gap-10">
+      <Sheet className="surface-base bg-background md:flex md:flex-col">
+        {/* Intro: 大字逐词点亮的自我介绍，人像与文字左右排版。
+            这张纸至少一屏高：介绍在上、基本信息贴底，把一屏撑满而不是在下方留空 */}
+        <div className="mx-auto flex w-full max-w-content flex-1 flex-col justify-between gap-10 px-container pb-7 pt-28 sm:px-container-sm sm:pb-12 sm:pt-36">
           {/* Edwin Le style layout - Image absolutely positioned on the right, overlapping the text on the left */}
           <div className="relative pb-8 sm:pb-0">
             {/* Portrait on the right side — outer div owns position, inner Parallax
@@ -73,7 +76,7 @@ export function AboutPageContent({
                 text={dictionary.about.intro}
                 maskTargetId="about-page-portrait-mask"
                 maskImageSrc="/Profile_Yuwei_mask.webp"
-                className="mt-4 text-3xl font-semibold leading-[1.2] tracking-tight sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.15]"
+                className="mt-4 font-display text-3xl leading-[1.2] tracking-tight sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.15]"
               />
             </div>
           </div>
@@ -104,9 +107,11 @@ export function AboutPageContent({
             </div>
           </ScrollReveal>
         </div>
+      </Sheet>
 
+      <Sheet fill={false} className="surface-alt bg-background">
         {/* Resume + Capabilities */}
-        <div className="flex flex-col gap-12 sm:gap-16">
+        <div className="mx-auto flex max-w-content flex-col gap-12 px-container py-panel sm:gap-16 sm:px-container-sm sm:py-panel-sm">
           <ScrollReveal>
             <div className="flex items-baseline gap-1.5">
               <h2 className="text-3xl font-bold tracking-tight text-design-light-text-primary sm:text-section">
@@ -169,12 +174,12 @@ export function AboutPageContent({
             )}
           </ScrollReveal>
         </div>
-      </div>
 
-      {/* 技能轮播展示 */}
-      <div className="pb-12">
-        <SkillsMarquee />
-      </div>
+        {/* 技能轮播展示 */}
+        <div className="pb-12">
+          <SkillsMarquee />
+        </div>
+      </Sheet>
     </main>
   );
 }

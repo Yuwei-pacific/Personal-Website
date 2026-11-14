@@ -36,7 +36,7 @@ export function NextProject({
       data-overscroll-dark
       href={localizedPath(locale, `/projects/${project.slug}`)}
       onClick={() => claimCoverTransition(coverRef.current)}
-      className="group block border-t border-design-dark-border-strong bg-design-dark-bg px-edge py-panel text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-design-dark-text-primary sm:px-edge-sm sm:py-panel-sm"
+      className="group block bg-design-dark-bg px-edge py-panel text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-design-dark-text-primary sm:px-edge-sm sm:py-panel-sm"
     >
       <div className="grid grid-cols-1 items-end gap-x-4 gap-y-8 md:grid-cols-12">
         <div className="md:col-span-8">
@@ -45,7 +45,7 @@ export function NextProject({
             <span aria-hidden="true">{String(position).padStart(2, "0")}</span>
           </p>
           {/* 箭头用不换行空格拴在标题最后一个词上，避免单独掉到下一行 */}
-          <p className="mt-4 text-[11vw] font-semibold leading-[0.95] tracking-display sm:text-[clamp(3rem,7vw,6.5rem)]">
+          <p className="mt-4 font-display text-[11vw] leading-[0.95] tracking-display sm:text-[clamp(3rem,7vw,6.5rem)]">
             {project.title}
             {" "}
             <span

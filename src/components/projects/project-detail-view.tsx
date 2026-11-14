@@ -4,6 +4,7 @@ import { MaskedTextHeading } from "@/components/ui/masked-text-heading";
 import { Parallax } from "@/components/ui/parallax";
 import { SanityImage } from "@/components/ui/sanity-image";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { Sheet } from "@/components/ui/sheet";
 import { buildScaledUrl } from "@/lib/media";
 import { getExternalLinkProps } from "@/lib/safe-url";
 import type { Project, ProjectDetail } from "@/lib/view-models/types";
@@ -66,6 +67,9 @@ export function ProjectDetailView({
   return (
     // main 覆盖整篇正文：浅色首屏 + 深色内容区 + 画廊 + 下一个项目都属于页面主体
     <main id="main-content" className="relative min-h-screen text-design-light-text-primary">
+      {/* 三张纸叠放（见 ui/sheet.tsx）：首屏 + 封面（纸）→ 正文（纸 2）→ 下一个项目（纸）。
+          为了不让整份文件多缩进一层，Sheet 的子元素保持原缩进 */}
+      <Sheet className="surface-base bg-background">
       {/* ── 首屏：第一屏内交代清楚「是什么、我做了什么、去哪看」 ── */}
       <header className="bg-design-light-bg px-edge pt-28 sm:px-edge-sm sm:pt-32">
         <Link
@@ -78,7 +82,7 @@ export function ProjectDetailView({
         <MaskedTextHeading
           as="h1"
           text={project.title}
-          className="mt-6 text-balance text-[13vw] font-semibold leading-[0.95] tracking-display sm:mt-8 sm:text-[clamp(3.5rem,10vw,9rem)]"
+          className="mt-6 text-balance font-display text-[13vw] leading-[0.95] tracking-display sm:mt-8 sm:text-[clamp(3.5rem,10vw,9rem)]"
         />
 
         <div className="mt-10 grid grid-cols-1 gap-x-4 gap-y-10 pb-10 sm:mt-14 sm:pb-14 md:grid-cols-12">
@@ -97,7 +101,7 @@ export function ProjectDetailView({
                     <a
                       href={link.href}
                       {...getExternalLinkProps(link.href)}
-                      className="inline-flex min-h-11 touch-manipulation items-center gap-2 border-b-2 border-current text-lg font-semibold leading-[1.3] tracking-[-0.02em] transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:min-h-0 sm:text-xl"
+                      className="inline-flex min-h-11 touch-manipulation items-center gap-2 border-b-2 border-accent text-lg font-semibold leading-[1.3] tracking-[-0.02em] transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:min-h-0 sm:text-xl"
                     >
                       {link.label}
                       <span aria-hidden="true">↗</span>
@@ -165,9 +169,11 @@ export function ProjectDetailView({
         </CoverTransitionTarget>
       ) : null}
 
-      {/* ── 正文、Credits、画廊：同一块深色面板，共用章节间距 ── */}
+      </Sheet>
+
+      {/* ── 正文、Credits、画廊：同一张纸，共用章节间距 ── */}
+      <Sheet className="surface-alt bg-background">
       <div
-        data-overscroll-dark
         className="bg-design-dark-bg px-edge py-section text-design-dark-text-primary sm:px-edge-sm sm:py-section-sm"
       >
         <div className={`flex flex-col ${CHAPTER_GAP}`}>
@@ -227,8 +233,12 @@ export function ProjectDetailView({
         </div>
       </div>
 
+      </Sheet>
+
       {next ? (
-        <NextProject project={next.project} position={next.position} label={d.nextProject} locale={locale} />
+        <Sheet fill={false} className="surface-base bg-background">
+          <NextProject project={next.project} position={next.position} label={d.nextProject} locale={locale} />
+        </Sheet>
       ) : null}
     </main>
   );

@@ -8,6 +8,7 @@ import { AboutPreview } from "@/components/sections/home/about-preview";
 import { Hero } from "@/components/sections/home/hero";
 import { ProjectsSection } from "@/components/sections/home/projects-section";
 import { JsonLd, personSchema, websiteSchema } from "@/components/seo/json-ld";
+import { Sheet } from "@/components/ui/sheet";
 import { sanityFetch } from "@/sanity/fetch";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -92,17 +93,25 @@ export default async function HomePage({
       {/* 顶部导航，位于 main 之外（landmark 语义 + skip link 才有意义） */}
       <Navbar locale={rawLocale} dictionary={dictionary} />
       <main id="main-content">
+        {/* 三张纸叠放：纸 → 纸 2 → 纸，后一张滚上来盖住前一张（见 ui/sheet.tsx）。
+            页脚在 main 之外，是每页唯一反转的区块。 */}
         {/* 首页主视觉区 */}
-        <Hero dictionary={dictionary} />
-        {/* 关于我预览：完整履历与能力信息位于 /about */}
-        <AboutPreview locale={rawLocale} dictionary={dictionary} />
+        <Sheet className="surface-base bg-background">
+          <Hero dictionary={dictionary} />
+        </Sheet>
+        {/* 关于我预览：完整履历与能力信息位于 /about。内容不满一屏时在纸上垂直居中 */}
+        <Sheet className="surface-alt bg-background md:flex md:flex-col md:justify-center">
+          <AboutPreview locale={rawLocale} dictionary={dictionary} />
+        </Sheet>
 
         {/* 项目集合：从 CMS 获取的数据传入 */}
-        <ProjectsSection
-          projects={homeData.projects}
-          locale={rawLocale}
-          dictionary={dictionary}
-        />
+        <Sheet className="surface-base bg-background">
+          <ProjectsSection
+            projects={homeData.projects}
+            locale={rawLocale}
+            dictionary={dictionary}
+          />
+        </Sheet>
       </main>
       <Footer locale={rawLocale} dictionary={dictionary} />
     </div>

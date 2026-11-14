@@ -114,7 +114,8 @@ export function CustomCursor() {
         style={{
           width: "24px",
           height: "24px",
-          backgroundColor: "hsl(var(--color-text-primary-dark))",
+          // 差值混合下必须是浅色才能在任何底色上反出来；用不随主题变的纸色
+          backgroundColor: "hsl(var(--color-paper))",
           transformOrigin: "center center",
         }}
       />

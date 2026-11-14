@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTheme } from "@/hooks/use-theme";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/scroll-trigger";
 import { cn } from "@/lib/utils";
 
@@ -52,11 +53,14 @@ export function RevealText({
   maskTargetId,
   maskImageSrc,
   contrastFromColor = "hsl(var(--color-text-primary-light))",
-  contrastToColor = "hsl(var(--color-bg-light))",
+  // 人像本身始终是深色的，压在它上面的字在两种主题下都要用纸色，不能跟着主题底色走
+  contrastToColor = "hsl(var(--color-paper))",
 }: RevealTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const words = text.split(" ");
   const usesContrastMask = Boolean(maskTargetId && maskImageSrc);
+  // 颜色在下面被解析成具体值写进内联 style，主题切换后必须重新解析并重建时间线
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!maskTargetId || !maskImageSrc || !containerRef.current) return;
@@ -217,7 +221,8 @@ export function RevealText({
     }
   }, {
     scope: containerRef,
-    dependencies: [contrastFromColor, contrastToColor, fromColor, text, toColor],
+    dependencies: [contrastFromColor, contrastToColor, fromColor, text, toColor, theme],
+    revertOnUpdate: true,
   });
 
   const renderWords = (wordClassName: string, color: string) =>

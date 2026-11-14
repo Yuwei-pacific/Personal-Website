@@ -18,6 +18,8 @@ const config: Config = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        // 强调色：五色里单取的一滴（浅色 Cobalt / 深色 Coral）。只落在线和点上，文字不染色
+        accent: hslVar("--color-accent"),
         // 分区色板：浅色区用 design-light-*，深色区用 design-dark-*
         design: {
           light: {
@@ -124,7 +126,17 @@ const config: Config = {
       scale: {
         emphasis: "var(--motion-scale-emphasis)",
       },
+      // Geist 只用 Regular（品牌手册第 06 章）：层级靠字号、墨的浓淡和留白，不靠加粗。
+      // 把加粗档位统一压回 400，而不是逐个删掉组件里的 font-semibold ——
+      // 这样新写的组件即使顺手加了粗体也不会破坏规则。
+      fontWeight: {
+        medium: "400",
+        semibold: "400",
+        bold: "400",
+      },
       fontFamily: {
+        // 展示字体：只用于大标题，一屏一次，不小于 40px
+        display: ["var(--font-fraunces)", "Iowan Old Style", "Georgia", "serif"],
         sans: ["var(--font-geist-sans)", ...fontFamily.sans],
         mono: ["var(--font-geist-mono)", ...fontFamily.mono],
       },

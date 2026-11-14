@@ -81,7 +81,7 @@ export function MaskedSectionHeading({
             不给 h2 命名的话读屏拿到的是拆散后的碎片。 */}
         <h2
           aria-label={countAriaLabel ? `${title} ${countAriaLabel}` : title}
-          className="min-w-0 text-display-sm font-semibold tracking-display text-design-dark-text-primary lg:text-display"
+          className="min-w-0 font-display text-display-sm tracking-display text-design-dark-text-primary lg:text-display"
         >
           <span aria-hidden="true" className="inline-block overflow-clip align-bottom">
             <span className="masked-section-heading-item relative inline-block">

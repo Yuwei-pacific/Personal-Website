@@ -142,10 +142,10 @@ export function ProjectGallery({
 
     // 锁滚动时滚动条消失，globals.css 里常驻的 scrollbar-gutter 会在右侧留下一条空槽，
     // 露出 html 的浅色画布底 —— 紧挨着深色 lightbox 会看见一条白边。
-    // lightbox 期间把画布换成深色分区底色，关闭时还原。
+    // lightbox 期间把画布换成墨色（lightbox 在两种主题下都是深色），关闭时还原。
     const html = document.documentElement;
     const previousBackground = html.style.backgroundColor;
-    html.style.backgroundColor = "hsl(var(--color-bg-dark))";
+    html.style.backgroundColor = "hsl(var(--color-ink))";
 
     return () => {
       lenis?.start();
@@ -239,8 +239,8 @@ export function ProjectGallery({
         // 静音自动循环：符合作品集里 UI 演示片段的用法，
         // 保留 controls 让访客能自己解除静音或暂停
         video={{ autoPlay: true, muted: true, loop: true, controls: true, playsInline: true }}
-        // 背景色对齐站点深色分区 token
-        styles={{ container: { backgroundColor: "hsl(var(--color-bg-dark) / 0.95)" } }}
+        // 背景色用不随主题变化的墨色：lightbox 的控件是白色，浅色模式下也必须是深底
+        styles={{ container: { backgroundColor: "hsl(var(--color-ink) / 0.95)" } }}
         controller={{ closeOnBackdropClick: true }}
       />
     </section>
