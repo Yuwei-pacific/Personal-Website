@@ -160,7 +160,10 @@ prepares shaders on first draw — large canvases otherwise flash blank on scrol
 sheets of paper with `position: sticky`; siblings must share one parent and each sheet is at least one
 viewport tall. The home page deliberately does **not** use it: hero, About and Work share one paper
 and scroll normally. Ink appears only where it has a job — the hero (mark, line, slogan word) and Work
-(pools and thread). The footer carries no ink and no canvas, and the home About section is a text-only statement on the Work
+(pools and thread). The footer carries no bloom, no canvas and no interaction: it is the "back cover" to the hero's cover
+— from `lg` up, a large solid mark on the right and a plain SVG line (the hero line without its bloom)
+running from the left edge into the mark's "i", positioned purely in CSS (`--fm-h` / `--fm-w` in
+`layout/footer.tsx`). The home About section is a text-only statement on the Work
 grid (no portrait — the photo appears only on the About page) with a single quiet hand-drawn circle
 around one title word (`about-ink.tsx`, path in `aboutCircle`, word picked by `data-ink-word`).
 A long thread wrapping the portrait and a stirrable, mark-blooming footer

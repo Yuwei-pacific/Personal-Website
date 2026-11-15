@@ -129,14 +129,17 @@ export function Footer({
         ref={innerRef}
         className="relative z-10 px-edge pb-8 pt-16 will-change-transform sm:px-edge-sm sm:pb-10 sm:pt-28"
       >
-        {/* 封底：只有字、一道细线和单色标志，没有墨也没有交互。
-            试过「墨线落进标志 + 整块可划开的墨池」，用户觉得乱（2026-11-15）—— 墨只留在首屏和 Work */}
-        <div className="flex w-full flex-col">
+        {/* 封底：和首屏（封面）是一对。封面是纸上化开的大标志和一根流进「i」的墨线；封底是墨底上同一个构图的
+            「墨的状态」—— 标志实心、单色，线是同一根线去掉晕之后剩下的那一道（用户 2026-11-16：把分隔线换成
+            首屏那种、去掉弥散、安静一点）。没有画布也没有交互：试过「墨线落进小标志 + 整块可划开的墨池」，
+            用户觉得乱（2026-11-15）—— 化开的墨只留在首屏和 Work。
+            --fm-h / --fm-w：大标志的高和宽（标志的墨迹框 30 × 35.5） */}
+        <div className="flex w-full flex-col [--fm-h:clamp(14rem,22vw,23rem)] [--fm-w:calc(var(--fm-h)*30/35.5)]">
           <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.getInTouch}</p>
           {/* 邮箱：这一屏唯一的大标题（Fraunces） */}
           <a
             href={`mailto:${SITE_EMAIL}`}
-            className="group mt-5 flex w-fit max-w-full items-start gap-[0.25em] whitespace-nowrap font-display text-[clamp(1.6rem,6vw,6rem)] leading-none tracking-display text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-4 focus-visible:ring-offset-design-dark-bg"
+            className="group mt-5 flex w-fit max-w-full items-start gap-[0.25em] whitespace-nowrap font-display text-[clamp(1.6rem,6vw,6rem)] leading-none tracking-display text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-4 focus-visible:ring-offset-design-dark-bg lg:text-[clamp(2.5rem,5vw,5.5rem)]"
           >
             <span className="transition-opacity duration-base group-hover:opacity-60">{SITE_EMAIL}</span>
             <span
@@ -147,9 +150,39 @@ export function Footer({
             </span>
           </a>
 
-          <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-10 border-t border-design-dark-border pt-8 sm:mt-20 sm:grid-cols-12">
-            {/* 单色标志：墨的状态（手册：日常都用它），不化开 */}
-            <div className="col-span-2 sm:col-span-3">
+          {/* 分隔线这一行。窄屏是一道细线；lg 起是首屏那根线：从视口左缘出发、略有起伏，流进大标志的「i」。
+              标志挂在这一行上：线落在标志高度的 64.8% 处（墨迹框 y = 33），那里「i」竖笔的中线在宽度的 24.8% */}
+          <div className="relative mt-12 border-t border-design-dark-border sm:mt-20 lg:border-0">
+            {/* 外层定左右端（SVG 自己带固有比例，直接用 left/right 撑不开），里面的线拉伸铺满 */}
+            <div
+              aria-hidden="true"
+              className="absolute -left-edge-sm right-[calc(var(--fm-w)*0.752)] top-[-7px] hidden h-[14px] text-design-dark-text-primary lg:block"
+            >
+              <svg viewBox="0 0 1000 14" preserveAspectRatio="none" className="size-full">
+                <path
+                  d="M0 7C80 3.5 160 3.5 250 7S420 10.5 500 7S670 3.5 750 7S920 9.5 1000 7"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  vectorEffect="non-scaling-stroke"
+                />
+              </svg>
+            </div>
+            <svg
+              viewBox="11 10 30 35.5"
+              role="img"
+              aria-label={SITE_AUTHOR}
+              className="absolute right-0 top-[calc(var(--fm-h)*-0.648)] hidden h-[var(--fm-h)] w-[var(--fm-w)] fill-current text-design-dark-text-primary lg:block"
+            >
+              {MARK_PATHS.map((d) => (
+                <path key={d} d={d} />
+              ))}
+            </svg>
+          </div>
+
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 pt-8 sm:grid-cols-3 lg:w-2/3 lg:pt-10">
+            {/* 窄屏放不下大标志：保留原来的小标志 */}
+            <div className="col-span-2 sm:col-span-3 lg:hidden">
               <svg
                 viewBox="8 7 36 41"
                 role="img"
@@ -162,7 +195,7 @@ export function Footer({
               </svg>
             </div>
 
-            <nav aria-label={dictionary.footer.aria} className="sm:col-span-3">
+            <nav aria-label={dictionary.footer.aria}>
               <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.site}</p>
               <ul className="mt-4 flex flex-col gap-2">
                 {siteLinks.map((link) => (
@@ -175,7 +208,7 @@ export function Footer({
               </ul>
             </nav>
 
-            <div className="sm:col-span-3">
+            <div>
               <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.elsewhere}</p>
               <ul className="mt-4 flex flex-col gap-2">
                 {SOCIAL_LINKS.map((social) => (
@@ -188,7 +221,7 @@ export function Footer({
               </ul>
             </div>
 
-            <div className="col-span-2 sm:col-span-3">
+            <div className="col-span-2 sm:col-span-1">
               <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.basedIn}</p>
               <p className="mt-4 text-small text-design-dark-text-secondary">
                 {SITE_LOCATIONS[locale]}
