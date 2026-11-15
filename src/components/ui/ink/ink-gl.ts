@@ -111,8 +111,10 @@ uniform float uDisplacement;    // 边缘起伏的幅度（CSS px）
 uniform float uWarpFrequency;   // 起伏噪声的频率（每 CSS px）
 uniform float uWeightFrequency; // 紧 / 松混合噪声的频率（每 CSS px）
 uniform float uSpreadBias;      // 竖向偏置：> 0 时越往下越渗得开（标志的「上紧下松」）
-uniform float uBreath;          // 呼吸的幅度（明暗值）
-uniform float uBreathFrequency; // 呼吸噪声的频率（每 CSS px）
+uniform float uBreath;          // 呼吸改变明暗的幅度
+uniform float uBreathWeight;    // 呼吸改变紧 / 松比例的幅度
+uniform float uBreathPeriod;    // 一呼一吸的周期（秒）
+uniform float uBreathFrequency; // 呼吸相位噪声的频率（每 CSS px）
 uniform float uGrain;
 uniform float uGrainFrequency;
 uniform float uMaxShift;
@@ -173,16 +175,21 @@ void main() {
   float core = texture(uCore, uv).r;
 
   // 3. 紧 / 松按低频噪声逐像素混合；混合图案自己也在极慢地漂移
+  //    呼吸（4）也作用在这里：吸气时往 loose 走（晕渗开），呼气时往 tight 收
+  float phase = fbm(q * uBreathFrequency + vec2(t * 0.02, -t * 0.015)) * 9.42;
+  float breath = sin(t * 6.2832 / uBreathPeriod + phase);
   float weightNoise = fbm(q * uWeightFrequency + vec2(t * 0.012, t * 0.008));
-  float weight = clamp(3.5 * weightNoise - 1.23 + uSpreadBias * (p.y / uSize.y - 0.45), 0.0, 1.0);
+  float weight = clamp(
+    3.5 * weightNoise - 1.23 + uSpreadBias * (p.y / uSize.y - 0.45) + breath * uBreathWeight,
+    0.0, 1.0
+  );
   float value = mix(tight, loose, weight);
 
-  // 4. 呼吸：一张随时间漂移的低频噪声，让晕局部往外鼓、往里收
-  float breath = fbm(q * uBreathFrequency + vec2(t * 0.07, -t * 0.05)) - 0.5;
-  value = clamp(value + breath * 2.0 * uBreath, 0.0, 1.0);
-
+  // 4. 呼吸：每一处按自己的相位做正弦起伏（相位取自一张低频噪声，各部位此起彼伏而不是整体齐跳），
+  //    晕跟着一胀一缩、变粗变细。只靠漂移的噪声太含糊，看不出是在呼吸
   // 5. 细墨芯：只在 core 里画了形状的地方生效（首屏墨线那一丝墨），别处 core = 1 不影响
   value = min(value, core);
+  value = clamp(value - breath * uBreath, 0.0, 1.0);
 
   // 6. 口子里露出纸
   value = mix(value, 1.0, cut * 0.9);
@@ -313,14 +320,18 @@ export type InkLayout = {
   params: InkParams;
 };
 
-const GRAIN_AMOUNT = 0.065;
-const GRAIN_FREQUENCY = 0.67;
-// 呼吸：幅度（明暗值）与空间尺度（约 240px 一个起伏）。时间上的周期由着色器里的漂移速度决定，约 10 秒
-const BREATH = 0.075;
-const BREATH_FREQUENCY = 1 / 240;
-// 筷子：影响半径、位移上限（CSS px），以及墨流回来的快慢（时间常数，秒）
-const TRAIL_RADIUS = 64;
-const TRAIL_MAX_SHIFT = 42;
+// 颗粒：幅度，以及每颗大约占几个设备像素。按设备像素定，高分屏上颗粒更细；
+// 小于约 1.5 个设备像素会混叠成闪烁的白噪声
+const GRAIN_AMOUNT = 0.05;
+const GRAIN_DEVICE_PX = 1.6;
+// 呼吸：改变明暗与紧 / 松比例的幅度、一呼一吸的周期（秒），以及相位噪声的空间尺度（约 320px）
+const BREATH = 0.07;
+const BREATH_WEIGHT = 0.35;
+const BREATH_PERIOD = 7;
+const BREATH_FREQUENCY = 1 / 320;
+// 筷子：影响半径、位移上限（CSS px，按一根筷子的粗细取，太大会把整块墨都搅动），以及墨流回来的快慢（时间常数，秒）
+const TRAIL_RADIUS = 30;
+const TRAIL_MAX_SHIFT = 22;
 const TRAIL_SHIFT_SETTLE = 0.9;
 const TRAIL_CUT_SETTLE = 0.55;
 // 划多快算「用力」：px/s
@@ -331,7 +342,7 @@ const TRAIL_SCALE = 0.25;
 const REVEAL_DURATION = 4.4;
 const REVEAL_PAUSE = 0.18;
 // 画布像素密度上限：晕本来就是柔的，再高只会多算像素
-const MAX_DPR = 1.5;
+const MAX_DPR = 2;
 const BLUR_SCALE = 0.5;
 // 细墨芯的模糊（CSS px）：只去掉锯齿，不让它化开
 const CORE_SIGMA = 1;
@@ -413,6 +424,7 @@ export class InkRenderer {
   // 拨动场是否还没回到原样；静下来之后不再每帧更新它
   private trailActive = false;
   private settleTime = 0;
+  private dpr = 1;
   private unsubscribe: (() => void) | null = null;
   private visible = true;
   private needsDraw = true;
@@ -458,6 +470,8 @@ export class InkRenderer {
       "uWeightFrequency",
       "uSpreadBias",
       "uBreath",
+      "uBreathWeight",
+      "uBreathPeriod",
       "uBreathFrequency",
       "uGrain",
       "uGrainFrequency",
@@ -480,6 +494,7 @@ export class InkRenderer {
     const { gl } = this;
     this.layout = layout;
     const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+    this.dpr = dpr;
     this.canvas.width = Math.max(1, Math.round(layout.width * dpr));
     this.canvas.height = Math.max(1, Math.round(layout.height * dpr));
 
@@ -683,9 +698,11 @@ export class InkRenderer {
     gl.uniform1f(u.uWeightFrequency, params.weightFrequency);
     gl.uniform1f(u.uSpreadBias, params.spreadBias);
     gl.uniform1f(u.uBreath, animated ? BREATH : 0);
+    gl.uniform1f(u.uBreathWeight, animated ? BREATH_WEIGHT : 0);
+    gl.uniform1f(u.uBreathPeriod, BREATH_PERIOD);
     gl.uniform1f(u.uBreathFrequency, BREATH_FREQUENCY);
     gl.uniform1f(u.uGrain, GRAIN_AMOUNT);
-    gl.uniform1f(u.uGrainFrequency, GRAIN_FREQUENCY);
+    gl.uniform1f(u.uGrainFrequency, this.dpr / GRAIN_DEVICE_PX);
     gl.uniform1f(u.uMaxShift, TRAIL_MAX_SHIFT);
 
     const reveal = params.reveal;

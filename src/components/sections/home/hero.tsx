@@ -87,7 +87,7 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
 
         {/* 墨线这一行：线画在它的竖向中线上，左端贴视口左缘、右端流进标志的「i」。
             行高要装得下两侧的晕，晕才不会压到口号和身份段上。宽度只给 SVG 兜底用 */}
-        <InkLineSlot className="-ml-edge h-[clamp(5.5rem,14svh,8.5rem)] w-[100vw] sm:-ml-edge-sm lg:w-[calc(100vw-var(--mark-r)-var(--mark-w)*0.56)]" />
+        <InkLineSlot className="-ml-edge h-[clamp(4.5rem,11svh,7rem)] w-[100vw] sm:-ml-edge-sm lg:w-[calc(100vw-var(--mark-r)-var(--mark-w)*0.56)]" />
 
         {/* 宽度不超过标志左缘（留 3rem），中等宽度的屏幕上身份段不会钻到标志底下 */}
         <p className="hero-details max-w-[46ch] text-pretty lg:max-w-[min(46ch,calc(100vw-var(--mark-r)-var(--mark-w)-6rem))] text-[1.25rem] leading-snug sm:text-2xl">

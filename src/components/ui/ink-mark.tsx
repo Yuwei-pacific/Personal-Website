@@ -30,7 +30,7 @@ import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode 
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 import { cn } from "@/lib/utils";
 
-import { COLOR_TABLES, MARK_PATHS, WORD_DARK_TABLE } from "./ink/ink-tables";
+import { COLOR_TABLES, MARK_PATHS } from "./ink/ink-tables";
 import { InkSurface, useInkSupported, type InkSpec } from "./ink/ink-surface";
 
 type Mode = keyof typeof COLOR_TABLES;
@@ -109,12 +109,9 @@ function Bloom({
   label,
   className,
   bleed = false,
-  invertInDark = false,
   children,
 }: {
   bleed?: boolean;
-  /** 深色模式下芯用纸色（文字用）；标志保持墨芯 */
-  invertInDark?: boolean;
   mode: Mode;
   uid: string;
   viewBox: string;
@@ -131,7 +128,7 @@ function Bloom({
   const filterId = `${uid}-${mode}-bloom`;
   const wetId = `${uid}-${mode}-wet`;
   const maskId = `${uid}-${mode}-mask`;
-  const [r, g, b, a] = mode === "dark" && invertInDark ? WORD_DARK_TABLE : COLOR_TABLES[mode];
+  const [r, g, b, a] = COLOR_TABLES[mode];
   const { displacement, tight, loose } = shape;
   const region = shape.region ?? REGION;
   const visible = insetRegion(region, shape.inset ?? INSET);
@@ -290,9 +287,7 @@ function Ink({
   children,
   style,
   bleed = false,
-  invertInDark = false,
 }: InkProps & {
-  invertInDark?: boolean;
   viewBox: string;
   shape: Shape;
   children: ReactNode;
@@ -313,7 +308,6 @@ function Ink({
     seep: seep && !reducedMotion,
     label,
     bleed,
-    invertInDark,
   };
 
   return (
@@ -409,7 +403,6 @@ function InkWordSvg({ word, ...props }: InkProps & { word: string }) {
       {...props}
       reveal={false}
       bleed
-      invertInDark
       viewBox={`${box.x} ${box.y} ${box.width} ${box.height}`}
       shape={shape}
       // 容器按字形比例定高：宽度由外面给，高度跟着走
@@ -496,8 +489,8 @@ function InkLineSvg({ className }: { className?: string }) {
 // ── WebGL 版本（对外） ─────────────────────────────────────────────────
 
 const MARK_TABLES = { light: COLOR_TABLES.light, dark: COLOR_TABLES.dark };
-// 文字在深色模式下芯用纸色（见 WORD_DARK_TABLE 的说明）
-const WORD_TABLES = { light: COLOR_TABLES.light, dark: WORD_DARK_TABLE };
+// 单词和标志用同一张表：深色模式下芯也是墨色，像日食 —— 墨字压在夜色上，靠一圈彩边显出来（用户 2026-11-15 定）
+const WORD_TABLES = MARK_TABLES;
 
 const even = (n: number) => ({ top: n, right: n, bottom: n, left: n });
 // 晕画在盒子外面要留多少：松的那档模糊约 4σ 才淡尽；鼠标划过时墨还会被推出去几十 px，至少留 56
@@ -665,12 +658,12 @@ export function InkWord({ word, className }: { word: string; className?: string 
 // 「i」竖笔中线（标志路径坐标）：上端 (22.8, 19.3)，每往下 1 个单位往左 0.315
 const STEM = { x: 22.8, y: 19.3, slope: -0.315, minY: 21, maxY: 43 };
 // 墨线晕带的半高（每用户单位）、中心的墨量（0–1，1 = 纯墨）与往两边淡出的曲线
-const LINE_BAND = 30;
-const LINE_PEAK = 0.72;
+const LINE_BAND = 20;
+const LINE_PEAK = 0.68;
 const LINE_FALLOFF = 1.4;
 // 墨芯的粗细（CSS px）；裹在外面那圈渐变的半宽（每用户单位）与贴着墨芯处的明暗（0.34 ≈ Cobalt）
 const LINE_CORE = 4;
-const LINE_HALO = 8;
+const LINE_HALO = 7;
 const LINE_HALO_INNER = 0.34;
 // 窄屏不显示标志时的尺度（px / 用户单位），与 1440 宽时标志的尺度相近
 const FALLBACK_UNIT = 2.6;
