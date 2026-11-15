@@ -16,6 +16,8 @@ import { buildCropUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/lib/view-models/types";
 
+import { InkFigure } from "./ink-figure";
+
 // 精选的三种位置，按顺序循环：左右交错，各项之间留大段空白给墨线（样稿里定下的列位）。
 // 不导出：这是客户端组件文件，服务端组件从这里拿到的普通值只是一个客户端引用（undefined）
 // 手机上封面左右各收进 1rem：墨滩比封面外扩 32px，不收进就会被屏幕边缘切平；
@@ -65,6 +67,11 @@ export function FeaturedWork({
             data-cover-transition
             className="absolute inset-0 size-full object-cover opacity-0 grayscale transition-[filter,opacity] duration-slow ease-design-out group-data-[focused=true]/cover:grayscale-0 group-data-[ink=off]/work:opacity-100 motion-reduce:transition-none"
           />
+        ) : null}
+        {/* 第二个精选的墨滩上沿坐着「对着电脑」的小人（用户定稿：跟着第二个精选，不绑定具体项目）。
+            位置按设计稿换算成封面占位的比例：左 39.6%、宽 37.25%，脚下比封面上沿低一点点（墨滩外扩的那圈） */}
+        {position === 2 ? (
+          <InkFigure figure="laptop" style={{ left: "39.6%", width: "37.25%", top: 0, transform: "translateY(-94%)" }} />
         ) : null}
       </div>
       <div className={layout.text}>

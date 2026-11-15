@@ -75,10 +75,8 @@ export function WorkSection({
           <WorkIndex
             projects={index}
             offset={featured.length}
-            total={total}
             locale={locale}
             title={copy.index}
-            countLabel={copy.countLabel}
           />
         ) : null}
       </div>

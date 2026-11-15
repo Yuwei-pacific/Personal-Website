@@ -8,7 +8,6 @@ import { AboutPreview } from "@/components/sections/home/about-preview";
 import { Hero } from "@/components/sections/home/hero";
 import { WorkSection } from "@/components/sections/home/work/work-section";
 import { JsonLd, personSchema, websiteSchema } from "@/components/seo/json-ld";
-import { Sheet } from "@/components/ui/sheet";
 import { sanityFetch } from "@/sanity/fetch";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -93,21 +92,20 @@ export default async function HomePage({
       {/* 顶部导航，位于 main 之外（landmark 语义 + skip link 才有意义） */}
       <Navbar locale={rawLocale} dictionary={dictionary} />
       <main id="main-content">
-        {/* 三张纸叠放：纸 → 纸 2 → 纸，后一张滚上来盖住前一张（见 ui/sheet.tsx）。
-            页脚在 main 之外，是每页唯一反转的区块。 */}
-        {/* 首页主视觉区 */}
-        <Sheet className="surface-base bg-background">
+        {/* 三段正常往下排，同一张纸作底（用户在 Figma 定稿：About 不再用纸 2）。页脚在 main 之外，是每页唯一反转的区块。
+            首页不用叠纸（ui/sheet.tsx）：About 的墨线从页面左缘进来、绕过人像，在区块下缘接上 Work 的墨线 ——
+            叠纸让每张纸贴住屏幕、下一张滑上来盖住，线在纸边被一刀刀切断，同一屏里还会出现两截对不上的线 */}
+        <div className="surface-base bg-background">
           <Hero dictionary={dictionary} />
-        </Sheet>
-        {/* 关于我预览：完整履历与能力信息位于 /about。内容不满一屏时在纸上垂直居中 */}
-        <Sheet className="surface-alt bg-background md:flex md:flex-col md:justify-center">
+        </div>
+        {/* 关于我预览：完整履历与能力信息位于 /about */}
+        <div className="surface-base bg-background">
           <AboutPreview locale={rawLocale} dictionary={dictionary} />
-        </Sheet>
-
+        </div>
         {/* 作品：精选在墨滩里、其余进目录（见 sections/home/work/work-section.tsx） */}
-        <Sheet className="surface-base bg-background">
+        <div className="surface-base bg-background">
           <WorkSection featured={work.featured} index={work.index} locale={rawLocale} dictionary={dictionary} />
-        </Sheet>
+        </div>
       </main>
       <Footer locale={rawLocale} dictionary={dictionary} />
     </div>

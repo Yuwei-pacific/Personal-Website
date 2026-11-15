@@ -497,11 +497,11 @@ const even = (n: number) => ({ top: n, right: n, bottom: n, left: n });
 const bleedPadding = (loose: number) => Math.max(56, Math.ceil(loose * 4));
 
 // 标志：盒子 = 墨迹框（MARK_INK_BOX，196×228 个用户单位）。参数沿用 SVG 版、按盒子换算成 px
-const MARK_BOX = { x: 282, y: 96, width: 196, height: 228 };
+export const MARK_BOX = { x: 282, y: 96, width: 196, height: 228 };
 const markPaths = () => MARK_PATHS.map((d) => new Path2D(d));
 
 // 把标志画进 (x, y) 处、每个用户单位 u px 的墨迹框里
-function drawMark(ctx: CanvasRenderingContext2D, x: number, y: number, u: number) {
+export function drawMark(ctx: CanvasRenderingContext2D, x: number, y: number, u: number) {
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(u, u);
@@ -513,7 +513,7 @@ function drawMark(ctx: CanvasRenderingContext2D, x: number, y: number, u: number
 }
 
 // 标志化开的参数（按每个用户单位 u px 换算）
-const markParams = (u: number) => ({
+export const markParams = (u: number) => ({
   tight: 4 * u,
   loose: 15 * u,
   displacement: 4 * u,
@@ -697,6 +697,16 @@ function relativeRect(element: Element | null, box: DOMRect) {
   return { x: r.left - box.left, y: r.top - box.top, width: r.width, height: r.height };
 }
 
+/**
+ * 「i」竖笔的中线在高度 y 处的 x（画布坐标）：墨线落进标志时，末端藏在这一笔的墨里。
+ * mark 是墨迹框的位置，u 是每个用户单位多少 px。首屏和页脚的墨线都用它
+ */
+export function markStemX(mark: { x: number; y: number }, u: number, y: number) {
+  const py = clamp(((y - mark.y) / u + MARK_BOX.y - 27) / 6.6, STEM.minY, STEM.maxY);
+  const px = STEM.x + (py - STEM.y) * STEM.slope;
+  return mark.x + (210 + 6.6 * px - MARK_BOX.x) * u;
+}
+
 function buildHero(width: number, height: number, box: HTMLElement): InkSpec {
   const boxRect = box.getBoundingClientRect();
   const slots = heroSlots(box);
@@ -708,11 +718,7 @@ function buildHero(width: number, height: number, box: HTMLElement): InkSpec {
 
   // 墨线右端：「i」竖笔中线在这一高度上的 x；没有标志时一直画出右缘
   let lineEnd = width + 200;
-  if (mark && lineY !== null) {
-    const py = clamp(((lineY - mark.y) / u + MARK_BOX.y - 27) / 6.6, STEM.minY, STEM.maxY);
-    const px = STEM.x + (py - STEM.y) * STEM.slope;
-    lineEnd = mark.x + (210 + 6.6 * px - MARK_BOX.x) * u;
-  }
+  if (mark && lineY !== null) lineEnd = markStemX(mark, u, lineY);
 
   // 显影：水落在标志上，漫开时顺着墨线往左流出去；没有标志时从墨线右端开始
   const drop = mark
@@ -749,6 +755,7 @@ function buildHero(width: number, height: number, box: HTMLElement): InkSpec {
       ctx.fillRect(-200, lineY - halo, lineEnd + 200, halo * 2);
       ctx.fillStyle = "#000";
       ctx.fillRect(-200, lineY - LINE_CORE / 2, lineEnd + 200, LINE_CORE);
+
     },
     params: {
       ...markParams(u),

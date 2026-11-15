@@ -72,6 +72,7 @@ export function InkSurface({
   watch,
   focus,
   video,
+  paused = false,
   fallback,
 }: {
   className?: string;
@@ -86,6 +87,8 @@ export function InkSurface({
   watch?: (box: HTMLElement) => (Element | null)[];
   /** 当前焦点：params.focusRegions 里第几个完整化开；-1 = 都收拢。不传 = 不用焦点 */
   focus?: number;
+  /** 暂停：不再每帧画（如目录预览淡出之后）。画布保留最后一帧，渲染器与纹理都留着，恢复时不用重建 */
+  paused?: boolean;
   /** 化开时在墨芯里播放的视频与它所占的区域（盒子坐标，CSS px）；element 为 null = 淡回静止封面 */
   video?: { element: HTMLVideoElement | null; rect?: { x: number; y: number; width: number; height: number } };
   fallback: ReactNode;
@@ -102,10 +105,18 @@ export function InkSurface({
   const { theme } = useTheme();
   const reducedMotion = usePrefersReducedMotion();
 
+  const pausedRef = useRef(paused);
+  const visibilityRef = useRef<() => void>(() => {});
+
   useEffect(() => {
     buildRef.current = build;
     watchRef.current = watch;
   });
+
+  useEffect(() => {
+    pausedRef.current = paused;
+    visibilityRef.current();
+  }, [paused]);
 
   // 渲染器只建一次（不支持时画布不存在，这里什么也不做）
   useEffect(() => {
@@ -123,7 +134,7 @@ export function InkSurface({
 
   // 主题：只换查找表
   useEffect(() => {
-    rendererRef.current?.setTables(theme === "dark" ? tables.dark : tables.light);
+    rendererRef.current?.setTables(theme === "dark" ? tables.dark : tables.light, theme === "dark");
   }, [theme, tables]);
 
   // 尺寸：盒子（或被 watch 的元素）变了才重画源图、重算模糊（这一步较贵）
@@ -259,11 +270,12 @@ export function InkSurface({
     };
     const update = () => {
       frame = 0;
-      rendererRef.current?.setVisible(intersecting && !covered());
+      rendererRef.current?.setVisible(intersecting && !pausedRef.current && !covered());
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);
     };
+    visibilityRef.current = schedule;
 
     const observer = new IntersectionObserver(
       ([entry]) => {

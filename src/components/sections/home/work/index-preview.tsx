@@ -10,7 +10,7 @@ import { InkSurface, useInkSupported, type InkSpec } from "@/components/ui/ink/i
 import { COLOR_TABLES } from "@/components/ui/ink/ink-tables";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 
-import { coverVideo, loadCoverImage, playOnly } from "./cover-media";
+import { coverVideo, endPreviewVideo, loadCoverImage, playPreviewVideo } from "./cover-media";
 import { POOL_PAD, U, WORK_INK, drawCover, poolPath } from "./ink-geometry";
 
 const TABLES = { light: COLOR_TABLES.light, dark: COLOR_TABLES.dark };
@@ -74,17 +74,28 @@ export function IndexPreview({ item, top }: { item: PreviewItem | null; top: num
   }, [url, id]);
 
   const video = item?.video && supported && !reducedMotion ? coverVideo(item.id, item.video) : null;
+  // 悬停期间播这个项目的视频；移开后把播放交还给焦点作品
+  const active = Boolean(item);
   useEffect(() => {
-    if (item) playOnly(video);
-  }, [item, video]);
+    if (active) playPreviewVideo(video);
+    else endPreviewVideo();
+  }, [active, video]);
+  useEffect(() => endPreviewVideo, []);
 
   const image = shown ? (images[shown.id] ?? null) : null;
+
+  // 淡出完了就停画（画布透明时没必要每帧算）；减弱动画时没有淡出过渡，移开就停
+  const [fadedOut, setFadedOut] = useState(false);
+  const paused = !item && (fadedOut || reducedMotion);
 
   return (
     <div
       aria-hidden="true"
       className="pointer-events-none absolute right-[12%] z-10 hidden transition-[top,opacity] duration-slow ease-design-out motion-reduce:transition-none md:block"
       style={{ top: top - PREVIEW_HEIGHT / 2, width: PREVIEW_WIDTH, height: PREVIEW_HEIGHT, opacity: item ? 1 : 0 }}
+      onTransitionEnd={(event) => {
+        if (event.propertyName === "opacity") setFadedOut(!item);
+      }}
     >
       {shown && supported ? (
         <InkSurface
@@ -93,6 +104,7 @@ export function IndexPreview({ item, top }: { item: PreviewItem | null; top: num
           build={buildPreview(shown, image)}
           buildKey={`preview:${shown.id}:${image ? "image" : "pending"}`}
           video={{ element: video, rect: { x: 0, y: 0, width: PREVIEW_WIDTH, height: PREVIEW_HEIGHT } }}
+          paused={paused}
           fallback={null}
         />
       ) : null}

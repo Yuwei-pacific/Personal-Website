@@ -60,7 +60,7 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
     <section
       ref={ref}
       id="home"
-      className={`relative isolate flex h-[100svh] min-h-[36rem] w-full flex-col overflow-hidden bg-background px-edge sm:px-edge-sm ${MARK_VARS}`}
+      className={`relative isolate z-20 flex h-[100svh] min-h-[36rem] w-full flex-col overflow-x-clip bg-background px-edge sm:px-edge-sm ${MARK_VARS}`}
     >
       {/* 化开的标志和墨线：一块画布铺满首屏，压在文字下面 */}
       <HeroInk className="absolute inset-0" />
@@ -102,7 +102,9 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
         </a>
       </div>
 
-      {/* Scroll Down：底部居中，下半截压在首屏底边外（Figma 里 52/84 露出） */}
+      {/* Scroll Down：底部居中，下半截压在首屏底边外（Figma 里 52/84 露出）。
+          首屏只裁横向（overflow-x-clip）并叠在 About 之上（z-20）：首屏和 About 是同一张纸，
+          往下滚时徽章的下半截要露出来，不能被首屏底边一刀切掉 */}
       <ScrollBadge
         href="#work"
         label={hero.scrollDown}

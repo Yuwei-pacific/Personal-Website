@@ -110,6 +110,7 @@ uniform vec4 uFocusRect[4];     // x, y, width, height（画布 CSS px）
 uniform float uFocusWeight[4];  // 0–1，随滚动缓动
 uniform float uFocusMargin;
 uniform float uFocusFeather;
+uniform float uQuietEdge;       // 焦点之外收拢到哪个明暗为止：浅色 0.36（干净的墨边），深色 0.52（留一丝连贯的 Cobalt）
 // 视频：化开时在墨芯里播放（一次只有一个）。区域与原始尺寸用于 object-fit: cover 的裁切
 uniform sampler2D uVideo;
 uniform vec4 uVideoRect;
@@ -123,6 +124,7 @@ uniform float uTime;            // 秒
 uniform float uFlow;            // 0 = 静止（减弱动画）
 uniform float uDisplacement;    // 边缘起伏的幅度（CSS px）
 uniform float uWarpFrequency;   // 起伏噪声的频率（每 CSS px）
+uniform float uEdgePin;         // > 0 时，起伏在区域上下缘这么多 px 内收为零（与相邻画布接线用）
 uniform float uWeightFrequency; // 紧 / 松混合噪声的频率（每 CSS px）
 uniform float uSpreadBias;      // 竖向偏置：> 0 时越往下越渗得开（标志的「上紧下松」）
 uniform float uBreath;          // 呼吸改变明暗的幅度
@@ -176,7 +178,9 @@ void main() {
     fbm(warpAt + vec2(t * 0.06, -t * 0.04)),
     fbm(warpAt + vec2(17.3, 4.1) + vec2(-t * 0.05, t * 0.03))
   ) - 0.5;
-  vec2 q = p + warp * 2.0 * uDisplacement;
+  // 上下缘钉住：相邻两块画布各有各的噪声，不钉住的话同一笔线在交接处会左右错开
+  float pin = uEdgePin > 0.0 ? smoothstep(0.0, uEdgePin, min(p.y, uSize.y - p.y)) : 1.0;
+  vec2 q = p + warp * 2.0 * uDisplacement * pin;
 
   // 2. 筷子划过：墨被推开（位移），中间划开一道口子（cut）
   vec4 trail = texture(uTrail, p / uSize);
@@ -203,8 +207,10 @@ void main() {
   // 4. 呼吸：每一处按自己的相位做正弦起伏（相位取自一张低频噪声，各部位此起彼伏而不是整体齐跳），
   //    晕跟着一胀一缩、变粗变细。只靠漂移的噪声太含糊，看不出是在呼吸
   // 5. 细墨芯：只在 core 里画了形状的地方生效（首屏墨线那一丝墨），别处 core = 1 不影响
-  value = min(value, core);
-  value = clamp(value - breath * uBreath, 0.0, 1.0);
+  //    墨滩本身（不含墨芯）另记一份 pool：图像显在哪里只看它。若用含墨芯的明暗，墨线穿过墨滩
+  //    边缘那圈黑墨时会把那一段也变成「最浓」、显出图像，看起来像墨边被切开了一道口子
+  float pool = clamp(value - breath * uBreath, 0.0, 1.0);
+  value = clamp(min(value, core) - breath * uBreath, 0.0, 1.0);
 
   // 5b. 焦点之外不化开：墨芯保留，墨芯外的晕直接收到纸，只剩一道干净的墨边。
   //     这样一屏里只有正在看的那一处带彩色（手册：一个画面只化开一处）
@@ -217,17 +223,19 @@ void main() {
       vec2 outside = max(abs(p - (r.xy + r.zw * 0.5)) - (r.zw * 0.5 + uFocusMargin), 0.0);
       focus = max(focus, (1.0 - smoothstep(0.0, uFocusFeather, length(outside))) * uFocusWeight[i]);
     }
-    float quiet = mix(value, 1.0, smoothstep(0.28, 0.36, value));
+    float quiet = mix(value, 1.0, smoothstep(0.28, uQuietEdge, value));
     value = mix(quiet, value, focus);
   }
 
   // 6. 口子里露出纸
   value = mix(value, 1.0, cut * 0.9);
+  pool = mix(pool, 1.0, cut * 0.9);
 
   // 7. 颗粒（晕）
   vec2 grainAt = p * uGrainFrequency;
   float grain = valueNoise(grainAt) + valueNoise(grainAt + vec2(31.7, 7.3)) + valueNoise(grainAt + vec2(-12.1, 51.9));
   value = clamp(value + uGrain * (grain - 1.5), 0.0, 1.0);
+  pool = clamp(pool + uGrain * (grain - 1.5), 0.0, 1.0);
 
   // 8. 五色：rgb 按明暗值取，alpha 已经在表里按 1 − 明暗值算好
   vec4 color = texture(uLut, vec2(value, 0.5));
@@ -249,7 +257,7 @@ void main() {
   // 没化开的作品保持黑白：颜色只在正在看的那一处出现
   float luma = dot(image.rgb, vec3(0.2126, 0.7152, 0.0722));
   image.rgb = mix(vec3(luma), image.rgb, focus);
-  float inImage = (1.0 - smoothstep(0.1, 0.26, value)) * image.a;
+  float inImage = (1.0 - smoothstep(0.1, 0.26, pool)) * image.a;
   color.rgb = mix(color.rgb, image.rgb, inImage);
   alpha = max(alpha, inImage);
 
@@ -305,6 +313,23 @@ function listenToPointer() {
     },
     { passive: true },
   );
+  // 触屏：手指一开始滚动页面，浏览器就发 pointercancel、不再有 pointermove —— 而手机上「划过」
+  // 几乎总是在滚动。touchmove 在滚动途中照常触发（被动监听，不拦滚动），所以手指滑过墨也能划开。
+  // 手指抬起后这个「指针」就不在了：不清掉的话，惯性滚动时内容从那一点底下经过，会凭空划出一道
+  const touch = (event: TouchEvent) => {
+    const finger = event.touches[0];
+    if (!finger) return;
+    pointer.x = finger.clientX;
+    pointer.y = finger.clientY;
+    pointer.seen = true;
+  };
+  const lift = (event: TouchEvent) => {
+    if (!event.touches.length) pointer.seen = false;
+  };
+  window.addEventListener("touchstart", touch, { passive: true });
+  window.addEventListener("touchmove", touch, { passive: true });
+  window.addEventListener("touchend", lift, { passive: true });
+  window.addEventListener("touchcancel", lift, { passive: true });
 }
 
 // ── 帧循环：全局一个 requestAnimationFrame，驱动所有画布 ─────────────────
@@ -348,6 +373,11 @@ export type InkParams = {
   /** 起伏与紧 / 松混合两张噪声的频率（每 CSS px） */
   warpFrequency: number;
   weightFrequency: number;
+  /**
+   * 起伏在区域上下缘这么多 CSS px 内渐渐收为零（默认 0 = 不收）。一笔线跨两块画布时两边都要设：
+   * 各自的噪声不同，不钉住的话线在交接处会错开
+   */
+  pinEdges?: number;
   /** 竖向偏置：越往下越渗得开（标志用），0 = 不偏 */
   spreadBias: number;
   /** 显影：水落下的点（画布坐标，CSS px）与最终半径；null = 不显影，直接出现 */
@@ -363,6 +393,8 @@ export type InkParams = {
   revealDuration?: number;
   revealPause?: number;
   replayReveal?: boolean;
+  /** 整块都不化开、只留墨边（首页 About 那根安静的墨线）。等于有焦点区域、但没有焦点 */
+  quiet?: boolean;
   /** 焦点区域（最多 4 个）：只有当前焦点处完整化开，其余收成墨边。焦点由 setFocus 切换 */
   focusRegions?: { x: number; y: number; width: number; height: number }[];
 };
@@ -498,6 +530,7 @@ export class InkRenderer {
   private focusTarget = -1;
   private focusWeights: number[] = [];
   private animated = true;
+  private dark = false;
   private videoTexture: WebGLTexture | null = null;
   private video: HTMLVideoElement | null = null;
   private videoRect = { x: 0, y: 0, width: 1, height: 1 };
@@ -547,6 +580,7 @@ export class InkRenderer {
       "uFlow",
       "uDisplacement",
       "uWarpFrequency",
+      "uEdgePin",
       "uWeightFrequency",
       "uSpreadBias",
       "uBreath",
@@ -564,6 +598,7 @@ export class InkRenderer {
       "uFocusWeight",
       "uFocusMargin",
       "uFocusFeather",
+      "uQuietEdge",
       "uVideo",
       "uVideoRect",
       "uVideoSize",
@@ -704,9 +739,10 @@ export class InkRenderer {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
-  /** 换主题：只换查找表 */
-  setTables(tables: InkTables) {
+  /** 换主题：换查找表；dark 决定焦点之外的墨边留多少 */
+  setTables(tables: InkTables, dark = false) {
     const { gl } = this;
+    this.dark = dark;
     if (this.lut) gl.deleteTexture(this.lut);
     this.lut = texture(gl, LUT_SIZE, 1, buildLut(tables));
     this.needsDraw = true;
@@ -899,7 +935,10 @@ export class InkRenderer {
     gl.uniform2f(u.uVideoSize, this.video?.videoWidth ?? 1, this.video?.videoHeight ?? 1);
     gl.uniform1f(u.uVideoMix, animated ? this.videoMix : 0);
 
-    const regions = (params.focusRegions ?? []).slice(0, 4);
+    // quiet：放一个画布外的焦点区域、权重为 0，整块按「焦点之外」收拢
+    const regions = params.quiet
+      ? [{ x: -1e6, y: -1e6, width: 1, height: 1 }]
+      : (params.focusRegions ?? []).slice(0, 4);
     gl.uniform1i(u.uFocusCount, regions.length);
     if (regions.length) {
       const rects = new Float32Array(16);
@@ -912,6 +951,8 @@ export class InkRenderer {
       gl.uniform1fv(u.uFocusWeight, weights);
       gl.uniform1f(u.uFocusMargin, FOCUS_MARGIN);
       gl.uniform1f(u.uFocusFeather, FOCUS_FEATHER);
+      // 深色模式的墨芯和夜色几乎一样黑：只留墨边就看不见了，多留一丝 Cobalt 勾出轮廓
+      gl.uniform1f(u.uQuietEdge, 0.36);
     }
 
     gl.uniform2f(u.uSize, layout.width, layout.height);
@@ -921,6 +962,7 @@ export class InkRenderer {
     gl.uniform1f(u.uFlow, animated ? 1 : 0);
     gl.uniform1f(u.uDisplacement, params.displacement);
     gl.uniform1f(u.uWarpFrequency, params.warpFrequency);
+    gl.uniform1f(u.uEdgePin, params.pinEdges ?? 0);
     gl.uniform1f(u.uWeightFrequency, params.weightFrequency);
     gl.uniform1f(u.uSpreadBias, params.spreadBias);
     gl.uniform1f(u.uBreath, animated ? BREATH : 0);

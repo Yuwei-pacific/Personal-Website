@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>页脚方向草图</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=Geist:wght@400&family=Geist+Mono:wght@400&display=swap">
+<style>
+  :root{
+    --ink:#0C0D12; --ink2:#15161C; --paper:#F5F5F3; --on-ink:#F2F2EF; --mute:#9A9CA6; --line:#2A2B33;
+    --cobalt:#1B3FD6; --cyan:#35C2D8; --amber:#FF9A1F; --coral:#FF5A4E;
+    --display:'Fraunces','Iowan Old Style',Georgia,serif;
+    --text:'Geist','Helvetica Neue',Arial,'PingFang SC',sans-serif;
+    --mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--text);font-size:15px;line-height:1.6}
+  .wrap{max-width:1180px;margin:0 auto;padding:32px 16px 80px}
+  h1{font-family:var(--display);font-weight:400;font-size:34px;letter-spacing:-.02em;margin:0 0 8px}
+  .intro{color:#5E6068;max-width:64ch;margin:0 0 40px}
+  .dir{margin:0 0 56px}
+  .head{display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;border-top:1px solid var(--ink);padding-top:12px;margin-bottom:14px}
+  .head .no{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:#5E6068}
+  .head h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0}
+  .head .tag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;border:1px solid var(--ink);padding:2px 8px}
+  .notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px 32px;margin-top:14px;color:#5E6068;font-size:14px}
+  .notes b{font-weight:400;color:var(--ink)}
+  /* 页脚样稿：浅色模式下的反转块（墨底、纸色字） */
+  .ft{position:relative;background:var(--ink);color:var(--on-ink);aspect-ratio:1200/560;overflow:hidden;container-type:inline-size}
+  .ft *{position:absolute;margin:0}
+  .lab{font-family:var(--mono);font-size:1cqw;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+  .sm{font-size:1.15cqw;line-height:1.7;color:#C9CAD0}
+  .sm span{display:block;position:static}
+  .mail{font-family:var(--display);letter-spacing:-.02em;line-height:1;white-space:nowrap}
+  .mail i{position:static;font-style:normal;border-bottom:.18cqw solid var(--coral);padding-bottom:.3cqw}
+  .rule{left:2.5cqw;right:2.5cqw;height:1px;background:var(--line)}
+  svg{position:absolute;overflow:visible}
+  .state{font-family:var(--mono);font-size:.95cqw;letter-spacing:.06em;color:var(--mute)}
+  @media (max-width:640px){.sm{font-size:1.6cqw}.lab,.state{font-size:1.4cqw}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="mark">
+      <path d="M27.6154 10.4767H24.3918C23.6344 10.4767 22.9574 10.95 22.6973 11.6621L21.7975 14.1259C21.3679 15.3025 22.239 16.5492 23.492 16.5492H26.7188C27.477 16.5492 28.1548 16.075 28.4141 15.3622L29.3107 12.8984C29.7387 11.7217 28.8676 10.4775 27.6154 10.4775Z"/>
+      <path d="M37.4621 38.2138H24.263C23.5049 38.2138 22.827 38.6879 22.5677 39.4007L21.3998 42.6092C20.9718 43.7858 21.8429 45.0301 23.0951 45.0301H36.2942C37.0524 45.0301 37.7302 44.5559 37.9896 43.8431L39.1574 40.6346C39.5854 39.458 38.7143 38.2138 37.4621 38.2138Z"/>
+      <path d="M24.4123 19.2763H21.1776C20.4202 19.2763 19.7432 19.7497 19.4831 20.4617L11.3947 42.6076C10.9651 43.7843 11.8362 45.0309 13.0892 45.0309H16.3518C17.1099 45.0309 17.7877 44.5567 18.0471 43.8439L26.1077 21.698C26.5357 20.5214 25.6646 19.2771 24.4123 19.2771Z"/>
+      <path d="M30.8046 16.7679L24.873 33.0649C24.445 34.2415 25.3161 35.4858 26.5683 35.4858H38.4523C39.7053 35.4858 40.5765 34.24 40.1469 33.0625L34.1945 16.7656C33.6169 15.1848 31.3806 15.1856 30.8046 16.7671Z"/>
+    </g>
+    <filter id="b1" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.6"/></filter>
+    <filter id="b2" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6"/></filter>
+    <filter id="b3" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation=".9"/></filter>
+    <!-- 化开的标志（示意）：墨底上是白芯，往外 Cobalt → Cyan → Amber → Coral。实际用现有的 WebGL 渲染 -->
+    <g id="bloom" stroke-linejoin="round">
+      <use href="#mark" fill="#FF5A4E" stroke="#FF5A4E" stroke-width="9" filter="url(#b1)" opacity=".75"/>
+      <use href="#mark" fill="#FF9A1F" stroke="#FF9A1F" stroke-width="6.2" filter="url(#b2)"/>
+      <use href="#mark" fill="#35C2D8" stroke="#35C2D8" stroke-width="4.2" filter="url(#b2)"/>
+      <use href="#mark" fill="#1B3FD6" stroke="#1B3FD6" stroke-width="2.6" filter="url(#b3)"/>
+      <use href="#mark" fill="#F2F2EF" filter="url(#b3)"/>
+    </g>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <h1>页脚：三个方向</h1>
+  <p class="intro">都画的是浅色模式（页脚反转成墨底）。深色模式下整块换成纸底、墨色字，结构不变。内容和现在一样：邮箱、站内链接、社交链接、所在地、版权，只是去掉了全大写的巨幅「YUWEI LI」。化开的效果是示意，实际沿用现有的 WebGL 渲染。</p>
+
+  <section class="dir">
+    <div class="head"><span class="no">A</span><h2>封底</h2></div>
+    <div class="ft">
+      <p class="lab" style="left:2.5cqw;top:3cqw">Get in touch</p>
+      <p class="mail" style="left:2.5cqw;top:9cqw;font-size:7.4cqw"><i>yuweidesign@outlook.com</i> <span style="position:static;font-size:.45em;vertical-align:.55em">↗</span></p>
+      <div class="rule" style="top:30cqw"></div>
+      <svg viewBox="8 7 36 41" style="left:2.5cqw;top:33cqw;width:4.2cqw" fill="#F2F2EF"><use href="#mark"/></svg>
+      <p class="lab" style="left:27cqw;top:33cqw">Site</p>
+      <p class="sm" style="left:27cqw;top:35.6cqw"><span>Home</span><span>About</span><span>Work</span></p>
+      <p class="lab" style="left:45cqw;top:33cqw">Elsewhere</p>
+      <p class="sm" style="left:45cqw;top:35.6cqw"><span>GitHub</span><span>LinkedIn</span><span>X</span></p>
+      <p class="lab" style="left:63cqw;top:33cqw">Based in</p>
+      <p class="sm" style="left:63cqw;top:35.6cqw"><span>Milan, Italy</span><span>Working internationally</span></p>
+      <p class="sm" style="right:2.5cqw;top:35.6cqw;text-align:right;color:var(--mute)"><span>© 2026 Yuwei Li</span><span>yuweidesign.com</span></p>
+    </div>
+    <div class="notes">
+      <p><b>是什么：</b>一本册子的封底。邮箱用 Fraunces 做这一屏唯一的大标题，单色标志落在左下角，其余是小字。</p>
+      <p><b>颜色：</b>没有化开。只有邮箱底下一道强调色的线。</p>
+      <p><b>好处：</b>最安静，改动最小，和项目详情页「保持安静」的要求一致。</p>
+      <p><b>代价：</b>全站的墨只在首页出现；其他页面从头到尾没有一处化开。</p>
+    </div>
+  </section>
+
+  <section class="dir">
+    <div class="head"><span class="no">B</span><h2>落款</h2><span class="tag">推荐</span></div>
+    <div class="ft">
+      <p class="lab" style="left:2.5cqw;top:3cqw">Get in touch</p>
+      <p class="mail" style="left:2.5cqw;top:8cqw;font-size:5.6cqw"><i>yuweidesign@outlook.com</i> <span style="position:static;font-size:.45em;vertical-align:.55em">↗</span></p>
+      <svg viewBox="0 0 1200 560" style="inset:0;width:100%;height:100%" fill="none">
+        <path d="M-10 268 C 180 258, 330 284, 520 270 S 820 252, 930 276 C 985 288, 1010 312, 1022 352" stroke="#F2F2EF" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      <svg viewBox="8 7 36 41" style="right:5cqw;top:25cqw;width:15cqw" fill="#F2F2EF"><use href="#mark"/></svg>
+      <p class="lab" style="left:2.5cqw;top:31cqw">Site</p>
+      <p class="sm" style="left:2.5cqw;top:33.6cqw"><span>Home</span><span>About</span><span>Work</span></p>
+      <p class="lab" style="left:20cqw;top:31cqw">Elsewhere</p>
+      <p class="sm" style="left:20cqw;top:33.6cqw"><span>GitHub</span><span>LinkedIn</span><span>X</span></p>
+      <p class="lab" style="left:38cqw;top:31cqw">Based in</p>
+      <p class="sm" style="left:38cqw;top:33.6cqw"><span>Milan, Italy</span><span>Working internationally</span></p>
+      <p class="sm" style="left:2.5cqw;bottom:2.4cqw;color:var(--mute)">© 2026 Yuwei Li · Communication designer &amp; frontend developer</p>
+    </div>
+    <div class="ft" style="aspect-ratio:1200/250;margin-top:8px">
+      <p class="state" style="left:2.5cqw;top:2.4cqw">鼠标靠近标志时</p>
+      <svg viewBox="0 0 1200 250" style="inset:0;width:100%;height:100%" fill="none">
+        <path d="M430 96 C 620 84, 820 80, 930 104 C 985 116, 1010 140, 1022 176" stroke="#FF5A4E" stroke-width="16" stroke-linecap="round" filter="url(#b1)" opacity=".5"/>
+        <path d="M430 96 C 620 84, 820 80, 930 104 C 985 116, 1010 140, 1022 176" stroke="#1B3FD6" stroke-width="6" stroke-linecap="round" filter="url(#b3)"/>
+        <path d="M-10 96 C 180 86, 330 112, 520 98 S 820 80, 930 104 C 985 116, 1010 140, 1022 176" stroke="#F2F2EF" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      <svg viewBox="2 1 48 53" style="right:3.2cqw;top:1cqw;width:18.6cqw"><use href="#bloom"/></svg>
+    </div>
+    <div class="notes">
+      <p><b>是什么：</b>首屏的镜像。首屏里墨线从左缘流进标志；页脚里同一根线从左缘进来，落在标志上停住，像画完之后的落款。</p>
+      <p><b>颜色：</b>平时是素墨（不化开）。鼠标靠近标志时，标志和线的末端才化开；移开后收回去。触屏和减弱动画下一直是素墨。</p>
+      <p><b>好处：</b>每一页都以你的标志收尾，首尾呼应；彩色只在有人去碰的时候出现一小处，不是大面积。</p>
+      <p><b>代价：</b>要多一块画布；线的走法需要你过目（或者你在 Figma 里拉一遍）。</p>
+    </div>
+  </section>
+
+  <section class="dir">
+    <div class="head"><span class="no">C</span><h2>一滴</h2></div>
+    <div class="ft">
+      <p class="mail" style="left:2.5cqw;top:6cqw;font-size:7.2cqw;line-height:1.02;white-space:normal;width:62cqw">Got something <span style="position:static;font-style:italic">ordinary?</span></p>
+      <p class="mail" style="left:2.5cqw;top:25.5cqw;font-size:2.5cqw;font-family:var(--text);letter-spacing:-.01em"><i>yuweidesign@outlook.com</i> ↗</p>
+      <svg viewBox="2 1 48 53" style="right:3cqw;top:2cqw;width:24cqw"><use href="#bloom"/></svg>
+      <div class="rule" style="top:33cqw"></div>
+      <p class="lab" style="left:2.5cqw;top:35.4cqw">Site</p>
+      <p class="sm" style="left:2.5cqw;top:38cqw"><span>Home</span><span>About</span><span>Work</span></p>
+      <p class="lab" style="left:20cqw;top:35.4cqw">Elsewhere</p>
+      <p class="sm" style="left:20cqw;top:38cqw"><span>GitHub</span><span>LinkedIn</span><span>X</span></p>
+      <p class="lab" style="left:38cqw;top:35.4cqw">Based in</p>
+      <p class="sm" style="left:38cqw;top:38cqw"><span>Milan, Italy</span><span>Working internationally</span></p>
+      <p class="sm" style="right:2.5cqw;top:38cqw;text-align:right;color:var(--mute)"><span>© 2026 Yuwei Li</span><span>yuweidesign.com</span></p>
+    </div>
+    <div class="notes">
+      <p><b>是什么：</b>把口号接回来做结尾：首屏说「Bring color to the ordinary」，页脚问「Got something ordinary?」。化开的标志一直亮着。</p>
+      <p><b>颜色：</b>一处，但始终在，面积比 B 大。</p>
+      <p><b>好处：</b>最有记忆点，页面读下来是一个完整的来回；对找你做项目的工作室是一句直接的邀请。</p>
+      <p><b>代价：</b>每一页结尾都有一团彩色，和你说的「不要大面积出现」有冲突；这句话对招聘方不如对客户贴切；意大利语需要另写一句。</p>
+    </div>
+  </section>
+</div>
+</body>
+</html>

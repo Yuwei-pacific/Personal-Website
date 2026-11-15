@@ -5,6 +5,7 @@
 // - 往下流淌：每段竖直流出、竖直流进，是 S 形，不在留白里斜拉直线（像电缆）；
 // - 有轻重：靠近墨滩粗、晕宽，和墨滩融在一起；两滩之间收细（像提笔），不是一路等宽（像霓虹灯管）；
 // - 从墨滩靠来路、去路的一侧流进流出，不从正中间扎进去。
+import { THREAD_X } from "@/components/ui/ink/ink-tables";
 
 /** 尺度：每「用户单位」多少 CSS px，与首屏标志一致（晕看起来是同一滴墨） */
 export const U = 2.6;
@@ -33,6 +34,13 @@ export const WORK_INK = {
   weightFrequency: 0.005 / U,
   spreadBias: 0,
 } as const;
+
+/**
+ * About 的墨线和 Work 的墨线是两块画布上的同一笔，两块都要带上这组参数，交接处才看不出接缝：
+ * - pinEdges：边缘起伏在画布上下缘收为零（两块画布的噪声不同，不钉住线会左右错开）；
+ * - maxDpr：同一个像素密度，线的粗细才一样（Work 画布有好几屏高，本来就要收到 1.5 省显存）
+ */
+export const THREAD_SEAM = { pinEdges: 160, maxDpr: 1.5 } as const;
 
 // 可复现的「噪声」：几个正弦叠加，每滩墨的相位不同（同一个项目每次画出来一样）
 function wobble(seed: number) {
@@ -67,7 +75,12 @@ export function poolPath(rect: Rect, seed: number): Path2D {
   return path;
 }
 
-/** 墨滩所占的外接矩形（封面占位外扩 POOL_PAD）：图像、视频按它铺满，再裁成墨滩形状 */
+/**
+ * 墨滩所占的外接矩形（封面占位外扩 POOL_PAD）：图像、视频按它铺满，再裁成墨滩形状。
+ * 代价是封面四边各被墨边吃掉约 POOL_PAD。试过让图像只铺到占位那么大（封面完整）：墨滩边缘起伏
+ * 到图像外面的地方会露出图像的直边，变成「黑框里一张方图」，不像作品在墨里 —— 所以保留铺满。
+ * 封面上贴边的内容（导航栏、角标）会被裁，选封面或在 Studio 里标焦点时留出边距
+ */
 export const poolBounds = (rect: Rect): Rect => ({
   x: rect.x - POOL_PAD,
   y: rect.y - POOL_PAD,
@@ -112,10 +125,14 @@ export function threadSamples(width: number, covers: Rect[], ruleY: number, mobi
   return mobile ? mobileThread(width, covers, ruleY) : desktopThread(width, covers, ruleY);
 }
 
+
 function desktopThread(width: number, covers: Rect[], ruleY: number): Sample[] {
-  const start: Sample = { x: width * 0.8, y: -80, f: 0.5 };
+  // 先竖直落到区块上缘、正好在 THREAD_X：接住 About 那一段（它在下缘也正好落在这里）
+  const start: Sample = { x: width * THREAD_X, y: -80, f: 0.5 };
   const out: Sample[] = [start];
-  let last: Point = start;
+  const top = { x: start.x, y: 0 };
+  sampleCubic(out, start, start, top, top, () => 0.5);
+  let last: Point = top;
   covers.forEach((rect, i) => {
     const center = rect.x + rect.width / 2;
     const nextX = i + 1 < covers.length ? covers[i + 1].x + covers[i + 1].width / 2 : width * 0.42;
@@ -159,6 +176,80 @@ function mobileThread(width: number, covers: Rect[], ruleY: number): Sample[] {
   return out;
 }
 
+/**
+ * About 里的那一段墨线（用户在 Figma 定稿的走法，画板「Home — 提案 v1」）：
+ * 从页面左缘外进来 → 在标题下面走成一道手写下划线，到标题右端外一点 → 往上绕过人像的头顶和右肩 →
+ * 从图注（所在地那两行小字）的外侧下来 → 在区块下缘正好落在 (width × THREAD_X, height)、竖直向下，
+ * Work 的墨线从同一点竖直接着往下流，两段是一笔。
+ * title：标题文字实际占的范围；portrait：人像那一方块（不随视差浮动的占位 —— 视差在人像居中时恰好为 0，
+ * 所以人像在屏幕中间时，线正好贴着头顶绕过去）。坐标都相对区块左上角
+ */
+export function aboutThread(width: number, height: number, title: Rect | null, portrait: Rect | null): Sample[] {
+  const x = width * THREAD_X;
+  const quiet = () => 0.5;
+  const edge = { x, y: height };
+  const out: Sample[] = [];
+  if (!title) {
+    // 量不到标题时：从顶上直接流到交接点
+    out.push({ x, y: -80, f: 0.5 });
+    flowDown(out, { x, y: -80 }, edge, quiet);
+  } else {
+    const T = title.y + title.height + 8;
+    const R = title.x + title.width + 24;
+    const start: Sample = { x: -12, y: T + 6, f: 0.5 };
+    out.push(start);
+    // 手写下划线：几乎水平，轻轻起伏
+    const end = { x: R, y: T + 4 };
+    sampleCubic(out, start, { x: 180, y: T - 2 }, { x: R - 260, y: T + 14 }, end, quiet);
+    if (portrait) {
+      const p = portrait;
+      const right = p.x + p.width;
+      const top = { x: p.x + p.width * 0.25, y: p.y - 30 };
+      const shoulder = { x: right + 18, y: p.y + 40 };
+      const below = { x: right + 34, y: Math.min(height - 70, p.y + p.height + 70) };
+      const near = { x: x + 2, y: height - 40 };
+      sampleCubic(out, end, { x: R + 90, y: T - 2 }, { x: p.x - 30, y: p.y + 20 }, top, quiet);
+      sampleCubic(out, top, { x: p.x + p.width * 0.5, y: p.y - 62 }, { x: p.x + p.width * 0.95, y: p.y - 52 }, shoulder, quiet);
+      sampleCubic(out, shoulder, { x: right + 40, y: p.y + 160 }, { x: right + 40, y: below.y - 140 }, below, quiet);
+      sampleCubic(out, below, { x: right + 28, y: below.y + 80 }, { x: x + 10, y: near.y - 30 }, near, quiet);
+      sampleCubic(out, near, { x, y: height - 20 }, { x, y: height - 6 }, edge, quiet);
+    } else {
+      flowDown(out, end, edge, quiet);
+    }
+  }
+  sampleCubic(out, edge, edge, { x, y: height + 80 }, { x, y: height + 80 }, quiet);
+  return out;
+}
+
+/**
+ * 页脚的墨线：从页面左缘进来，在邮箱下面走成一道略有起伏的分割线，到标志跟前往下一拐，
+ * 落进标志「i」那一笔（end），停住 —— 首屏那根线的镜像，像画完之后的落款。
+ * lineY 是分割线的高度；end 为 null（量不到标志）时一直画出右缘
+ */
+export function footerThread(width: number, lineY: number, end: Point | null): Sample[] {
+  const quiet = () => 0.5;
+  const start: Sample = { x: -12, y: lineY + 3, f: 0.5 };
+  const out: Sample[] = [start];
+  if (!end) {
+    sampleCubic(out, start, { x: width * 0.3, y: lineY - 6 }, { x: width * 0.7, y: lineY + 8 }, { x: width + 200, y: lineY }, quiet);
+    return out;
+  }
+  // 拐弯前的那一点：离标志留出一段，线才有地方缓缓弯下去
+  const drop = Math.max(0, end.y - lineY);
+  const turn = { x: end.x - Math.max(110, drop * 1.6), y: lineY - 1 };
+  sampleCubic(out, start, { x: width * 0.22, y: lineY - 6 }, { x: turn.x - width * 0.22, y: lineY + 8 }, turn, quiet);
+  // 弯进竖笔：靠近标志时略重一点，像收笔
+  sampleCubic(
+    out,
+    turn,
+    { x: turn.x + (end.x - turn.x) * 0.62, y: lineY - 5 },
+    { x: end.x + drop * 0.12, y: lineY + drop * 0.3 },
+    end,
+    (t) => 0.5 + 0.35 * t,
+  );
+  return out;
+}
+
 // 沿采样点画一条横截面渐变、粗细可变的带：每一遍从宽而淡画到窄而浓，叠出 ink(d) 的截面
 function strokeProfile(ctx: CanvasRenderingContext2D, samples: Sample[], half: number, ink: (d: number) => number) {
   const passes = 14;
@@ -180,14 +271,14 @@ function strokeProfile(ctx: CanvasRenderingContext2D, samples: Sample[], half: n
   }
 }
 
-/** 墨线的晕带（画进模糊源图） */
-export function strokeBand(ctx: CanvasRenderingContext2D, samples: Sample[]) {
-  strokeProfile(ctx, samples, BAND, (d) => PEAK * Math.pow(1 - d, FALLOFF));
+/** 墨线的晕带（画进模糊源图）。scale：晕的宽度按比例收（页脚的标志小，线的晕也要跟着小） */
+export function strokeBand(ctx: CanvasRenderingContext2D, samples: Sample[], scale = 1) {
+  strokeProfile(ctx, samples, BAND * scale, (d) => PEAK * Math.pow(1 - d, FALLOFF));
 }
 
 /** 墨线的墨芯与外裹的一圈渐变（画进 core 层，不参与化开，保证那一丝墨始终在） */
-export function strokeCore(ctx: CanvasRenderingContext2D, samples: Sample[]) {
-  strokeProfile(ctx, samples, HALO, (d) => 1 - (HALO_INNER + (1 - HALO_INNER) * Math.pow(d, 0.8)));
+export function strokeCore(ctx: CanvasRenderingContext2D, samples: Sample[], scale = 1) {
+  strokeProfile(ctx, samples, HALO * scale, (d) => 1 - (HALO_INNER + (1 - HALO_INNER) * Math.pow(d, 0.8)));
   ctx.lineCap = "round";
   ctx.strokeStyle = "#000";
   for (let i = 1; i < samples.length; i++) {

@@ -35,10 +35,34 @@ export function coverVideo(id: string, url: string): HTMLVideoElement {
   return video;
 }
 
-/** 只让一个视频在播：化开的那一个。其余暂停；播放被拒绝时静默 */
-export function playOnly(active: HTMLVideoElement | null) {
+// 同一时间只播一个视频。两层：焦点作品的视频（WorkInk 随滚动设定），与目录悬停预览的视频
+// （悬停期间临时接管）。预览结束时回到焦点作品的视频 —— 否则移开目录后，它要等下一次焦点变化才继续播。
+let focusVideo: HTMLVideoElement | null = null;
+let previewing = false;
+
+function playOnly(active: HTMLVideoElement | null) {
   videos.forEach((video) => {
     if (video !== active && !video.paused) video.pause();
   });
+  // 播放被拒绝（自动播放策略、低电量模式）时静默：停在静止封面上
   active?.play().catch(() => {});
+}
+
+/** 焦点作品的视频（没有视频或不该播时传 null）。悬停预览期间只记下，不抢播放 */
+export function playFocusVideo(video: HTMLVideoElement | null) {
+  focusVideo = video;
+  if (!previewing) playOnly(video);
+}
+
+/** 目录悬停预览：暂停焦点视频，播放这个项目的视频（没有就传 null，只暂停） */
+export function playPreviewVideo(video: HTMLVideoElement | null) {
+  previewing = true;
+  playOnly(video);
+}
+
+/** 预览结束：回到焦点作品的视频 */
+export function endPreviewVideo() {
+  if (!previewing) return;
+  previewing = false;
+  playOnly(focusVideo);
 }

@@ -321,6 +321,22 @@
   }
 }
 
+/* 首页 About 的人像：两种模式都是黑白照（墨与纸），不反相 */
+.portrait-mono {
+  filter: grayscale(1);
+}
+
+/* 作品区的小人线稿（sections/home/work/ink-figure.tsx）：深色模式反相成白线，与深色模式的白色墨芯一致 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ink-figure {
+    filter: invert(0.95);
+  }
+}
+
+:root[data-theme="dark"] .ink-figure {
+  filter: invert(0.95);
+}
+
 /* 按主题二选一显示：给必须为两种主题各渲染一份的内容用（如 ink-mark.tsx 的两套颜色查找表）。
    选择器与上面切换原始色值的那两条保持一致：跟随系统，或手动选择 data-theme。 */
 .only-dark {

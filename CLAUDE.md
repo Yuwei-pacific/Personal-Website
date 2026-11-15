@@ -156,8 +156,17 @@ regions). Images and videos uploaded as textures must load with `crossOrigin="an
 canvas still draws one warm-up frame after each layout change, because the GPU uploads textures and
 prepares shaders on first draw — large canvases otherwise flash blank on scroll-in.
 
-`src/components/ui/sheet.tsx` (experimental, home page only) stacks sections like sheets of paper
-with `position: sticky`; siblings must share one parent and each sheet is at least one viewport tall.
+`src/components/ui/sheet.tsx` (experimental; About page and project detail pages) stacks sections like
+sheets of paper with `position: sticky`; siblings must share one parent and each sheet is at least one
+viewport tall. The home page deliberately does **not** use it: hero, About and Work share one paper,
+and About's quiet (non-blooming) stroke (`about-ink.tsx`, path in `aboutThread`) enters from the left
+edge, underlines the title, wraps the portrait and hands off to Work at `THREAD_X`
+(`ui/ink/ink-tables.ts`). Sticky sheets slide over each other and cut that stroke at every edge.
+
+Two line-art figures (`work/ink-figure.tsx`, PNGs in `public/illustrations/`) sit on the Work thread:
+one on the top edge of the **second** featured cover (whichever project that is; absent if there is
+none), one leaning on the index rule. They are placed in percentages of their anchor and hidden below
+`md`; dark mode inverts them (`.ink-figure` in `globals.css`). Invert only line art, never photos.
 
 Raw values are CSS variables in `src/app/globals.css`, mapped to utilities in `tailwind.config.ts`.
 Use the semantic tokens rather than raw Tailwind scale values: spacing (`section`/`panel` for

@@ -153,9 +153,9 @@ const dictionaries: Record<Locale, Dictionary> = {
         scrollDown: "Scorri",
       },
       aboutPreview: {
-        title: "Dall’idea al lancio.",
+        title: "Lo disegno, poi lo costruisco.",
         body:
-          "Lavoro su sistemi visivi, interfacce e sviluppo frontend, trasformando le prime idee in esperienze digitali curate e facili da mantenere.",
+          "La maggior parte dei miei progetti passa dal primo frame in Figma al sito online restando nelle stesse mani. Tra il design e il codice non si perde niente.",
         cta: "Scopri di più →",
       },
       projects: {
@@ -279,9 +279,9 @@ const dictionaries: Record<Locale, Dictionary> = {
         scrollDown: "Scroll Down",
       },
       aboutPreview: {
-        title: "From concept to launch.",
+        title: "I design it, then I build it.",
         body:
-          "I work across visual systems, interface design and frontend development, turning early ideas into polished, maintainable digital experiences.",
+          "Most of my projects go from the first Figma frame to the live site in the same hands. Nothing gets lost between the design and the code.",
         cta: "More about me →",
       },
       projects: {

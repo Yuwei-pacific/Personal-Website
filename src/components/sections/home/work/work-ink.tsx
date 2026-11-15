@@ -11,8 +11,9 @@ import { InkSurface, useInkSupported, type InkSpec } from "@/components/ui/ink/i
 import { COLOR_TABLES } from "@/components/ui/ink/ink-tables";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 
-import { coverVideo, playOnly } from "./cover-media";
+import { coverVideo, playFocusVideo } from "./cover-media";
 import {
+  THREAD_SEAM,
   WORK_INK,
   drawCover,
   poolBounds,
@@ -80,9 +81,8 @@ function buildWork(mobile: boolean) {
       },
       params: {
         ...WORK_INK,
+        ...THREAD_SEAM,
         reveal: null,
-        // 纹理覆盖整个区块：像素密度收一点，省显存
-        maxDpr: 1.5,
         focusRegions: rects,
       },
     };
@@ -148,7 +148,7 @@ export function WorkInk({ featured }: { featured: FeaturedMedia[] }) {
       // 焦点作品有封面视频：在墨里播放（减弱动画或不支持 WebGL 时不播）
       const media = best >= 0 ? featured[best] : undefined;
       const element = media?.video && supported && !reducedMotion ? coverVideo(media.id, media.video) : null;
-      playOnly(element);
+      playFocusVideo(element);
       if (!element) {
         setVideo({ element: null });
         return;
@@ -167,7 +167,7 @@ export function WorkInk({ featured }: { featured: FeaturedMedia[] }) {
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
       if (frame) cancelAnimationFrame(frame);
-      playOnly(null);
+      playFocusVideo(null);
     };
   }, [featured, supported, reducedMotion]);
 

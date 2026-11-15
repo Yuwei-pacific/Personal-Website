@@ -12,22 +12,19 @@ import { buildCropUrl } from "@/lib/media";
 import type { Project } from "@/lib/view-models/types";
 
 import { IndexPreview, PREVIEW_HEIGHT, PREVIEW_WIDTH, type PreviewItem } from "./index-preview";
+import { InkFigure } from "./ink-figure";
 
 export function WorkIndex({
   projects,
   offset,
-  total,
   locale,
   title,
-  countLabel,
 }: {
   projects: Project[];
   /** 精选的个数：目录接着往下编号 */
   offset: number;
-  total: number;
   locale: Locale;
   title: string;
-  countLabel: string;
 }) {
   const listRef = useRef<HTMLUListElement>(null);
   const [active, setActive] = useState<number | null>(null);
@@ -54,14 +51,14 @@ export function WorkIndex({
 
   return (
     <div className="mt-[clamp(8rem,20vw,16rem)]">
-      <div className="mb-10 flex items-baseline justify-between">
-        <h3 className="font-display text-section">{title}</h3>
-        <p className="text-small text-design-light-text-muted">
-          {total} {countLabel}
-        </p>
-      </div>
+      {/* 不在这里再写一次项目总数：总数已经在 Work 标题旁边，这里只列精选之外的几个，
+          写「5 个项目」而底下只有两行，数字和看到的对不上。行号接着精选往下编，已经说明了顺序 */}
+      <h3 className="mb-10 font-display text-section">{title}</h3>
       {/* 墨线最后落在这里，成为目录顶上的那道线 */}
-      <div data-ink="rule" className="h-px" />
+      <div data-ink="rule" className="relative h-px">
+        {/* 「托腮」的小人趴在目录这根线上，像在挑下一个（用户定稿的位置：线长的 62.5% 处，手肘压过线） */}
+        <InkFigure figure="lean" style={{ left: "62.45%", width: "12.93%", top: 0, transform: "translateY(-76.4%)" }} />
+      </div>
       <ul ref={listRef} className="relative" onMouseLeave={() => setActive(null)}>
         <IndexPreview item={active === null ? null : items[active]} top={top} />
         {projects.map((project, i) => {
