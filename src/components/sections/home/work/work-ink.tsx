@@ -13,7 +13,6 @@ import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 
 import { coverVideo, playFocusVideo } from "./cover-media";
 import {
-  THREAD_SEAM,
   WORK_INK,
   drawCover,
   poolBounds,
@@ -81,8 +80,9 @@ function buildWork(mobile: boolean) {
       },
       params: {
         ...WORK_INK,
-        ...THREAD_SEAM,
         reveal: null,
+        // 纹理覆盖整个区块：像素密度收一点，省显存
+        maxDpr: 1.5,
         focusRegions: rects,
       },
     };

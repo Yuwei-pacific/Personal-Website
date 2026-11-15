@@ -30,10 +30,7 @@ export const COLOR_TABLES = {
   ],
 } as const;
 
-/**
- * 首页那一笔墨的横向位置（占页面宽度的比例）：墨从首屏标志底下滴落，穿过 About，流进 Work。
- * 三块画布各画各的一段，都在这个位置交接，所以看起来是同一笔
- */
+/** Work 区墨线起笔的横向位置（占页面宽度的比例） */
 export const THREAD_X = 0.8;
 
 export type InkTables = readonly [string, string, string, string];

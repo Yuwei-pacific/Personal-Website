@@ -497,11 +497,11 @@ const even = (n: number) => ({ top: n, right: n, bottom: n, left: n });
 const bleedPadding = (loose: number) => Math.max(56, Math.ceil(loose * 4));
 
 // 标志：盒子 = 墨迹框（MARK_INK_BOX，196×228 个用户单位）。参数沿用 SVG 版、按盒子换算成 px
-export const MARK_BOX = { x: 282, y: 96, width: 196, height: 228 };
+const MARK_BOX = { x: 282, y: 96, width: 196, height: 228 };
 const markPaths = () => MARK_PATHS.map((d) => new Path2D(d));
 
 // 把标志画进 (x, y) 处、每个用户单位 u px 的墨迹框里
-export function drawMark(ctx: CanvasRenderingContext2D, x: number, y: number, u: number) {
+function drawMark(ctx: CanvasRenderingContext2D, x: number, y: number, u: number) {
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(u, u);
@@ -513,7 +513,7 @@ export function drawMark(ctx: CanvasRenderingContext2D, x: number, y: number, u:
 }
 
 // 标志化开的参数（按每个用户单位 u px 换算）
-export const markParams = (u: number) => ({
+const markParams = (u: number) => ({
   tight: 4 * u,
   loose: 15 * u,
   displacement: 4 * u,
@@ -697,15 +697,22 @@ function relativeRect(element: Element | null, box: DOMRect) {
   return { x: r.left - box.left, y: r.top - box.top, width: r.width, height: r.height };
 }
 
-/**
- * 「i」竖笔的中线在高度 y 处的 x（画布坐标）：墨线落进标志时，末端藏在这一笔的墨里。
- * mark 是墨迹框的位置，u 是每个用户单位多少 px。首屏和页脚的墨线都用它
- */
-export function markStemX(mark: { x: number; y: number }, u: number, y: number) {
+// 「i」竖笔的中线在高度 y 处的 x（画布坐标）：墨线流进标志时，末端藏在这一笔的墨里。
+// mark 是墨迹框的位置，u 是每个用户单位多少 px
+function markStemX(mark: { x: number; y: number }, u: number, y: number) {
   const py = clamp(((y - mark.y) / u + MARK_BOX.y - 27) / 6.6, STEM.minY, STEM.maxY);
   const px = STEM.x + (py - STEM.y) * STEM.slope;
   return mark.x + (210 + 6.6 * px - MARK_BOX.x) * u;
 }
+
+// 首屏墨线的晕沿线被盖掉多少：[位置 0–1（左缘 → 标志）, 盖掉的比例]
+const LINE_FADE: [number, number][] = [
+  [0, 1],
+  [0.2, 0.85],
+  [0.5, 0.5],
+  [0.8, 0.18],
+  [1, 0],
+];
 
 function buildHero(width: number, height: number, box: HTMLElement): InkSpec {
   const boxRect = box.getBoundingClientRect();
@@ -744,6 +751,15 @@ function buildHero(width: number, height: number, box: HTMLElement): InkSpec {
         const band = LINE_BAND * u;
         ctx.fillStyle = verticalGradient(ctx, lineY, band, (d) => 1 - LINE_PEAK * Math.pow(1 - d, LINE_FALLOFF));
         ctx.fillRect(-200, lineY - band, lineEnd + 200, band * 2);
+        // 晕不是一路均匀：越往左越收，到左缘只剩墨芯和贴着它的一圈（和 Work 那根线一个样子），
+        // 越靠近标志化得越开 —— 线是「流进标志才化开」的，不是一根通体发光的灯管。
+        // 做法：用一层从左（不透明）到右（透明）的纸色盖掉晕带。没有标志时（窄屏）线只是分隔，保持均匀
+        if (mark) {
+          const fade = ctx.createLinearGradient(0, 0, lineEnd, 0);
+          for (const [stop, alpha] of LINE_FADE) fade.addColorStop(stop, `rgba(255,255,255,${alpha})`);
+          ctx.fillStyle = fade;
+          ctx.fillRect(-200, lineY - band, lineEnd + 200, band * 2);
+        }
         ctx.fillStyle = "#000";
       }
       if (mark) drawMark(ctx, mark.x, mark.y, u);
@@ -753,6 +769,13 @@ function buildHero(width: number, height: number, box: HTMLElement): InkSpec {
       const halo = LINE_HALO * u;
       ctx.fillStyle = verticalGradient(ctx, lineY, halo, (d) => LINE_HALO_INNER + (1 - LINE_HALO_INNER) * Math.pow(d, 0.8));
       ctx.fillRect(-200, lineY - halo, lineEnd + 200, halo * 2);
+      // 贴着墨芯的那圈彩边也跟着往左收（收得比晕少一些，留一点颜色），左端才像 Work 那根素线
+      if (mark) {
+        const fade = ctx.createLinearGradient(0, 0, lineEnd, 0);
+        for (const [stop, alpha] of LINE_FADE) fade.addColorStop(stop, `rgba(255,255,255,${alpha * 0.75})`);
+        ctx.fillStyle = fade;
+        ctx.fillRect(-200, lineY - halo, lineEnd + 200, halo * 2);
+      }
       ctx.fillStyle = "#000";
       ctx.fillRect(-200, lineY - LINE_CORE / 2, lineEnd + 200, LINE_CORE);
 

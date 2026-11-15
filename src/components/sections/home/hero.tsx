@@ -23,7 +23,6 @@
 import { useRef } from "react";
 
 import { HeroInk, InkLineSlot, InkMarkSlot, InkWord } from "@/components/ui/ink-mark";
-import { ScrollBadge } from "@/components/ui/scroll-badge";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/gsap-react";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { SITE_EMAIL } from "@/lib/site-metadata";
@@ -102,14 +101,8 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
         </a>
       </div>
 
-      {/* Scroll Down：底部居中，下半截压在首屏底边外（Figma 里 52/84 露出）。
-          首屏只裁横向（overflow-x-clip）并叠在 About 之上（z-20）：首屏和 About 是同一张纸，
-          往下滚时徽章的下半截要露出来，不能被首屏底边一刀切掉 */}
-      <ScrollBadge
-        href="#work"
-        label={hero.scrollDown}
-        className="absolute bottom-0 left-1/2 z-20 size-[84px] -translate-x-1/2 translate-y-[38%]"
-      />
+      {/* Scroll Down 徽章试着拿掉了（2026-11-16）：居中的旋转圆章是全页唯一居中、唯一在转的东西，
+          正卡在首屏和 About 的接缝上；用户看着不顺眼。组件还在 ui/scroll-badge.tsx，字典键 hero.scrollDown 也留着 */}
     </section>
   );
 }

@@ -124,7 +124,6 @@ uniform float uTime;            // 秒
 uniform float uFlow;            // 0 = 静止（减弱动画）
 uniform float uDisplacement;    // 边缘起伏的幅度（CSS px）
 uniform float uWarpFrequency;   // 起伏噪声的频率（每 CSS px）
-uniform float uEdgePin;         // > 0 时，起伏在区域上下缘这么多 px 内收为零（与相邻画布接线用）
 uniform float uWeightFrequency; // 紧 / 松混合噪声的频率（每 CSS px）
 uniform float uSpreadBias;      // 竖向偏置：> 0 时越往下越渗得开（标志的「上紧下松」）
 uniform float uBreath;          // 呼吸改变明暗的幅度
@@ -178,9 +177,7 @@ void main() {
     fbm(warpAt + vec2(t * 0.06, -t * 0.04)),
     fbm(warpAt + vec2(17.3, 4.1) + vec2(-t * 0.05, t * 0.03))
   ) - 0.5;
-  // 上下缘钉住：相邻两块画布各有各的噪声，不钉住的话同一笔线在交接处会左右错开
-  float pin = uEdgePin > 0.0 ? smoothstep(0.0, uEdgePin, min(p.y, uSize.y - p.y)) : 1.0;
-  vec2 q = p + warp * 2.0 * uDisplacement * pin;
+  vec2 q = p + warp * 2.0 * uDisplacement;
 
   // 2. 筷子划过：墨被推开（位移），中间划开一道口子（cut）
   vec4 trail = texture(uTrail, p / uSize);
@@ -373,11 +370,6 @@ export type InkParams = {
   /** 起伏与紧 / 松混合两张噪声的频率（每 CSS px） */
   warpFrequency: number;
   weightFrequency: number;
-  /**
-   * 起伏在区域上下缘这么多 CSS px 内渐渐收为零（默认 0 = 不收）。一笔线跨两块画布时两边都要设：
-   * 各自的噪声不同，不钉住的话线在交接处会错开
-   */
-  pinEdges?: number;
   /** 竖向偏置：越往下越渗得开（标志用），0 = 不偏 */
   spreadBias: number;
   /** 显影：水落下的点（画布坐标，CSS px）与最终半径；null = 不显影，直接出现 */
@@ -580,7 +572,6 @@ export class InkRenderer {
       "uFlow",
       "uDisplacement",
       "uWarpFrequency",
-      "uEdgePin",
       "uWeightFrequency",
       "uSpreadBias",
       "uBreath",
@@ -962,7 +953,6 @@ export class InkRenderer {
     gl.uniform1f(u.uFlow, animated ? 1 : 0);
     gl.uniform1f(u.uDisplacement, params.displacement);
     gl.uniform1f(u.uWarpFrequency, params.warpFrequency);
-    gl.uniform1f(u.uEdgePin, params.pinEdges ?? 0);
     gl.uniform1f(u.uWeightFrequency, params.weightFrequency);
     gl.uniform1f(u.uSpreadBias, params.spreadBias);
     gl.uniform1f(u.uBreath, animated ? BREATH : 0);

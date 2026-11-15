@@ -158,10 +158,15 @@ prepares shaders on first draw — large canvases otherwise flash blank on scrol
 
 `src/components/ui/sheet.tsx` (experimental; About page and project detail pages) stacks sections like
 sheets of paper with `position: sticky`; siblings must share one parent and each sheet is at least one
-viewport tall. The home page deliberately does **not** use it: hero, About and Work share one paper,
-and About's quiet (non-blooming) stroke (`about-ink.tsx`, path in `aboutThread`) enters from the left
-edge, underlines the title, wraps the portrait and hands off to Work at `THREAD_X`
-(`ui/ink/ink-tables.ts`). Sticky sheets slide over each other and cut that stroke at every edge.
+viewport tall. The home page deliberately does **not** use it: hero, About and Work share one paper
+and scroll normally. Ink appears only where it has a job — the hero (mark, line, slogan word) and Work
+(pools and thread). The footer carries no ink and no canvas, and the home About section is a text-only statement on the Work
+grid (no portrait — the photo appears only on the About page) with a single quiet hand-drawn circle
+around one title word (`about-ink.tsx`, path in `aboutCircle`, word picked by `data-ink-word`).
+A long thread wrapping the portrait and a stirrable, mark-blooming footer
+were both built and rejected as cluttered, as was a full underline entering from the left edge. The
+Work thread starts inside the section with a tapered tip (`START_Y` in `ink-geometry.ts`) at `THREAD_X`
+rather than entering from the section's top edge, which read as a line cut by the paper's edge.
 
 Two line-art figures (`work/ink-figure.tsx`, PNGs in `public/illustrations/`) sit on the Work thread:
 one on the top edge of the **second** featured cover (whichever project that is; absent if there is

@@ -18,9 +18,8 @@ import {
 } from "@/lib/site-metadata";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
+import { MARK_PATHS } from "@/components/ui/ink/ink-tables";
 import { localizedPath } from "@/i18n/routing";
-
-import { FooterInk, FooterLineSlot, FooterMarkSlot } from "./footer-ink";
 
 const footerLinkClassName =
   "group flex w-fit items-center gap-2 text-small text-design-dark-text-secondary transition-colors duration-base hover:text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-4 focus-visible:ring-offset-design-dark-bg";
@@ -130,13 +129,11 @@ export function Footer({
         ref={innerRef}
         className="relative z-10 px-edge pb-8 pt-16 will-change-transform sm:px-edge-sm sm:pb-10 sm:pt-28"
       >
-        {/* 墨：一池可以划开的墨 + 落在标志上的墨线（见 footer-ink.tsx）。画布压在文字下面 */}
-        <FooterInk />
-
-        <div className="relative flex w-full flex-col">
+        {/* 封底：只有字、一道细线和单色标志，没有墨也没有交互。
+            试过「墨线落进标志 + 整块可划开的墨池」，用户觉得乱（2026-11-15）—— 墨只留在首屏和 Work */}
+        <div className="flex w-full flex-col">
           <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.getInTouch}</p>
-          {/* 邮箱：这一屏唯一的大标题（Fraunces）。它直接坐在墨线上 —— 墨线就是它的下划线，
-              也是页脚的分割线，所以不再另画强调色的线 */}
+          {/* 邮箱：这一屏唯一的大标题（Fraunces） */}
           <a
             href={`mailto:${SITE_EMAIL}`}
             className="group mt-5 flex w-fit max-w-full items-start gap-[0.25em] whitespace-nowrap font-display text-[clamp(1.6rem,6vw,6rem)] leading-none tracking-display text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-4 focus-visible:ring-offset-design-dark-bg"
@@ -150,13 +147,22 @@ export function Footer({
             </span>
           </a>
 
-          {/* 墨线这一行：线画在它的竖向中线上，左端贴视口左缘。行高只比线的晕略大，邮箱才贴得住线 */}
-          <FooterLineSlot className="-mx-edge h-10 sm:-mx-edge-sm sm:h-14" />
+          <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-10 border-t border-design-dark-border pt-8 sm:mt-20 sm:grid-cols-12">
+            {/* 单色标志：墨的状态（手册：日常都用它），不化开 */}
+            <div className="col-span-2 sm:col-span-3">
+              <svg
+                viewBox="8 7 36 41"
+                role="img"
+                aria-label={SITE_AUTHOR}
+                className="h-12 w-auto fill-current text-design-dark-text-primary sm:h-14"
+              >
+                {MARK_PATHS.map((d) => (
+                  <path key={d} d={d} />
+                ))}
+              </svg>
+            </div>
 
-          {/* 链接三栏 + 标志。标志在右，墨线从上面一拐落进它的「i」。
-              手机上是两列：所在地和标志在第一行（线落下来的地方不能有字），站内与社交链接在第二行 */}
-          <div className="grid grid-cols-2 gap-x-6 gap-y-10 pt-2 sm:grid-cols-12 sm:pt-4">
-            <nav aria-label={dictionary.footer.aria} className="order-3 sm:order-1 sm:col-span-3">
+            <nav aria-label={dictionary.footer.aria} className="sm:col-span-3">
               <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.site}</p>
               <ul className="mt-4 flex flex-col gap-2">
                 {siteLinks.map((link) => (
@@ -169,7 +175,7 @@ export function Footer({
               </ul>
             </nav>
 
-            <div className="order-4 sm:order-2 sm:col-span-3">
+            <div className="sm:col-span-3">
               <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.elsewhere}</p>
               <ul className="mt-4 flex flex-col gap-2">
                 {SOCIAL_LINKS.map((social) => (
@@ -182,7 +188,7 @@ export function Footer({
               </ul>
             </div>
 
-            <div className="order-1 sm:order-3 sm:col-span-3">
+            <div className="col-span-2 sm:col-span-3">
               <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.basedIn}</p>
               <p className="mt-4 text-small text-design-dark-text-secondary">
                 {SITE_LOCATIONS[locale]}
@@ -190,13 +196,9 @@ export function Footer({
                 {dictionary.footer.workingInternationally}
               </p>
             </div>
-
-            <div className="order-2 flex justify-end sm:order-4 sm:col-span-3">
-              <FooterMarkSlot label={SITE_AUTHOR} className="mt-4 w-[clamp(5rem,13vw,12rem)] text-design-dark-text-primary sm:mt-6" />
-            </div>
           </div>
 
-          <div className="mt-16 flex flex-col gap-2 text-small text-design-dark-text-muted sm:mt-20 sm:flex-row sm:items-baseline sm:justify-between">
+          <div className="mt-16 flex flex-col gap-2 text-small text-design-dark-text-muted sm:mt-24 sm:flex-row sm:items-baseline sm:justify-between">
             <p>
               © {year} {SITE_AUTHOR} · {dictionary.footer.rights}
             </p>
