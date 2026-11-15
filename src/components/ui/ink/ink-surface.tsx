@@ -24,8 +24,15 @@ export type InkSpec = {
   draw: (ctx: CanvasRenderingContext2D, width: number, height: number) => void;
   /** 必须保留一丝墨芯的细形状（可选），坐标同上 */
   drawCore?: (ctx: CanvasRenderingContext2D, width: number, height: number) => void;
+  /** 墨芯里显出的图像（可选），坐标同上 */
+  drawImage?: (ctx: CanvasRenderingContext2D, width: number, height: number) => void;
   /** 参数；reveal 的坐标也按盒子算 */
   params: InkParams;
+  /**
+   * 窗口模式：盒子很高时（整个作品区），画布只有视口那么高、贴住视口（sticky），
+   * 按滚动位置画出盒子里正在看的那一段。只用于 padding 为 0 的盒子
+   */
+  windowed?: boolean;
 };
 
 const ZERO: Padding = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -63,6 +70,8 @@ export function InkSurface({
   build,
   buildKey,
   watch,
+  focus,
+  video,
   fallback,
 }: {
   className?: string;
@@ -75,6 +84,10 @@ export function InkSurface({
   buildKey: string;
   /** 形状还取决于页面里别的元素（占位）时：返回这些元素，它们的尺寸或位置变了也会重算 */
   watch?: (box: HTMLElement) => (Element | null)[];
+  /** 当前焦点：params.focusRegions 里第几个完整化开；-1 = 都收拢。不传 = 不用焦点 */
+  focus?: number;
+  /** 化开时在墨芯里播放的视频与它所占的区域（盒子坐标，CSS px）；element 为 null = 淡回静止封面 */
+  video?: { element: HTMLVideoElement | null; rect?: { x: number; y: number; width: number; height: number } };
   fallback: ReactNode;
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
@@ -83,6 +96,8 @@ export function InkSurface({
   const buildRef = useRef(build);
   const watchRef = useRef(watch);
   const [padding, setPadding] = useState<Padding>(ZERO);
+  // 窗口模式下画布的高度（CSS px）；null = 普通模式，画布铺满盒子
+  const [windowHeight, setWindowHeight] = useState<number | null>(null);
   const failed = !useInkSupported();
   const { theme } = useTheme();
   const reducedMotion = usePrefersReducedMotion();
@@ -118,6 +133,10 @@ export function InkSurface({
     let frame = 0;
     let last = "";
     let cancelled = false;
+    // 窗口模式的画布高度：取见过的最大视口高度。手机上地址栏收起 / 展开会让视口高度来回变，
+    // 若跟着变就会在滚动途中反复重算整块区块的模糊（卡顿）；画布比可见部分略高没有关系
+    let windowed = false;
+    let viewport = 0;
 
     const update = () => {
       frame = 0;
@@ -127,18 +146,25 @@ export function InkSurface({
       if (!renderer || width < 1 || height < 1) return;
       const boxRect = box.getBoundingClientRect();
       const watched = (watchRef.current?.(box) ?? []).filter((el): el is Element => Boolean(el));
-      const key = [`${width}x${height}`, buildKey, ...watched.map((el) => rectKey(el, boxRect))].join(":");
+      viewport = Math.max(viewport, window.innerHeight);
+      const key = [`${width}x${height}`, windowed ? viewport : "", buildKey, ...watched.map((el) => rectKey(el, boxRect))].join(
+        ":",
+      );
       if (key === last) return;
       last = key;
 
       const spec = buildRef.current(width, height, box);
       const { top, right, bottom, left } = spec.padding;
       setPadding(spec.padding);
+      windowed = Boolean(spec.windowed);
+      const view = windowed ? Math.min(viewport, height) : null;
+      setWindowHeight(view);
       const reveal = spec.params.reveal;
-      const { drawCore } = spec;
+      const { drawCore, drawImage } = spec;
       renderer.setLayout({
         width: width + left + right,
         height: height + top + bottom,
+        window: view === null ? undefined : { height: view },
         draw: (ctx) => {
           ctx.translate(left, top);
           spec.draw(ctx, width, height);
@@ -149,9 +175,16 @@ export function InkSurface({
               drawCore(ctx, width, height);
             }
           : undefined,
+        drawImage: drawImage
+          ? (ctx) => {
+              ctx.translate(left, top);
+              drawImage(ctx, width, height);
+            }
+          : undefined,
         params: {
           ...spec.params,
           reveal: reveal ? { ...reveal, x: reveal.x + left, y: reveal.y + top } : null,
+          focusRegions: spec.params.focusRegions?.map((r) => ({ ...r, x: r.x + left, y: r.y + top })),
         },
       });
     };
@@ -161,6 +194,7 @@ export function InkSurface({
     };
     const observer = new ResizeObserver(schedule);
     observer.observe(box);
+    window.addEventListener("resize", schedule);
     (watchRef.current?.(box) ?? []).forEach((el) => el && observer.observe(el));
     // 字体加载完后，被 watch 的元素可能只是挪了位置（上面的文字变高了），尺寸没变
     document.fonts.ready.then(() => {
@@ -170,25 +204,81 @@ export function InkSurface({
     return () => {
       cancelled = true;
       observer.disconnect();
+      window.removeEventListener("resize", schedule);
       if (frame) cancelAnimationFrame(frame);
     };
   }, [buildKey, failed]);
+
+  // 焦点切换（作品区：滚到哪个作品，哪个作品化开）
+  useEffect(() => {
+    if (focus !== undefined) rendererRef.current?.setFocus(focus);
+  }, [focus]);
+
+  // 视频：只在化开的那一处播放
+  const videoElement = video?.element ?? null;
+  const videoRect = video?.rect;
+  useEffect(() => {
+    if (video === undefined) return;
+    rendererRef.current?.setVideo(
+      videoElement,
+      videoRect && { ...videoRect, x: videoRect.x + padding.left, y: videoRect.y + padding.top },
+    );
+    // videoRect 每次渲染都是新对象：按数值比较，避免每帧重设
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videoElement, videoRect?.x, videoRect?.y, videoRect?.width, videoRect?.height, padding.left, padding.top]);
 
   // 开始渲染；减弱动画时只画静止的一帧
   useEffect(() => {
     rendererRef.current?.start(!reducedMotion);
   }, [reducedMotion]);
 
-  // 滚出视口就不画
+  // 看不见就不画：滚出视口，或者被后面的纸整个盖住。
+  // 首页的区块是叠纸（ui/sheet.tsx，position: sticky）：往下滚时首屏那张纸其实一直贴在视口顶上、
+  // 只是被后面的纸盖住了。IntersectionObserver 只看位置，会以为它还看得见 —— 于是首屏和作品区
+  // 两块画布每帧都在画，帧率掉到八十几。所以滚动时再看一眼：盒子可见部分的几个点上，
+  // 最上层的元素是否还在盒子所在的区块里（画布是 pointer-events: none，elementFromPoint 会穿过它）。
   useEffect(() => {
     const box = boxRef.current;
     if (!box) return;
+    let intersecting = false;
+    let frame = 0;
+
+    const covered = () => {
+      // 以盒子所在的 <section> 为准：悬停预览这类盒子的直接父元素本身也是 pointer-events: none
+      const section = box.closest("section") ?? box.parentElement;
+      if (!section) return false;
+      const r = box.getBoundingClientRect();
+      const top = Math.max(r.top, 0);
+      const bottom = Math.min(r.bottom, window.innerHeight);
+      if (bottom <= top) return false;
+      const x = Math.min(Math.max(r.left + r.width / 2, 0), window.innerWidth - 1);
+      return [0.15, 0.5, 0.85].every((k) => {
+        const hit = document.elementFromPoint(x, top + (bottom - top) * k);
+        return hit !== null && !section.contains(hit);
+      });
+    };
+    const update = () => {
+      frame = 0;
+      rendererRef.current?.setVisible(intersecting && !covered());
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+
     const observer = new IntersectionObserver(
-      ([entry]) => rendererRef.current?.setVisible(entry.isIntersecting),
+      ([entry]) => {
+        intersecting = entry.isIntersecting;
+        schedule();
+      },
       { rootMargin: "120px" },
     );
     observer.observe(box);
-    return () => observer.disconnect();
+    window.addEventListener("scroll", schedule, { passive: true });
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", schedule);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   return (
@@ -205,13 +295,17 @@ export function InkSurface({
       ) : (
         <canvas
           ref={canvasRef}
-          className="absolute block"
-          style={{
-            top: -padding.top,
-            left: -padding.left,
-            width: `calc(100% + ${padding.left + padding.right}px)`,
-            height: `calc(100% + ${padding.top + padding.bottom}px)`,
-          }}
+          className={windowHeight === null ? "absolute block" : "sticky top-0 block w-full"}
+          style={
+            windowHeight === null
+              ? {
+                  top: -padding.top,
+                  left: -padding.left,
+                  width: `calc(100% + ${padding.left + padding.right}px)`,
+                  height: `calc(100% + ${padding.top + padding.bottom}px)`,
+                }
+              : { height: windowHeight }
+          }
         />
       )}
     </div>

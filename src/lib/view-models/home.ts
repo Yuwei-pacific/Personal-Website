@@ -1,6 +1,6 @@
 import type { Project, ResumeItem, SkillCategory } from "./types";
 import type {
-  PROJECTS_QUERY_RESULT,
+  HOME_WORK_QUERY_RESULT,
   RESUME_QUERY_RESULT,
   SKILLS_QUERY_RESULT,
 } from "@/sanity/sanity.types";
@@ -10,7 +10,10 @@ import { blocks, optionalText, stringList, text, video } from "./utils";
 const resumeType = (value: RESUME_QUERY_RESULT[number]["type"]): ResumeItem["type"] | null =>
   value === "education" || value === "experience" ? value : null;
 
-function normalizeProjects(items: PROJECTS_QUERY_RESULT = []): Project[] {
+// 精选与目录用同一份投影（PROJECT_LIST_PROJECTION）
+type RawProjectListItem = HOME_WORK_QUERY_RESULT["featured"][number] | HOME_WORK_QUERY_RESULT["index"][number];
+
+function normalizeProjects(items: RawProjectListItem[] = []): Project[] {
   return items.map((item) => {
     const title = text(item.title, "Untitled project");
     return {
@@ -19,6 +22,7 @@ function normalizeProjects(items: PROJECTS_QUERY_RESULT = []): Project[] {
       summary: text(item.summary),
       year: item.year ?? null,
       projectType: optionalText(item.projectType),
+      roles: stringList(item.roles),
       slug: optionalText(item.slug),
       coverImage: item.coverImage?.asset
         ? {
@@ -59,19 +63,14 @@ function normalizeResumeItems(items: RESUME_QUERY_RESULT = []): ResumeItem[] {
   });
 }
 
-export function normalizeHomeData({
-  projects,
-  skillCategories,
-  resumeItems,
-}: {
-  projects?: PROJECTS_QUERY_RESULT;
-  skillCategories?: SKILLS_QUERY_RESULT;
-  resumeItems?: RESUME_QUERY_RESULT;
-}) {
+/** 首页 Work 区：精选与目录两组，拆分与排序都已在 HOME_WORK_QUERY 里完成 */
+export function normalizeHomeWork(raw: HOME_WORK_QUERY_RESULT | null | undefined): {
+  featured: Project[];
+  index: Project[];
+} {
   return {
-    projects: normalizeProjects(projects),
-    skillCategories: normalizeSkillCategories(skillCategories),
-    resumeItems: normalizeResumeItems(resumeItems),
+    featured: normalizeProjects(raw?.featured ?? []),
+    index: normalizeProjects(raw?.index ?? []),
   };
 }
 

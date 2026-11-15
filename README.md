@@ -60,7 +60,7 @@ Personal-Website/
   A Sanity publish webhook (`src/app/api/revalidate`) expires the shared cache tag,
   with a 60-second time fallback;
   query results then pass through `src/lib/view-models/` before reaching UI components.
-  Filtering (`visibility != false`) and ordering happen **in GROQ only** — never
+  Filtering and ordering happen **in GROQ only** (unpublished drafts are hidden by the `published` perspective) — never
   re-filter/re-sort in components.
 - **Types**: prefer Sanity TypeGen query result types and run `npm run typegen`
   after changing a schema or query. A normalizer may define a narrow local raw

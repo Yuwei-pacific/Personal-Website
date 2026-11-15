@@ -103,8 +103,22 @@ uniform sampler2D uLoose;
 uniform sampler2D uCore;
 uniform sampler2D uTrail;
 uniform sampler2D uLut;
+uniform sampler2D uImage;        // 墨芯里显出的图像（作品封面）；没有时是 1×1 透明
+// 焦点：只在这些区域里完整化开（五色的晕），区域外收成一道干净的墨边。没有区域时处处化开
+uniform int uFocusCount;
+uniform vec4 uFocusRect[4];     // x, y, width, height（画布 CSS px）
+uniform float uFocusWeight[4];  // 0–1，随滚动缓动
+uniform float uFocusMargin;
+uniform float uFocusFeather;
+// 视频：化开时在墨芯里播放（一次只有一个）。区域与原始尺寸用于 object-fit: cover 的裁切
+uniform sampler2D uVideo;
+uniform vec4 uVideoRect;
+uniform vec2 uVideoSize;
+uniform float uVideoMix;
 
-uniform vec2 uSize;             // 画布尺寸（CSS px）
+uniform vec2 uSize;             // 形状所在的整块区域（CSS px）；纹理按它取样
+uniform vec2 uView;             // 画布实际画出的那一块（CSS px）：通常等于 uSize；
+uniform vec2 uViewOffset;       // 「窗口」模式下是视口那么高的一条，随滚动在区域里移动
 uniform float uTime;            // 秒
 uniform float uFlow;            // 0 = 静止（减弱动画）
 uniform float uDisplacement;    // 边缘起伏的幅度（CSS px）
@@ -153,7 +167,7 @@ float fbm(vec2 p) {
 
 void main() {
   // 画布坐标（CSS px），原点在左上；纹理也是左上为原点
-  vec2 p = vec2(vUv.x, 1.0 - vUv.y) * uSize;
+  vec2 p = vec2(vUv.x, 1.0 - vUv.y) * uView + uViewOffset;
   float t = uTime * uFlow;
 
   // 1. 墨还没干：边缘随时间缓慢起伏
@@ -166,7 +180,8 @@ void main() {
 
   // 2. 筷子划过：墨被推开（位移），中间划开一道口子（cut）
   vec4 trail = texture(uTrail, p / uSize);
-  q -= (trail.rg - 0.5) * 2.0 * uMaxShift;
+  vec2 trailShift = (trail.rg - 0.5) * 2.0 * uMaxShift;
+  q -= trailShift;
   float cut = trail.b;
 
   vec2 uv = q / uSize;
@@ -191,6 +206,21 @@ void main() {
   value = min(value, core);
   value = clamp(value - breath * uBreath, 0.0, 1.0);
 
+  // 5b. 焦点之外不化开：墨芯保留，墨芯外的晕直接收到纸，只剩一道干净的墨边。
+  //     这样一屏里只有正在看的那一处带彩色（手册：一个画面只化开一处）
+  float focus = 1.0;
+  if (uFocusCount > 0) {
+    focus = 0.0;
+    for (int i = 0; i < 4; i++) {
+      if (i >= uFocusCount) break;
+      vec4 r = uFocusRect[i];
+      vec2 outside = max(abs(p - (r.xy + r.zw * 0.5)) - (r.zw * 0.5 + uFocusMargin), 0.0);
+      focus = max(focus, (1.0 - smoothstep(0.0, uFocusFeather, length(outside))) * uFocusWeight[i]);
+    }
+    float quiet = mix(value, 1.0, smoothstep(0.28, 0.36, value));
+    value = mix(quiet, value, focus);
+  }
+
   // 6. 口子里露出纸
   value = mix(value, 1.0, cut * 0.9);
 
@@ -202,6 +232,26 @@ void main() {
   // 8. 五色：rgb 按明暗值取，alpha 已经在表里按 1 − 明暗值算好
   vec4 color = texture(uLut, vec2(value, 0.5));
   float alpha = color.a;
+
+  // 8b. 墨芯里显出图像：墨最浓的地方不是黑，而是图像 —— 作品「在墨里」。
+  //     边界由化开后的明暗值决定（含颗粒），所以图像的轮廓和墨一起起伏、呼吸；
+  //     图像只跟着筷子的位移走，不跟着噪声起伏抖动，免得画面晃
+  vec2 ip = p - trailShift;
+  vec4 image = texture(uImage, ip / uSize);
+  if (uVideoMix > 0.0) {
+    vec2 local = (ip - uVideoRect.xy) / uVideoRect.zw;
+    float rectAspect = uVideoRect.z / uVideoRect.w;
+    float videoAspect = uVideoSize.x / max(uVideoSize.y, 1.0);
+    vec2 crop = rectAspect > videoAspect ? vec2(1.0, videoAspect / rectAspect) : vec2(rectAspect / videoAspect, 1.0);
+    float inside = step(0.0, local.x) * step(local.x, 1.0) * step(0.0, local.y) * step(local.y, 1.0);
+    image.rgb = mix(image.rgb, texture(uVideo, (local - 0.5) * crop + 0.5).rgb, uVideoMix * inside);
+  }
+  // 没化开的作品保持黑白：颜色只在正在看的那一处出现
+  float luma = dot(image.rgb, vec3(0.2126, 0.7152, 0.0722));
+  image.rgb = mix(vec3(luma), image.rgb, focus);
+  float inImage = (1.0 - smoothstep(0.1, 0.26, value)) * image.a;
+  color.rgb = mix(color.rgb, image.rgb, inImage);
+  alpha = max(alpha, inImage);
 
   // 9. 显影：水从一点落下，湿的边界不规则地漫开，漫到哪里墨才显出来
   if (uRevealOn > 0.5) {
@@ -307,16 +357,31 @@ export type InkParams = {
    * 小尺寸的元素（口号里的单词）细笔画会先被平均成灰色，要用 1
    */
   blurScale?: number;
+  /** 画布像素密度上限（默认 2）。很高的画布（整个作品区）用低一点，省显存和像素 */
+  maxDpr?: number;
+  /** 显影的时长与开头停顿（秒），默认 4.4 / 前 18%；replayReveal = 每次 setLayout 都重新显影（悬停预览） */
+  revealDuration?: number;
+  revealPause?: number;
+  replayReveal?: boolean;
+  /** 焦点区域（最多 4 个）：只有当前焦点处完整化开，其余收成墨边。焦点由 setFocus 切换 */
+  focusRegions?: { x: number; y: number; width: number; height: number }[];
 };
 
 export type InkLayout = {
-  /** 画布尺寸（CSS px）—— 已经包含四周给晕留的余量 */
+  /**
+   * 窗口模式（很高的区域，如整个作品区）：画布只有视口那么高、贴住视口（sticky），按滚动位置画出
+   * 区域里正在看的那一段。整块区域那么大的画布每帧都要合成，帧率会掉一半（实测 120 → 52fps）
+   */
+  window?: { height: number };
+  /** 区域尺寸（CSS px）—— 已经包含四周给晕留的余量 */
   width: number;
   height: number;
   /** 把形状画进源图：坐标是画布 CSS px，墨用黑色，纸已经铺好白色 */
   draw: (ctx: CanvasRenderingContext2D) => void;
   /** 必须保留一丝墨芯的细形状（可选），坐标同上 */
   drawCore?: (ctx: CanvasRenderingContext2D) => void;
+  /** 墨芯里显出的图像（可选）：画在透明底上，坐标同上；有图像的地方，墨最浓处显示图像而不是墨色 */
+  drawImage?: (ctx: CanvasRenderingContext2D) => void;
   params: InkParams;
 };
 
@@ -346,6 +411,10 @@ const MAX_DPR = 2;
 const BLUR_SCALE = 0.5;
 // 细墨芯的模糊（CSS px）：只去掉锯齿，不让它化开
 const CORE_SIGMA = 1;
+// 焦点：区域往外多算多少、再用多远淡出（CSS px），以及切换焦点时化开 / 收拢的快慢（时间常数，秒）
+const FOCUS_MARGIN = 40;
+const FOCUS_FEATHER = 260;
+const FOCUS_SETTLE = 0.45;
 
 type Program = { program: WebGLProgram; uniforms: Record<string, WebGLUniformLocation | null> };
 
@@ -415,6 +484,7 @@ export class InkRenderer {
   private tight: WebGLTexture | null = null;
   private loose: WebGLTexture | null = null;
   private core: WebGLTexture | null = null;
+  private image: WebGLTexture | null = null;
   private trail: [WebGLTexture | null, WebGLTexture | null] = [null, null];
   private trailSize = { width: 1, height: 1 };
   private lut: WebGLTexture | null = null;
@@ -425,6 +495,14 @@ export class InkRenderer {
   private trailActive = false;
   private settleTime = 0;
   private dpr = 1;
+  private focusTarget = -1;
+  private focusWeights: number[] = [];
+  private animated = true;
+  private videoTexture: WebGLTexture | null = null;
+  private video: HTMLVideoElement | null = null;
+  private videoRect = { x: 0, y: 0, width: 1, height: 1 };
+  private videoTarget = 0;
+  private videoMix = 0;
   private unsubscribe: (() => void) | null = null;
   private visible = true;
   private needsDraw = true;
@@ -463,6 +541,8 @@ export class InkRenderer {
       "uTrail",
       "uLut",
       "uSize",
+      "uView",
+      "uViewOffset",
       "uTime",
       "uFlow",
       "uDisplacement",
@@ -478,6 +558,16 @@ export class InkRenderer {
       "uMaxShift",
       "uReveal",
       "uRevealOn",
+      "uImage",
+      "uFocusCount",
+      "uFocusRect",
+      "uFocusWeight",
+      "uFocusMargin",
+      "uFocusFeather",
+      "uVideo",
+      "uVideoRect",
+      "uVideoSize",
+      "uVideoMix",
     ]);
     // 一个覆盖全屏的大三角形
     const buffer = gl.createBuffer();
@@ -486,6 +576,7 @@ export class InkRenderer {
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     this.framebuffer = gl.createFramebuffer();
+    this.videoTexture = texture(gl, 1, 1, new Uint8Array([0, 0, 0, 0]));
     listenToPointer();
   }
 
@@ -493,17 +584,20 @@ export class InkRenderer {
   setLayout(layout: InkLayout) {
     const { gl } = this;
     this.layout = layout;
-    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+    const dpr = Math.min(window.devicePixelRatio || 1, layout.params.maxDpr ?? MAX_DPR);
     this.dpr = dpr;
-    this.canvas.width = Math.max(1, Math.round(layout.width * dpr));
-    this.canvas.height = Math.max(1, Math.round(layout.height * dpr));
+    // 纹理覆盖整块区域；画布在窗口模式下只有视口那么高
+    const fullWidth = Math.max(1, Math.round(layout.width * dpr));
+    const fullHeight = Math.max(1, Math.round(layout.height * dpr));
+    this.canvas.width = fullWidth;
+    this.canvas.height = Math.max(1, Math.round((layout.window?.height ?? layout.height) * dpr));
 
-    [this.tight, this.loose, this.core, ...this.trail].forEach((t) => gl.deleteTexture(t));
+    [this.tight, this.loose, this.core, this.image, ...this.trail].forEach((t) => gl.deleteTexture(t));
 
     // 1. 晕：形状在模糊用的分辨率上画成源图，做两档模糊
     const blurScale = layout.params.blurScale ?? BLUR_SCALE;
-    const bw = Math.max(1, Math.round(this.canvas.width * blurScale));
-    const bh = Math.max(1, Math.round(this.canvas.height * blurScale));
+    const bw = Math.max(1, Math.round(fullWidth * blurScale));
+    const bh = Math.max(1, Math.round(fullHeight * blurScale));
     const source = texture(gl, bw, bh, sourceCanvas(bw, bh, layout, layout.draw));
     const scratch = texture(gl, bw, bh, null);
     const texelsPerPx = bw / layout.width;
@@ -515,8 +609,8 @@ export class InkRenderer {
     // 2. 细墨芯：没有的话放一张全白（= 纸）的 1×1，合成时取最小值就等于不起作用。
     //    墨芯要清楚，用画布的全分辨率画
     if (layout.drawCore) {
-      const cw = this.canvas.width;
-      const ch = this.canvas.height;
+      const cw = fullWidth;
+      const ch = fullHeight;
       const coreSource = texture(gl, cw, ch, sourceCanvas(cw, ch, layout, layout.drawCore));
       const coreScratch = texture(gl, cw, ch, null);
       this.core = this.blurInto(coreSource, coreScratch, cw, ch, CORE_SIGMA * dpr);
@@ -526,6 +620,30 @@ export class InkRenderer {
       this.core = texture(gl, 1, 1, new Uint8Array([255, 255, 255, 255]));
     }
     gl.deleteTexture(scratch);
+
+    // 2b. 墨芯里的图像：直接按画布分辨率画，不模糊；没有时放一张 1×1 透明
+    if (layout.drawImage) {
+      const iw = fullWidth;
+      const ih = fullHeight;
+      const canvas = document.createElement("canvas");
+      canvas.width = iw;
+      canvas.height = ih;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.scale(iw / layout.width, ih / layout.height);
+        layout.drawImage(ctx);
+      }
+      // 画布是非预乘的，上传时不要再乘一次 alpha。
+      // 万一某张图没带 CORS 把画布污染了，上传会抛 SecurityError：退回「没有图像」，墨滩显示为纯墨
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      try {
+        this.image = texture(gl, iw, ih, canvas);
+      } catch {
+        this.image = texture(gl, 1, 1, new Uint8Array([0, 0, 0, 0]));
+      }
+    } else {
+      this.image = texture(gl, 1, 1, new Uint8Array([0, 0, 0, 0]));
+    }
 
     // 3. 拨动场：两张纹理来回倒，初始为「没有位移、没有口子」
     const tw = Math.max(1, Math.round(layout.width * TRAIL_SCALE));
@@ -541,6 +659,8 @@ export class InkRenderer {
     });
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     this.lastPointer = null;
+    if (layout.params.replayReveal) this.revealStart = performance.now() / 1000;
+    this.focusWeights = (layout.params.focusRegions ?? []).map((_, i) => (i === this.focusTarget ? 1 : 0));
     this.trailActive = false;
     this.needsDraw = true;
   }
@@ -592,6 +712,56 @@ export class InkRenderer {
     this.needsDraw = true;
   }
 
+  /** 切换焦点：第 index 个焦点区域化开，其余收拢；-1 = 都收拢 */
+  setFocus(index: number) {
+    this.focusTarget = index;
+    if (!this.animated) this.focusWeights = this.focusWeights.map((_, i) => (i === index ? 1 : 0));
+    this.needsDraw = true;
+  }
+
+  /**
+   * 化开时在墨芯里播放的视频（区域按画布 CSS px）。null = 淡回静止的封面。
+   * 视频必须带 crossOrigin，才能上传成纹理
+   */
+  setVideo(video: HTMLVideoElement | null, rect?: { x: number; y: number; width: number; height: number }) {
+    if (video) {
+      this.video = video;
+      if (rect) this.videoRect = rect;
+      this.videoTarget = 1;
+    } else {
+      this.videoTarget = 0;
+    }
+  }
+
+  private updateVideo(dt: number) {
+    const { gl, video } = this;
+    if (!video) return;
+    const ready = video.readyState >= 2 && video.videoWidth > 0;
+    // 有画面了才淡入；淡出用最后一帧
+    const target = ready ? this.videoTarget : 0;
+    this.videoMix += (target - this.videoMix) * (1 - Math.exp(-dt / 0.35));
+    if (ready && this.videoTarget > 0) {
+      gl.bindTexture(gl.TEXTURE_2D, this.videoTexture);
+      try {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+      } catch {
+        // 跨域视频上传失败：放弃这个视频，停在静止封面上
+        this.videoTarget = 0;
+        this.videoMix = 0;
+        this.video = null;
+      }
+    }
+    if (this.videoTarget === 0 && this.videoMix < 0.01) {
+      this.videoMix = 0;
+      this.video = null;
+    }
+  }
+
+  private easeFocus(dt: number) {
+    const k = 1 - Math.exp(-dt / FOCUS_SETTLE);
+    this.focusWeights = this.focusWeights.map((w, i) => w + ((i === this.focusTarget ? 1 : 0) - w) * k);
+  }
+
   setVisible(visible: boolean) {
     this.visible = visible;
     if (visible) this.needsDraw = true;
@@ -599,17 +769,43 @@ export class InkRenderer {
 
   /** 开始渲染。animated = false（减弱动画）时：不显影、不流动、不呼吸、不响应鼠标，只画静止画面 */
   start(animated: boolean) {
+    this.animated = animated;
     this.revealStart = performance.now() / 1000;
     this.unsubscribe?.();
     this.unsubscribe = subscribe((time, dt) => {
-      if (!this.visible || document.hidden || !this.layout || !this.lut) return;
+      if (document.hidden || !this.layout || !this.lut) return;
+      // 在视口外：只在形状刚变过时画一帧「预热」。纹理的实际上传和着色器的准备是 GPU 在第一次
+      // 绘制时才做的，大画布（整个作品区）要花近一秒 —— 不预热的话，滚进视口时会先空白一下
+      if (!this.visible) {
+        if (this.needsDraw) this.draw(time, false);
+        return;
+      }
+      // 窗口模式：滚动会改变画出的那一段，静止画面也要跟着重画
+      const offset = this.viewOffset();
+      if (offset !== this.lastViewOffset) {
+        this.lastViewOffset = offset;
+        this.needsDraw = true;
+      }
       if (!animated) {
         if (this.needsDraw) this.draw(time, false);
         return;
       }
       this.stir(dt);
+      this.easeFocus(dt);
+      this.updateVideo(dt);
       this.draw(time, true);
     });
+  }
+
+  private lastViewOffset = 0;
+
+  // 窗口模式下画布（sticky）的上缘离区域上缘多远（CSS px）；非窗口模式为 0
+  private viewOffset() {
+    const parent = this.canvas.parentElement;
+    if (!this.layout?.window || !parent) return 0;
+    const max = Math.max(0, this.layout.height - this.layout.window.height);
+    const offset = this.canvas.getBoundingClientRect().top - parent.getBoundingClientRect().top;
+    return Math.min(max, Math.max(0, Math.round(offset)));
   }
 
   /** 筷子：把鼠标这一帧划过的线段盖进拨动场，并让整张场衰减（墨流回来） */
@@ -618,9 +814,14 @@ export class InkRenderer {
     if (!layout || dt <= 0) return;
 
     const rect = this.canvas.getBoundingClientRect();
+    const viewHeight = layout.window?.height ?? layout.height;
     const sx = layout.width / (rect.width || 1);
-    const sy = layout.height / (rect.height || 1);
-    const here = pointer.seen ? { x: (pointer.x - rect.left) * sx, y: (pointer.y - rect.top) * sy } : null;
+    const sy = viewHeight / (rect.height || 1);
+    // 换算到整块区域的坐标（窗口模式要加上画布在区域里的偏移）
+    const offset = this.lastViewOffset;
+    const here = pointer.seen
+      ? { x: (pointer.x - rect.left) * sx, y: (pointer.y - rect.top) * sy + offset }
+      : null;
     const from = this.lastPointer ?? here;
     this.lastPointer = here;
 
@@ -680,7 +881,7 @@ export class InkRenderer {
     gl.useProgram(ink.program);
     const u = ink.uniforms;
 
-    [this.tight, this.loose, this.core, this.trail[0], this.lut].forEach((tex, i) => {
+    [this.tight, this.loose, this.core, this.trail[0], this.lut, this.image].forEach((tex, i) => {
       gl.activeTexture(gl.TEXTURE0 + i);
       gl.bindTexture(gl.TEXTURE_2D, tex);
     });
@@ -689,8 +890,33 @@ export class InkRenderer {
     gl.uniform1i(u.uCore, 2);
     gl.uniform1i(u.uTrail, 3);
     gl.uniform1i(u.uLut, 4);
+    gl.uniform1i(u.uImage, 5);
+    gl.activeTexture(gl.TEXTURE6);
+    gl.bindTexture(gl.TEXTURE_2D, this.videoTexture);
+    gl.uniform1i(u.uVideo, 6);
+    const v = this.videoRect;
+    gl.uniform4f(u.uVideoRect, v.x, v.y, v.width, v.height);
+    gl.uniform2f(u.uVideoSize, this.video?.videoWidth ?? 1, this.video?.videoHeight ?? 1);
+    gl.uniform1f(u.uVideoMix, animated ? this.videoMix : 0);
+
+    const regions = (params.focusRegions ?? []).slice(0, 4);
+    gl.uniform1i(u.uFocusCount, regions.length);
+    if (regions.length) {
+      const rects = new Float32Array(16);
+      const weights = new Float32Array(4);
+      regions.forEach((r, i) => {
+        rects.set([r.x, r.y, r.width, r.height], i * 4);
+        weights[i] = this.focusWeights[i] ?? 0;
+      });
+      gl.uniform4fv(u.uFocusRect, rects);
+      gl.uniform1fv(u.uFocusWeight, weights);
+      gl.uniform1f(u.uFocusMargin, FOCUS_MARGIN);
+      gl.uniform1f(u.uFocusFeather, FOCUS_FEATHER);
+    }
 
     gl.uniform2f(u.uSize, layout.width, layout.height);
+    gl.uniform2f(u.uView, layout.width, layout.window?.height ?? layout.height);
+    gl.uniform2f(u.uViewOffset, 0, this.lastViewOffset);
     gl.uniform1f(u.uTime, animated ? time : 0);
     gl.uniform1f(u.uFlow, animated ? 1 : 0);
     gl.uniform1f(u.uDisplacement, params.displacement);
@@ -707,7 +933,9 @@ export class InkRenderer {
 
     const reveal = params.reveal;
     if (animated && reveal) {
-      const progress = Math.max(0, (time - this.revealStart) / REVEAL_DURATION - REVEAL_PAUSE) / (1 - REVEAL_PAUSE);
+      const duration = params.revealDuration ?? REVEAL_DURATION;
+      const pause = params.revealPause ?? REVEAL_PAUSE;
+      const progress = Math.max(0, (time - this.revealStart) / duration - pause) / (1 - pause);
       // 接近匀速，末尾放缓
       const eased = progress >= 1 ? 1 : 1 - Math.pow(1 - progress, 1.6);
       gl.uniform3f(u.uReveal, reveal.x, reveal.y, reveal.radius * eased);
@@ -722,7 +950,8 @@ export class InkRenderer {
   destroy() {
     this.unsubscribe?.();
     const { gl } = this;
-    [this.tight, this.loose, this.core, ...this.trail, this.lut].forEach((t) => gl.deleteTexture(t));
+    [this.tight, this.loose, this.core, this.image, ...this.trail, this.lut].forEach((t) => gl.deleteTexture(t));
+    gl.deleteTexture(this.videoTexture);
     gl.deleteFramebuffer(this.framebuffer);
     gl.deleteProgram(this.blur.program);
     gl.deleteProgram(this.trailProgram.program);

@@ -62,7 +62,9 @@ page.tsx (Server Component)
 
 Rules that keep this from drifting:
 
-- **Filtering and ordering happen in GROQ only** (`visibility != false`, `order(coalesce(year,0) desc, …)`).
+- **Filtering and ordering happen in GROQ only** (`order(coalesce(year,0) desc, …)`, the home Work
+  section's featured / index split). There is no visibility flag: the site reads the `published`
+  perspective, so unpublishing a project to a draft is how it is hidden.
   Never re-filter or re-sort in a component or view model.
 - `src/sanity/queries.ts` is the single source of every query. Changing a query or a schema requires
   `npm run typegen` to regenerate `src/sanity/sanity.types.ts`.
@@ -142,6 +144,17 @@ blooms merge where the line runs into the "i" stem. Layout only places two empty
 `InkMarkSlot` (`data-ink="mark"`, the ink box) and `InkLineSlot` (`data-ink="line"`, the line runs on
 its vertical center); `buildHero` reads their rects and ends the line on the stem's centerline. When
 WebGL2 is missing, `HeroInk` renders nothing and the slots show the SVG fallbacks.
+
+The home Work section (`src/components/sections/home/work/`) follows the same slot pattern on a canvas
+covering the whole section: `[data-ink="cover"]` placeholders become ink pools with the cover image shown
+in the ink core (`drawImage`), a thread (`ink-geometry.ts`) links them and lands as the index's top rule
+(`[data-ink="rule"]`). Only one pool blooms at a time — the featured project nearest the viewport's
+middle is the focus (`focusRegions` + `setFocus`); outside it the bloom collapses to an ink rim and
+covers turn grayscale. The focused project's cover video plays inside the ink (`setVideo`). Featured
+projects are ticked in Sanity (`featured`, `featuredOrder`, max 4 shown — the shader takes 4 focus
+regions). Images and videos uploaded as textures must load with `crossOrigin="anonymous"`. An offscreen
+canvas still draws one warm-up frame after each layout change, because the GPU uploads textures and
+prepares shaders on first draw — large canvases otherwise flash blank on scroll-in.
 
 `src/components/ui/sheet.tsx` (experimental, home page only) stacks sections like sheets of paper
 with `position: sticky`; siblings must share one parent and each sheet is at least one viewport tall.

@@ -23,6 +23,8 @@ export type Project = {
   summary: string;
   year: number | null;
   projectType: string | null;
+  /** 我在项目里的角色（Sanity「My roles」），首页精选上用「·」连起来显示 */
+  roles: string[];
   slug: string | null;
   coverImage: ProjectCoverImage | null;
   coverVideo: ProjectVideo | null;
