@@ -3,7 +3,7 @@
 //   ┌──────────────────────────────────────────────┐
 //   │ CHI SONO                                      │
 //   │ 墨   Nella pittura a inchiostro       ▄██▄    │  出处：四个字 + 这个说法（h1）+ 一句小字
-//   │ 分   cinese si dice che un solo …    ██████   │  人像：右 4 栏，站在下面那道线上，外面一圈墨
+//   │ 分   cinese si dice che un solo …    ██████   │  人像：右 4 栏，显在一滩墨里
 //   │ 五   Lavoro allo stesso modo …       ██████   │
 //   │~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~██████~~~│
 //   │ Ruolo      Communication Designer & …         │  基本信息：标签左 3 栏，内容从第 4 栏起
@@ -12,8 +12,9 @@
 //   └──────────────────────────────────────────────┘
 //
 // 整页用首页 Work 的 12 栏网格、贴页边：标签和标题在左 3 栏，内容从第 4 栏起，一条轴线贯穿两段。
-// 这一页只有一处化开：人像外面那一圈墨（portrait-ink.tsx）。首屏的墨线和化开的字不搬到这里当装饰。
-// 人像是抠像，直接落在纸上，下缘贴着基本信息顶上的线 —— 和 Work 里趴在线上的小人是同一个姿势。
+// 这一页只有一处化开：托着人像的那一滩墨（portrait-drop.tsx），和首页作品封面显在墨滩里是同一个做法。
+// 首屏的墨线和化开的字不搬到这里当装饰。
+// 之前的方案是抠像直接落在纸上、站在线上、轮廓外面一圈墨（portrait-ink.tsx，文件还在）：用户比较后选了墨滩。
 // 分隔线都是墨线（ui/ink-rule.tsx）。
 import Image from "next/image";
 
@@ -27,7 +28,7 @@ import { cn } from "@/lib/utils";
 import type { ResumeItem, SkillCategory } from "@/lib/view-models/types";
 
 import { infoListClassName, infoRowFocusClassName } from "./info-list";
-import { PortraitInk } from "./portrait-ink";
+import { PortraitDrop } from "./portrait-drop";
 import { ResumeList } from "./resume-list";
 
 type AboutPageContentProps = {
@@ -85,8 +86,8 @@ export function AboutPageContent({
           三栏：左 3 栏是名字，中间 5 栏是话，右 4 栏是人像。「墨分五色」四个字用系统自带的宋体竖排，
           全站只出现这一次（不加载网络字体，所以不用动 CSP）。
           这一屏只有人像那一处化开；出处原来配的那滴墨（origin-drop.tsx）没有再用 —— 一屏不放两处。
-          至少一屏高：上半部分撑满，人像沉到底、站在基本信息顶上那道线上 */}
-      <section className={cn("surface-base flex min-h-[100svh] flex-col bg-background pb-10 pt-28 sm:pb-14 sm:pt-36 lg:pb-10 lg:pt-28", edge)}>
+          至少一屏高：上半部分撑满，基本信息贴底 */}
+      <section className={cn("surface-base flex min-h-[100svh] flex-col overflow-x-clip bg-background pb-10 pt-28 sm:pb-14 sm:pt-36 lg:pb-10 lg:pt-28", edge)}>
         <p className="text-label uppercase text-design-light-text-muted">{about.eyebrow}</p>
         {/* 窄屏是同一套逻辑的两栏版：左边一条窄栏只放竖排的四个字（像书脊上的题签），右边一栏是内容 ——
             读音译名、那句话、小字、人像都在右栏，左缘对齐成一条线，人像正好占满右栏、站在线上。
@@ -116,17 +117,18 @@ export function AboutPageContent({
               {about.origin.body}
             </p>
           </div>
-          {/* 人像：照片只在这一页出现一次。下缘不留空，直接压在下面那道线上。
-              照片不反色（深色模式也是原样）—— 反色只给线稿 */}
-          <div className="relative col-start-2 aspect-[4/5] w-full max-w-[26rem] lg:col-span-4 lg:col-start-auto lg:aspect-[5/6] lg:max-w-none">
-            <PortraitInk />
+          {/* 人像在一滩墨里（portrait-drop.tsx）：顶端和左边的文字对齐，浮在那道线上方。
+              照片只在这一页出现一次。排版里这张 <img> 在画布可用时是透明的，看得见的是墨里的那张 */}
+          <div className="group/portrait relative col-start-2 mb-6 aspect-[8/9] w-full max-w-[26rem] lg:col-span-4 lg:col-start-auto lg:mb-0 lg:max-w-none lg:self-start">
+            <PortraitDrop />
             <Image
               src="/Profile_Yuwei.webp"
               alt={dictionary.common.portraitAlt}
               fill
               priority
+              crossOrigin="anonymous"
               sizes="(min-width: 1024px) 33vw, (min-width: 640px) 26rem, 80vw"
-              className="relative object-cover object-top"
+              className="object-cover object-top group-data-[ink=on]/portrait:opacity-0"
             />
           </div>
         </div>

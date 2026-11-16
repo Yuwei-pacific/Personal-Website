@@ -172,14 +172,15 @@ around one title word (`about-ink.tsx`, path in `aboutCircle`, word picked by `d
 The About page (`sections/about/`) scrolls normally on the same edge-to-edge 12-column grid (labels and
 headings in columns 1–3, content from column 4), paper then paper 2. Its first screen opens with the origin —
 the vertical 墨分五色 (the one place it appears), the origin sentence as the `h1`, a quieter second sentence — beside
-the cut-out portrait, which stands on the rule above the basic-info rows. A generic "I combine design and
-frontend…" headline was rejected as templated and already said on the home page, and the origin as its own
-section between the facts sat awkwardly. The page's only bloom is the ink around the portrait
-(`portrait-ink.tsx` — a canvas under the photo whose shape is the photo's own alpha, so only the ink outside the
-silhouette shows; added because the black shirt vanished on the dark theme; a uniform 2 px rim was rejected as
-lifeless, so it uses Work-level bloom with a downward spread). `origin-drop.tsx` (an ink drop that opens when
-scrolled to mid-viewport) is currently unused. Dividers on this page are `ui/ink-rule.tsx` (the footer's plain
-hand-drawn line as a reusable SVG rule), not straight borders.
+the portrait. A generic "I combine design and frontend…" headline was rejected as templated and already said on
+the home page; an origin-only first screen was rejected because it no longer said who "I" is, so the `h1` now
+introduces the person and the origin follows in small text. The page's only bloom is the ink pool holding the
+portrait (`portrait-drop.tsx`): an irregular pool with the cut-out photo shown in the ink core via `drawImage`,
+the same technique as the Work covers; the layout `<img>` only loads the photo and carries the alt text (it is
+transparent while the canvas is active). The earlier variant — the cut-out standing on the rule with ink only
+around its silhouette (`portrait-ink.tsx`) — lost the comparison and is unused, as is `origin-drop.tsx`.
+Dividers on this page are `ui/ink-rule.tsx` (the footer's plain hand-drawn line as a reusable SVG rule), not
+straight borders.
 A long thread wrapping the portrait and a stirrable, mark-blooming footer
 were both built and rejected as cluttered, as was a full underline entering from the left edge. The
 Work thread starts inside the section with a tapered tip (`START_Y` in `ink-geometry.ts`) at `THREAD_X`
