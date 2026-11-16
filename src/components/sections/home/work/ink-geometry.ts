@@ -266,7 +266,8 @@ export function aboutCircle(word: Rect | null, lastLine: boolean): Sample[] {
   const w = ABOUT_WEIGHT;
   const baseY = word.y + word.height + 1;
   // 比词大一圈的扁圆（超椭圆，接近药丸形）
-  const rx = word.width / 2 + size * 0.11;
+  // 左右只多出不到半个词距：圈要从词与词之间的空里穿过去，再宽就压到旁边的字（之前压到了前面的「I」）
+  const rx = word.width / 2 + size * 0.075;
   const ry = (baseY - (word.y - size * 0.2)) / 2;
   const cx = word.x + word.width / 2;
   const cy = baseY - ry;
@@ -280,7 +281,7 @@ export function aboutCircle(word: Rect | null, lastLine: boolean): Sample[] {
   for (let i = 0; i <= steps; i++) {
     const k = i / steps;
     const phi = from + (to - from) * k;
-    const grow = 1 + 0.035 * k + 0.012 * Math.sin(phi * 2 + 0.8);
+    const grow = 1 + 0.02 * k + 0.012 * Math.sin(phi * 2 + 0.8);
     points.push({
       x: cx + bend(Math.sin(phi)) * rx * grow,
       y: cy + bend(Math.cos(phi)) * ry * grow,

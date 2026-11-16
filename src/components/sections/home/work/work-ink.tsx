@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { InkSurface, useInkSupported, type InkSpec } from "@/components/ui/ink/ink-surface";
-import { COLOR_TABLES } from "@/components/ui/ink/ink-tables";
+import { INK_TABLES } from "@/components/ui/ink/ink-tables";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 
 import { coverVideo, playFocusVideo } from "./cover-media";
@@ -26,7 +26,6 @@ import {
   type Rect,
 } from "./ink-geometry";
 
-const TABLES = { light: COLOR_TABLES.light, dark: COLOR_TABLES.dark };
 // 焦点：离视口中线多远以内才算（视口高度的比例）；都不在范围内时全部收拢
 const FOCUS_RANGE = 0.55;
 
@@ -86,6 +85,15 @@ function buildWork(mobile: boolean) {
       params: {
         ...WORK_INK,
         reveal: null,
+        // 墨线随滚动往下流，流到哪个作品、哪滩墨才漫开；流过就留下（见 ink-gl.ts 的 flow）
+        flow: true,
+        // 每滩墨的入口：墨线上第一个落进这块封面的点（线没经过时退回上沿正中）
+        flowDrops: rects.map((rect) => {
+          const hit = thread.find(
+            (s) => s.x >= rect.x && s.x <= rect.x + rect.width && s.y >= rect.y - pad && s.y <= rect.y + rect.height,
+          );
+          return hit ? { x: hit.x, y: hit.y } : { x: rect.x + rect.width / 2, y: rect.y };
+        }),
         // 纹理覆盖整个区块：像素密度收一点，省显存
         maxDpr: 1.5,
         focusRegions: rects,
@@ -184,7 +192,7 @@ export function WorkInk({ featured }: { featured: FeaturedMedia[] }) {
       {supported ? (
         <InkSurface
           className="absolute inset-0"
-          tables={TABLES}
+          tables={INK_TABLES}
           build={buildWork(!desktop)}
           buildKey={`work:${loaded}:${desktop ? "desktop" : "mobile"}`}
           watch={watch}

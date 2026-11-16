@@ -7,13 +7,12 @@
 import { useEffect, useState } from "react";
 
 import { InkSurface, useInkSupported, type InkSpec } from "@/components/ui/ink/ink-surface";
-import { COLOR_TABLES } from "@/components/ui/ink/ink-tables";
+import { INK_TABLES } from "@/components/ui/ink/ink-tables";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 
 import { coverVideo, endPreviewVideo, loadCoverImage, playPreviewVideo } from "./cover-media";
 import { POOL_PAD, U, WORK_INK, drawCover, poolPath } from "./ink-geometry";
 
-const TABLES = { light: COLOR_TABLES.light, dark: COLOR_TABLES.dark };
 
 export const PREVIEW_WIDTH = 340;
 export const PREVIEW_HEIGHT = 240;
@@ -100,7 +99,7 @@ export function IndexPreview({ item, top }: { item: PreviewItem | null; top: num
       {shown && supported ? (
         <InkSurface
           className="size-full"
-          tables={TABLES}
+          tables={INK_TABLES}
           build={buildPreview(shown, image)}
           buildKey={`preview:${shown.id}:${image ? "image" : "pending"}`}
           video={{ element: video, rect: { x: 0, y: 0, width: PREVIEW_WIDTH, height: PREVIEW_HEIGHT } }}

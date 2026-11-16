@@ -30,7 +30,27 @@ export const COLOR_TABLES = {
   ],
 } as const;
 
+/** 两种主题的查找表，InkSurface 的 tables 直接用这一份 */
+export const INK_TABLES = { light: COLOR_TABLES.light, dark: COLOR_TABLES.dark };
+
 /** Work 区墨线起笔的横向位置（占页面宽度的比例） */
 export const THREAD_X = 0.8;
 
 export type InkTables = readonly [string, string, string, string];
+
+// 标志墨迹本身的外框（用户坐标）：路径范围 x 10.97–40.6、y 10.48–45.03，
+// 经 translate(210,27) scale(6.6) 换算而来。配合 bleed 使用：盒子的边就是墨迹的边。
+export const MARK_INK_BOX = "282 96 196 228";
+
+// 化开的单词（首屏口号里的 color / colore）的排版基准，WebGL 版和 SVG 兜底共用：字号 208 是用户坐标
+export const WORD_FONT_SIZE = 208;
+export const WORD_BASELINE = 212;
+// 基线下面留一点，给描边和斜体的下摆
+export const WORD_BASELINE_PAD = 8;
+// 量到真实宽度之前的估计：每个字母约 0.5 个字号
+export const estimateBox = (word: string) => ({
+  x: 0,
+  y: 14,
+  width: Math.round(word.length * WORD_FONT_SIZE * 0.5),
+  height: WORD_BASELINE + WORD_BASELINE_PAD - 14,
+});

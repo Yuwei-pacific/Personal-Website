@@ -24,11 +24,10 @@ import {
   poolPath,
 } from "@/components/sections/home/work/ink-geometry";
 import { InkSurface, useInkSupported, type InkSpec } from "@/components/ui/ink/ink-surface";
-import { COLOR_TABLES } from "@/components/ui/ink/ink-tables";
+import { INK_TABLES } from "@/components/ui/ink/ink-tables";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 import { cn } from "@/lib/utils";
 
-const TABLES = { light: COLOR_TABLES.light, dark: COLOR_TABLES.dark };
 // 晕画在盒子外面：画布四周多出这么多
 const BLEED = 56;
 // 盒子窄于这个宽度时用小一档的外扩（和首页手机版一致）
@@ -158,7 +157,7 @@ export function InkCover({
       {supported ? (
         <InkSurface
           className="!absolute inset-0"
-          tables={TABLES}
+          tables={INK_TABLES}
           build={build}
           buildKey={`cover:${id}:${loaded ? "image" : "pending"}`}
           video={

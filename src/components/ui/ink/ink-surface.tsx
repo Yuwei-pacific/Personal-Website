@@ -196,6 +196,7 @@ export function InkSurface({
           ...spec.params,
           reveal: reveal ? { ...reveal, x: reveal.x + left, y: reveal.y + top } : null,
           focusRegions: spec.params.focusRegions?.map((r) => ({ ...r, x: r.x + left, y: r.y + top })),
+          flowDrops: spec.params.flowDrops?.map((d) => ({ x: d.x + left, y: d.y + top })),
         },
       });
     };
@@ -244,7 +245,7 @@ export function InkSurface({
   }, [reducedMotion]);
 
   // 看不见就不画：滚出视口，或者被后面的纸整个盖住。
-  // 首页的区块是叠纸（ui/sheet.tsx，position: sticky）：往下滚时首屏那张纸其实一直贴在视口顶上、
+  // 叠纸（position: sticky 的区块，现在没有页面在用，但这个判断留着）：往下滚时首屏那张纸其实一直贴在视口顶上、
   // 只是被后面的纸盖住了。IntersectionObserver 只看位置，会以为它还看得见 —— 于是首屏和作品区
   // 两块画布每帧都在画，帧率掉到八十几。所以滚动时再看一眼：盒子可见部分的几个点上，
   // 最上层的元素是否还在盒子所在的区块里（画布是 pointer-events: none，elementFromPoint 会穿过它）。

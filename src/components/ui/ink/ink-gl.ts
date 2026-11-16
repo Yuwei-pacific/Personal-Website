@@ -135,6 +135,9 @@ uniform float uGrainFrequency;
 uniform float uMaxShift;
 uniform vec3 uReveal;           // xy 水落下的点，z 当前半径
 uniform float uRevealOn;
+uniform float uFlowHead;        // 墨头流到哪了（区域坐标，CSS px 的 y）：它下面的墨还没到
+uniform float uFlowOn;
+uniform vec3 uFlowDrop[4];      // 墨流进每滩墨的那一点（xy）和这滩墨当前漫开的半径（z）；与 uFocusRect 一一对应
 
 float hash(vec2 p) {
   p = fract(p * vec2(123.34, 456.21));
@@ -264,6 +267,25 @@ void main() {
     alpha *= 1.0 - smoothstep(edge - 36.0, edge, length(p - uReveal.xy));
   }
 
+  // 10. 墨随滚动往下流。墨线：墨头以下还没有墨；墨浓的地方（线芯）跑在前面，晕跟在后面，
+  //     所以线是一个尖头先到、再慢慢洇开。墨滩不是被一道横线抹出来的（试过：封面像被渐变遮罩切了一刀）——
+  //     线流到它时，墨从流进去的那一点往四周漫开，和首屏的显影是同一种边
+  if (uFlowOn > 0.5) {
+    float head = uFlowHead + (1.0 - loose) * 90.0 + (fbm(vec2(p.x * 0.008, uFlowHead * 0.003)) - 0.5) * 70.0;
+    float gate = 1.0 - smoothstep(head - 80.0, head, p.y);
+    for (int i = 0; i < 4; i++) {
+      if (i >= uFocusCount) break;
+      vec4 r = uFocusRect[i];
+      vec2 outside = max(abs(p - (r.xy + r.zw * 0.5)) - (r.zw * 0.5 + 110.0), 0.0);
+      float inPool = 1.0 - smoothstep(0.0, 50.0, length(outside));
+      float radius = uFlowDrop[i].z;
+      float edge = radius + (fbm(p * 0.012) - 0.5) * 0.45 * radius;
+      float poolGate = (1.0 - smoothstep(edge - 36.0, edge, length(p - uFlowDrop[i].xy))) * step(0.5, radius);
+      gate = mix(gate, poolGate, inPool);
+    }
+    alpha *= gate;
+  }
+
   outColor = vec4(color.rgb * alpha, alpha);
 }`;
 
@@ -385,6 +407,13 @@ export type InkParams = {
   revealDuration?: number;
   revealPause?: number;
   replayReveal?: boolean;
+  /**
+   * 墨随滚动往下流（作品区的墨线，只用于窗口模式）：视口里靠下的一条线是「墨头」，它流到哪、哪里才有墨；
+   * 流过就留下，往回滚不收回。减弱动画时不用，整块直接画出来
+   */
+  flow?: boolean;
+  /** flow 时每滩墨的入口（墨线流进去的那一点），与 focusRegions 一一对应；线流到这里，这滩墨才从这一点漫开 */
+  flowDrops?: { x: number; y: number }[];
   /** 整块都不化开、只留墨边（首页 About 那根安静的墨线）。等于有焦点区域、但没有焦点 */
   quiet?: boolean;
   /** 焦点区域（最多 4 个）：只有当前焦点处完整化开，其余收成墨边。焦点由 setFocus 切换 */
@@ -439,6 +468,11 @@ const CORE_SIGMA = 1;
 const FOCUS_MARGIN = 40;
 const FOCUS_FEATHER = 260;
 const FOCUS_SETTLE = 0.45;
+// 墨头：在视口高度的几成处（往下滚时墨比视线先到一步），以及它追上滚动位置的快慢（时间常数，秒）
+const FLOW_LEAD = 0.82;
+const FLOW_SETTLE = 0.32;
+// 墨线流到一滩墨的入口之后，这滩墨漫开要多久（秒）
+const FLOW_POOL_DURATION = 2.2;
 
 type Program = { program: WebGLProgram; uniforms: Record<string, WebGLUniformLocation | null> };
 
@@ -521,6 +555,11 @@ export class InkRenderer {
   private dpr = 1;
   private focusTarget = -1;
   private focusWeights: number[] = [];
+  // 墨头：flowReached 是滚到过的最远处（只增不减 —— 流过就留下），flowHead 是当前画到的位置（缓动追上去）
+  private flowReached = -Infinity;
+  private flowHead: number | null = null;
+  // 每滩墨开始漫开的时刻（秒）；null = 线还没流到
+  private flowPoolStart: (number | null)[] = [];
   private animated = true;
   private dark = false;
   private videoTexture: WebGLTexture | null = null;
@@ -583,6 +622,9 @@ export class InkRenderer {
       "uMaxShift",
       "uReveal",
       "uRevealOn",
+      "uFlowHead",
+      "uFlowOn",
+      "uFlowDrop",
       "uImage",
       "uFocusCount",
       "uFocusRect",
@@ -819,12 +861,32 @@ export class InkRenderer {
       }
       this.stir(dt);
       this.easeFocus(dt);
+      this.easeFlow(time, dt);
       this.updateVideo(dt);
       this.draw(time, true);
     });
   }
 
   private lastViewOffset = 0;
+
+  // 墨头跟着滚动往下走。第一次看见这块区域时直接落在当前位置：刷新或返回时人已经在区块中间，
+  // 上面的墨应该早就在那儿了，不从头流一遍
+  private easeFlow(time: number, dt: number) {
+    const parent = this.canvas.parentElement;
+    const params = this.layout?.params;
+    if (!params?.flow || !parent) return;
+    const target = window.innerHeight * FLOW_LEAD - parent.getBoundingClientRect().top;
+    this.flowReached = Math.max(this.flowReached, target);
+    const first = this.flowHead === null;
+    this.flowHead = first
+      ? this.flowReached
+      : this.flowHead! + (this.flowReached - this.flowHead!) * (1 - Math.exp(-dt / FLOW_SETTLE));
+    // 线头流到哪滩墨的入口，哪滩墨开始漫开。第一次看见时已经在线头上面的，算早就漫开了
+    (params.flowDrops ?? []).forEach((drop, i) => {
+      if (this.flowPoolStart[i] != null || this.flowHead! < drop.y) return;
+      this.flowPoolStart[i] = first ? -Infinity : time;
+    });
+  }
 
   // 窗口模式下画布（sticky）的上缘离区域上缘多远（CSS px）；非窗口模式为 0
   private viewOffset() {
@@ -974,6 +1036,22 @@ export class InkRenderer {
       gl.uniform1f(u.uRevealOn, progress >= 1 ? 0 : 1);
     } else {
       gl.uniform1f(u.uRevealOn, 0);
+    }
+
+    const flowing = animated && Boolean(params.flow) && this.flowHead !== null;
+    gl.uniform1f(u.uFlowOn, flowing ? 1 : 0);
+    gl.uniform1f(u.uFlowHead, this.flowHead ?? 0);
+    if (flowing) {
+      const drops = new Float32Array(12);
+      (params.focusRegions ?? []).slice(0, 4).forEach((r, i) => {
+        const drop = params.flowDrops?.[i] ?? { x: r.x + r.width / 2, y: r.y };
+        const start = this.flowPoolStart[i];
+        const progress = start == null ? 0 : Math.min(1, (time - start) / FLOW_POOL_DURATION);
+        // 半径要盖过整滩墨连同它的晕：从入口到最远的角，再加余量。乘 1.3 是因为边界带噪声、会往里缩
+        const reach = Math.hypot(Math.max(drop.x - r.x, r.x + r.width - drop.x), r.height) + 220;
+        drops.set([drop.x, drop.y, reach * 1.3 * (1 - Math.pow(1 - progress, 1.25))], i * 3);
+      });
+      gl.uniform3fv(u.uFlowDrop, drops);
     }
 
     gl.drawArrays(gl.TRIANGLES, 0, 3);
