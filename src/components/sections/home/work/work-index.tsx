@@ -57,7 +57,12 @@ export function WorkIndex({
       {/* 墨线最后落在这里，成为目录顶上的那道线 */}
       <div data-ink="rule" className="relative h-px">
         {/* 「托腮」的小人趴在目录这根线上，像在挑下一个（用户定稿的位置：线长的 62.5% 处，手肘压过线） */}
-        <InkFigure figure="lean" style={{ left: "62.45%", width: "12.93%", top: 0, transform: "translateY(-76.4%)" }} />
+        {/* 手机上线短，小人按线长的比例会小得看不清：放大到线长的四分之一 */}
+        <InkFigure
+          figure="lean"
+          className="left-[60%] w-[25%] md:left-[62.45%] md:w-[12.93%]"
+          style={{ top: 0, transform: "translateY(-76.4%)" }}
+        />
       </div>
       <ul ref={listRef} className="relative" onMouseLeave={() => setActive(null)}>
         <IndexPreview item={active === null ? null : items[active]} top={top} />

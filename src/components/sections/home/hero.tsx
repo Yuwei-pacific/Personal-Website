@@ -33,7 +33,7 @@ import { SITE_EMAIL } from "@/lib/site-metadata";
 // --mark-w  墨迹宽度：按墨迹框 196×228 的比例
 // --mark-r  墨迹右缘到视口右缘的距离：Figma 里 19/1440 ≈ 1.3vw
 const MARK_VARS =
-  "[--mark-h:min(73.5svh,46vw)] [--mark-w:calc(var(--mark-h)*196/228)] [--mark-r:1.3vw]";
+  "[--mark-h:min(73.5svh,46vw)] [--mark-w:calc(var(--mark-h)*196/228)] [--mark-r:1.3vw] [--mark-hm:min(50vw,24svh,16rem)]";
 
 export function Hero({ dictionary }: { dictionary: Dictionary }) {
   const hero = dictionary.home.hero;
@@ -59,20 +59,30 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
     <section
       ref={ref}
       id="home"
-      className={`relative isolate z-20 flex h-[100svh] min-h-[36rem] w-full flex-col overflow-x-clip bg-background px-edge sm:px-edge-sm ${MARK_VARS}`}
+      className={`relative isolate z-20 flex min-h-[max(100svh,36rem)] w-full flex-col lg:h-[100svh] lg:min-h-[36rem] overflow-x-clip bg-background px-edge sm:px-edge-sm ${MARK_VARS}`}
     >
       {/* 化开的标志和墨线：一块画布铺满首屏，压在文字下面 */}
       <HeroInk className="absolute inset-0" />
 
       {/* 标志的占位：lg 起贴右、垂直居中，与口号同排。
-          lg 以下（含平板竖屏）标志和口号排不下同一行，就不显示标志（用户的决定：挤到口号上方只会占掉
-          一大块空间，显影前那里还是空的）。墨线保留，作为口号和信息之间的分隔 */}
+          lg 以下（含平板竖屏）标志和口号排不下同一行：这个占位不显示，改用下面口号上方那一套小的 */}
       <InkMarkSlot
         className="absolute right-[var(--mark-r)] top-1/2 hidden h-[var(--mark-h)] w-[var(--mark-w)] -translate-y-1/2 lg:block"
         label="L·i"
       />
 
-      <div className="relative flex flex-1 flex-col justify-center pb-24 pt-28 md:pb-20">
+      <div className="relative flex flex-1 flex-col justify-center pb-16 pt-24 md:pb-20 lg:pb-20 lg:pt-28">
+        {/* lg 以下：标志和墨线排在口号上面那片空白里 —— 线从屏幕左缘流进右边的小标志，和宽屏是同一个构图。
+            之前窄屏没有标志，线是口号和介绍之间一条通体发光的粗带，晕压着上下的字（用户 2026-11-16：
+            手机上装饰都没了、线不好看）。更早的决定是「标志不要挤到口号上方」，那时它会多占一屏的高度；
+            现在它用的是口号上方本来就空着的地方。--mark-hm：窄屏标志的高度 */}
+        <div className="relative mb-7 h-[var(--mark-hm)] lg:hidden">
+          <InkLineSlot className="absolute -left-edge top-[66%] h-10 w-[100vw] -translate-y-1/2 sm:-left-edge-sm" />
+          <InkMarkSlot
+            className="absolute right-[2%] top-0 h-full w-[calc(var(--mark-hm)*196/228)]"
+            label="L·i"
+          />
+        </div>
         <h1 className="hero-slogan max-w-[12ch] font-display text-[clamp(2.75rem,min(7.3vw,11.7svh),8rem)] leading-[0.98] tracking-display text-design-light-text-primary">
           {before}
           {/* 化开的词按行内元素排进句子，基线对齐；视觉上是 SVG，读屏读这份真实文字 */}
@@ -86,10 +96,10 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
 
         {/* 墨线这一行：线画在它的竖向中线上，左端贴视口左缘、右端流进标志的「i」。
             行高要装得下两侧的晕，晕才不会压到口号和身份段上。宽度只给 SVG 兜底用 */}
-        <InkLineSlot className="-ml-edge h-[clamp(4.5rem,11svh,7rem)] w-[100vw] sm:-ml-edge-sm lg:w-[calc(100vw-var(--mark-r)-var(--mark-w)*0.56)]" />
+        <InkLineSlot className="-ml-edge hidden h-[clamp(4.5rem,11svh,7rem)] w-[100vw] sm:-ml-edge-sm lg:block lg:w-[calc(100vw-var(--mark-r)-var(--mark-w)*0.56)]" />
 
         {/* 宽度不超过标志左缘（留 3rem），中等宽度的屏幕上身份段不会钻到标志底下 */}
-        <p className="hero-details max-w-[46ch] text-pretty lg:max-w-[min(46ch,calc(100vw-var(--mark-r)-var(--mark-w)-6rem))] text-[1.25rem] leading-snug sm:text-2xl">
+        <p className="hero-details mt-6 max-w-[46ch] text-pretty lg:mt-0 lg:max-w-[min(46ch,calc(100vw-var(--mark-r)-var(--mark-w)-6rem))] text-[1.25rem] leading-snug sm:text-2xl">
           <span className="text-design-light-text-primary">{hero.identity.lead}</span>
           <span className="text-design-light-text-muted">{hero.identity.rest}</span>
         </p>

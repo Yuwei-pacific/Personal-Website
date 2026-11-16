@@ -26,7 +26,7 @@ export function AboutPreview({
           同一条线），Work 的墨线正好从它下方起笔 —— 视线走的是：标题从左到右 → 右下的附注 → 墨线往左下流进作品。
           这里不放人像（用户 2026-11-16 的决定）：照片只在 About 页出现一次；首页上代表「人」的是
           Work 里的线稿。之前居中限宽、正文压在人像上的版本，夹在两个贴页边的区块之间像另一套版式 */}
-      <div className="px-edge py-section sm:px-edge-sm sm:pt-section-sm">
+      <div className="px-edge pb-section pt-16 sm:px-edge-sm sm:pt-section-sm">
         {/* data-ink：about-ink.tsx 按它量标题里的词。
             data-ink-word：圈起来的那个词的序号 —— 两种语言都是第 2 个词（disegno / design） */}
         <div data-ink="about-title" data-ink-word="1">
@@ -41,11 +41,11 @@ export function AboutPreview({
             <RevealText
               as="p"
               text={content.body}
-              className="text-pretty text-lead tracking-display lg:text-2xl lg:leading-snug lg:tracking-normal"
+              className="text-pretty text-[1.25rem] leading-snug sm:text-2xl"
             />
             <Link
               href={localizedPath(locale, "/about")}
-              className="relative inline-flex min-h-11 w-fit touch-manipulation items-center border-b-2 border-accent text-lg leading-[1.15] tracking-[-0.04em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 lg:min-h-0 lg:text-2xl"
+              className="relative inline-flex min-h-11 w-fit touch-manipulation items-center border-b-2 border-accent text-xl leading-[1.3] tracking-[-0.02em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:text-2xl lg:min-h-0"
             >
               {content.cta}
             </Link>

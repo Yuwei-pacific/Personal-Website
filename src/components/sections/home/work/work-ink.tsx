@@ -15,6 +15,9 @@ import { coverVideo, playFocusVideo } from "./cover-media";
 import {
   WORK_INK,
   drawCover,
+  POOL_PAD,
+  POOL_PAD_MOBILE,
+  STROKE_SCALE_MOBILE,
   poolBounds,
   poolPath,
   strokeBand,
@@ -55,18 +58,20 @@ function buildWork(mobile: boolean) {
     const rule = section?.querySelector('[data-ink="rule"]');
     const ruleY = rule ? relative(rule, boxRect).y : height - 40;
     const thread = threadSamples(width, rects, ruleY, mobile);
-    const pools = rects.map((rect, i) => poolPath(rect, i + 3));
+    const pad = mobile ? POOL_PAD_MOBILE : POOL_PAD;
+    const stroke = mobile ? STROKE_SCALE_MOBILE : 1;
+    const pools = rects.map((rect, i) => poolPath(rect, i + 3, pad));
 
     return {
       padding: { top: 0, right: 0, bottom: 0, left: 0 },
       // 区块有好几屏高：画布只画视口那么高的一段（整块画布每帧合成会把帧率拖到一半）
       windowed: true,
       draw: (ctx) => {
-        strokeBand(ctx, thread);
+        strokeBand(ctx, thread, stroke);
         ctx.fillStyle = "#000";
         pools.forEach((pool) => ctx.fill(pool));
       },
-      drawCore: (ctx) => strokeCore(ctx, thread),
+      drawCore: (ctx) => strokeCore(ctx, thread, stroke),
       // 封面：占位里那张（带 CORS 的）<img> 加载好了才画；没加载到的墨滩就是纯墨
       drawImage: (ctx) => {
         covers.forEach((cover, i) => {
@@ -74,7 +79,7 @@ function buildWork(mobile: boolean) {
           if (!image?.complete || !image.naturalWidth) return;
           ctx.save();
           ctx.clip(pools[i]);
-          drawCover(ctx, image, { width: image.naturalWidth, height: image.naturalHeight }, poolBounds(rects[i]));
+          drawCover(ctx, image, { width: image.naturalWidth, height: image.naturalHeight }, poolBounds(rects[i], pad));
           ctx.restore();
         });
       },
@@ -154,7 +159,7 @@ export function WorkInk({ featured }: { featured: FeaturedMedia[] }) {
         return;
       }
       const box = section.getBoundingClientRect();
-      setVideo({ element, rect: poolBounds(relative(covers[best], box)) });
+      setVideo({ element, rect: poolBounds(relative(covers[best], box), isDesktop() ? POOL_PAD : POOL_PAD_MOBILE) });
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);

@@ -20,8 +20,9 @@ import { InkFigure } from "./ink-figure";
 
 // 精选的三种位置，按顺序循环：左右交错，各项之间留大段空白给墨线（样稿里定下的列位）。
 // 不导出：这是客户端组件文件，服务端组件从这里拿到的普通值只是一个客户端引用（undefined）
-// 手机上封面左右各收进 1rem：墨滩比封面外扩 32px，不收进就会被屏幕边缘切平；
-// 左边空出来的那条页边距也正好给墨线走
+// 手机上封面左右各收进 1rem，墨滩外扩也收小（POOL_PAD_MOBILE）：整滩墨连同它的晕都落在屏幕里面。
+// 手机上墨线走文字旁边的页边距、左右交替（ink-geometry.ts 的 mobileThread）：
+// 第奇数个作品的文字在右边让出 3rem，第偶数个在左边让出 3rem
 const LAYOUTS = [
   { cover: "md:col-start-2 md:col-span-5", text: "md:col-start-8 md:col-span-4" },
   { cover: "md:col-start-7 md:col-span-5 md:row-start-1", text: "md:col-start-2 md:col-span-4 md:row-start-1" },
@@ -74,7 +75,7 @@ export function FeaturedWork({
           <InkFigure figure="laptop" style={{ left: "39.6%", width: "37.25%", top: 0, transform: "translateY(-94%)" }} />
         ) : null}
       </div>
-      <div className={layout.text}>
+      <div className={cn(position % 2 === 1 ? "pr-12" : "pl-12", "md:px-0", layout.text)}>
         <p aria-hidden="true" className="font-display text-2xl italic text-design-light-text-muted">
           {String(position).padStart(2, "0")}
         </p>

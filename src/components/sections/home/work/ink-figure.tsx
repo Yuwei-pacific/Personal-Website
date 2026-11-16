@@ -1,5 +1,5 @@
 // 作品区里的小人：用户自己的线稿（原稿在 Figma「Home — 设计稿」页），坐在墨滩上沿、趴在目录那根线上。
-// 它们是作品的陪衬，不是内容：aria-hidden、不接收指针。手机上不出现（单列版式里会压到文字）。
+// 它们是作品的陪衬，不是内容：aria-hidden、不接收指针。手机上也出现（位置由用它的地方按断点给）。
 // 线稿本身是透明底上的墨色线条；深色模式在 globals.css 里反相成白线（和深色模式的白色墨芯一致 ——
 // 线稿可以反相，照片不行）。
 import Image from "next/image";
@@ -30,7 +30,7 @@ export function InkFigure({
       alt=""
       aria-hidden="true"
       sizes="220px"
-      className={cn("ink-figure pointer-events-none absolute hidden h-auto select-none md:block", className)}
+      className={cn("ink-figure pointer-events-none absolute h-auto select-none", className)}
       style={style}
     />
   );

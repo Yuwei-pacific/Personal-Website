@@ -682,12 +682,12 @@ function verticalGradient(ctx: CanvasRenderingContext2D, y: number, half: number
   return gradient;
 }
 
+// 首屏的占位在宽屏和窄屏各有一套（位置不同，用 CSS 二选一显示）：取当前显示着的那个
 function heroSlots(box: HTMLElement) {
   const root = box.parentElement;
-  return {
-    mark: root?.querySelector<HTMLElement>('[data-ink="mark"]') ?? null,
-    line: root?.querySelector<HTMLElement>('[data-ink="line"]') ?? null,
-  };
+  const shown = (name: string) =>
+    [...(root?.querySelectorAll<HTMLElement>(`[data-ink="${name}"]`) ?? [])].find((el) => el.getClientRects().length > 0) ?? null;
+  return { mark: shown("mark"), line: shown("line") };
 }
 
 function relativeRect(element: Element | null, box: DOMRect) {
@@ -782,6 +782,8 @@ function buildHero(width: number, height: number, box: HTMLElement): InkSpec {
     },
     params: {
       ...markParams(u),
+      // 小标志（手机）化开得收紧一些：按比例缩下来的晕会把「i」的点这类小形状吃成一个空心圈
+      ...(u < 2 ? { tight: 4 * u * Math.max(0.55, u / 2), displacement: 4 * u * Math.max(0.55, u / 2) } : null),
       reveal: { ...drop, radius: reach * 1.1 },
     },
   };

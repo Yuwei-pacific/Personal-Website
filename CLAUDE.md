@@ -143,7 +143,10 @@ The hero draws the mark and the ink line on **one** canvas (`HeroInk`, covering 
 blooms merge where the line runs into the "i" stem. Layout only places two empty slots,
 `InkMarkSlot` (`data-ink="mark"`, the ink box) and `InkLineSlot` (`data-ink="line"`, the line runs on
 its vertical center); `buildHero` reads their rects and ends the line on the stem's centerline. When
-WebGL2 is missing, `HeroInk` renders nothing and the slots show the SVG fallbacks.
+WebGL2 is missing, `HeroInk` renders nothing and the slots show the SVG fallbacks. Below `lg` the hero
+renders a second, smaller pair of slots above the slogan (same composition: line from the left edge into
+the mark); `heroSlots` picks whichever pair is displayed. The line's bloom fades toward the left edge so
+the left end is a plain stroke like the Work thread.
 
 The home Work section (`src/components/sections/home/work/`) follows the same slot pattern on a canvas
 covering the whole section: `[data-ink="cover"]` placeholders become ink pools with the cover image shown
@@ -161,7 +164,7 @@ sheets of paper with `position: sticky`; siblings must share one parent and each
 viewport tall. The home page deliberately does **not** use it: hero, About and Work share one paper
 and scroll normally. Ink appears only where it has a job — the hero (mark, line, slogan word) and Work
 (pools and thread). The footer carries no bloom, no canvas and no interaction: it is the "back cover" to the hero's cover
-— from `lg` up, a large solid mark on the right and a plain SVG line (the hero line without its bloom)
+— a solid mark on the right (large from `lg`, small on phones) and a plain SVG line (the hero line without its bloom)
 running from the left edge into the mark's "i", positioned purely in CSS (`--fm-h` / `--fm-w` in
 `layout/footer.tsx`). The home About section is a text-only statement on the Work
 grid (no portrait — the photo appears only on the About page) with a single quiet hand-drawn circle
@@ -170,11 +173,15 @@ A long thread wrapping the portrait and a stirrable, mark-blooming footer
 were both built and rejected as cluttered, as was a full underline entering from the left edge. The
 Work thread starts inside the section with a tapered tip (`START_Y` in `ink-geometry.ts`) at `THREAD_X`
 rather than entering from the section's top edge, which read as a line cut by the paper's edge.
+Below `md` (single column) the thread runs in the margin beside each text block, alternating right / left
+per project (`mobileThread`; `featured-work.tsx` pads the text on that side) and switching sides inside
+the pools — a line hugging the left screen edge all the way down was rejected as an ugly border. Pools
+use `POOL_PAD_MOBILE` there so they and their bloom fit inside the screen.
 
 Two line-art figures (`work/ink-figure.tsx`, PNGs in `public/illustrations/`) sit on the Work thread:
 one on the top edge of the **second** featured cover (whichever project that is; absent if there is
-none), one leaning on the index rule. They are placed in percentages of their anchor and hidden below
-`md`; dark mode inverts them (`.ink-figure` in `globals.css`). Invert only line art, never photos.
+none), one leaning on the index rule. They are placed in percentages of their anchor and shown at every
+width; dark mode inverts them (`.ink-figure` in `globals.css`). Invert only line art, never photos.
 
 Raw values are CSS variables in `src/app/globals.css`, mapped to utilities in `tailwind.config.ts`.
 Use the semantic tokens rather than raw Tailwind scale values: spacing (`section`/`panel` for

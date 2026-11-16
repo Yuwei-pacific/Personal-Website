@@ -2,23 +2,13 @@
 
 // 首页 About 里唯一的一处墨：把标题里的一个词手画圈起来（走法见 work/ink-geometry.ts 的 aboutCircle）。
 // 这一屏是首屏与 Work 之间安静下来的地方：圈不化开（quiet），只是素墨。
-// 只在 lg 起出现：窄屏标题字小、折行不定，圈容易压到相邻的字。
-import { useSyncExternalStore } from "react";
-
+// 所有宽度都画：词在哪一行、多大，都是现量的。
 import { InkSurface, type InkSpec } from "@/components/ui/ink/ink-surface";
 import { COLOR_TABLES } from "@/components/ui/ink/ink-tables";
 
 import { WORK_INK, aboutCircle, strokeBand, strokeCore } from "./work/ink-geometry";
 
 const TABLES = { light: COLOR_TABLES.light, dark: COLOR_TABLES.dark };
-
-const wideQuery = "(min-width: 1024px)";
-const subscribeWide = (onChange: () => void) => {
-  const query = window.matchMedia(wideQuery);
-  query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
-};
-const isWide = () => window.matchMedia(wideQuery).matches;
 
 const titleOf = (box: HTMLElement) => box.parentElement?.querySelector('[data-ink="about-title"]') ?? null;
 
@@ -35,10 +25,12 @@ function buildAbout(_width: number, _height: number, box: HTMLElement): InkSpec 
   const word = r ? { x: r.left - boxRect.left, y: r.top - boxRect.top, width: r.width, height: r.height } : null;
   const titleBottom = Math.max(0, ...masks.map((m) => m.getBoundingClientRect().bottom));
   const stroke = aboutCircle(word, r ? r.bottom > titleBottom - 4 : true);
+  // 笔画跟着字号走：手机上标题小，同样粗的圈会比字还重，也挤不进词与词之间的空
+  const scale = r ? Math.min(1, Math.max(0.5, r.height / 100)) : 1;
   return {
     padding: { top: 0, right: 0, bottom: 0, left: 0 },
-    draw: (ctx) => strokeBand(ctx, stroke),
-    drawCore: (ctx) => strokeCore(ctx, stroke),
+    draw: (ctx) => strokeBand(ctx, stroke, scale),
+    drawCore: (ctx) => strokeCore(ctx, stroke, scale),
     params: { ...WORK_INK, reveal: null, quiet: true, maxDpr: 1.5 },
   };
 }
@@ -46,8 +38,6 @@ function buildAbout(_width: number, _height: number, box: HTMLElement): InkSpec 
 const watchSlots = (box: HTMLElement) => [titleOf(box)];
 
 export function AboutInk() {
-  const wide = useSyncExternalStore(subscribeWide, isWide, () => false);
-  if (!wide) return null;
   return (
     <InkSurface
       className="absolute inset-0"

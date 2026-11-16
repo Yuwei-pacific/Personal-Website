@@ -131,10 +131,10 @@ export function Footer({
       >
         {/* 封底：和首屏（封面）是一对。封面是纸上化开的大标志和一根流进「i」的墨线；封底是墨底上同一个构图的
             「墨的状态」—— 标志实心、单色，线是同一根线去掉晕之后剩下的那一道（用户 2026-11-16：把分隔线换成
-            首屏那种、去掉弥散、安静一点）。没有画布也没有交互：试过「墨线落进小标志 + 整块可划开的墨池」，
+            首屏那种、去掉弥散、安静一点）。所有宽度都是这个构图。没有画布也没有交互：试过「墨线落进小标志 + 整块可划开的墨池」，
             用户觉得乱（2026-11-15）—— 化开的墨只留在首屏和 Work。
             --fm-h / --fm-w：大标志的高和宽（标志的墨迹框 30 × 35.5） */}
-        <div className="flex w-full flex-col [--fm-h:clamp(14rem,22vw,23rem)] [--fm-w:calc(var(--fm-h)*30/35.5)]">
+        <div className="flex w-full flex-col [--fm-h:clamp(6.75rem,22vw,23rem)] [--fm-w:calc(var(--fm-h)*30/35.5)]">
           <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.getInTouch}</p>
           {/* 邮箱：这一屏唯一的大标题（Fraunces） */}
           <a
@@ -150,15 +150,17 @@ export function Footer({
             </span>
           </a>
 
-          {/* 分隔线这一行。窄屏是一道细线；lg 起是首屏那根线：从视口左缘出发、略有起伏，流进大标志的「i」。
+          {/* 分隔线这一行：首屏那根线去掉晕 —— 从视口左缘出发、略有起伏，流进标志的「i」（所有宽度都是这样，
+              窄屏只是标志小一些；上面留出的空要比标志伸上去的那截高，不然会碰到邮箱）。
               标志挂在这一行上：线落在标志高度的 64.8% 处（墨迹框 y = 33），那里「i」竖笔的中线在宽度的 24.8% */}
-          <div className="relative mt-12 border-t border-design-dark-border sm:mt-20 lg:border-0">
-            {/* 外层定左右端（SVG 自己带固有比例，直接用 left/right 撑不开），里面的线拉伸铺满 */}
+          <div className="relative mt-24 lg:mt-20">
+            {/* 外层定左右端（SVG 自己带固有比例，直接用 left/right 撑不开），里面的线拉伸铺满。
+                窄屏上线不压缩到屏幕那么窄（起伏会挤成波浪）：保持最小宽度、靠右对齐，左边多出来的裁掉 */}
             <div
               aria-hidden="true"
-              className="absolute -left-edge-sm right-[calc(var(--fm-w)*0.752)] top-[-7px] hidden h-[14px] text-design-dark-text-primary lg:block"
+              className="absolute -left-edge right-[calc(var(--fm-w)*0.752)] top-[-7px] h-[14px] overflow-hidden text-design-dark-text-primary sm:-left-edge-sm"
             >
-              <svg viewBox="0 0 1000 14" preserveAspectRatio="none" className="size-full">
+              <svg viewBox="0 0 1000 14" preserveAspectRatio="none" className="absolute right-0 top-0 h-full w-full min-w-[56rem]">
                 <path
                   d="M0 7C80 3.5 160 3.5 250 7S420 10.5 500 7S670 3.5 750 7S920 9.5 1000 7"
                   fill="none"
@@ -172,7 +174,7 @@ export function Footer({
               viewBox="11 10 30 35.5"
               role="img"
               aria-label={SITE_AUTHOR}
-              className="absolute right-0 top-[calc(var(--fm-h)*-0.648)] hidden h-[var(--fm-h)] w-[var(--fm-w)] fill-current text-design-dark-text-primary lg:block"
+              className="absolute right-0 top-[calc(var(--fm-h)*-0.648)] h-[var(--fm-h)] w-[var(--fm-w)] fill-current text-design-dark-text-primary"
             >
               {MARK_PATHS.map((d) => (
                 <path key={d} d={d} />
@@ -180,20 +182,7 @@ export function Footer({
             </svg>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-6 gap-y-10 pt-8 sm:grid-cols-3 lg:w-2/3 lg:pt-10">
-            {/* 窄屏放不下大标志：保留原来的小标志 */}
-            <div className="col-span-2 sm:col-span-3 lg:hidden">
-              <svg
-                viewBox="8 7 36 41"
-                role="img"
-                aria-label={SITE_AUTHOR}
-                className="h-12 w-auto fill-current text-design-dark-text-primary sm:h-14"
-              >
-                {MARK_PATHS.map((d) => (
-                  <path key={d} d={d} />
-                ))}
-              </svg>
-            </div>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 pt-14 sm:w-3/4 sm:grid-cols-3 lg:w-2/3 lg:pt-10">
 
             <nav aria-label={dictionary.footer.aria}>
               <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.site}</p>

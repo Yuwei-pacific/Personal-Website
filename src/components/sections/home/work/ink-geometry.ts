@@ -11,6 +11,8 @@ import { THREAD_X } from "@/components/ui/ink/ink-tables";
 export const U = 2.6;
 /** 墨滩比封面占位外扩多少（墨在边缘化开时会往里收，留够了图像才差不多是占位的大小） */
 export const POOL_PAD = 32;
+/** 手机上的外扩量：屏幕窄，外扩 32 的墨滩两边会被屏幕边缘切平，晕也露不出来 */
+export const POOL_PAD_MOBILE = 20;
 
 // 墨线的截面：晕带半高、中心墨量与淡出曲线；墨芯外裹的一圈渐变（贴着墨芯处 ≈ Cobalt）；墨芯粗细
 const BAND = 20 * U;
@@ -47,11 +49,11 @@ function wobble(seed: number) {
 }
 
 /** 一滩墨的轮廓：围绕封面占位外扩 POOL_PAD 的超椭圆（介于圆角矩形与椭圆之间），边缘按噪声起伏 */
-export function poolPath(rect: Rect, seed: number): Path2D {
+export function poolPath(rect: Rect, seed: number, pad = POOL_PAD): Path2D {
   const cx = rect.x + rect.width / 2;
   const cy = rect.y + rect.height / 2;
-  const hw = rect.width / 2 + POOL_PAD;
-  const hh = rect.height / 2 + POOL_PAD;
+  const hw = rect.width / 2 + pad;
+  const hh = rect.height / 2 + pad;
   const noise = wobble(seed + 1);
   const path = new Path2D();
   const steps = 160;
@@ -75,11 +77,11 @@ export function poolPath(rect: Rect, seed: number): Path2D {
  * 到图像外面的地方会露出图像的直边，变成「黑框里一张方图」，不像作品在墨里 —— 所以保留铺满。
  * 封面上贴边的内容（导航栏、角标）会被裁，选封面或在 Studio 里标焦点时留出边距
  */
-export const poolBounds = (rect: Rect): Rect => ({
-  x: rect.x - POOL_PAD,
-  y: rect.y - POOL_PAD,
-  width: rect.width + POOL_PAD * 2,
-  height: rect.height + POOL_PAD * 2,
+export const poolBounds = (rect: Rect, pad = POOL_PAD): Rect => ({
+  x: rect.x - pad,
+  y: rect.y - pad,
+  width: rect.width + pad * 2,
+  height: rect.height + pad * 2,
 });
 
 function cubicAt(a: Point, b: Point, c: Point, d: Point, t: number): Point {
@@ -117,8 +119,7 @@ const between = (t: number) => 1 - 0.65 * Math.pow(Math.sin(Math.PI * t), 1.3);
 /**
  * 墨线：在作品区顶部起笔，依次流过每滩墨，最后落成目录顶上的那道线、横穿出右缘。
  * covers 是封面占位（不含 POOL_PAD），按从上到下的顺序；ruleY 是目录顶线的位置。
- * mobile：单列时文字在墨滩下方、占满宽度，线不能从中间穿过文字 —— 改走左侧页边距，
- * 竖着往下流，只轻轻摆一点，经过墨滩时从墨滩左缘里穿过。
+ * mobile：单列时文字在墨滩下方，线不能从字上穿过 —— 改走文字旁边的页边距，左右交替（见 mobileThread）。
  */
 export function threadSamples(width: number, covers: Rect[], ruleY: number, mobile: boolean): Sample[] {
   return mobile ? mobileThread(width, covers, ruleY) : desktopThread(width, covers, ruleY);
@@ -150,27 +151,66 @@ function desktopThread(width: number, covers: Rect[], ruleY: number): Sample[] {
   return out;
 }
 
+// 手机上墨线走的页边距：离屏幕边缘多远；经过文字旁边时的粗细；出了墨滩往下多远之内要让到页边距里
+// （墨滩下面先是编号和标题，都短，右边空着；再往下是占满行宽的简介）
+const GUTTER = 20;
+const GUTTER_WEIGHT = 0.34;
+const TEXT_CLEAR = 120;
+
+/**
+ * 手机（单列）的墨线。文字在墨滩下方，线不能从字上穿过，所以走文字旁边的页边距 —— 但不是贴着屏幕左缘
+ * 一竖到底（那样像一道粗黑边框，用户 2026-11-16 说丑）：
+ * - 左右交替：第 1 个作品之后走右边，第 2 个之后走左边……和桌面上封面左右交错是同一个节奏。
+ *   featured-work.tsx 里文字块按同样的奇偶在那一侧让出 3rem。
+ * - 换边发生在墨滩里面（被封面盖住），露在外面的每一段都是一道括号形的弧：从墨滩底边靠外的地方出来，
+ *   让到页边距，再弯回去流进下一滩。
+ * - 经过文字旁边时收细（提笔），靠近墨滩才重。
+ * - 起笔在右上，和桌面一样从标题右边落下来；最后顺着所在的一侧转成目录顶线，横着出另一侧的屏幕边缘。
+ */
 function mobileThread(width: number, covers: Rect[], ruleY: number): Sample[] {
-  // 左侧页边距的正中：手机上封面占位比文字再收进 1rem（见 featured-work.tsx），
-  // 所以文字左缘 = 占位左缘 − 16，线走在屏幕边缘与文字左缘的中间，不碰字
-  const textLeft = covers.length ? covers[0].x - 16 : 24;
-  const gutter = Math.max(6, textLeft / 2);
-  const start: Sample = { x: gutter, y: START_Y, f: START_WEIGHT };
+  // 起笔比第一滩墨的入口靠左一些：落下来是一道弧，不是一根竖直的棍子
+  const start: Sample = { x: width * 0.7, y: START_Y, f: START_WEIGHT };
   const out: Sample[] = [start];
-  let last: Point = start;
+  if (!covers.length) return out;
+  const side = (rect: Rect, right: boolean) => rect.x + rect.width * (right ? 0.88 : 0.12);
+  const first = { x: side(covers[0], true), y: covers[0].y + covers[0].height * 0.1 };
+  flowDown(out, start, first, fromTip);
+  let entry: Point = first;
   covers.forEach((rect, i) => {
-    // 进出点一左一右差几 px，竖线带一点手写的摆动
-    const entry = { x: gutter + 5, y: rect.y + rect.height * 0.1 };
-    const exit = { x: gutter - 3, y: rect.y + rect.height * 0.9 };
-    flowDown(out, last, entry, i === 0 ? fromTip : between);
+    const right = i % 2 === 0;
+    const dir = right ? -1 : 1;
+    const gx = right ? width - GUTTER : GUTTER;
+    // 墨滩里面：被封面盖住，线在这里换边
+    const exit = { x: side(rect, right), y: rect.y + rect.height * 0.9 };
     sampleCubic(out, entry, entry, exit, exit, () => 1);
-    last = exit;
+    // 出墨滩，让到页边距里，越走越细
+    const top = { x: gx, y: rect.y + rect.height + TEXT_CLEAR };
+    flowDown(out, exit, top, (t) => 1 - (1 - GUTTER_WEIGHT) * Math.pow(t, 0.55));
+    const next = covers[i + 1];
+    if (next) {
+      // 沿着文字往下，带一点手写的摆动，再弯回去流进下一滩
+      const bottom = { x: gx + dir * 4, y: Math.max(top.y + 20, next.y - 70) };
+      const span = bottom.y - top.y;
+      sampleCubic(
+        out,
+        top,
+        { x: gx - dir * 6, y: top.y + span * 0.35 },
+        { x: gx + dir * 2, y: top.y + span * 0.7 },
+        bottom,
+        () => GUTTER_WEIGHT,
+      );
+      entry = { x: side(next, right), y: next.y + next.height * 0.1 };
+      flowDown(out, bottom, entry, (t) => GUTTER_WEIGHT + (1 - GUTTER_WEIGHT) * t);
+      return;
+    }
+    // 最后一段：沿页边距往下，在目录顶线的高度缓缓转成横线，从另一侧出屏幕
+    const before = { x: gx, y: Math.max(top.y + 20, ruleY - 110) };
+    sampleCubic(out, top, top, before, before, () => GUTTER_WEIGHT);
+    const turned = { x: gx + dir * 110, y: ruleY };
+    sampleCubic(out, before, { x: gx, y: ruleY - 30 }, { x: gx + dir * 40, y: ruleY }, turned, (t) => GUTTER_WEIGHT + 0.12 * t);
+    const off = right ? -200 : width + 200;
+    sampleCubic(out, turned, { x: turned.x + dir * 60, y: ruleY }, { x: off - dir * 60, y: ruleY }, { x: off, y: ruleY }, () => 0.4);
   });
-  // 落到目录顶线：沿页边距往下，到线的高度再拐向右
-  const land = { x: gutter + 48, y: ruleY };
-  const dy = Math.max(60, ruleY - last.y);
-  sampleCubic(out, last, { x: gutter, y: last.y + dy * 0.8 }, { x: gutter, y: ruleY }, land, (t) => 1 - 0.6 * t);
-  sampleCubic(out, land, { x: width * 0.5, y: ruleY }, { x: width * 0.8, y: ruleY }, { x: width + 200, y: ruleY }, () => 0.4);
   return out;
 }
 
@@ -222,11 +262,11 @@ const ABOUT_WEIGHT = 0.7;
  */
 export function aboutCircle(word: Rect | null, lastLine: boolean): Sample[] {
   if (!word) return [];
-  const w = ABOUT_WEIGHT;
   const size = word.height / 1.1;
+  const w = ABOUT_WEIGHT;
   const baseY = word.y + word.height + 1;
   // 比词大一圈的扁圆（超椭圆，接近药丸形）
-  const rx = word.width / 2 + size * 0.1;
+  const rx = word.width / 2 + size * 0.11;
   const ry = (baseY - (word.y - size * 0.2)) / 2;
   const cx = word.x + word.width / 2;
   const cy = baseY - ry;
@@ -276,20 +316,23 @@ function strokeProfile(ctx: CanvasRenderingContext2D, samples: Sample[], half: n
   }
 }
 
-/** 墨线的晕带（画进模糊源图） */
-export function strokeBand(ctx: CanvasRenderingContext2D, samples: Sample[]) {
-  strokeProfile(ctx, samples, BAND, (d) => PEAK * Math.pow(1 - d, FALLOFF));
+/** 手机上墨线的粗细比例：同样的像素粗细放在窄屏上重得像边框，按屏幕尺度收细 */
+export const STROKE_SCALE_MOBILE = 0.62;
+
+/** 墨线的晕带（画进模糊源图）。scale：整体粗细比例（窄屏、小字旁边用小于 1 的值） */
+export function strokeBand(ctx: CanvasRenderingContext2D, samples: Sample[], scale = 1) {
+  strokeProfile(ctx, samples, BAND * scale, (d) => PEAK * Math.pow(1 - d, FALLOFF));
 }
 
 /** 墨线的墨芯与外裹的一圈渐变（画进 core 层，不参与化开，保证那一丝墨始终在） */
-export function strokeCore(ctx: CanvasRenderingContext2D, samples: Sample[]) {
-  strokeProfile(ctx, samples, HALO, (d) => 1 - (HALO_INNER + (1 - HALO_INNER) * Math.pow(d, 0.8)));
+export function strokeCore(ctx: CanvasRenderingContext2D, samples: Sample[], scale = 1) {
+  strokeProfile(ctx, samples, HALO * scale, (d) => 1 - (HALO_INNER + (1 - HALO_INNER) * Math.pow(d, 0.8)));
   ctx.lineCap = "round";
   ctx.strokeStyle = "#000";
   for (let i = 1; i < samples.length; i++) {
     const a = samples[i - 1];
     const b = samples[i];
-    ctx.lineWidth = CORE * (0.5 + 0.5 * b.f);
+    ctx.lineWidth = Math.max(1.9, CORE * scale * (0.5 + 0.5 * b.f));
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
     ctx.lineTo(b.x, b.y);
