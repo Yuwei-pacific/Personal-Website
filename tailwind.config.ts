@@ -135,7 +135,7 @@ const config: Config = {
         bold: "400",
       },
       fontFamily: {
-        // 展示字体：只用于大标题，一屏一次，不小于 40px
+        // 展示字体：写各级标题（页面大标题、区块标题、列表行的名字、菜单项），正文和标签不用
         display: ["var(--font-fraunces)", "Iowan Old Style", "Georgia", "serif"],
         sans: ["var(--font-geist-sans)", ...fontFamily.sans],
         mono: ["var(--font-geist-mono)", ...fontFamily.mono],

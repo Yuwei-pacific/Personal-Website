@@ -18,6 +18,7 @@ import { NotFoundView } from "@/components/layout/not-found-view";
 import { defaultLocale, isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { SITE_LOCALE_HEADER } from "@/proxy";
+import { fontVariables } from "./fonts";
 import "./globals.css";
 
 export default async function GlobalNotFound() {
@@ -33,7 +34,7 @@ export default async function GlobalNotFound() {
         <title>{`404 | ${dictionary.errors.notFoundTitle}`}</title>
         <meta name="robots" content="noindex" />
       </head>
-      <body className="min-h-screen bg-background text-foreground antialiased">
+      <body className={`${fontVariables} min-h-screen bg-background text-foreground antialiased`}>
         <NotFoundView locale={locale} />
       </body>
     </html>

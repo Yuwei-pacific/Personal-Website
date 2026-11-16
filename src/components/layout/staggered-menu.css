@@ -299,12 +299,15 @@
   position: relative;
   /* 站点适配：文字色接 token（上游为 #000） */
   color: hsl(var(--color-text-primary-light));
+  /* 站点适配：导航项是这一屏的大标题，用展示字体 Fraunces、句首大写（上游是全大写的无衬线）。
+     和各页的大标题同一种写法；编号按手册用等宽 */
+  font-family: var(--font-fraunces), "Iowan Old Style", Georgia, serif;
   font-weight: 400;
   font-size: 3.5rem;
   cursor: pointer;
-  line-height: 1;
-  letter-spacing: -2px;
-  text-transform: uppercase;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
   transition:
     background 0.25s,
     color 0.25s;
@@ -351,7 +354,8 @@
   position: absolute;
   top: 0.1em;
   right: 2.8em;
-  font-size: 18px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 14px;
   font-weight: 400;
   color: var(--sm-accent, hsl(var(--color-text-muted-light)));
   letter-spacing: 0;

@@ -217,6 +217,11 @@ export function Footer({
                 <br />
                 {dictionary.footer.workingInternationally}
               </p>
+              {/* 接项目：页脚没有化开的东西，可以取一滴强调色 —— 只落在圆点上，字还是墨写的（手册 03） */}
+              <p className="mt-3 flex items-center gap-2 text-small text-design-dark-text-secondary">
+                <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-accent" />
+                {dictionary.home.hero.availability}
+              </p>
             </div>
           </div>
 

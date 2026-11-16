@@ -125,7 +125,7 @@
   }
 
   /* 深色模式：只换原始值。两个选择器内容必须一致 ——
-     跟随系统（未手动选择时）与手动选择 data-theme="dark"（见 theme-toggle.tsx）。 */
+     跟随系统（未手动选择时）与手动选择 data-theme="dark"（见 hooks/use-theme.ts）。 */
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       /* base：纸（主表面） */

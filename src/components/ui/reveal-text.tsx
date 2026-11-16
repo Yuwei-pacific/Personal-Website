@@ -133,7 +133,7 @@ export function RevealText({
       contrastLayer.style.opacity = "1";
     };
 
-    // 逐帧跟随，而不是监听 scroll：人像的位置由 GSAP（Parallax 的 scrub）在它的 ticker 里
+    // 逐帧跟随，而不是监听 scroll：人像的位置可能由 GSAP 的 scrub 动画在它的 ticker 里
     // 写入 transform。在 scroll 事件后另排一帧去量，可能量到上一帧的人像，而滚动一停就不再
     // 有事件来纠正。挂在同一个 ticker 上、排在 GSAP 自己的更新之后，每帧量到的都是这一帧
     // 已经落定的位置。只在文字靠近视口时才运行，离开后摘掉。

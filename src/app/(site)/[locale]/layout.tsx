@@ -7,7 +7,6 @@
 // 把 root layout 放到 [locale] 之下后，locale 直接来自 params，静态化与 ISR 恢复。
 // /studio 不在这个语言路由里，由 src/app/(studio)/layout.tsx 提供自己的 <html>。
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -27,34 +26,12 @@ import {
   languageAlternates,
   localizedAbsoluteUrl,
 } from "@/lib/site-metadata";
+import { fontVariables } from "../../fonts";
 import "lenis/dist/lenis.css";
 import "../../globals.css";
 
-// 配置无衬线字体（Geist Sans）：
-// - variable：注入到 CSS 自定义属性，便于全局使用
-// - subsets：指定子集以优化打包体积
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-// 配置等宽字体（Geist Mono）：用于代码或数字对齐的场景
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-// 展示字体（Fraunces）：只用于大标题。可变字重 + 斜体（斜体只给一句话里落重音的那个词）；
-// opsz 轴让大字号自动用更细的笔画对比。由 next/font 自托管，不需要改 CSP。
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  axes: ["opsz"],
-});
-
 // 浏览器主题色：跟随系统深浅，对应纸 / 墨两种底色（移动端地址栏/状态栏着色）。
-// 手动切换主题时由 theme-toggle.tsx 同步更新这两个 meta。
+// 手动切换主题时由 hooks/use-theme.ts 同步更新这两个 meta。
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#F5F5F3" },
@@ -64,7 +41,7 @@ export const viewport: Viewport = {
 
 // 首帧之前把手动选择的主题写到 <html data-theme>，避免先按系统主题画一帧再跳变。
 // 没有手动选择时不写属性，由 globals.css 的 prefers-color-scheme 跟随系统。
-// 存储键与 theme-toggle.tsx 的 THEME_STORAGE_KEY 保持一致。
+// 存储键与 hooks/use-theme.ts 的 THEME_STORAGE_KEY 保持一致。
 const themeInitScript = `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
 
 export function generateStaticParams() {
@@ -147,8 +124,8 @@ export default async function SiteLayout({
         <link rel="preconnect" href="https://cdn.sanity.io" />
       </head>
       <body
-        // 将两种字体的 CSS 变量应用到 body，并设置全局基础样式
-        className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} min-h-screen bg-background text-foreground antialiased`}
+        // 将三种字体的 CSS 变量应用到 body（定义在 app/fonts.ts），并设置全局基础样式
+        className={`${fontVariables} min-h-screen bg-background text-foreground antialiased`}
       >
         <AppViewTransitions>
           <LenisProvider>

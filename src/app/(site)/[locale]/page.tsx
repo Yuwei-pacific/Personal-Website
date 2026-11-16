@@ -93,8 +93,7 @@ export default async function HomePage({
       <Navbar locale={rawLocale} dictionary={dictionary} />
       <main id="main-content">
         {/* 三段正常往下排，同一张纸作底（用户在 Figma 定稿：About 不再用纸 2）。页脚在 main 之外，是每页唯一反转的区块。
-            首页不用叠纸（ui/sheet.tsx）：About 的墨线从页面左缘进来、绕过人像，在区块下缘接上 Work 的墨线 ——
-            叠纸让每张纸贴住屏幕、下一张滑上来盖住，线在纸边被一刀刀切断，同一屏里还会出现两截对不上的线 */}
+            首页不用叠纸（sticky 叠放的做法，组件已删）：三段正常往下滚 */}
         <div className="surface-base bg-background">
           <Hero dictionary={dictionary} />
         </div>
