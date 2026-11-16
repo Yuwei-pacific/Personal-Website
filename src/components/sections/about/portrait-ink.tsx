@@ -23,10 +23,10 @@ const TIGHT = 3;
 const LOOSE = 12;
 // 画布在盒子左、上多出的余量：装得下晕、边缘的起伏和被鼠标推出去的墨
 const BLEED = 64;
-// 上面的宽度是按宽屏的人像（约 435px 宽）定的；人像小的时候晕按比例收，不然窄屏上显得厚、
-// 手肘那道缝会被墨填满
+// 上面的宽度是按宽屏的人像（约 435px 宽）定的；人像小的时候晕略收一点。
+// 只能略收：试过按比例收到 0.6，窄屏上只剩一道细边，用户的反应是「墨怎么没了」（2026-11-16）
 const REFERENCE_WIDTH = 435;
-const MIN_SCALE = 0.6;
+const MIN_SCALE = 0.85;
 // 剪影按 2 倍画，轮廓才不会发虚
 const SCALE = 2;
 
@@ -49,15 +49,18 @@ function silhouette(image: HTMLImageElement, width: number, height: number) {
 export function PortraitInk() {
   const anchorRef = useRef<HTMLSpanElement>(null);
   const supported = useInkSupported();
-  const [loaded, setLoaded] = useState(false);
+  // 照片每加载完一次就加一：用来触发重画
+  const [loaded, setLoaded] = useState(0);
 
-  // 照片加载好了才有剪影可画
+  // 照片加载好了才有剪影可画。不能只听第一次：窗口变窄 / 变宽（或手机转屏）时 next/image 会按 srcset
+  // 换一张尺寸合适的图，换图的那一刻 complete 是 false —— 这时正好赶上尺寸变化的重画，剪影是空的，
+  // 墨就没了；所以每次 load 都要再重画一遍
   useEffect(() => {
     const image = anchorRef.current?.parentElement?.querySelector("img");
     if (!image) return;
-    const onLoad = () => setLoaded(true);
+    const onLoad = () => setLoaded((n) => n + 1);
     if (image.complete && image.naturalWidth) onLoad();
-    else image.addEventListener("load", onLoad, { once: true });
+    image.addEventListener("load", onLoad);
     return () => image.removeEventListener("load", onLoad);
   }, []);
 
