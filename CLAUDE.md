@@ -125,92 +125,64 @@ are theme-invariant, for things that must stay dark or light (the lightbox, text
 the blend-mode cursor). Colors resolved in JS (GSAP tweens) must be re-read when the theme changes.
 
 Brand rules that code must respect: Geist is used at Regular only (Tailwind's `font-medium|semibold|bold`
-are mapped to 400 on purpose), Fraunces (`font-display`) is for large titles only, and `accent`
+are mapped to 400 on purpose), Fraunces (`font-display`) is for titles at every level (page titles, section headings, row names, menu items) but never body or labels, and `accent`
 (Cobalt in light, Coral in dark) goes on lines and dots, never on text.
 
-The "inked" effect (the bloomed L·i mark, the hero ink line and the inked slogan word) renders with
-WebGL2 in `src/components/ui/ink/` (`ink-gl.ts` renderer, `ink-surface.tsx` wrapper); `ui/ink-mark.tsx`
-exposes `InkMark` / `InkWord` and keeps the old SVG-filter version only as a static fallback
-when WebGL2 is unavailable. Do not animate the SVG filter version — it rasterizes on the CPU and drops
-frames. Blur fields are computed once per resize; per frame the shader adds slow flow, a "breathing"
-noise that thickens and thins the bloom, and the pointer "stir" field: moving the cursor (no clicks)
-pushes the ink aside and cuts a gap along its path, which decays so the ink flows back together.
-The stir field lives in 8-bit ping-pong textures, so its decay must step at least one quantum per
-frame or small offsets get stuck. Reduced motion renders one static frame. Colors come from the shared
-tables in `ui/ink/ink-tables.ts`.
+Design rules live in the brand manual (a Claude artifact; chapter numbers cited in code comments as 手册 NN).
+Variants that were tried and rejected, with the reason, are in `docs/decisions.md` — read it before
+reintroducing something that looks like an obvious improvement.
 
-The hero draws the mark and the ink line on **one** canvas (`HeroInk`, covering the section) so their
-blooms merge where the line runs into the "i" stem. Layout only places two empty slots,
-`InkMarkSlot` (`data-ink="mark"`, the ink box) and `InkLineSlot` (`data-ink="line"`, the line runs on
-its vertical center); `buildHero` reads their rects and ends the line on the stem's centerline. When
-WebGL2 is missing, `HeroInk` renders nothing and the slots show the SVG fallbacks. Below `lg` the hero
-renders a second, smaller pair of slots above the slogan (same composition: line from the left edge into
-the mark); `heroSlots` picks whichever pair is displayed. The line's bloom fades toward the left edge so
-the left end is a plain stroke like the Work thread.
+### Ink
 
-The home Work section (`src/components/sections/home/work/`) follows the same slot pattern on a canvas
-covering the whole section: `[data-ink="cover"]` placeholders become ink pools with the cover image shown
-in the ink core (`drawImage`), a thread (`ink-geometry.ts`) links them and lands as the index's top rule
-(`[data-ink="rule"]`). Only one pool blooms at a time — the featured project nearest the viewport's
-middle is the focus (`focusRegions` + `setFocus`); outside it the bloom collapses to an ink rim and
-covers turn grayscale. The focused project's cover video plays inside the ink (`setVideo`). Featured
-projects are ticked in Sanity (`featured`, `featuredOrder`, max 4 shown — the shader takes 4 focus
-regions). Images and videos uploaded as textures must load with `crossOrigin="anonymous"`. An offscreen
-canvas still draws one warm-up frame after each layout change, because the GPU uploads textures and
-prepares shaders on first draw — large canvases otherwise flash blank on scroll-in.
+The "inked" effect renders with WebGL2 in `src/components/ui/ink/`: `ink-gl.ts` (renderer and shader),
+`ink-surface.tsx` (sizing, theme, visibility, reduced motion), `ink-tables.ts` (mark paths, color tables,
+shared metrics). When WebGL2 is unavailable a static SVG-filter version from `ink/ink-fallback.tsx` is
+loaded on demand; never animate it — it rasterizes on the CPU.
 
-`src/components/ui/sheet.tsx` (experimental; currently unused — every page now scrolls normally) stacks sections like
-sheets of paper with `position: sticky`; siblings must share one parent and each sheet is at least one
-viewport tall. The home page deliberately does **not** use it: hero, About and Work share one paper
-and scroll normally. Ink appears only where it has a job — the hero (mark, line, slogan word) and Work
-(pools and thread). The footer carries no bloom, no canvas and no interaction: it is the "back cover" to the hero's cover
-— a solid mark on the right (large from `lg`, small on phones) and a plain SVG line (the hero line without its bloom)
-running from the left edge into the mark's "i", positioned purely in CSS (`--fm-h` / `--fm-w` in
-`layout/footer.tsx`). The home About section is a text-only statement on the Work
-grid (no portrait — the photo appears only on the About page) with a single quiet hand-drawn circle
-around one title word (`about-ink.tsx`, path in `aboutCircle`, word picked by `data-ink-word`).
-The About page (`sections/about/`) scrolls normally on the same edge-to-edge 12-column grid (labels and
-headings in columns 1–3, content from column 4), paper then paper 2. Its first screen opens with the origin —
-the vertical 墨分五色 (the one place it appears), the origin sentence as the `h1`, a quieter second sentence — beside
-the portrait. A generic "I combine design and frontend…" headline was rejected as templated and already said on
-the home page; an origin-only first screen was rejected because it no longer said who "I" is, so the `h1` now
-introduces the person and the origin follows in small text. The page's only bloom is the ink pool holding the
-portrait (`portrait-drop.tsx`): an irregular pool with the cut-out photo shown in the ink core via `drawImage`,
-the same technique as the Work covers; the layout `<img>` only loads the photo and carries the alt text (it is
-transparent while the canvas is active). The earlier variant — the cut-out standing on the rule with ink only
-around its silhouette (`portrait-ink.tsx`) — lost the comparison and is unused, as is `origin-drop.tsx`.
-Dividers on this page are `ui/ink-rule.tsx` (the footer's plain hand-drawn line as a reusable SVG rule), not
-straight borders.
-Project detail header order is title (with a one-line "type — year" kicker) → cover → facts and summary: the
-cover is in the first screen, and the facts / summary row uses the same columns as the chapters below
-(`SECTION_LABEL_COL` / `SECTION_TEXT_COL` in `project-sections.tsx`: label in columns 1–3, content from column 4,
-matching the About page). The earlier header put a five-row meta table beside the summary above the cover.
-Project detail pages (`components/projects/`) also scroll normally (stacked sheets were removed: the next sheet
-slid up over the cover). The cover is the complete original image at its natural ratio, uncropped and with no
-effect (its size is parsed from the Sanity asset URL); putting it in an ink pool was tried and rejected — the
-detail page must show the project image whole. The only pool on the page is the thumbnail of the closing "next
-project" block (`projects/ink-cover.tsx`, built from the home Work pool geometry and params). Section rules and
-meta-table row lines are `ui/ink-rule.tsx`; section headings use Fraunces.
-Entering a project (featured cover, index row, "next project") plays `projects/ink-transition.tsx`: an ink blob
-spreads from the clicked spot until it covers the viewport, the route changes underneath, then the ink fades.
-Its core is the page background color (paper in light, ink in dark) so it lands on the destination page without
-a flash — a foreground-colored core flipped the whole screen dark and back. It
-replaced the shared-element cover morph, which the user disliked. The blob is an SVG scaled through an inner
-`<g transform>` so `non-scaling-stroke` keeps its five-color rim a few px wide (scaling the `<svg>` with CSS
-turns the rim into fat rainbow bands). Reduced motion and modified clicks navigate normally.
-A long thread wrapping the portrait and a stirrable, mark-blooming footer
-were both built and rejected as cluttered, as was a full underline entering from the left edge. The
-Work thread starts inside the section with a tapered tip (`START_Y` in `ink-geometry.ts`) at `THREAD_X`
-rather than entering from the section's top edge, which read as a line cut by the paper's edge.
-Below `md` (single column) the thread runs in the margin beside each text block, alternating right / left
-per project (`mobileThread`; `featured-work.tsx` pads the text on that side) and switching sides inside
-the pools — a line hugging the left screen edge all the way down was rejected as an ugly border. Pools
-use `POOL_PAD_MOBILE` there so they and their bloom fit inside the screen.
+- Blur fields are computed once per layout change; per frame the shader adds flow, breathing and the
+  pointer "stir" field. The stir field lives in 8-bit ping-pong textures, so its decay must step at least
+  one quantum per frame or small offsets get stuck.
+- **Slot pattern.** Layout places empty placeholders (`data-ink="…"`); one canvas covering the section
+  reads their rects and draws the ink. The hero uses it for the mark and line (`HeroInk`, `InkMarkSlot`,
+  `InkLineSlot`; a second, smaller pair of slots below `lg`), Work for covers and the index rule.
+- **Images in ink** (`drawImage`): Work covers, the About portrait, the "next project" thumbnail. The
+  layout `<img>` only loads the file and carries the alt text; it stays transparent unless the canvas is
+  confirmed unavailable. Images and videos used as textures need `crossOrigin="anonymous"`.
+- **Focus** (`focusRegions` + `setFocus`): only the featured project nearest the viewport's middle blooms
+  and shows color; the rest collapse to an ink rim and grayscale. Max 4 regions (shader limit), so max 4
+  featured projects (`featured`, `featuredOrder` in Sanity). The focused cover's video plays in the ink.
+- **Flow** (`flow`, `flowDrops`): the Work thread's head follows the scroll at ~82% of the viewport
+  height; a pool blooms from the thread's entry point when the head reaches it. It never retracts.
+- **Windowed canvases**: a section-high canvas only draws a viewport-high sticky strip. An offscreen canvas
+  still draws one warm-up frame after each layout change, or large canvases flash blank on scroll-in.
+- Reduced motion renders one static frame: no reveal, flow, breathing, stir or video.
 
-Two line-art figures (`work/ink-figure.tsx`, PNGs in `public/illustrations/`) sit on the Work thread:
-one on the top edge of the **second** featured cover (whichever project that is; absent if there is
-none), one leaning on the index rule. They are placed in percentages of their anchor and shown at every
-width; dark mode inverts them (`.ink-figure` in `globals.css`). Invert only line art, never photos.
+Ink appears only where it has a job: the hero (mark, line, slogan word), Work (pools and thread), the About
+portrait, the "next project" thumbnail, the project-entry transition (`projects/ink-transition.tsx`) and
+one quiet hand-drawn circle on the home About title (`about-ink.tsx`). The footer and all dividers
+(`ui/ink-rule.tsx`) are plain strokes with no bloom.
+
+### Pages
+
+All pages scroll normally on one edge-to-edge 12-column grid: labels and section titles in columns 1–3,
+content from column 4.
+
+- **Home**: hero, About statement and Work share one paper. The About statement has no portrait; its lower
+  left is reserved for client logos.
+- **About** (`sections/about/`): paper, then paper 2. The top hangs on two verticals (page edge: portrait;
+  column 4: `h1` and statement) and two horizontals (row top; one ink rule from which the statement and the
+  facts table hang). The portrait's ink pool is normalised to fill its box, so aligning the box aligns the
+  ink. Two columns from `md`. The origin story (墨分五色) is not told on any site page.
+- **Project** (`components/projects/`): title with a "type — year" kicker → cover → summary (7 columns) and
+  facts (4 columns) → chapters → credits → gallery → next project. The cover is the whole original image at
+  its natural ratio, never cropped or put in ink.
+- **Footer**: the one inverted block per page — a solid mark and a plain line into its "i", positioned in
+  CSS (`--fm-h` / `--fm-w`).
+- Two line-art figures (`work/ink-figure.tsx`) sit on the Work thread. Dark mode inverts them; invert only
+  line art, never photos.
+
+Shared pieces: `ui/text-link.ts` (the accent-underlined link, every CTA), `ui/meta-list.tsx` (label / value
+rows on the project header and About), `ui/ink-rule.tsx` (dividers).
 
 Raw values are CSS variables in `src/app/globals.css`, mapped to utilities in `tailwind.config.ts`.
 Use the semantic tokens rather than raw Tailwind scale values: spacing (`section`/`panel` for
@@ -228,6 +200,15 @@ decision used 3+ times earns a token; one-off art direction stays inline.
 role strings. Never hardcode the domain — `absoluteUrl()` and `localizedAbsoluteUrl()` build
 canonical, sitemap, Open Graph and JSON-LD URLs. `languageAlternates()` emits the hreflang set.
 
+The share image (`[locale]/opengraph-image.tsx`) follows the brand manual: ink background, bloomed mark, the name in
+Fraunces and one mono line. It draws the bloom with an SVG filter and loads TTFs from `src/assets/fonts/`
+(`ImageResponse` cannot use next/font's woff2). The SVG is drawn larger than the image and cropped, because the
+renderer treats the canvas edge as a shape edge and blooms it. `apple-icon.tsx` is the plain mark on ink.
+
+The three site fonts are defined once in `src/app/fonts.ts` and applied by both documents that own a `<body>`:
+`[locale]/layout.tsx` and `global-not-found.tsx` (which bypasses every layout — without the variables the 404 page
+falls back to the browser's serif).
+
 `src/app/sitemap.ts` and `src/app/robots.ts` are generated; the smoke test reads the sitemap to
 discover project routes, so a project missing from the sitemap is also untested.
 
@@ -243,14 +224,12 @@ Dev-only relaxations (`unsafe-eval`, no `upgrade-insecure-requests`) are gated o
 ### Components
 
 - `src/components/ui/` — animation primitives (`ScrollReveal`, `StaggerReveal`, `RevealText`,
-  `Parallax`, `masked-*`) that respect `prefers-reduced-motion`. Reduced-motion coverage is
-  component-specific, not global: vendor, menu, media and route-transition effects each need their
+  `masked-*`) that respect `prefers-reduced-motion`. Reduced-motion coverage is
+  component-specific, not global: menu, media and route-transition effects each need their
   own guard. New animations must honor the preference explicitly. GSAP registration lives in
   `src/lib/animation/`.
-- `src/components/vendor/` — low-touch React Bits adaptations kept in JS with local `.d.ts`
-  declarations and `src/components/vendor/README.md` documenting the workflow. Import DOM-heavy
-  ones dynamically with `ssr: false`. A component that starts owning core behavior gets migrated to
-  TSX instead — `components/layout/staggered-menu.tsx` already crossed that line and is owned TSX.
+- `components/layout/staggered-menu.tsx` started as a React Bits adaptation and is now owned TSX; there is no
+  vendor folder any more.
 - Gallery uses the maintained `react-photo-album` package; lightbox uses `yet-another-react-lightbox`.
 
 ## Skills
