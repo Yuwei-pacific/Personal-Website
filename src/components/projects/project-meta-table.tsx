@@ -1,13 +1,15 @@
 import type { ReactNode } from "react";
 
+import { InkRule } from "@/components/ui/ink-rule";
+
 const metaItemTones = {
   light: {
-    border: "border-design-light-border-strong",
+    border: "text-design-light-border-strong",
     label: "text-design-light-text-muted",
     value: "text-design-light-text-primary",
   },
   dark: {
-    border: "border-design-dark-border-strong",
+    border: "text-design-dark-border-strong",
     label: "text-design-dark-text-muted",
     value: "text-design-dark-text-primary",
   },
@@ -16,7 +18,8 @@ const metaItemTones = {
 export type MetaTone = keyof typeof metaItemTones;
 
 // 元信息列表：首屏（浅色）与 Credits（深色）共用同一套「标签 / 值」行。
-// 每行只画上边线，最后一条底线由 MetaList 补上。
+// 每行只画上边线，最后一条底线由 MetaList 补上。线是墨线（ui/ink-rule.tsx），和 About 页一致；
+// 每行按标签取一种起伏，免得几条线一模一样。
 export function MetaList({
   tone,
   className = "",
@@ -26,7 +29,12 @@ export function MetaList({
   className?: string;
   children: ReactNode;
 }) {
-  return <dl className={`border-b ${metaItemTones[tone].border} ${className}`}>{children}</dl>;
+  return (
+    <dl className={className}>
+      {children}
+      <InkRule tone="soft" variant={2} className={metaItemTones[tone].border} />
+    </dl>
+  );
 }
 
 export function MetaItem({
@@ -41,10 +49,13 @@ export function MetaItem({
   const t = metaItemTones[tone];
 
   return (
-    <div className={`grid grid-cols-[7rem_1fr] gap-4 border-t py-3 text-small sm:grid-cols-[9rem_1fr] ${t.border}`}>
-      <dt className={t.label}>{label}</dt>
-      <dd className={t.value}>{children}</dd>
-    </div>
+    <>
+      <InkRule tone="soft" variant={label.length} className={t.border} />
+      <div className="grid grid-cols-[7rem_1fr] gap-4 py-3 text-small sm:grid-cols-[9rem_1fr]">
+        <dt className={t.label}>{label}</dt>
+        <dd className={t.value}>{children}</dd>
+      </div>
+    </>
   );
 }
 

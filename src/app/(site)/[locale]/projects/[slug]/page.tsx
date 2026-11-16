@@ -61,8 +61,8 @@ export default async function ProjectPage({
       <ProjectScrollReset />
       <Navbar locale={rawLocale} dictionary={dictionary} />
       <ProjectDetailView
-        // 按项目重建：从「下一个项目」跳转时路由组件不变，不加 key 的话封面容器会被复用，
-        // 带着上一页释放掉的过渡名进入新页（见 cover-transition.tsx）
+        // 按项目重建：从「下一个项目」跳转时路由组件不变，不加 key 的话上一页的封面、
+        // 视频和展开状态会被带进新页
         key={project.slug}
         project={project}
         next={next}

@@ -5,13 +5,13 @@
 import { useRef } from "react";
 import { Link } from "next-view-transitions";
 
-import { SanityImage } from "@/components/ui/sanity-image";
-import { buildScaledUrl } from "@/lib/media";
+import { buildCropUrl } from "@/lib/media";
 import type { Locale } from "@/i18n/config";
 import { localizedPath } from "@/i18n/routing";
 import type { Project } from "@/lib/view-models/types";
 
-import { claimCoverTransition } from "./cover-transition";
+import { InkCover } from "./ink-cover";
+import { useInkNavigate } from "./ink-transition";
 
 export function NextProject({
   project,
@@ -26,16 +26,22 @@ export function NextProject({
   locale: Locale;
 }) {
   const coverRef = useRef<HTMLDivElement>(null);
+  const inkNavigate = useInkNavigate();
   if (!project.slug) return null;
+  const href = localizedPath(locale, `/projects/${project.slug}`);
 
-  const coverUrl = project.coverImage?.asset?.url;
+  // 和首页精选同一个裁切、同一个地址：从首页来的人这张图已经在缓存里
+  const coverUrl = project.coverImage
+    ? buildCropUrl(project.coverImage, { width: 1600, height: 1000, animated: project.coverImage.animated })
+    : null;
   const meta = [project.projectType, project.year].filter(Boolean);
 
   return (
     <Link
       data-overscroll-dark
-      href={localizedPath(locale, `/projects/${project.slug}`)}
-      onClick={() => claimCoverTransition(coverRef.current)}
+      href={href}
+      // 过场：墨从缩略图那一小滩漫开（见 ink-transition.tsx）
+      onClick={(event) => inkNavigate(event, href, coverRef.current)}
       className="group block bg-design-dark-bg px-edge py-panel text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-design-dark-text-primary sm:px-edge-sm sm:py-panel-sm"
     >
       <div className="grid grid-cols-1 items-end gap-x-4 gap-y-8 md:grid-cols-12">
@@ -60,23 +66,11 @@ export function NextProject({
           ) : null}
         </div>
 
+        {/* 缩略图是一小滩墨（ink-cover.tsx），和首页目录悬停时落下的那滩是同一个东西；不播视频 */}
         {coverUrl ? (
-          <div
-            ref={coverRef}
-            data-cover-transition
-            className="relative aspect-[16/10] overflow-hidden bg-design-dark-surface md:col-span-4 md:col-start-9"
-          >
-            <SanityImage
-              src={buildScaledUrl(coverUrl, {
-                width: 1200,
-                animated: project.coverImage?.animated ?? false,
-              })}
-              // 装饰性：链接的可读名称已由标题提供
-              alt=""
-              fill
-              sizes="(min-width: 768px) 33vw, 100vw"
-              className="object-cover transition-transform duration-media ease-design-out group-hover:scale-[1.04] motion-reduce:transition-none"
-            />
+          <div ref={coverRef} className="mx-4 md:col-span-4 md:col-start-9 md:mx-0">
+            {/* 装饰性：链接的可读名称已由标题提供 */}
+            <InkCover id={project._id} image={coverUrl} alt="" className="aspect-[16/10] w-full" />
           </div>
         ) : null}
       </div>

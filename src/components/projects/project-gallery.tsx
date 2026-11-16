@@ -13,6 +13,7 @@ import { LuPlay } from "react-icons/lu";
 import { RowsPhotoAlbum } from "react-photo-album";
 import type { Photo } from "react-photo-album";
 import "react-photo-album/rows.css";
+import { InkRule } from "@/components/ui/ink-rule";
 import type { ProjectGalleryItem } from "@/lib/view-models/types";
 import { buildScaledUrl, buildSrcSet } from "@/lib/media";
 import Lightbox from "yet-another-react-lightbox";
@@ -184,9 +185,9 @@ export function ProjectGallery({
   return (
     <section ref={galleryRef} className="w-full">
       {/* 与正文章节同一套抬头：细线 + 左对齐标题，数量沿用首页 Work 标题旁的计数写法 */}
-      <div className="mb-6 h-px w-full bg-design-dark-border-strong sm:mb-8" />
+      <InkRule variant={3} className="mb-8 text-design-dark-text-primary sm:mb-10" />
       <div className="mb-8 flex items-end gap-1">
-        <h2 className="text-2xl font-semibold leading-[1.1] tracking-[-0.02em] text-design-dark-text-primary sm:text-3xl lg:text-section">
+        <h2 className="font-display text-3xl leading-[1.1] text-design-dark-text-primary lg:text-section">
           {title}
         </h2>
         <span aria-hidden="true" className="font-mono text-small text-design-dark-text-muted">

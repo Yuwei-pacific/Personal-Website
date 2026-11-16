@@ -6,6 +6,7 @@
 import { useRef, useState, type FocusEvent, type MouseEvent } from "react";
 import { Link } from "next-view-transitions";
 
+import { useInkNavigate } from "@/components/projects/ink-transition";
 import { localizedPath } from "@/i18n/routing";
 import type { Locale } from "@/i18n/config";
 import { buildCropUrl } from "@/lib/media";
@@ -29,6 +30,7 @@ export function WorkIndex({
   const listRef = useRef<HTMLUListElement>(null);
   const [active, setActive] = useState<number | null>(null);
   const [top, setTop] = useState(0);
+  const inkNavigate = useInkNavigate();
 
   const items: PreviewItem[] = projects.map((project) => ({
     id: project._id,
@@ -91,6 +93,8 @@ export function WorkIndex({
               {project.slug ? (
                 <Link
                   href={localizedPath(locale, `/projects/${project.slug}`)}
+                  // 过场：墨从点下去的位置漫开
+                  onClick={(event) => inkNavigate(event, localizedPath(locale, `/projects/${project.slug}`))}
                   onMouseEnter={(event) => show(i, event)}
                   onFocus={(event) => show(i, event)}
                   onBlur={() => setActive(null)}

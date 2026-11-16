@@ -1,10 +1,8 @@
 import { Link } from "next-view-transitions";
 
 import { MaskedTextHeading } from "@/components/ui/masked-text-heading";
-import { Parallax } from "@/components/ui/parallax";
 import { SanityImage } from "@/components/ui/sanity-image";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { Sheet } from "@/components/ui/sheet";
 import { buildScaledUrl } from "@/lib/media";
 import { getExternalLinkProps } from "@/lib/safe-url";
 import type { Project, ProjectDetail } from "@/lib/view-models/types";
@@ -12,7 +10,6 @@ import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { localizedPath } from "@/i18n/routing";
 
-import { CoverTransitionTarget } from "./cover-transition";
 import { CoverVideo } from "./cover-video";
 import { NextProject } from "./next-project";
 import { ProjectGallery } from "./project-gallery";
@@ -22,14 +19,26 @@ import {
   CHAPTER_GAP,
   ProjectSections,
   SECTION_GRID,
+  SECTION_LABEL_COL,
   SECTION_MEASURE,
   SECTION_TEXT_COL,
   SectionLabel,
   SectionRule,
 } from "./project-sections";
 
-// 编辑式长卷：浅色首屏（标题 / 简介 / 元信息 / 外链）→ 出血封面 → 深色正文（章节）
+// 封面的原始尺寸：Sanity 资源地址的文件名里带着（…-1575x852.png）。详情查询没有单独取尺寸，
+// 从地址里读就够了；读不到时按 16:10 处理
+function coverSize(url: string) {
+  const match = /-(\d+)x(\d+)\.[a-z0-9]+(?:\?.*)?$/i.exec(url);
+  return match ? { width: Number(match[1]), height: Number(match[2]) } : { width: 1600, height: 1000 };
+}
+
+// 编辑式长卷：首屏（标题 / 简介 / 元信息 / 外链）→ 完整的封面大图 → 正文（章节）
 // → Credits → 画廊 → 下一个项目。全页用首页同款的贴边页边距（px-edge），不再居中收窄。
+// 同一张纸正常往下滚（不叠纸，和首页、About 一致），区块底色在纸 / 纸 2 / 纸之间轮换。
+// 封面是完整的原图，不放进墨里（试过，用户 2026-11-16：内页需要项目大图完整展示）—— 墨滩会裁掉四边、
+// 还给作品图加了一圈东西；手册也写了作品图片保持原样。内页唯一的墨滩是结尾「下一个项目」的缩略图。
+// 分隔线是墨线（ui/ink-rule.tsx）。
 export function ProjectDetailView({
   project,
   next,
@@ -58,6 +67,9 @@ export function ProjectDetailView({
       : [],
   );
 
+  // 标题上方那一行：类型 — 年份
+  const kicker = [project.projectType, project.year].filter(Boolean).join(" — ");
+
   const hasCredits =
     project.myContribution.length > 0 ||
     project.contributors.length > 0 ||
@@ -67,112 +79,120 @@ export function ProjectDetailView({
   return (
     // main 覆盖整篇正文：浅色首屏 + 深色内容区 + 画廊 + 下一个项目都属于页面主体
     <main id="main-content" className="relative min-h-screen text-design-light-text-primary">
-      {/* 三张纸叠放（见 ui/sheet.tsx）：首屏 + 封面（纸）→ 正文（纸 2）→ 下一个项目（纸）。
-          为了不让整份文件多缩进一层，Sheet 的子元素保持原缩进 */}
-      <Sheet className="surface-base bg-background">
-      {/* ── 首屏：第一屏内交代清楚「是什么、我做了什么、去哪看」 ── */}
-      <header className="bg-design-light-bg px-edge pt-28 sm:px-edge-sm sm:pt-32">
-        <Link
-          href={`${localizedPath(locale)}#work`}
-          className="text-small font-medium text-design-light-text-secondary transition-colors duration-base hover:text-design-light-text-primary"
-        >
-          {d.back}
-        </Link>
+      {/* 三段：首屏 + 封面（纸）→ 正文（纸 2）→ 下一个项目（纸）。
+          之前是三张纸叠放（ui/sheet.tsx）：滚动时正文那张纸会从下面盖上来，把封面盖掉一半 —— 去掉了。
+          为了不让整份文件多缩进一层，这三段的子元素保持原缩进 */}
+      <div className="surface-base bg-background">
+      {/* ── 头部：标题 → 封面 → 资料与简介。
+          次序是「是什么（标题 + 一行类型和年份）→ 长什么样（封面）→ 细节（资料、简介、外链）」。
+          之前是标题下面左边简介、右边五行资料表，然后才是封面：标题右边空着一大块，
+          资料表又把封面挤到第一屏之外，进来先看到的是一张表。现在第一屏是标题和作品本身；
+          资料和简介排在封面下面，用正文章节同一套栏位（左栏标签 / 右栏内容），头部和正文是一条轴线 ── */}
+      <header className="px-edge pt-28 sm:px-edge-sm sm:pt-32">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 text-small text-design-light-text-secondary">
+          <Link
+            href={`${localizedPath(locale)}#work`}
+            className="transition-colors duration-base hover:text-design-light-text-primary"
+          >
+            {d.back}
+          </Link>
+          {/* 一行就说清这是什么：类型 — 年份（它们不再占资料表的两行） */}
+          {kicker ? <p className="text-design-light-text-muted">{kicker}</p> : null}
+        </div>
 
         <MaskedTextHeading
           as="h1"
           text={project.title}
-          className="mt-6 text-balance font-display text-[13vw] leading-[0.95] tracking-display sm:mt-8 sm:text-[clamp(3.5rem,10vw,9rem)]"
+          className="mt-5 text-balance pb-8 font-display text-[13vw] leading-[0.95] tracking-display sm:mt-6 sm:pb-10 sm:text-[clamp(3.5rem,10vw,9rem)]"
         />
-
-        <div className="mt-10 grid grid-cols-1 gap-x-4 gap-y-10 pb-10 sm:mt-14 sm:pb-14 md:grid-cols-12">
-          <div className="flex flex-col gap-8 md:col-span-6">
-            {project.summary ? (
-              <p className="text-pretty text-[1.375rem] leading-[1.2] tracking-[-0.02em] sm:text-[clamp(1.5rem,2.1vw,2rem)]">
-                {project.summary}
-              </p>
-            ) : null}
-
-            {/* 外链是整页最有价值的点击：与首页 Hero 的 CTA 同一种大号下划线文字链 */}
-            {links.length ? (
-              <ul className="flex flex-wrap gap-x-8 gap-y-3">
-                {links.map((link) => (
-                  <li key={link.key}>
-                    <a
-                      href={link.href}
-                      {...getExternalLinkProps(link.href)}
-                      className="inline-flex min-h-11 touch-manipulation items-center gap-2 border-b-2 border-accent text-lg font-semibold leading-[1.3] tracking-[-0.02em] transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:min-h-0 sm:text-xl"
-                    >
-                      {link.label}
-                      <span aria-hidden="true">↗</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-
-          {/* 「我的角色」排第一：访客最先想知道我在这个项目里做了什么 */}
-          <MetaList tone="light" className="self-end md:col-span-5 md:col-start-8">
-            {project.role.length ? (
-              <MetaItem tone="light" label={d.roles}>{joinMeta(project.role)}</MetaItem>
-            ) : null}
-            {project.projectType ? (
-              <MetaItem tone="light" label={d.type}>{project.projectType}</MetaItem>
-            ) : null}
-            {project.year ? <MetaItem tone="light" label={d.year}>{project.year}</MetaItem> : null}
-            {project.client ? <MetaItem tone="light" label={d.client}>{project.client}</MetaItem> : null}
-            {project.location ? (
-              <MetaItem tone="light" label={d.location}>{project.location}</MetaItem>
-            ) : null}
-          </MetaList>
-        </div>
       </header>
 
-      {/* ── 封面：左右出血，直接压在深浅分界上；也是卡片共享过渡的终点 ── */}
-      {/* 比例随屏宽放扁：出血的 16:9 在大屏上会吃掉一整屏，桌面收到 2:1，并封顶在视口高度的 80% */}
+      {/* ── 封面：完整的原图，按原始比例占满版心，不裁切、不加效果 ──
+          （进入项目的过场是一滩墨漫开，见 ink-transition.tsx；封面不再从首页的位置滑过来） */}
       {project.coverImage ? (
-        <CoverTransitionTarget className="relative aspect-[4/3] max-h-[80svh] w-full overflow-hidden bg-design-dark-bg sm:aspect-[16/9] lg:aspect-[2/1]">
-          {project.coverVideo ? (
-            // 有封面视频时它占据封面位，封面图作为 poster 首帧
-            <CoverVideo
-              src={project.coverVideo.url}
-              poster={buildScaledUrl(project.coverImage.url, {
-                width: 1600,
-                animated: project.coverImage.animated,
-              })}
-              className="h-full w-full object-cover"
-              playLabel={d.playVideo}
-              pauseLabel={d.pauseVideo}
-            />
-          ) : (
-            // 轻微视差：图片上下各多出 5% 作为位移余量，容器裁掉溢出部分
-            <Parallax offset={70} className="absolute inset-x-0 -inset-y-[5%]">
-              <div className="relative h-full w-full">
+        <div className="px-edge pb-12 sm:px-edge-sm sm:pb-16">
+          <div className="relative w-full overflow-hidden bg-design-dark-bg">
+            {(() => {
+              const size = coverSize(project.coverImage.url);
+              return project.coverVideo ? (
+                // 有封面视频时它占据封面位（按封面图的比例），封面图作为 poster 首帧
+                <div style={{ aspectRatio: `${size.width} / ${size.height}` }}>
+                  <CoverVideo
+                    src={project.coverVideo.url}
+                    poster={buildScaledUrl(project.coverImage.url, {
+                      width: 1600,
+                      animated: project.coverImage.animated,
+                    })}
+                    className="h-full w-full object-cover"
+                    playLabel={d.playVideo}
+                    pauseLabel={d.pauseVideo}
+                  />
+                </div>
+              ) : (
                 <SanityImage
                   // 这张是详情页的 LCP 元素，由浏览器按 srcset 直连 Sanity CDN。
-                  // 2048 是 loader 的宽度上限，与画廊 lightbox 的最大档
-                  // （project-gallery 的 SLIDE_WIDTHS）一致。
+                  // 2048 是 loader 的宽度上限，与画廊 lightbox 的最大档一致
                   src={buildScaledUrl(project.coverImage.url, {
                     width: 2048,
                     animated: project.coverImage.animated,
                   })}
                   alt={project.coverImage.alt}
-                  fill
+                  width={size.width}
+                  height={size.height}
                   preload
                   sizes="100vw"
-                  className="object-cover"
+                  className="h-auto w-full"
                 />
-              </div>
-            </Parallax>
-          )}
-        </CoverTransitionTarget>
+              );
+            })()}
+          </div>
+        </div>
       ) : null}
 
-      </Sheet>
+      {/* ── 资料与简介：左栏是资料（我的角色排第一：访客最先想知道我在这个项目里做了什么），
+          右栏是简介和外链。栏位和下面的章节一致。
+          单列（手机）时简介和外链排在资料前面：先读到这是什么，再看资料 ── */}
+      <div className={`px-edge pb-section sm:px-edge-sm sm:pb-section-sm ${SECTION_GRID}`}>
+        <MetaList tone="light" className={`${SECTION_LABEL_COL} order-2 self-start md:order-none`}>
+          {project.role.length ? (
+            <MetaItem tone="light" label={d.roles}>{joinMeta(project.role)}</MetaItem>
+          ) : null}
+          {project.client ? <MetaItem tone="light" label={d.client}>{project.client}</MetaItem> : null}
+          {project.location ? (
+            <MetaItem tone="light" label={d.location}>{project.location}</MetaItem>
+          ) : null}
+        </MetaList>
 
-      {/* ── 正文、Credits、画廊：同一张纸，共用章节间距 ── */}
-      <Sheet className="surface-alt bg-background">
+        <div className={`${SECTION_TEXT_COL} order-1 flex flex-col gap-8 md:order-none`}>
+          {project.summary ? (
+            <p className="max-w-[34ch] text-pretty text-[1.375rem] leading-[1.2] tracking-[-0.02em] sm:text-[clamp(1.5rem,2.1vw,2rem)]">
+              {project.summary}
+            </p>
+          ) : null}
+
+          {/* 外链是整页最有价值的点击：与首页 Hero 的 CTA 同一种大号下划线文字链 */}
+          {links.length ? (
+            <ul className="flex flex-wrap gap-x-8 gap-y-3">
+              {links.map((link) => (
+                <li key={link.key}>
+                  <a
+                    href={link.href}
+                    {...getExternalLinkProps(link.href)}
+                    className="inline-flex min-h-11 touch-manipulation items-center gap-2 border-b-2 border-accent text-lg leading-[1.3] tracking-[-0.02em] transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:min-h-0 sm:text-xl"
+                  >
+                    {link.label}
+                    <span aria-hidden="true">↗</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      </div>
+      </div>
+
+      {/* ── 正文、Credits、画廊：同一段，共用章节间距 ── */}
+      <div className="surface-alt bg-background">
       <div
         className="bg-design-dark-bg px-edge py-section text-design-dark-text-primary sm:px-edge-sm sm:py-section-sm"
       >
@@ -182,7 +202,7 @@ export function ProjectDetailView({
 
           {hasCredits ? (
             <section>
-              <SectionRule />
+              <SectionRule variant={2} />
               <div className={SECTION_GRID}>
                 <SectionLabel>{d.credits}</SectionLabel>
                 <ScrollReveal className={`${SECTION_TEXT_COL} flex flex-col gap-10`}>
@@ -233,12 +253,12 @@ export function ProjectDetailView({
         </div>
       </div>
 
-      </Sheet>
+      </div>
 
       {next ? (
-        <Sheet fill={false} className="surface-base bg-background">
+        <div className="surface-base overflow-x-clip bg-background">
           <NextProject project={next.project} position={next.position} label={d.nextProject} locale={locale} />
-        </Sheet>
+        </div>
       ) : null}
     </main>
   );

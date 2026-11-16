@@ -6,6 +6,7 @@
 // 模块自身不带外边距，间距统一在这里控制。
 import type { ReactNode } from "react";
 
+import { InkRule } from "@/components/ui/ink-rule";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import type { ProjectSection } from "@/lib/view-models/types";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -13,9 +14,11 @@ import type { Dictionary } from "@/i18n/dictionaries";
 import { ProjectRichText } from "./project-rich-text";
 import { SectionMedia } from "./section-media";
 
-// 12 列骨架：左 4 列放编号与小标题（桌面吸顶），空 1 列，右 7 列放正文
-export const SECTION_GRID = "grid grid-cols-1 gap-x-4 gap-y-6 md:grid-cols-12";
-export const SECTION_TEXT_COL = "md:col-span-7 md:col-start-6";
+// 12 列骨架，和 About 页同一条轴线：左 3 列放编号与小标题（桌面吸顶），正文从第 4 列起。
+// md 到 lg 之间屏幕窄，左栏给 4 列，不然小标题挤不下。头部的资料 / 简介那一行也用这一套
+export const SECTION_GRID = "grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-12";
+export const SECTION_LABEL_COL = "md:col-span-4 lg:col-span-3";
+export const SECTION_TEXT_COL = "md:col-span-8 md:col-start-5 lg:col-span-9 lg:col-start-4";
 // 正文 measure：约 62 个字符一行
 export const SECTION_MEASURE = "max-w-[62ch]";
 // 章节之间 / 章节内部的两档间距
@@ -26,21 +29,22 @@ const TEXT_COL_SIZES = "(min-width: 768px) 58vw, 100vw";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export function SectionRule() {
-  return <div className="mb-6 h-px w-full bg-design-dark-border-strong sm:mb-8" />;
+// 章节顶上的线：墨线（和 About 页、页脚同一种画法）。每章取一种起伏
+export function SectionRule({ variant = 0 }: { variant?: number }) {
+  return <InkRule variant={variant} className="mb-8 text-design-dark-text-primary sm:mb-10" />;
 }
 
 // 左栏小标题：吸顶和入场动画都落在 grid item 这一层 ——
 // sticky 的活动范围是它所在的 grid，所以同一章节的正文栏内容必须和它放进同一个 grid。
 export function SectionLabel({ index, children }: { index?: number; children: ReactNode }) {
   return (
-    <ScrollReveal className="md:sticky md:top-28 md:col-span-4 md:self-start">
+    <ScrollReveal className={`md:sticky md:top-28 md:self-start ${SECTION_LABEL_COL}`}>
       {index ? (
         <p aria-hidden="true" className="mb-3 font-mono text-small text-design-dark-text-muted">
           {pad(index)}
         </p>
       ) : null}
-      <h2 className="max-w-[16ch] text-balance text-2xl font-semibold leading-[1.1] tracking-[-0.02em] text-design-dark-text-primary sm:text-3xl lg:text-section">
+      <h2 className="max-w-[16ch] text-balance font-display text-3xl leading-[1.1] text-design-dark-text-primary lg:text-section">
         {children}
       </h2>
     </ScrollReveal>
@@ -210,7 +214,7 @@ function ChapterView({ chapter, labels }: { chapter: Chapter; labels: Labels }) 
 
   return (
     <section>
-      {chapter.heading ? <SectionRule /> : null}
+      {chapter.heading ? <SectionRule variant={chapter.index ?? 0} /> : null}
       <div className={`flex flex-col ${BLOCK_GAP}`}>
         {label && !labelInFirstRun ? <div className={SECTION_GRID}>{label}</div> : null}
         {runs.map((run, runIndex) =>

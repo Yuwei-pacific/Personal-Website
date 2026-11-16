@@ -1,15 +1,15 @@
 "use client";
 
 // 一个精选作品：封面占位 + 旁边的文字。封面本身由 WorkInk 画在墨滩里，占位里的 <img> 平时透明，
-// 只有三种时候露出来：
+// 只有两种时候露出来：
 // - 读屏：它就是封面的替代文字；
 // - 不支持 WebGL：区块被标成 data-ink="off"，它变成可见的普通封面（焦点之外黑白）；
-// - 点击时：它顶到最上面，作为「封面共享过渡」的起点，变形到详情页的封面（见 cover-transition.tsx）。
+//（点击进入项目时不再让它滑到内页封面的位置：过场是一滩墨从这个墨滩漫开，见 projects/ink-transition.tsx）
 // 它也是 WorkInk 上传成纹理的那张图（带 crossOrigin），不会重复下载。
 import { useRef } from "react";
 import { Link } from "next-view-transitions";
 
-import { claimCoverTransition } from "@/components/projects/cover-transition";
+import { useInkNavigate } from "@/components/projects/ink-transition";
 import { localizedPath } from "@/i18n/routing";
 import type { Locale } from "@/i18n/config";
 import { buildCropUrl } from "@/lib/media";
@@ -44,7 +44,8 @@ export function FeaturedWork({
   locale: Locale;
 }) {
   const layout = LAYOUTS[(position - 1) % LAYOUTS.length];
-  const imageRef = useRef<HTMLImageElement>(null);
+  const coverRef = useRef<HTMLDivElement>(null);
+  const inkNavigate = useInkNavigate();
   const cover = project.coverImage
     ? buildCropUrl(project.coverImage, { width: COVER_WIDTH, height: COVER_HEIGHT, animated: project.coverImage.animated })
     : null;
@@ -55,17 +56,15 @@ export function FeaturedWork({
 
   const content = (
     <>
-      <div data-ink="cover" data-id={project._id} className={cn("group/cover relative mx-4 aspect-[16/10] md:mx-0", layout.cover)}>
+      <div ref={coverRef} data-ink="cover" data-id={project._id} className={cn("group/cover relative mx-4 aspect-[16/10] md:mx-0", layout.cover)}>
         {cover ? (
           // 不用 next/image：这张图要以 CORS 方式取回、原样上传成 WebGL 纹理
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            ref={imageRef}
             src={cover}
             alt={project.coverImage?.alt ?? ""}
             crossOrigin="anonymous"
             decoding="async"
-            data-cover-transition
             className="absolute inset-0 size-full object-cover opacity-0 grayscale transition-[filter,opacity] duration-slow ease-design-out group-data-[focused=true]/cover:grayscale-0 group-data-[ink=off]/work:opacity-100 motion-reduce:transition-none"
           />
         ) : null}
@@ -94,18 +93,13 @@ export function FeaturedWork({
 
   if (!project.slug) return <div className={className}>{content}</div>;
 
+  const href = localizedPath(locale, `/projects/${project.slug}`);
+
   return (
     <Link
-      href={localizedPath(locale, `/projects/${project.slug}`)}
-      onClick={() => {
-        const image = imageRef.current;
-        if (image) {
-          // 过渡的起点要是彩色、可见的封面（它平时透明，焦点之外还是黑白）
-          image.style.opacity = "1";
-          image.style.filter = "none";
-        }
-        claimCoverTransition(image);
-      }}
+      href={href}
+      // 墨从这个作品的墨滩漫开
+      onClick={(event) => inkNavigate(event, href, coverRef.current)}
       className={cn(
         className,
         "touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-8",

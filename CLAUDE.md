@@ -159,7 +159,7 @@ regions). Images and videos uploaded as textures must load with `crossOrigin="an
 canvas still draws one warm-up frame after each layout change, because the GPU uploads textures and
 prepares shaders on first draw — large canvases otherwise flash blank on scroll-in.
 
-`src/components/ui/sheet.tsx` (experimental; project detail pages only) stacks sections like
+`src/components/ui/sheet.tsx` (experimental; currently unused — every page now scrolls normally) stacks sections like
 sheets of paper with `position: sticky`; siblings must share one parent and each sheet is at least one
 viewport tall. The home page deliberately does **not** use it: hero, About and Work share one paper
 and scroll normally. Ink appears only where it has a job — the hero (mark, line, slogan word) and Work
@@ -181,6 +181,23 @@ transparent while the canvas is active). The earlier variant — the cut-out sta
 around its silhouette (`portrait-ink.tsx`) — lost the comparison and is unused, as is `origin-drop.tsx`.
 Dividers on this page are `ui/ink-rule.tsx` (the footer's plain hand-drawn line as a reusable SVG rule), not
 straight borders.
+Project detail header order is title (with a one-line "type — year" kicker) → cover → facts and summary: the
+cover is in the first screen, and the facts / summary row uses the same columns as the chapters below
+(`SECTION_LABEL_COL` / `SECTION_TEXT_COL` in `project-sections.tsx`: label in columns 1–3, content from column 4,
+matching the About page). The earlier header put a five-row meta table beside the summary above the cover.
+Project detail pages (`components/projects/`) also scroll normally (stacked sheets were removed: the next sheet
+slid up over the cover). The cover is the complete original image at its natural ratio, uncropped and with no
+effect (its size is parsed from the Sanity asset URL); putting it in an ink pool was tried and rejected — the
+detail page must show the project image whole. The only pool on the page is the thumbnail of the closing "next
+project" block (`projects/ink-cover.tsx`, built from the home Work pool geometry and params). Section rules and
+meta-table row lines are `ui/ink-rule.tsx`; section headings use Fraunces.
+Entering a project (featured cover, index row, "next project") plays `projects/ink-transition.tsx`: an ink blob
+spreads from the clicked spot until it covers the viewport, the route changes underneath, then the ink fades.
+Its core is the page background color (paper in light, ink in dark) so it lands on the destination page without
+a flash — a foreground-colored core flipped the whole screen dark and back. It
+replaced the shared-element cover morph, which the user disliked. The blob is an SVG scaled through an inner
+`<g transform>` so `non-scaling-stroke` keeps its five-color rim a few px wide (scaling the `<svg>` with CSS
+turns the rim into fat rainbow bands). Reduced motion and modified clicks navigate normally.
 A long thread wrapping the portrait and a stirrable, mark-blooming footer
 were both built and rejected as cluttered, as was a full underline entering from the left edge. The
 Work thread starts inside the section with a tapered tip (`START_Y` in `ink-geometry.ts`) at `THREAD_X`

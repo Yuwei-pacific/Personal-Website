@@ -12,6 +12,7 @@ import { notFound } from "next/navigation";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
+import { InkTransitionOverlay } from "@/components/projects/ink-transition";
 import { AppViewTransitions } from "@/components/providers/view-transitions-provider";
 import { LenisProvider } from "@/components/providers/lenis-provider";
 import { CustomCursor } from "@/components/ui/custom-cursor";
@@ -166,6 +167,8 @@ export default async function SiteLayout({
               {children}
             </div>
           </LenisProvider>
+          {/* 进入项目的过场：一滩墨漫开铺满屏幕（见 projects/ink-transition.tsx） */}
+          <InkTransitionOverlay />
         </AppViewTransitions>
         {/* Vercel Analytics 组件：用于监测页面性能与用户行为 */}
         {process.env.NODE_ENV === "production" && <Analytics />}
