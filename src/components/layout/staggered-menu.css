@@ -7,6 +7,8 @@
   left: 0;
   width: 100vw;
   height: 100vh;
+  /* iOS Safari 的 100vh 包含工具栏后面那一截，面板底部会被挡住；支持 dvh 的浏览器按实际可见高度 */
+  height: 100dvh;
   z-index: 40;
   pointer-events: none;
   overflow: hidden;

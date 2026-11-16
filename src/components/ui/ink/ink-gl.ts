@@ -422,8 +422,13 @@ export type InkParams = {
 
 export type InkLayout = {
   /**
-   * 窗口模式（很高的区域，如整个作品区）：画布只有视口那么高、贴住视口（sticky），按滚动位置画出
-   * 区域里正在看的那一段。整块区域那么大的画布每帧都要合成，帧率会掉一半（实测 120 → 52fps）
+   * 窗口模式（很高的区域，如整个作品区）：画布只有一两个视口那么高，画出区域里正在看的那一段。
+   * 整块区域那么大的画布每帧都要合成，帧率会掉一半（实测 120 → 52fps）。
+   *
+   * 画布不贴住视口：它放在区域里某个位置、跟着页面一起原生滚动，只有视口快滚出它的时候才挪一次（见 viewOffset）。
+   * 之前是 position: sticky 贴住视口、每帧按滚动位置重画 —— iOS Safari 的滚动在合成线程上走，脚本拿到的滚动位置
+   * 总是慢一拍，于是墨滩和封面跟不上文字、被拖在后面（用户 2026-11-17 在手机上看到的）。
+   * 现在两次挪动之间画面的位置是浏览器自己滚出来的，不依赖脚本，哪个浏览器都不会错位
    */
   window?: { height: number };
   /** 区域尺寸（CSS px）—— 已经包含四周给晕留的余量 */
@@ -853,6 +858,8 @@ export class InkRenderer {
       const offset = this.viewOffset();
       if (offset !== this.lastViewOffset) {
         this.lastViewOffset = offset;
+        // 挪画布和重画在同一帧里，两者一起上屏
+        this.canvas.style.transform = `translate3d(0, ${offset}px, 0)`;
         this.needsDraw = true;
       }
       if (!animated) {
@@ -888,13 +895,22 @@ export class InkRenderer {
     });
   }
 
-  // 窗口模式下画布（sticky）的上缘离区域上缘多远（CSS px）；非窗口模式为 0
+  // 窗口模式下画布的上缘该放在区域里多远的地方（CSS px）；非窗口模式为 0。
+  // 画布比视口高，视口还在它里面（离上下边都有余量）时不动；快滚出去了，才把画布重新摆到视口居中的位置
   private viewOffset() {
     const parent = this.canvas.parentElement;
     if (!this.layout?.window || !parent) return 0;
-    const max = Math.max(0, this.layout.height - this.layout.window.height);
-    const offset = this.canvas.getBoundingClientRect().top - parent.getBoundingClientRect().top;
-    return Math.min(max, Math.max(0, Math.round(offset)));
+    const height = this.layout.window.height;
+    const max = Math.max(0, this.layout.height - height);
+    const viewport = window.innerHeight;
+    // 视口上缘在区域里的位置
+    const top = -parent.getBoundingClientRect().top;
+    const spare = Math.max(0, height - viewport);
+    const margin = spare / 6;
+    // 区域变矮之后，原来的位置可能已经超出去了
+    const current = Math.min(max, this.lastViewOffset);
+    if (top >= current + margin && top + viewport <= current + height - margin) return current;
+    return Math.min(max, Math.max(0, Math.round(top - spare / 2)));
   }
 
   /** 筷子：把鼠标这一帧划过的线段盖进拨动场，并让整张场衰减（墨流回来） */

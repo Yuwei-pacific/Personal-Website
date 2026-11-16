@@ -16,10 +16,11 @@ async function assertOk(path) {
   }
 }
 
-async function assertRedirect(path, expectedPath) {
-  const response = await fetch(new URL(path, baseUrl), { redirect: "manual" });
+// 不带语言前缀的地址按访客跳：先看 cookie 里手动选过的语言，再看浏览器语言，都没有就去英语
+async function assertRedirect(path, expectedPath, headers = {}) {
+  const response = await fetch(new URL(path, baseUrl), { redirect: "manual", headers });
   const location = response.headers.get("location");
-  if (response.status !== 308 || !location || new URL(location, baseUrl).pathname !== expectedPath) {
+  if (response.status !== 307 || !location || new URL(location, baseUrl).pathname !== expectedPath) {
     throw new Error(
       `${path} should redirect to ${expectedPath}; received ${response.status} ${location ?? ""}`,
     );
@@ -50,8 +51,13 @@ for (const path of requiredPaths) {
   await assertOk(path);
 }
 
-await assertRedirect("/", "/it");
-await assertRedirect("/about", "/it/about");
+await assertRedirect("/", "/it", { "Accept-Language": "it-IT,it;q=0.9,en;q=0.8" });
+await assertRedirect("/about", "/it/about", { "Accept-Language": "it" });
+await assertRedirect("/", "/en", { "Accept-Language": "en-US,en;q=0.9" });
+await assertRedirect("/about", "/en/about", { "Accept-Language": "zh-CN,zh;q=0.9" });
+await assertRedirect("/", "/en", { "Accept-Language": "" });
+await assertRedirect("/", "/it", { "Accept-Language": "en-US", Cookie: "locale=it" });
+await assertRedirect("/", "/en", { "Accept-Language": "it", Cookie: "locale=en" });
 await Promise.all([assertHtmlLocale("/it", "it"), assertHtmlLocale("/en", "en")]);
 
 const projectPaths = await getProjectPaths();

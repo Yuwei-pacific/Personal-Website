@@ -28,6 +28,9 @@ export function coverVideo(id: string, url: string): HTMLVideoElement {
     video.muted = true;
     video.loop = true;
     video.playsInline = true;
+    // iOS Safari 认的是标签上的属性：没有它，视频一播放就会被拉成全屏
+    video.setAttribute("playsinline", "");
+    video.setAttribute("muted", "");
     video.preload = "none";
     video.src = url;
     videos.set(id, video);

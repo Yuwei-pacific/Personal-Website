@@ -29,8 +29,8 @@ export type InkSpec = {
   /** 参数；reveal 的坐标也按盒子算 */
   params: InkParams;
   /**
-   * 窗口模式：盒子很高时（整个作品区），画布只有视口那么高、贴住视口（sticky），
-   * 按滚动位置画出盒子里正在看的那一段。只用于 padding 为 0 的盒子
+   * 窗口模式：盒子很高时（整个作品区），画布只有一两个视口那么高，画出盒子里正在看的那一段，
+   * 跟着页面原生滚动、快滚出去时才挪一次。只用于 padding 为 0 的盒子
    */
   windowed?: boolean;
 };
@@ -168,7 +168,10 @@ export function InkSurface({
       const { top, right, bottom, left } = spec.padding;
       setPadding(spec.padding);
       windowed = Boolean(spec.windowed);
-      const view = windowed ? Math.min(viewport, height) : null;
+      // 窗口模式的画布高度：比视口高出一截（触屏两个视口，其余一个半），留给浏览器自己滚动的余量 ——
+      // 触屏的惯性滚动快，脚本又慢一拍，余量要大一些（见 ink-gl.ts 的 viewOffset）
+      const overscan = window.matchMedia("(pointer: coarse)").matches ? 2 : 1.5;
+      const view = windowed ? Math.min(Math.round(viewport * overscan), height) : null;
       setWindowHeight(view);
       const reveal = spec.params.reveal;
       const { drawCore, drawImage } = spec;
@@ -308,7 +311,7 @@ export function InkSurface({
       ) : (
         <canvas
           ref={canvasRef}
-          className={windowHeight === null ? "absolute block" : "sticky top-0 block w-full"}
+          className={windowHeight === null ? "absolute block" : "absolute left-0 top-0 block w-full will-change-transform"}
           style={
             windowHeight === null
               ? {

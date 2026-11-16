@@ -33,6 +33,9 @@ do not describe the current design here — that is the brand manual and `CLAUDE
 - **Horizontal wipe revealing pools on scroll**: looked like a gradient mask cutting the cover; pools now bloom
   from the thread's entry point.
 
+- **Sticky viewport-high canvas redrawn on every scroll frame**: on iOS Safari the ink lagged behind the text
+  (scrolling is off the main thread). The canvas now scrolls natively and is only repositioned near its edges.
+
 ## About page
 
 - **Origin story on the page** (vertical 墨分五色 and its explanation, first alone, then as small text): visitors

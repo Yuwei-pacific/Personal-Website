@@ -40,8 +40,11 @@ There is **no `src/app/layout.tsx`**. Each route group supplies its own `<html>`
   reintroduce a root layout or read `headers()`/`cookies()` there.
 - `src/app/(studio)/layout.tsx` — the Sanity Studio, deliberately outside the locale routes.
 
-`src/proxy.ts` (Next 16's `middleware.ts` replacement) 308-redirects any unprefixed path to the
-default locale (`/about` → `/it/about`). For prefixed paths it also forwards an `x-site-locale`
+`src/proxy.ts` (Next 16's `middleware.ts` replacement) redirects any unprefixed path to the visitor's language
+with a 307: the `locale` cookie if they picked a language in the menu (set in `navbar.tsx`), otherwise the best match
+in `Accept-Language`, otherwise English (`preferredLocale` / `fallbackLocale` in `i18n/config.ts`). It must stay a
+temporary redirect with `Vary` — the target differs per visitor. Prefixed URLs are never redirected.
+For prefixed paths it also forwards an `x-site-locale`
 request header, read **only** by `src/app/global-not-found.tsx` (that document bypasses every
 layout and has no `params`). Site pages must keep reading the locale from `params`.
 Matcher excludes `/api`, `/studio`, `/_next`, `/apple-icon`, and anything with a file extension.
@@ -91,7 +94,8 @@ reintroduce it for the public site; `api.sanity.io` is no longer in the CSP `con
 
 ### Localization
 
-`it` (default) and `en`, both always explicitly prefixed. Three separate layers:
+`it` and `en`, both always explicitly prefixed. `it` is the content default (CMS fallback, 404); which language an
+unprefixed URL opens follows the visitor (see `proxy.ts` above), with `en` as the fallback and as hreflang `x-default`. Three separate layers:
 
 1. **Interface copy** — `src/i18n/dictionaries.ts`, read via `getDictionary(locale)`.
 2. **CMS content** — one shared document per project holding media, dates and ordering, with each
@@ -153,7 +157,10 @@ loaded on demand; never animate it — it rasterizes on the CPU.
   featured projects (`featured`, `featuredOrder` in Sanity). The focused cover's video plays in the ink.
 - **Flow** (`flow`, `flowDrops`): the Work thread's head follows the scroll at ~82% of the viewport
   height; a pool blooms from the thread's entry point when the head reaches it. It never retracts.
-- **Windowed canvases**: a section-high canvas only draws a viewport-high sticky strip. An offscreen canvas
+- **Windowed canvases**: a section-high canvas is only 1.5–2 viewports tall. It is absolutely positioned inside
+  the section and scrolls natively with the page; the renderer moves it (`viewOffset`) only when the viewport is
+  about to leave it. Do not make it `position: sticky` and redraw per scroll frame — on iOS Safari scrolling runs
+  off the main thread, the script's scroll position lags, and the ink trails behind the text. An offscreen canvas
   still draws one warm-up frame after each layout change, or large canvases flash blank on scroll-in.
 - Reduced motion renders one static frame: no reveal, flow, breathing, stir or video.
 

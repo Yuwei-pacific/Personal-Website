@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import { defaultLocale, isLocale } from "@/i18n/config";
+import { LOCALE_COOKIE, isLocale, preferredLocale } from "@/i18n/config";
 
 /** 仅供 404 文档读取的 locale 传递头，见下方 proxy() 内的说明。 */
 export const SITE_LOCALE_HEADER = "x-site-locale";
@@ -11,9 +11,17 @@ export function proxy(request: NextRequest) {
   const pathLocale = pathname.split("/")[1];
 
   if (!isLocale(pathLocale)) {
+    // 不带语言前缀的地址：语言跟着访客走。先看他有没有在菜单里手动选过（cookie），
+    // 没有就按浏览器语言 —— 意大利语去 /it，其余去 /en。
+    // 之前一律跳到意大利语：英语的客户和招聘方点进来，第一眼看到的是意大利语。
+    // 307 而不是 308：目的地因人而异，308 会被浏览器和 CDN 当成永久结论缓存下来；Vary 同理
+    const chosen = request.cookies.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(chosen) ? chosen : preferredLocale(request.headers.get("accept-language"));
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = `/${defaultLocale}${pathname === "/" ? "" : pathname}`;
-    return NextResponse.redirect(redirectUrl, 308);
+    redirectUrl.pathname = `/${locale}${pathname === "/" ? "" : pathname}`;
+    const response = NextResponse.redirect(redirectUrl, 307);
+    response.headers.set("Vary", "Accept-Language, Cookie");
+    return response;
   }
 
   // 语言从路由段本身读（见 src/app/(site)/[locale]/layout.tsx），不再往下游传 header：

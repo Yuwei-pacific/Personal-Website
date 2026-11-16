@@ -80,7 +80,9 @@ export function AboutPageContent({
           - 标题横贯整页、下面人像 / 话 / 资料三样并排：三样的顶和底都对不上，人像比另外两样高一倍，底下空一大片；
           - 更早的「把设计和前端结合起来…」式大标题（模版化，首页也说过）。
           这一页只有人像那一处化开 */}
-      <section className={cn("surface-base overflow-x-clip bg-background pb-16 pt-28 sm:pb-20 sm:pt-36 lg:pt-28", edge)}>
+      {/* 差一点满一屏：内容在上，滚动指引贴底，下一段的纸 2 在屏幕底边露出一条。
+          之前这一段只有内容那么高，大屏幕上它下面是下一段顶部的一大片留白 —— 空，也看不出还能往下滚（用户 2026-11-17） */}
+      <section className={cn("surface-base flex min-h-[calc(100svh-2.5rem)] flex-col overflow-x-clip bg-background pb-8 pt-28 sm:pt-36 lg:pt-28", edge)}>
         <p className="text-label uppercase text-design-light-text-muted">{about.eyebrow}</p>
 
         <div className="mt-6 grid grid-cols-1 gap-y-10 md:grid-cols-12 md:items-start md:gap-x-6 md:gap-y-0">
@@ -133,10 +135,29 @@ export function AboutPageContent({
             </div>
           </div>
         </div>
+
+        {/* 滚动指引：不是「Scroll」，而是下面有什么 —— 三个区块的名字，点了就到。
+            挂在第 4 栏那条内容轴线上，和上面的话、下面的行表格同一个左缘；箭头在标签栏里。
+            首页否掉的那种居中旋转的圆章不用在这里 */}
+        <a
+          href="#resume"
+          className="group/cue mt-auto block pt-16 text-design-light-text-secondary transition-colors duration-base hover:text-design-light-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"
+        >
+          {/* 一道墨线托着：它是这一屏的底线，指引挂在线下 */}
+          <InkRule variant={2} />
+          <span className="grid grid-cols-[auto_1fr] items-baseline gap-x-3 pt-4 md:grid-cols-12 md:gap-x-6">
+            <span aria-hidden="true" className="scroll-cue-arrow text-xl leading-none md:col-span-4 lg:col-span-3">
+              ↓
+            </span>
+            <span className="text-body md:col-span-8 lg:col-span-9">
+              {[about.experience, about.education, about.capabilities].join(" · ")}
+            </span>
+          </span>
+        </a>
       </section>
 
       {/* 二、履历 + 能力（纸 2：和第一屏的纸交替） */}
-      <section className={cn("surface-alt flex flex-col gap-20 bg-background py-section sm:gap-28 sm:py-section-sm", edge)}>
+      <section id="resume" className={cn("surface-alt flex scroll-mt-0 flex-col gap-20 bg-background py-section sm:gap-28 sm:py-section-sm", edge)}>
         {/* 经历在前、教育在后：客户和招聘方先看做过什么，再看在哪学的 */}
         <Block title={about.experience} count={experiences.length}>
           <ResumeList items={experiences} emptyLabel={about.resumeEmpty} />

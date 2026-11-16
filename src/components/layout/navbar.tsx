@@ -14,7 +14,7 @@ import type {
   StaggeredMenuLanguageItem,
   StaggeredMenuSocialItem,
 } from "@/components/layout/staggered-menu";
-import { localeLabels, locales, type Locale } from "@/i18n/config";
+import { localeLabels, locales, type Locale, LOCALE_COOKIE, isLocale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { localizedPath, replaceLocale } from "@/i18n/routing";
 import { SOCIAL_LINKS } from "@/lib/site-metadata";
@@ -140,6 +140,12 @@ export function Navbar({
   // href 本身保持不带 hash，SSR 与无 JS 时仍是一个干净的语言首页链接。
   const handleLanguageClick = useCallback(
     (href: string, event: React.MouseEvent<HTMLAnchorElement>) => {
+      // 记住这次手动选的语言（一年）：下次打开不带前缀的地址时，proxy.ts 按它跳，而不是再按浏览器语言猜
+      const chosen = href.split("/")[1];
+      if (isLocale(chosen)) {
+        document.cookie = `${LOCALE_COOKIE}=${chosen}; path=/; max-age=31536000; samesite=lax`;
+      }
+
       // 让浏览器自己处理「新标签页打开」这类修饰键点击
       if (
         event.defaultPrevented ||

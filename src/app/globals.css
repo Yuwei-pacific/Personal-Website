@@ -370,3 +370,25 @@
   }
 }
 
+/* 滚动指引的箭头（About 第一屏底部）：缓慢地往下点一下再回来，提示还能往下滚。
+   只是位移，不弹跳；减弱动画时不动 */
+@keyframes scroll-cue-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+.scroll-cue-arrow {
+  display: inline-block;
+  animation: scroll-cue-drift 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue-arrow {
+    animation: none;
+  }
+}

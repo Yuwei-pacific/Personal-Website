@@ -3,7 +3,7 @@
 // sitemap、robots、footer、导航面板全部从同一份数据读取。
 
 import { getDictionary } from "@/i18n/dictionaries";
-import type { Locale } from "@/i18n/config";
+import { fallbackLocale, type Locale } from "@/i18n/config";
 import { localizedPath } from "@/i18n/routing";
 
 export const SITE_URL = "https://www.yuweidesign.com";
@@ -63,7 +63,8 @@ export function languageAlternates(path = "/") {
   return {
     it: localizedAbsoluteUrl("it", path),
     en: localizedAbsoluteUrl("en", path),
-    "x-default": localizedAbsoluteUrl("it", path),
+    // x-default：语言对不上的访客看哪一版 —— 和 proxy.ts 的兜底一致
+    "x-default": localizedAbsoluteUrl(fallbackLocale, path),
   };
 }
 
