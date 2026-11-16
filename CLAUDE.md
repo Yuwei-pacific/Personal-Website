@@ -159,7 +159,7 @@ regions). Images and videos uploaded as textures must load with `crossOrigin="an
 canvas still draws one warm-up frame after each layout change, because the GPU uploads textures and
 prepares shaders on first draw — large canvases otherwise flash blank on scroll-in.
 
-`src/components/ui/sheet.tsx` (experimental; About page and project detail pages) stacks sections like
+`src/components/ui/sheet.tsx` (experimental; project detail pages only) stacks sections like
 sheets of paper with `position: sticky`; siblings must share one parent and each sheet is at least one
 viewport tall. The home page deliberately does **not** use it: hero, About and Work share one paper
 and scroll normally. Ink appears only where it has a job — the hero (mark, line, slogan word) and Work
@@ -169,6 +169,17 @@ running from the left edge into the mark's "i", positioned purely in CSS (`--fm-
 `layout/footer.tsx`). The home About section is a text-only statement on the Work
 grid (no portrait — the photo appears only on the About page) with a single quiet hand-drawn circle
 around one title word (`about-ink.tsx`, path in `aboutCircle`, word picked by `data-ink-word`).
+The About page (`sections/about/`) scrolls normally on the same edge-to-edge 12-column grid (labels and
+headings in columns 1–3, content from column 4), paper then paper 2. Its first screen opens with the origin —
+the vertical 墨分五色 (the one place it appears), the origin sentence as the `h1`, a quieter second sentence — beside
+the cut-out portrait, which stands on the rule above the basic-info rows. A generic "I combine design and
+frontend…" headline was rejected as templated and already said on the home page, and the origin as its own
+section between the facts sat awkwardly. The page's only bloom is the ink around the portrait
+(`portrait-ink.tsx` — a canvas under the photo whose shape is the photo's own alpha, so only the ink outside the
+silhouette shows; added because the black shirt vanished on the dark theme; a uniform 2 px rim was rejected as
+lifeless, so it uses Work-level bloom with a downward spread). `origin-drop.tsx` (an ink drop that opens when
+scrolled to mid-viewport) is currently unused. Dividers on this page are `ui/ink-rule.tsx` (the footer's plain
+hand-drawn line as a reusable SVG rule), not straight borders.
 A long thread wrapping the portrait and a stirrable, mark-blooming footer
 were both built and rejected as cluttered, as was a full underline entering from the left edge. The
 Work thread starts inside the section with a tapered tip (`START_Y` in `ink-geometry.ts`) at `THREAD_X`

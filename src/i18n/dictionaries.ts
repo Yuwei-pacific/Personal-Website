@@ -52,11 +52,17 @@ type Dictionary = {
   };
   about: {
     eyebrow: string;
-    intro: string;
     roleLabel: string;
     locationLabel: string;
     languagesLabel: string;
     languages: string[];
+    /**
+     * 第一屏的三层文字，先说人、再说出处（用户 2026-11-16：只讲出处，看不出「我」是谁）：
+     * intro.lead 是大标题（我是谁、从哪来）；intro.body 是现在做什么、怎么做；
+     * origin 是出处「墨分五色」，全站只在这里讲一次（品牌手册 09），caption 是四个字的读音和译名
+     */
+    intro: { lead: string; body: string };
+    origin: { caption: string; body: string };
     education: string;
     experience: string;
     capabilities: string;
@@ -167,12 +173,22 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     about: {
       eyebrow: "Chi sono",
-      intro:
-        "Unisco design della comunicazione e sviluppo frontend per trasformare le idee in esperienze digitali chiare, espressive e facili da mantenere.",
       roleLabel: "Ruolo",
       locationLabel: "Luogo",
       languagesLabel: "Lingue",
       languages: ["Cinese — madrelingua", "Inglese — B2", "Italiano — B2"],
+      // 意大利语文案是草稿，上线前请母语者过一遍（品牌手册 09）。
+      // 句子特意写成不带性别变化的（没有 arrivato / arrivata 这类过去分词）
+      intro: {
+        lead: "Sono Yuwei Li. Dalla Cina a Firenze per dipingere, poi a Milano per progettare.",
+        body:
+          "Oggi mi occupo di communication design e sviluppo frontend, e lavoro come UX designer a POLI.design. Disegno identità e interfacce in Figma, poi le costruisco in codice.",
+      },
+      origin: {
+        caption: "mò fēn wǔ sè · L’inchiostro ha cinque colori.",
+        body:
+          "Nella pittura a inchiostro cinese si dice che un solo nero contenga cinque colori. Basta aggiungere acqua, e il nero si apre. Lavoro allo stesso modo: il colore è già dentro le cose ordinarie. Il design lo fa uscire.",
+      },
       education: "Formazione",
       experience: "Esperienza",
       capabilities: "Competenze",
@@ -293,12 +309,20 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     about: {
       eyebrow: "About me",
-      intro:
-        "I combine communication design and frontend development to turn ideas into clear, expressive and maintainable digital experiences.",
       roleLabel: "Role",
       locationLabel: "Location",
       languagesLabel: "Languages",
       languages: ["Chinese — native", "English — B2", "Italian — B2"],
+      intro: {
+        lead: "I’m Yuwei Li. I came from China to Florence to paint, then moved to Milan to design.",
+        body:
+          "Today I’m a communication designer and frontend developer, working as a UX designer at POLI.design. I design identities and interfaces in Figma, then build them in code myself.",
+      },
+      origin: {
+        caption: "mò fēn wǔ sè · Ink holds five colors.",
+        body:
+          "In Chinese ink painting, a single black ink is said to hold five colors. Add water, and black opens up. I work the same way: the color is already in the ordinary thing. Design lets it out.",
+      },
       education: "Education",
       experience: "Experience",
       capabilities: "Capabilities",
