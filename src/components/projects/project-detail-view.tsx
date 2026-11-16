@@ -3,6 +3,7 @@ import { Link } from "next-view-transitions";
 import { MaskedTextHeading } from "@/components/ui/masked-text-heading";
 import { SanityImage } from "@/components/ui/sanity-image";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { textLink } from "@/components/ui/text-link";
 import { buildScaledUrl } from "@/lib/media";
 import { getExternalLinkProps } from "@/lib/safe-url";
 import type { Project, ProjectDetail } from "@/lib/view-models/types";
@@ -13,13 +14,12 @@ import { localizedPath } from "@/i18n/routing";
 import { CoverVideo } from "./cover-video";
 import { NextProject } from "./next-project";
 import { ProjectGallery } from "./project-gallery";
-import { MetaItem, MetaList, joinMeta } from "./project-meta-table";
+import { MetaItem, MetaList, joinMeta } from "@/components/ui/meta-list";
 import { ProjectRichText } from "./project-rich-text";
 import {
   CHAPTER_GAP,
   ProjectSections,
   SECTION_GRID,
-  SECTION_LABEL_COL,
   SECTION_MEASURE,
   SECTION_TEXT_COL,
   SectionLabel,
@@ -77,10 +77,10 @@ export function ProjectDetailView({
     links.length > 0;
 
   return (
-    // main 覆盖整篇正文：浅色首屏 + 深色内容区 + 画廊 + 下一个项目都属于页面主体
+    // main 覆盖整篇正文：头部和封面（纸）+ 正文与画廊（纸 2）+ 下一个项目（纸）都属于页面主体
     <main id="main-content" className="relative min-h-screen text-design-light-text-primary">
       {/* 三段：首屏 + 封面（纸）→ 正文（纸 2）→ 下一个项目（纸）。
-          之前是三张纸叠放（ui/sheet.tsx）：滚动时正文那张纸会从下面盖上来，把封面盖掉一半 —— 去掉了。
+          之前是三张纸叠放（position: sticky）：滚动时正文那张纸会从下面盖上来，把封面盖掉一半 —— 去掉了。
           为了不让整份文件多缩进一层，这三段的子元素保持原缩进 */}
       <div className="surface-base bg-background">
       {/* ── 头部：标题 → 封面 → 资料与简介。
@@ -131,9 +131,10 @@ export function ProjectDetailView({
               ) : (
                 <SanityImage
                   // 这张是详情页的 LCP 元素，由浏览器按 srcset 直连 Sanity CDN。
-                  // 2048 是 loader 的宽度上限，与画廊 lightbox 的最大档一致
+                  // 2880 是 loader 的宽度上限：封面横贯整页，2 倍屏上 1440 宽的窗口要这么多像素
+                  // （之前是 2048，高分屏的大窗口里封面是被放大的、发软）。不会超过原图，窄屏仍按 srcset 取小档
                   src={buildScaledUrl(project.coverImage.url, {
-                    width: 2048,
+                    width: 2880,
                     animated: project.coverImage.animated,
                   })}
                   alt={project.coverImage.alt}
@@ -149,11 +150,12 @@ export function ProjectDetailView({
         </div>
       ) : null}
 
-      {/* ── 资料与简介：左栏是资料（我的角色排第一：访客最先想知道我在这个项目里做了什么），
-          右栏是简介和外链。栏位和下面的章节一致。
-          单列（手机）时简介和外链排在资料前面：先读到这是什么，再看资料 ── */}
-      <div className={`px-edge pb-section sm:px-edge-sm sm:pb-section-sm ${SECTION_GRID}`}>
-        <MetaList tone="light" className={`${SECTION_LABEL_COL} order-2 self-start md:order-none`}>
+      {/* ── 简介与资料：左边是大字简介和外链（占 7 栏），右边 4 栏是资料
+          （我的角色排第一：访客最先想知道我在这个项目里做了什么）。一左一右把这一行撑满。
+          试过资料在左 3 栏、简介从第 4 栏起（和章节同一套栏位）：简介的行宽有限，右边三分之一是空的，
+          整行都挤在左边（用户 2026-11-16）。单列（手机）时也是简介在前、资料在后 ── */}
+      <div className={`px-edge pb-14 sm:px-edge-sm sm:pb-20 ${SECTION_GRID}`}>
+        <MetaList tone="light" className="order-2 self-start md:col-span-5 md:col-start-8 lg:col-span-4 lg:col-start-9">
           {project.role.length ? (
             <MetaItem tone="light" label={d.roles}>{joinMeta(project.role)}</MetaItem>
           ) : null}
@@ -163,9 +165,9 @@ export function ProjectDetailView({
           ) : null}
         </MetaList>
 
-        <div className={`${SECTION_TEXT_COL} order-1 flex flex-col gap-8 md:order-none`}>
+        <div className="order-1 flex flex-col gap-8 md:col-span-6 lg:col-span-7">
           {project.summary ? (
-            <p className="max-w-[34ch] text-pretty text-[1.375rem] leading-[1.2] tracking-[-0.02em] sm:text-[clamp(1.5rem,2.1vw,2rem)]">
+            <p className="text-pretty text-[1.375rem] leading-[1.2] tracking-[-0.02em] sm:text-[clamp(1.5rem,2.1vw,2rem)]">
               {project.summary}
             </p>
           ) : null}
@@ -178,7 +180,7 @@ export function ProjectDetailView({
                   <a
                     href={link.href}
                     {...getExternalLinkProps(link.href)}
-                    className="inline-flex min-h-11 touch-manipulation items-center gap-2 border-b-2 border-accent text-lg leading-[1.3] tracking-[-0.02em] transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:min-h-0 sm:text-xl"
+                    className={textLink("md", "gap-2")}
                   >
                     {link.label}
                     <span aria-hidden="true">↗</span>
@@ -194,7 +196,8 @@ export function ProjectDetailView({
       {/* ── 正文、Credits、画廊：同一段，共用章节间距 ── */}
       <div className="surface-alt bg-background">
       <div
-        className="bg-design-dark-bg px-edge py-section text-design-dark-text-primary sm:px-edge-sm sm:py-section-sm"
+        // 上边距比下边距小：头部那一行下面已经留过白，两段的留白叠在一起会空出大半屏
+        className="bg-design-dark-bg px-edge pb-section pt-14 text-design-dark-text-primary sm:px-edge-sm sm:pb-section-sm sm:pt-20"
       >
         <div className={`flex flex-col ${CHAPTER_GAP}`}>
           {/* 可增删排序的内容模块 */}

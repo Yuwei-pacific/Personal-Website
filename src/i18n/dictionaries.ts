@@ -34,7 +34,8 @@ type Dictionary = {
       /** 身份段：lead 用墨色（谁、做什么、现在在哪），rest 用淡墨（给谁做） */
       identity: { lead: string; rest: string };
       cta: string;
-      scrollDown: string;
+      /** 接外部项目：首屏联系方式旁边和页脚各说一次 */
+      availability: string;
     };
     aboutPreview: {
       title: string;
@@ -57,12 +58,11 @@ type Dictionary = {
     languagesLabel: string;
     languages: string[];
     /**
-     * 第一屏的三层文字，先说人、再说出处（用户 2026-11-16：只讲出处，看不出「我」是谁）：
-     * intro.lead 是大标题（我是谁、从哪来）；intro.body 是现在做什么、怎么做；
-     * origin 是出处「墨分五色」，全站只在这里讲一次（品牌手册 09），caption 是四个字的读音和译名
+     * 第一屏的两层文字：intro.lead 是大标题（我是谁、从哪来）；intro.body 是现状（在哪工作、接项目、在读什么）。
+     * intro.body 不重复首页那句「先设计、再自己做出来」（首屏和首页 About 已经各说过一次）。
+     * 出处「墨分五色」不在这页讲了（用户 2026-11-16）：留给将来的视觉识别案例，文案在品牌手册 09 里
      */
     intro: { lead: string; body: string };
-    origin: { caption: string; body: string };
     education: string;
     experience: string;
     capabilities: string;
@@ -84,7 +84,6 @@ type Dictionary = {
     gallery: string;
     links: string;
     nextProject: string;
-    projectCover: string;
     playVideo: string;
     pauseVideo: string;
     playGalleryVideo: string;
@@ -115,8 +114,6 @@ type Dictionary = {
     aboutTitle: string;
     aboutDescription: string;
     projectNotFound: string;
-    portfolio: string;
-    basedInMilan: string;
   };
 };
 
@@ -156,7 +153,7 @@ const dictionaries: Record<Locale, Dictionary> = {
           rest: " Identità visive, interfacce e siti web per studi creativi e organizzazioni orientate al design.",
         },
         cta: "Parliamone →",
-        scrollDown: "Scorri",
+        availability: "Disponibile per progetti freelance",
       },
       aboutPreview: {
         title: "Lo disegno, poi lo costruisco.",
@@ -182,12 +179,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       intro: {
         lead: "Sono Yuwei Li. Dalla Cina a Firenze per dipingere, poi a Milano per progettare.",
         body:
-          "Oggi mi occupo di communication design e sviluppo frontend, e lavoro come UX designer a POLI.design. Disegno identità e interfacce in Figma, poi le costruisco in codice.",
-      },
-      origin: {
-        caption: "mò fēn wǔ sè · L’inchiostro ha cinque colori.",
-        body:
-          "Nella pittura a inchiostro cinese si dice che un solo nero contenga cinque colori. Basta aggiungere acqua, e il nero si apre. Lavoro allo stesso modo: il colore è già dentro le cose ordinarie. Il design lo fa uscire.",
+          "Oggi lavoro come UX designer a POLI.design e seguo progetti freelance di communication design e sviluppo frontend. Sto completando la laurea magistrale in Communication Design al Politecnico di Milano.",
       },
       education: "Formazione",
       experience: "Esperienza",
@@ -211,7 +203,6 @@ const dictionaries: Record<Locale, Dictionary> = {
       gallery: "Galleria",
       links: "Link",
       nextProject: "Prossimo progetto",
-      projectCover: "Copertina del progetto",
       playVideo: "Riproduci il video di copertina",
       pauseVideo: "Metti in pausa il video di copertina",
       playGalleryVideo: "Riproduci video",
@@ -249,12 +240,10 @@ const dictionaries: Record<Locale, Dictionary> = {
         "UX UI design",
         "sviluppo web",
       ],
-      aboutTitle: "Chi è Yuwei Li",
+      aboutTitle: "Chi sono",
       aboutDescription:
         "Portfolio di Yuwei Li, Communication Designer & Frontend Developer a Milano: identità visive, interfacce digitali e siti web su misura.",
       projectNotFound: "Progetto non trovato",
-      portfolio: "Portfolio",
-      basedInMilan: "A Milano",
     },
   },
   en: {
@@ -292,7 +281,7 @@ const dictionaries: Record<Locale, Dictionary> = {
           rest: " Visual identities, interfaces and websites for creative studios and design-led organisations.",
         },
         cta: "Get in touch →",
-        scrollDown: "Scroll Down",
+        availability: "Available for freelance",
       },
       aboutPreview: {
         title: "I design it, then I build it.",
@@ -316,12 +305,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       intro: {
         lead: "I’m Yuwei Li. I came from China to Florence to paint, then moved to Milan to design.",
         body:
-          "Today I’m a communication designer and frontend developer, working as a UX designer at POLI.design. I design identities and interfaces in Figma, then build them in code myself.",
-      },
-      origin: {
-        caption: "mò fēn wǔ sè · Ink holds five colors.",
-        body:
-          "In Chinese ink painting, a single black ink is said to hold five colors. Add water, and black opens up. I work the same way: the color is already in the ordinary thing. Design lets it out.",
+          "Today I work as a UX designer at POLI.design and take on freelance projects in communication design and frontend development. I’m completing an MSc in Communication Design at Politecnico di Milano.",
       },
       education: "Education",
       experience: "Experience",
@@ -345,7 +329,6 @@ const dictionaries: Record<Locale, Dictionary> = {
       gallery: "Gallery",
       links: "Links",
       nextProject: "Next project",
-      projectCover: "Project cover",
       playVideo: "Play cover video",
       pauseVideo: "Pause cover video",
       playGalleryVideo: "Play video",
@@ -384,12 +367,10 @@ const dictionaries: Record<Locale, Dictionary> = {
         "interaction design",
         "web development",
       ],
-      aboutTitle: "About Yuwei Li",
+      aboutTitle: "About",
       aboutDescription:
         "Meet Yuwei Li, a Milan-based Communication Designer and Frontend Developer working across visual identity, digital interfaces and custom websites.",
       projectNotFound: "Project not found",
-      portfolio: "Portfolio",
-      basedInMilan: "Based in Milan",
     },
   },
 };

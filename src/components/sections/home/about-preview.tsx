@@ -3,6 +3,7 @@ import { Link } from "next-view-transitions";
 import { AboutInk } from "./about-ink";
 import { MaskedTextHeading } from "@/components/ui/masked-text-heading";
 import { RevealText } from "@/components/ui/reveal-text";
+import { textLink } from "@/components/ui/text-link";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { localizedPath } from "@/i18n/routing";
@@ -45,7 +46,7 @@ export function AboutPreview({
             />
             <Link
               href={localizedPath(locale, "/about")}
-              className="relative inline-flex min-h-11 w-fit touch-manipulation items-center border-b-2 border-accent text-xl leading-[1.3] tracking-[-0.02em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:text-2xl lg:min-h-0"
+              className={textLink("lg", "relative")}
             >
               {content.cta}
             </Link>

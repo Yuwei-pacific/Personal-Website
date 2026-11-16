@@ -25,6 +25,7 @@ import { useRef } from "react";
 import { HeroInk, InkLineSlot, InkMarkSlot, InkWord } from "@/components/ui/ink-mark";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/gsap-react";
 import type { Dictionary } from "@/i18n/dictionaries";
+import { textLink } from "@/components/ui/text-link";
 import { SITE_EMAIL } from "@/lib/site-metadata";
 
 // 标志的尺寸与位置（CSS 变量，下面几处都要用）：
@@ -33,7 +34,7 @@ import { SITE_EMAIL } from "@/lib/site-metadata";
 // --mark-w  墨迹宽度：按墨迹框 196×228 的比例
 // --mark-r  墨迹右缘到视口右缘的距离：Figma 里 19/1440 ≈ 1.3vw
 const MARK_VARS =
-  "[--mark-h:min(73.5svh,46vw)] [--mark-w:calc(var(--mark-h)*196/228)] [--mark-r:1.3vw] [--mark-hm:min(50vw,24svh,16rem)]";
+  "[--mark-h:min(73.5svh,46vw)] [--mark-w:calc(var(--mark-h)*196/228)] [--mark-r:1.3vw] [--mark-hm:min(50vw,24svh,16rem)] md:[--mark-hm:min(44vw,34svh,24rem)]";
 
 export function Hero({ dictionary }: { dictionary: Dictionary }) {
   const hero = dictionary.home.hero;
@@ -103,16 +104,20 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
           <span className="text-design-light-text-primary">{hero.identity.lead}</span>
           <span className="text-design-light-text-muted">{hero.identity.rest}</span>
         </p>
+        {/* 联系方式和「接项目」并排：访客在第一屏就知道可以来找我做事。
+            这一屏已经有东西化开，不再另取强调色的圆点（手册 03），所以只是一行淡墨小字 */}
+        <div className="hero-details mt-8 flex flex-wrap items-baseline gap-x-6 gap-y-2">
         <a
           href={`mailto:${SITE_EMAIL}`}
-          className="hero-details mt-8 inline-flex min-h-11 w-fit touch-manipulation items-center border-b-2 border-accent text-xl leading-[1.3] tracking-[-0.02em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:min-h-0 sm:text-2xl"
+          className={textLink("lg")}
         >
           {hero.cta}
         </a>
+        <p className="text-small text-design-light-text-muted">{hero.availability}</p>
+        </div>
       </div>
 
-      {/* Scroll Down 徽章试着拿掉了（2026-11-16）：居中的旋转圆章是全页唯一居中、唯一在转的东西，
-          正卡在首屏和 About 的接缝上；用户看着不顺眼。组件还在 ui/scroll-badge.tsx，字典键 hero.scrollDown 也留着 */}
+{/* 底部不放 Scroll Down 徽章：居中旋转的圆章是全页唯一居中、唯一在转的东西，正卡在首屏和 About 的接缝上 */}
     </section>
   );
 }
