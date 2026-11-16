@@ -4,28 +4,73 @@
 
 @layer base {
   :root {
-    /* 浅色端统一白：页面背景、菜单面板、人像容器等所有静置表面共用同一个纯白，
-       避免多种近似白并存产生色差。hover 的浅灰仅用于交互反馈。 */
-    --color-bg-light: 0 0% 100%;
-    --color-surface-light: 0 0% 100%;
-    --color-surface-raised-light: 0 0% 99%;
-    --color-text-primary-light: 0 0% 9%;
-    --color-text-secondary-light: 0 0% 26%;
-    --color-text-muted-light: 0 0% 45%;
-    --color-border-light: 0 0% 83%;
-    --color-border-strong-light: 0 0% 64%;
-    --color-accent-light: 0 0% 9%;
-    --color-hover-bg-light: 0 0% 98%;
+    /* ── 颜色：墨与纸（品牌手册第 03、05 章）──
+       三层结构：
+       1. 原始值 --s-<表面>-*：每个主题下三种表面（base 纸 / alt 纸 2 / inverse 反转）的
+          底色、文字、线。深浅模式只切换这一层（见下方 dark 两个选择器）。
+       2. 组件在用的两族 token --color-*-light / --color-*-dark：名字是历史遗留，
+          不再表示「浅 / 深」，而是「主表面 / 交替表面」。默认 light 族接 base、dark 族接 alt。
+       3. .surface-base / .surface-alt / .surface-inverse：把一个区块内的两族 token
+          整体改接到某一种表面，用来安排区块交替和页脚反转。
+       --color-ink / --color-paper 是不随主题变的墨色与纸色：给始终深色的浮层（lightbox）
+       和压在深色照片上的文字用。 */
+    /* base：纸（主表面） */
+    --s-base-bg: 60 9.1% 95.7%;
+    --s-base-bg2: 60 9.5% 91.8%;
+    --s-base-text: 230 20.0% 5.9%;
+    --s-base-text2: 228 7.9% 24.7%;
+    --s-base-text3: 228 5.1% 38.8%;
+    --s-base-line: 60 4.7% 83.1%;
+    --s-base-line2: 60 3.2% 69.6%;
+    /* alt：纸 2（交替表面） */
+    --s-alt-bg: 60 9.5% 91.8%;
+    --s-alt-bg2: 60 7.9% 87.6%;
+    --s-alt-text: 230 20.0% 5.9%;
+    --s-alt-text2: 228 7.9% 24.7%;
+    --s-alt-text3: 228 5.1% 38.8%;
+    --s-alt-line: 60 5.1% 80.6%;
+    --s-alt-line2: 60 3.0% 66.9%;
+    /* inverse：反转表面（页脚） */
+    --s-inv-bg: 230 20.0% 5.9%;
+    --s-inv-bg2: 231 14.3% 9.6%;
+    --s-inv-text: 60 10.3% 94.3%;
+    --s-inv-text2: 230 5.9% 80.0%;
+    --s-inv-text3: 230 6.3% 62.7%;
+    --s-inv-line: 233 9.7% 18.2%;
+    --s-inv-line2: 230 7.8% 30.2%;
+    --s-base-accent: 228 77.6% 47.3%;
+    --s-alt-accent: 228 77.6% 47.3%;
+    --s-inv-accent: 4 100.0% 65.3%;
+    --color-ink: 230 20.0% 5.9%;
+    --color-paper: 60 9.1% 95.7%;
+    color-scheme: light;
 
-    --color-bg-dark: 0 0% 4%;
-    --color-surface-dark: 0 0% 9%;
-    --color-surface-elevated-dark: 0 0% 15%;
-    --color-text-primary-dark: 0 0% 100%;
-    --color-text-secondary-dark: 0 0% 90%;
-    --color-text-muted-dark: 0 0% 64%;
-    --color-border-dark: 0 0% 15%;
-    --color-border-strong-dark: 0 0% 32%;
-    --color-hover-border-dark: 0 0% 45%;
+    --color-bg-light: var(--s-base-bg);
+    --color-surface-light: var(--s-base-bg);
+    --color-surface-raised-light: var(--s-base-bg);
+    --color-text-primary-light: var(--s-base-text);
+    --color-text-secondary-light: var(--s-base-text2);
+    --color-text-muted-light: var(--s-base-text3);
+    --color-border-light: var(--s-base-line);
+    --color-border-strong-light: var(--s-base-line2);
+    --color-accent-light: var(--s-base-text);
+    --color-hover-bg-light: var(--s-base-bg2);
+
+    --color-bg-dark: var(--s-alt-bg);
+    --color-surface-dark: var(--s-alt-bg2);
+    --color-surface-elevated-dark: var(--s-alt-line);
+    --color-text-primary-dark: var(--s-alt-text);
+    --color-text-secondary-dark: var(--s-alt-text2);
+    --color-text-muted-dark: var(--s-alt-text3);
+    --color-border-dark: var(--s-alt-line);
+    --color-border-strong-dark: var(--s-alt-line2);
+    --color-hover-border-dark: var(--s-alt-text3);
+
+    --color-accent: var(--s-base-accent);
+    --background: var(--s-base-bg);
+    --foreground: var(--s-base-text);
+    --border: var(--s-base-line);
+    --ring: var(--s-base-text);
 
     /* 垂直节奏分两档，名字对应实际用途：
        - section：页面级大区块之间的呼吸（首页 About / Work 等整屏级区块）
@@ -77,19 +122,155 @@
     --motion-duration-media: 700ms;
     --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
     --motion-scale-emphasis: 1.05;
-
-    /* 全局默认值：body 底色/文字与全站描边、焦点环。
-       （原 shadcn 那套 card / popover / primary / secondary / muted /
-       accent / destructive 语义色已随 Button 组件一起移除，此处不再保留。） */
-    --background: var(--color-bg-light);
-    --foreground: var(--color-text-primary-light);
-    --border: var(--color-border-light);
-    --ring: var(--color-accent-light);
   }
 
-  /* 本站不做主题切换（无 dark mode）：
-     --color-*-light / --color-*-dark 是固定的浅色/深色「分区」token
-     （页面上半浅色、Work 区深色），而不是随系统或开关切换的主题。 */
+  /* 深色模式：只换原始值。两个选择器内容必须一致 ——
+     跟随系统（未手动选择时）与手动选择 data-theme="dark"（见 hooks/use-theme.ts）。 */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      /* base：纸（主表面） */
+      --s-base-bg: 230 20.0% 5.9%;
+      --s-base-bg2: 231 14.3% 9.6%;
+      --s-base-text: 60 10.3% 94.3%;
+      --s-base-text2: 230 5.9% 80.0%;
+      --s-base-text3: 230 6.3% 62.7%;
+      --s-base-line: 233 9.7% 18.2%;
+      --s-base-line2: 230 7.8% 30.2%;
+      /* alt：纸 2（交替表面） */
+      --s-alt-bg: 231 14.3% 9.6%;
+      --s-alt-bg2: 233 13.0% 13.5%;
+      --s-alt-text: 60 10.3% 94.3%;
+      --s-alt-text2: 230 5.9% 80.0%;
+      --s-alt-text3: 230 6.3% 62.7%;
+      --s-alt-line: 234 9.4% 20.8%;
+      --s-alt-line2: 230 7.2% 32.5%;
+      /* inverse：反转表面（页脚） */
+      --s-inv-bg: 60 9.1% 95.7%;
+      --s-inv-bg2: 60 9.5% 91.8%;
+      --s-inv-text: 230 20.0% 5.9%;
+      --s-inv-text2: 228 7.9% 24.7%;
+      --s-inv-text3: 228 5.1% 38.8%;
+      --s-inv-line: 60 4.7% 83.1%;
+      --s-inv-line2: 60 3.2% 69.6%;
+      --s-base-accent: 4 100.0% 65.3%;
+      --s-alt-accent: 4 100.0% 65.3%;
+      --s-inv-accent: 228 77.6% 47.3%;
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    /* base：纸（主表面） */
+    --s-base-bg: 230 20.0% 5.9%;
+    --s-base-bg2: 231 14.3% 9.6%;
+    --s-base-text: 60 10.3% 94.3%;
+    --s-base-text2: 230 5.9% 80.0%;
+    --s-base-text3: 230 6.3% 62.7%;
+    --s-base-line: 233 9.7% 18.2%;
+    --s-base-line2: 230 7.8% 30.2%;
+    /* alt：纸 2（交替表面） */
+    --s-alt-bg: 231 14.3% 9.6%;
+    --s-alt-bg2: 233 13.0% 13.5%;
+    --s-alt-text: 60 10.3% 94.3%;
+    --s-alt-text2: 230 5.9% 80.0%;
+    --s-alt-text3: 230 6.3% 62.7%;
+    --s-alt-line: 234 9.4% 20.8%;
+    --s-alt-line2: 230 7.2% 32.5%;
+    /* inverse：反转表面（页脚） */
+    --s-inv-bg: 60 9.1% 95.7%;
+    --s-inv-bg2: 60 9.5% 91.8%;
+    --s-inv-text: 230 20.0% 5.9%;
+    --s-inv-text2: 228 7.9% 24.7%;
+    --s-inv-text3: 228 5.1% 38.8%;
+    --s-inv-line: 60 4.7% 83.1%;
+    --s-inv-line2: 60 3.2% 69.6%;
+    --s-base-accent: 4 100.0% 65.3%;
+    --s-alt-accent: 4 100.0% 65.3%;
+    --s-inv-accent: 228 77.6% 47.3%;
+    color-scheme: dark;
+  }
+
+  /* 区块表面：整体改接两族 token。用在区块最外层元素上。 */
+  .surface-base {
+    --color-bg-light: var(--s-base-bg);
+    --color-surface-light: var(--s-base-bg);
+    --color-surface-raised-light: var(--s-base-bg);
+    --color-text-primary-light: var(--s-base-text);
+    --color-text-secondary-light: var(--s-base-text2);
+    --color-text-muted-light: var(--s-base-text3);
+    --color-border-light: var(--s-base-line);
+    --color-border-strong-light: var(--s-base-line2);
+    --color-accent-light: var(--s-base-text);
+    --color-hover-bg-light: var(--s-base-bg2);
+    --color-bg-dark: var(--s-base-bg);
+    --color-surface-dark: var(--s-base-bg2);
+    --color-surface-elevated-dark: var(--s-base-line);
+    --color-text-primary-dark: var(--s-base-text);
+    --color-text-secondary-dark: var(--s-base-text2);
+    --color-text-muted-dark: var(--s-base-text3);
+    --color-border-dark: var(--s-base-line);
+    --color-border-strong-dark: var(--s-base-line2);
+    --color-hover-border-dark: var(--s-base-text3);
+    --color-accent: var(--s-base-accent);
+    --background: var(--s-base-bg);
+    --foreground: var(--s-base-text);
+    --border: var(--s-base-line);
+    --ring: var(--s-base-text);
+  }
+
+  .surface-alt {
+    --color-bg-light: var(--s-alt-bg);
+    --color-surface-light: var(--s-alt-bg);
+    --color-surface-raised-light: var(--s-alt-bg);
+    --color-text-primary-light: var(--s-alt-text);
+    --color-text-secondary-light: var(--s-alt-text2);
+    --color-text-muted-light: var(--s-alt-text3);
+    --color-border-light: var(--s-alt-line);
+    --color-border-strong-light: var(--s-alt-line2);
+    --color-accent-light: var(--s-alt-text);
+    --color-hover-bg-light: var(--s-alt-bg2);
+    --color-bg-dark: var(--s-alt-bg);
+    --color-surface-dark: var(--s-alt-bg2);
+    --color-surface-elevated-dark: var(--s-alt-line);
+    --color-text-primary-dark: var(--s-alt-text);
+    --color-text-secondary-dark: var(--s-alt-text2);
+    --color-text-muted-dark: var(--s-alt-text3);
+    --color-border-dark: var(--s-alt-line);
+    --color-border-strong-dark: var(--s-alt-line2);
+    --color-hover-border-dark: var(--s-alt-text3);
+    --color-accent: var(--s-alt-accent);
+    --background: var(--s-alt-bg);
+    --foreground: var(--s-alt-text);
+    --border: var(--s-alt-line);
+    --ring: var(--s-alt-text);
+  }
+
+  .surface-inverse {
+    --color-bg-light: var(--s-inv-bg);
+    --color-surface-light: var(--s-inv-bg);
+    --color-surface-raised-light: var(--s-inv-bg);
+    --color-text-primary-light: var(--s-inv-text);
+    --color-text-secondary-light: var(--s-inv-text2);
+    --color-text-muted-light: var(--s-inv-text3);
+    --color-border-light: var(--s-inv-line);
+    --color-border-strong-light: var(--s-inv-line2);
+    --color-accent-light: var(--s-inv-text);
+    --color-hover-bg-light: var(--s-inv-bg2);
+    --color-bg-dark: var(--s-inv-bg);
+    --color-surface-dark: var(--s-inv-bg2);
+    --color-surface-elevated-dark: var(--s-inv-line);
+    --color-text-primary-dark: var(--s-inv-text);
+    --color-text-secondary-dark: var(--s-inv-text2);
+    --color-text-muted-dark: var(--s-inv-text3);
+    --color-border-dark: var(--s-inv-line);
+    --color-border-strong-dark: var(--s-inv-line2);
+    --color-hover-border-dark: var(--s-inv-text3);
+    --color-accent: var(--s-inv-accent);
+    --background: var(--s-inv-bg);
+    --foreground: var(--s-inv-text);
+    --border: var(--s-inv-line);
+    --ring: var(--s-inv-text);
+  }
 
   * {
     @apply border-border;
@@ -140,6 +321,45 @@
   }
 }
 
+/* 首页 About 的人像：两种模式都是黑白照（墨与纸），不反相 */
+.portrait-mono {
+  filter: grayscale(1);
+}
+
+/* 作品区的小人线稿（sections/home/work/ink-figure.tsx）：深色模式反相成白线，与深色模式的白色墨芯一致 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ink-figure {
+    filter: invert(0.95);
+  }
+}
+
+:root[data-theme="dark"] .ink-figure {
+  filter: invert(0.95);
+}
+
+/* 按主题二选一显示：给必须为两种主题各渲染一份的内容用（如 ink-mark.tsx 的两套颜色查找表）。
+   选择器与上面切换原始色值的那两条保持一致：跟随系统，或手动选择 data-theme。 */
+.only-dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .only-light {
+    display: none;
+  }
+  :root:not([data-theme="light"]) .only-dark {
+    display: block;
+  }
+}
+
+:root[data-theme="dark"] .only-light {
+  display: none;
+}
+
+:root[data-theme="dark"] .only-dark {
+  display: block;
+}
+
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
@@ -149,3 +369,4 @@
     scrollbar-width: none;
   }
 }
+

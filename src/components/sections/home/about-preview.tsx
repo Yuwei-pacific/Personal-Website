@@ -1,9 +1,9 @@
-import Image from "next/image";
 import { Link } from "next-view-transitions";
 
-import { Parallax } from "@/components/ui/parallax";
+import { AboutInk } from "./about-ink";
 import { MaskedTextHeading } from "@/components/ui/masked-text-heading";
 import { RevealText } from "@/components/ui/reveal-text";
+import { textLink } from "@/components/ui/text-link";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { localizedPath } from "@/i18n/routing";
@@ -19,60 +19,38 @@ export function AboutPreview({
 
   return (
     <section id="about" className="relative z-10 w-full bg-background">
-      {/* 限宽并居中：这是一段阅读型文字，宽屏下左对齐会在右侧留出一大片空白。
-          视口窄于限宽时，左边缘自然落在与 Hero / Work / 页脚相同的页面边距上。
-          上下留白不对称：上方与 Hero 底部的定位文案同为白底、字号相近，只能靠距离分段，
-          sm 起用 section-sm；下方紧接深色区，色块切换本身就是分隔，保持 section 基础档 */}
-      <div className="mx-auto w-full max-w-content px-edge py-section sm:px-edge-sm sm:pt-section-sm">
-        <div className="relative flex flex-col gap-8 lg:min-h-[22.9375rem] lg:gap-6">
-          {/* 窄屏按底边定位：人像下方的标签要落在 CTA 那一行右侧的空位里。
-              按顶边定位的话，标签会压在正文最后几行上（英文版正文更长，直接重叠） */}
-          <div className="pointer-events-none absolute bottom-0 right-0 z-0 w-[46%] max-w-44 lg:-top-[1.875rem] lg:bottom-auto lg:right-0 lg:w-[30%] lg:max-w-[20.6875rem]">
-            <Parallax offset={-160} mobileOffset={-64}>
-              {/* 抠像人像直接落在页面白底上：不加卡片底色与阴影 */}
-              <div className="relative aspect-square overflow-hidden">
-                <Image
-                  id="about-preview-portrait-mask"
-                  src="/Profile_Yuwei.webp"
-                  alt={dictionary.common.portraitAlt}
-                  fill
-                  sizes="(min-width: 1024px) 331px, 45vw"
-                  className="object-cover object-top"
-                />
-              </div>
-              {/* 所在地标签：人像的图注，放在 Parallax 内部，跟着人像一起上浮。
-                  靠右对齐，避开从左侧穿过人像的正文。文案仍取自 hero 字典键（OG 图也在用） */}
-              {/* 窄屏限宽：人像只占半栏，标签收成更窄的一列，不伸进左侧正文的行尾 */}
-              <p className="ml-auto mt-3 max-w-[7.75rem] text-balance text-right lg:max-w-none text-[0.6875rem] font-semibold uppercase leading-[1.35] tracking-[0.18em] text-design-light-text-primary lg:text-xs">
-                {dictionary.home.hero.basedIn}
-              </p>
-            </Parallax>
-          </div>
+      {/* 唯一的一处墨：把标题里的一个词手画圈起来（见 about-ink.tsx） */}
+      <AboutInk />
+      {/* 一句话的声明，不是「标题 + 正文」的版块：标题与首屏口号同一个字号、同样贴页边，一行横贯整页
+          （首屏口号 → 这一句 → Progetti，三道大衬线字沿着左页边往下排）。
+          正文和 CTA 是挂在这句话右端下面的一条附注，落在 Work 12 栏网格的第 8 栏起（与 01 项目的文字栏
+          同一条线），Work 的墨线正好从它下方起笔 —— 视线走的是：标题从左到右 → 右下的附注 → 墨线往左下流进作品。
+          这里不放人像（用户 2026-11-16 的决定）：照片只在 About 页出现一次；首页上代表「人」的是
+          Work 里的线稿。之前居中限宽、正文压在人像上的版本，夹在两个贴页边的区块之间像另一套版式 */}
+      <div className="px-edge pb-section pt-16 sm:px-edge-sm sm:pt-section-sm">
+        {/* data-ink：about-ink.tsx 按它量标题里的词。
+            data-ink-word：圈起来的那个词的序号 —— 两种语言都是第 2 个词（disegno / design） */}
+        <div data-ink="about-title" data-ink-word="1">
+          <MaskedTextHeading
+            text={content.title}
+            className="text-balance font-display text-display-sm leading-[1.1] tracking-display text-design-light-text-primary lg:text-[clamp(3.75rem,7vw,8rem)] lg:leading-[1.02]"
+          />
+        </div>
 
-          <div className="relative">
-            <MaskedTextHeading
-              text={content.title}
-              className="text-balance text-display-sm font-semibold leading-[1.1] tracking-display text-design-light-text-primary lg:text-display"
+        <div className="mt-8 lg:mt-14 lg:grid lg:grid-cols-12 lg:gap-x-6">
+          <div className="flex flex-col gap-8 lg:col-[8/13] xl:col-[8/12]">
+            <RevealText
+              as="p"
+              text={content.body}
+              className="text-pretty text-[1.25rem] leading-snug sm:text-2xl"
             />
-            {/* 右侧留白给人像让位：不留的话正文会整段压在人像上，
-                穿过轮廓的反差字太多反而看不清。lg 起人像更小、文字有 max-w 限宽，不需要 */}
-            <div className="relative z-10 w-full pr-[12.5%] sm:pr-[7.5%] lg:max-w-[63rem] lg:pr-0">
-              <RevealText
-                as="p"
-                text={content.body}
-                maskTargetId="about-preview-portrait-mask"
-                maskImageSrc="/Profile_Yuwei_mask.webp"
-                className="mt-4 text-pretty text-lead font-semibold tracking-display lg:text-display-sm lg:leading-[1.245]"
-              />
-            </div>
+            <Link
+              href={localizedPath(locale, "/about")}
+              className={textLink("lg", "relative")}
+            >
+              {content.cta}
+            </Link>
           </div>
-
-          <Link
-            href={localizedPath(locale, "/about")}
-            className="relative z-20 inline-flex min-h-11 w-fit touch-manipulation items-center border-b-2 border-current text-lg font-semibold leading-[1.15] tracking-[-0.04em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 lg:min-h-0 lg:text-[2.5rem]"
-          >
-            {content.cta}
-          </Link>
         </div>
       </div>
     </section>

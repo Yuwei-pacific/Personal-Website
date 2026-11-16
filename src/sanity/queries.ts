@@ -1,6 +1,6 @@
 // 所有 GROQ 查询的唯一出处。
 // 规则（避免前端与查询各做一遍的双重逻辑）：
-// - 可见性过滤只在 GROQ 里做（visibility != false），前端不再二次过滤
+// - 网站只读 published 视图，不想公开的项目撤回成草稿即可（不再有 visibility 字段）
 // - 排序只在 GROQ 里做：项目按年份倒序（无年份的排最后），同年按创建时间倒序
 // - 本地化字段一律走下面的 localized()，不要手写 coalesce（见该函数注释）
 // 修改查询后运行 `npm run typegen` 重新生成 sanity.types.ts。
@@ -57,14 +57,14 @@ const PROJECT_MEDIA_PROJECTION = /* groq */ `
   "video": video.asset->{ url, mimeType }
 `;
 
-// 首页项目列表
-export const PROJECTS_QUERY = defineQuery(`*[_type == "project" && visibility != false]
-  | order(coalesce(year, 0) desc, _createdAt desc){
+// 项目列表的投影（首页 Work 区，「下一个项目」也读这份）
+const PROJECT_LIST_PROJECTION = `{
   _id,
   "title": ${localized("titleTranslations")},
   "summary": ${localized("summaryTranslations")},
   year,
   "projectType": ${localized("projectTypeTranslations")},
+  "roles": ${localized("roleTranslations")},
   "slug": slug.current,
   "coverImage": coverImage{
     ...,
@@ -76,6 +76,17 @@ export const PROJECTS_QUERY = defineQuery(`*[_type == "project" && visibility !=
     }
   },
   "coverVideo": coverVideo.asset->{ url, mimeType }
+}` as const;
+
+// 首页 Work 区：精选（在 Sanity 里勾选「Feature on home page」）与目录分成两组。
+// 精选按「Featured order」升序、再按年份倒序，最多 4 个（渲染器一次最多 4 个焦点区域）；
+// 其余项目 —— 包括排在第 5 个以后的精选 —— 进目录，按年份倒序。
+export const HOME_WORK_QUERY = defineQuery(`{
+  "featured": *[_type == "project" && featured == true]
+    | order(coalesce(featuredOrder, 999) asc, coalesce(year, 0) desc, _createdAt desc)[0...4]${PROJECT_LIST_PROJECTION},
+  "index": *[_type == "project" && !(_id in *[_type == "project" && featured == true]
+    | order(coalesce(featuredOrder, 999) asc, coalesce(year, 0) desc, _createdAt desc)[0...4]._id)]
+    | order(coalesce(year, 0) desc, _createdAt desc)${PROJECT_LIST_PROJECTION}
 }`);
 
 // 技能分类列表
@@ -99,7 +110,7 @@ export const RESUME_QUERY = defineQuery(`*[_type == "education"] | order(order d
 }`);
 
 // 项目详情页
-export const PROJECT_QUERY = defineQuery(`*[_type == "project" && slug.current == $slug && visibility != false][0]{
+export const PROJECT_QUERY = defineQuery(`*[_type == "project" && slug.current == $slug][0]{
   _id,
   "title": ${localized("titleTranslations")},
   "summary": ${localized("summaryTranslations")},
@@ -162,13 +173,13 @@ export const PROJECT_QUERY = defineQuery(`*[_type == "project" && slug.current =
   }
 }`);
 
-// generateStaticParams：所有可见项目的 slug
+// generateStaticParams：所有已发布项目的 slug
 export const PROJECT_SLUGS_QUERY = defineQuery(
-  `*[_type == "project" && defined(slug.current) && visibility != false].slug.current`
+  `*[_type == "project" && defined(slug.current)].slug.current`
 );
 
 // sitemap：slug + 最近更新时间
-export const PROJECT_SITEMAP_QUERY = defineQuery(`*[_type == "project" && defined(slug.current) && visibility != false]{
+export const PROJECT_SITEMAP_QUERY = defineQuery(`*[_type == "project" && defined(slug.current)]{
   "slug": slug.current,
   _updatedAt
 }`);

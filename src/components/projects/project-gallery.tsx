@@ -13,6 +13,7 @@ import { LuPlay } from "react-icons/lu";
 import { RowsPhotoAlbum } from "react-photo-album";
 import type { Photo } from "react-photo-album";
 import "react-photo-album/rows.css";
+import { InkRule } from "@/components/ui/ink-rule";
 import type { ProjectGalleryItem } from "@/lib/view-models/types";
 import { buildScaledUrl, buildSrcSet } from "@/lib/media";
 import Lightbox from "yet-another-react-lightbox";
@@ -29,13 +30,11 @@ import { ScrollTrigger } from "@/lib/animation/scroll-trigger";
 // 组件入参：
 // - items：媒体列表（图片 / GIF / 视频）
 // - title：标题文案
-// - fullWidth：是否整屏宽度展示
 type ProjectGalleryProps = {
   items?: ProjectGalleryItem[];
   title: string;
   playVideoLabel: string;
   viewImageLabel: string;
-  fullWidth?: boolean;
 };
 
 // lightbox 大图的 srcSet 档位
@@ -114,7 +113,6 @@ export function ProjectGallery({
   title,
   playVideoLabel,
   viewImageLabel,
-  fullWidth,
 }: ProjectGalleryProps) {
   const galleryItems = useMemo(() => items ?? [], [items]);
   const galleryRef = useRef<HTMLElement>(null);
@@ -145,10 +143,10 @@ export function ProjectGallery({
 
     // 锁滚动时滚动条消失，globals.css 里常驻的 scrollbar-gutter 会在右侧留下一条空槽，
     // 露出 html 的浅色画布底 —— 紧挨着深色 lightbox 会看见一条白边。
-    // lightbox 期间把画布换成深色分区底色，关闭时还原。
+    // lightbox 期间把画布换成墨色（lightbox 在两种主题下都是深色），关闭时还原。
     const html = document.documentElement;
     const previousBackground = html.style.backgroundColor;
-    html.style.backgroundColor = "hsl(var(--color-bg-dark))";
+    html.style.backgroundColor = "hsl(var(--color-ink))";
 
     return () => {
       lenis?.start();
@@ -185,11 +183,17 @@ export function ProjectGallery({
   if (!galleryItems.length) return null;
 
   return (
-    <section ref={galleryRef} className={`space-y-4 ${fullWidth ? "w-full" : ""}`}>
-      <div className="text-center">
-        <h2 className="text-3xl font-bold text-design-dark-text-primary mb-2">{title}</h2>
+    <section ref={galleryRef} className="w-full">
+      {/* 与正文章节同一套抬头：细线 + 左对齐标题，数量沿用首页 Work 标题旁的计数写法 */}
+      <InkRule variant={3} className="mb-8 text-design-dark-text-primary sm:mb-10" />
+      <div className="mb-8 flex items-end gap-1">
+        <h2 className="font-display text-3xl leading-[1.1] text-design-dark-text-primary lg:text-section">
+          {title}
+        </h2>
+        <span aria-hidden="true" className="font-mono text-small text-design-dark-text-muted">
+          ({galleryItems.length})
+        </span>
       </div>
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-design-dark-text-primary/50 to-transparent" />
 
       <RowsPhotoAlbum
         photos={photos}
@@ -198,10 +202,10 @@ export function ProjectGallery({
         rowConstraints={{ singleRowMaxHeight: 420 }}
         spacing={12}
         defaultContainerWidth={DEFAULT_CONTAINER_WIDTH}
-        // 容器实际占宽：外层是 px-4 / sm:px-10 的通栏
+        // 容器实际占宽：通栏减去两侧页边距（px-edge / sm:px-edge-sm）
         sizes={{
-          size: "calc(100vw - 5rem)",
-          sizes: [{ viewport: "(max-width: 640px)", size: "calc(100vw - 2rem)" }],
+          size: "calc(100vw - 4rem)",
+          sizes: [{ viewport: "(max-width: 640px)", size: "calc(100vw - 3rem)" }],
         }}
         onClick={({ index }) => setActiveIndex(index)}
         render={{
@@ -236,8 +240,8 @@ export function ProjectGallery({
         // 静音自动循环：符合作品集里 UI 演示片段的用法，
         // 保留 controls 让访客能自己解除静音或暂停
         video={{ autoPlay: true, muted: true, loop: true, controls: true, playsInline: true }}
-        // 背景色对齐站点深色分区 token
-        styles={{ container: { backgroundColor: "hsl(var(--color-bg-dark) / 0.95)" } }}
+        // 背景色用不随主题变化的墨色：lightbox 的控件是白色，浅色模式下也必须是深底
+        styles={{ container: { backgroundColor: "hsl(var(--color-ink) / 0.95)" } }}
         controller={{ closeOnBackdropClick: true }}
       />
     </section>

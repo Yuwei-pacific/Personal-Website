@@ -32,7 +32,6 @@ Personal-Website/
 │  │  │  └─ about/                #   about page content, resume list
 │  │  ├─ seo/                     # JSON-LD
 │  │  ├─ ui/                      # Shared UI and animation primitives
-│  │  └─ vendor/                  # Low-touch third-party JSX + local .d.ts
 │  ├─ hooks/                      # Shared client hooks
 │  ├─ i18n/                       # Locale config, dictionaries, path helpers
 │  ├─ lib/
@@ -60,7 +59,7 @@ Personal-Website/
   A Sanity publish webhook (`src/app/api/revalidate`) expires the shared cache tag,
   with a 60-second time fallback;
   query results then pass through `src/lib/view-models/` before reaching UI components.
-  Filtering (`visibility != false`) and ordering happen **in GROQ only** — never
+  Filtering and ordering happen **in GROQ only** (unpublished drafts are hidden by the `published` perspective) — never
   re-filter/re-sort in components.
 - **Types**: prefer Sanity TypeGen query result types and run `npm run typegen`
   after changing a schema or query. A normalizer may define a narrow local raw
@@ -109,13 +108,10 @@ Personal-Website/
   React Bits adaptation that now owns core site behavior, so its prop contract
   lives in TSX source rather than a handwritten `.d.ts` file. The project gallery
   uses `react-photo-album`.
-- **Vendor components** (`components/vendor/`): low-touch React Bits visual
-  components stay in JavaScript with local adaptation notes. Import DOM-heavy
-  components dynamically with `ssr: false`.
 - **Animations**: use the primitives in `components/ui/` (ScrollReveal,
-  StaggerReveal, RevealText, Parallax), which respect
+  StaggerReveal, RevealText), which respect
   `prefers-reduced-motion`. Coverage is component-specific rather than global:
-  vendor, menu, media, and route-transition effects need their own guard.
+  menu, media, and route-transition effects need their own guard.
   New animations must explicitly honor the preference.
 
 ## Setup

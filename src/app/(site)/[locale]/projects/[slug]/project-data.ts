@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 
 import { sanityClient } from "@/sanity/client";
 import { sanityFetch } from "@/sanity/fetch";
+import { normalizeHomeWork } from "@/lib/view-models/home";
 import { normalizeProjectDetail } from "@/lib/view-models/project";
-import { PROJECT_QUERY, PROJECT_SLUGS_QUERY } from "@/sanity/queries";
+import { HOME_WORK_QUERY, PROJECT_QUERY, PROJECT_SLUGS_QUERY } from "@/sanity/queries";
 import type { PROJECT_QUERY_RESULT } from "@/sanity/sanity.types";
-import type { ProjectDetail } from "@/lib/view-models/types";
+import type { Project, ProjectDetail } from "@/lib/view-models/types";
 import type { Locale } from "@/i18n/config";
 import {
   SITE_AUTHOR,
@@ -41,6 +42,25 @@ export const fetchProject = cache(async (
   });
   return normalizeProjectDetail(result, slug);
 });
+
+// 详情页结尾的「下一个项目」。复用首页的 HOME_WORK_QUERY：顺序就是首页 Work 的顺序 ——
+// 先精选、再目录（拆分与排序都在 GROQ 里），这里只按位置取下一条，末尾回到第一条，不重排、不重滤。
+// position 是下一条在列表里的序号（从 1 起），与首页卡片的编号一致。
+export async function fetchNextProject(
+  currentSlug: string,
+  locale: Locale,
+): Promise<{ project: Project; position: number } | null> {
+  const { data } = await sanityFetch({ query: HOME_WORK_QUERY, params: { locale } });
+  const { featured, index } = normalizeHomeWork(data);
+  const projects = [...featured, ...index];
+
+  const current = projects.findIndex((item) => item.slug === currentSlug);
+  if (current < 0 || projects.length < 2) return null;
+
+  const nextIndex = (current + 1) % projects.length;
+  const project = projects[nextIndex];
+  return project.slug ? { project, position: nextIndex + 1 } : null;
+}
 
 export async function fetchProjectSlugs() {
   // 供 generateStaticParams 使用。这里同样不吞异常：返回 [] 会让构建

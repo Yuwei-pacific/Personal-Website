@@ -11,7 +11,11 @@ export const SITE_URL = "https://www.yuweidesign.com";
 /** 展示用的域名（去掉协议，用于 footer / OG 图这类只读文本） */
 export const SITE_DOMAIN = SITE_URL.replace(/^https?:\/\//, "");
 
-export const SITE_NAME = "Yuwei Design";
+/** 站名就是人名（品牌手册：这套识别叫 Yuwei Li）。页面标题后缀、og:site_name、JSON-LD 都用它 */
+export const SITE_NAME = "Yuwei Li";
+
+/** 域名里的那个叫法，只给 JSON-LD 的 alternateName 用 */
+export const SITE_ALTERNATE_NAME = "Yuwei Design";
 
 export const SITE_AUTHOR = "Yuwei Li";
 
@@ -46,7 +50,6 @@ export const OPEN_GRAPH_LOCALES: Record<Locale, string> = {
 export const SOCIAL_LINKS = [
   { label: "GitHub", href: "https://github.com/Yuwei-pacific" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/yuwei081/" },
-  { label: "Instagram", href: "https://www.instagram.com/yuwei081/" },
   { label: "X", href: "https://x.com/Li_Yuwei_" },
 ] as const;
 

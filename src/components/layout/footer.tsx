@@ -18,6 +18,7 @@ import {
 } from "@/lib/site-metadata";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
+import { MARK_PATHS } from "@/components/ui/ink/ink-tables";
 import { localizedPath } from "@/i18n/routing";
 
 const footerLinkClassName =
@@ -121,56 +122,70 @@ export function Footer({
     <footer
       ref={footerRef}
       data-overscroll-dark
-      className="relative z-10 w-full overflow-hidden bg-design-dark-bg text-design-dark-text-primary"
+      // surface-inverse：页脚是每页唯一反转的区块（浅色模式墨底、深色模式纸底），像书的封底
+      className="surface-inverse relative z-10 w-full overflow-hidden bg-design-dark-bg text-design-dark-text-primary"
     >
       <div
         ref={innerRef}
-        className="relative z-10 min-h-[30rem] px-edge pb-8 pt-8 will-change-transform sm:min-h-[48rem] sm:px-edge-sm sm:pb-10 sm:pt-10"
+        className="relative z-10 px-edge pb-8 pt-16 will-change-transform sm:px-edge-sm sm:pb-10 sm:pt-28"
       >
-        <div className="flex min-h-[inherit] w-full flex-col">
-          <div className="grid gap-5 border-t border-design-dark-border pt-5 sm:grid-cols-12 sm:gap-6">
-            <p className="text-label font-semibold uppercase text-design-dark-text-muted sm:col-span-3">
-              {dictionary.footer.getInTouch}
-            </p>
-            <a
-              href={`mailto:${SITE_EMAIL}`}
-              // w-full + justify-between：邮箱靠左、↗ 顶到栏位右缘。
-              // 字号斜率按「邮箱整串必须放进 col-span-9」反推（旧的 6.25vw/上限 5rem
-              // 会让文字比列宽还长 ~80px，把箭头挤出容器右缘）。
-              className="group flex w-full items-start justify-between gap-4 break-words text-[clamp(1.55rem,4.6vw,4.25rem)] sm:justify-end font-semibold leading-[0.92] tracking-display text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-4 focus-visible:ring-offset-design-dark-bg sm:col-span-9 sm:break-normal"
-            >
-              {/* min-w-0：flex item 默认 min-width:auto 不会收缩，
-                  极端窄屏下需要它才能让 break-words 生效而不是溢出 */}
-              <span className="min-w-0 transition-opacity duration-base group-hover:opacity-60">
-                {SITE_EMAIL}
-              </span>
-              <span
-                aria-hidden="true"
-                className="mt-[0.1em] text-[0.45em] font-normal transition-transform duration-base ease-design-out group-hover:-translate-y-1 group-hover:translate-x-1"
-              >
-                ↗
-              </span>
-            </a>
-          </div>
-
-          {/* 移动端收紧上下留白：名字本身只有 ~52px 高，py-16 + min-h 的拉伸
-              会在它上下各留出近 100px 空档 */}
-          <div className="flex flex-1 items-center py-10 sm:py-20">
-            <p
+        {/* 封底：和首屏（封面）是一对。封面是纸上化开的大标志和一根流进「i」的墨线；封底是墨底上同一个构图的
+            「墨的状态」—— 标志实心、单色，线是同一根线去掉晕之后剩下的那一道（用户 2026-11-16：把分隔线换成
+            首屏那种、去掉弥散、安静一点）。所有宽度都是这个构图。没有画布也没有交互：试过「墨线落进小标志 + 整块可划开的墨池」，
+            用户觉得乱（2026-11-15）—— 化开的墨只留在首屏和 Work。
+            --fm-h / --fm-w：大标志的高和宽（标志的墨迹框 30 × 35.5） */}
+        <div className="flex w-full flex-col [--fm-h:clamp(6.75rem,22vw,23rem)] [--fm-w:calc(var(--fm-h)*30/35.5)]">
+          <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.getInTouch}</p>
+          {/* 邮箱：这一屏唯一的大标题（Fraunces） */}
+          <a
+            href={`mailto:${SITE_EMAIL}`}
+            className="group mt-5 flex w-fit max-w-full items-start gap-[0.25em] whitespace-nowrap font-display text-[clamp(1.6rem,6vw,6rem)] leading-none tracking-display text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-4 focus-visible:ring-offset-design-dark-bg lg:text-[clamp(2.5rem,5vw,5.5rem)]"
+          >
+            <span className="transition-opacity duration-base group-hover:opacity-60">{SITE_EMAIL}</span>
+            <span
               aria-hidden="true"
-              className="w-full text-[clamp(4.5rem,16vw,12rem)] font-semibold uppercase leading-[0.72] tracking-[-0.075em] text-design-dark-text-primary"
+              className="mt-[0.15em] font-sans text-[0.4em] transition-transform duration-base ease-design-out group-hover:-translate-y-1 group-hover:translate-x-1"
             >
-              {/* 单行显示：375px 视口下整串仅需 ~262px，可用宽度 343px，放得下 */}
-              <span>Yuwei</span>{" "}
-              <span className="text-design-dark-text-muted">Li</span>
-            </p>
+              ↗
+            </span>
+          </a>
+
+          {/* 分隔线这一行：首屏那根线去掉晕 —— 从视口左缘出发、略有起伏，流进标志的「i」（所有宽度都是这样，
+              窄屏只是标志小一些；上面留出的空要比标志伸上去的那截高，不然会碰到邮箱）。
+              标志挂在这一行上：线落在标志高度的 64.8% 处（墨迹框 y = 33），那里「i」竖笔的中线在宽度的 24.8% */}
+          <div className="relative mt-24 lg:mt-20">
+            {/* 外层定左右端（SVG 自己带固有比例，直接用 left/right 撑不开），里面的线拉伸铺满。
+                窄屏上线不压缩到屏幕那么窄（起伏会挤成波浪）：保持最小宽度、靠右对齐，左边多出来的裁掉 */}
+            <div
+              aria-hidden="true"
+              className="absolute -left-edge right-[calc(var(--fm-w)*0.752)] top-[-7px] h-[14px] overflow-hidden text-design-dark-text-primary sm:-left-edge-sm"
+            >
+              <svg viewBox="0 0 1000 14" preserveAspectRatio="none" className="absolute right-0 top-0 h-full w-full min-w-[56rem]">
+                <path
+                  d="M0 7C80 3.5 160 3.5 250 7S420 10.5 500 7S670 3.5 750 7S920 9.5 1000 7"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  vectorEffect="non-scaling-stroke"
+                />
+              </svg>
+            </div>
+            <svg
+              viewBox="11 10 30 35.5"
+              role="img"
+              aria-label={SITE_AUTHOR}
+              className="absolute right-0 top-[calc(var(--fm-h)*-0.648)] h-[var(--fm-h)] w-[var(--fm-w)] fill-current text-design-dark-text-primary"
+            >
+              {MARK_PATHS.map((d) => (
+                <path key={d} d={d} />
+              ))}
+            </svg>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-6 gap-y-10 border-t border-design-dark-border pt-6 sm:grid-cols-12">
-            <nav aria-label={dictionary.footer.aria} className="sm:col-span-3">
-              <p className="text-label font-semibold uppercase text-design-dark-text-muted">
-                {dictionary.footer.site}
-              </p>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 pt-14 sm:w-3/4 sm:grid-cols-3 lg:w-2/3 lg:pt-10">
+
+            <nav aria-label={dictionary.footer.aria}>
+              <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.site}</p>
               <ul className="mt-4 flex flex-col gap-2">
                 {siteLinks.map((link) => (
                   <li key={link.href}>
@@ -182,19 +197,12 @@ export function Footer({
               </ul>
             </nav>
 
-            <div className="sm:col-span-3">
-              <p className="text-label font-semibold uppercase text-design-dark-text-muted">
-                {dictionary.footer.elsewhere}
-              </p>
+            <div>
+              <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.elsewhere}</p>
               <ul className="mt-4 flex flex-col gap-2">
                 {SOCIAL_LINKS.map((social) => (
                   <li key={social.href}>
-                    <a
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={footerLinkClassName}
-                    >
+                    <a href={social.href} target="_blank" rel="noopener noreferrer" className={footerLinkClassName}>
                       <FooterLinkLabel>{social.label}</FooterLinkLabel>
                     </a>
                   </li>
@@ -202,29 +210,28 @@ export function Footer({
               </ul>
             </div>
 
-            <div className="sm:col-span-3">
-              <p className="text-label font-semibold uppercase text-design-dark-text-muted">
-                {dictionary.footer.basedIn}
-              </p>
+            <div className="col-span-2 sm:col-span-1">
+              <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.basedIn}</p>
               <p className="mt-4 text-small text-design-dark-text-secondary">
                 {SITE_LOCATIONS[locale]}
                 <br />
                 {dictionary.footer.workingInternationally}
               </p>
-            </div>
-
-            <div className="flex flex-col justify-end gap-2 text-small text-design-dark-text-muted sm:col-span-3 sm:items-end sm:text-right">
-              <p>
-                {SITE_AUTHOR}
-                <br />© {year} {dictionary.footer.rights}
+              {/* 接项目：页脚没有化开的东西，可以取一滴强调色 —— 只落在圆点上，字还是墨写的（手册 03） */}
+              <p className="mt-3 flex items-center gap-2 text-small text-design-dark-text-secondary">
+                <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-accent" />
+                {dictionary.home.hero.availability}
               </p>
-              <p>{SITE_DOMAIN}</p>
             </div>
           </div>
 
-          <p className="mt-8 border-t border-design-dark-border pt-5 text-small text-design-dark-text-muted sm:text-right">
-            {SITE_ROLE}
-          </p>
+          <div className="mt-16 flex flex-col gap-2 text-small text-design-dark-text-muted sm:mt-24 sm:flex-row sm:items-baseline sm:justify-between">
+            <p>
+              © {year} {SITE_AUTHOR} · {dictionary.footer.rights}
+            </p>
+            <p>{SITE_ROLE}</p>
+            <p>{SITE_DOMAIN}</p>
+          </div>
         </div>
       </div>
 

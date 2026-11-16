@@ -6,7 +6,7 @@ import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { AboutPreview } from "@/components/sections/home/about-preview";
 import { Hero } from "@/components/sections/home/hero";
-import { ProjectsSection } from "@/components/sections/home/projects-section";
+import { WorkSection } from "@/components/sections/home/work/work-section";
 import { JsonLd, personSchema, websiteSchema } from "@/components/seo/json-ld";
 import { sanityFetch } from "@/sanity/fetch";
 import { isLocale } from "@/i18n/config";
@@ -18,8 +18,8 @@ import {
   languageAlternates,
   localizedAbsoluteUrl,
 } from "@/lib/site-metadata";
-import { normalizeHomeData } from "@/lib/view-models/home";
-import { PROJECTS_QUERY } from "@/sanity/queries";
+import { normalizeHomeWork } from "@/lib/view-models/home";
+import { HOME_WORK_QUERY } from "@/sanity/queries";
 
 // 内容发布由 webhook 即时失效缓存（见 sanity/fetch.ts）；这里是页面级时间兜底。
 export const revalidate = 60;
@@ -76,12 +76,12 @@ export default async function HomePage({
   // 而那是 200 + indexable 的，会被搜索收录并顶掉好页面 —— 空结果和取数失败
   // 必须区分开。抛出后由 error.tsx 接管；若该页已有 ISR 缓存，Next 在重新生成
   // 失败时会继续服务上一次的好版本，冷缓存才落到错误页。
-  const { data: projects } = await sanityFetch({
-    query: PROJECTS_QUERY,
+  const { data } = await sanityFetch({
+    query: HOME_WORK_QUERY,
     params: { locale: rawLocale },
   });
 
-  const homeData = normalizeHomeData({ projects });
+  const work = normalizeHomeWork(data);
 
   return (
     // 页面结构：导航栏 + Hero + About 预览 + Projects 列表 + 页脚
@@ -92,17 +92,19 @@ export default async function HomePage({
       {/* 顶部导航，位于 main 之外（landmark 语义 + skip link 才有意义） */}
       <Navbar locale={rawLocale} dictionary={dictionary} />
       <main id="main-content">
-        {/* 首页主视觉区 */}
-        <Hero dictionary={dictionary} />
+        {/* 三段正常往下排，同一张纸作底（用户在 Figma 定稿：About 不再用纸 2）。页脚在 main 之外，是每页唯一反转的区块。
+            首页不用叠纸（sticky 叠放的做法，组件已删）：三段正常往下滚 */}
+        <div className="surface-base bg-background">
+          <Hero dictionary={dictionary} />
+        </div>
         {/* 关于我预览：完整履历与能力信息位于 /about */}
-        <AboutPreview locale={rawLocale} dictionary={dictionary} />
-
-        {/* 项目集合：从 CMS 获取的数据传入 */}
-        <ProjectsSection
-          projects={homeData.projects}
-          locale={rawLocale}
-          dictionary={dictionary}
-        />
+        <div className="surface-base bg-background">
+          <AboutPreview locale={rawLocale} dictionary={dictionary} />
+        </div>
+        {/* 作品：精选在墨滩里、其余进目录（见 sections/home/work/work-section.tsx） */}
+        <div className="surface-base bg-background">
+          <WorkSection featured={work.featured} index={work.index} locale={rawLocale} dictionary={dictionary} />
+        </div>
       </main>
       <Footer locale={rawLocale} dictionary={dictionary} />
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTheme } from "@/hooks/use-theme";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/scroll-trigger";
 import { cn } from "@/lib/utils";
 
@@ -52,11 +53,14 @@ export function RevealText({
   maskTargetId,
   maskImageSrc,
   contrastFromColor = "hsl(var(--color-text-primary-light))",
-  contrastToColor = "hsl(var(--color-bg-light))",
+  // 人像本身始终是深色的，压在它上面的字在两种主题下都要用纸色，不能跟着主题底色走
+  contrastToColor = "hsl(var(--color-paper))",
 }: RevealTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const words = text.split(" ");
   const usesContrastMask = Boolean(maskTargetId && maskImageSrc);
+  // 颜色在下面被解析成具体值写进内联 style，主题切换后必须重新解析并重建时间线
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!maskTargetId || !maskImageSrc || !containerRef.current) return;
@@ -129,7 +133,7 @@ export function RevealText({
       contrastLayer.style.opacity = "1";
     };
 
-    // 逐帧跟随，而不是监听 scroll：人像的位置由 GSAP（Parallax 的 scrub）在它的 ticker 里
+    // 逐帧跟随，而不是监听 scroll：人像的位置可能由 GSAP 的 scrub 动画在它的 ticker 里
     // 写入 transform。在 scroll 事件后另排一帧去量，可能量到上一帧的人像，而滚动一停就不再
     // 有事件来纠正。挂在同一个 ticker 上、排在 GSAP 自己的更新之后，每帧量到的都是这一帧
     // 已经落定的位置。只在文字靠近视口时才运行，离开后摘掉。
@@ -217,7 +221,8 @@ export function RevealText({
     }
   }, {
     scope: containerRef,
-    dependencies: [contrastFromColor, contrastToColor, fromColor, text, toColor],
+    dependencies: [contrastFromColor, contrastToColor, fromColor, text, toColor, theme],
+    revertOnUpdate: true,
   });
 
   const renderWords = (wordClassName: string, color: string) =>

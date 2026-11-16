@@ -18,6 +18,9 @@ type Dictionary = {
     socialLinksAria: string;
     language: string;
     switchLanguage: string;
+    theme: string;
+    themeLight: string;
+    themeDark: string;
   };
   common: {
     skipToMain: string;
@@ -26,9 +29,13 @@ type Dictionary = {
   home: {
     hero: {
       basedIn: string;
-      description: string;
-      emphasizedTerms: string[];
+      /** 口号拆成四段：before + 化开的 accent + after 是第一行，end 是第二行 */
+      slogan: { before: string; accent: string; after: string; end: string };
+      /** 身份段：lead 用墨色（谁、做什么、现在在哪），rest 用淡墨（给谁做） */
+      identity: { lead: string; rest: string };
       cta: string;
+      /** 接外部项目：首屏联系方式旁边和页脚各说一次 */
+      availability: string;
     };
     aboutPreview: {
       title: string;
@@ -40,15 +47,22 @@ type Dictionary = {
       empty: string;
       /** 标题旁计数的量词，供辅助技术拼出可读的标签（如 "5 progetti"） */
       countLabel: string;
+      /** 精选之外其余项目的目录标题 */
+      index: string;
     };
   };
   about: {
     eyebrow: string;
-    intro: string;
     roleLabel: string;
     locationLabel: string;
     languagesLabel: string;
     languages: string[];
+    /**
+     * 第一屏的两层文字：intro.lead 是大标题（我是谁、从哪来）；intro.body 是现状（在哪工作、接项目、在读什么）。
+     * intro.body 不重复首页那句「先设计、再自己做出来」（首屏和首页 About 已经各说过一次）。
+     * 出处「墨分五色」不在这页讲了（用户 2026-11-16）：留给将来的视觉识别案例，文案在品牌手册 09 里
+     */
+    intro: { lead: string; body: string };
     education: string;
     experience: string;
     capabilities: string;
@@ -57,7 +71,6 @@ type Dictionary = {
   };
   project: {
     back: string;
-    eyebrow: string;
     type: string;
     year: string;
     client: string;
@@ -69,7 +82,8 @@ type Dictionary = {
     roles: string;
     skills: string;
     gallery: string;
-    projectCover: string;
+    links: string;
+    nextProject: string;
     playVideo: string;
     pauseVideo: string;
     playGalleryVideo: string;
@@ -100,8 +114,6 @@ type Dictionary = {
     aboutTitle: string;
     aboutDescription: string;
     projectNotFound: string;
-    portfolio: string;
-    basedInMilan: string;
   };
 };
 
@@ -124,6 +136,9 @@ const dictionaries: Record<Locale, Dictionary> = {
       socialLinksAria: "Link social",
       language: "Lingua",
       switchLanguage: "Passa all’inglese",
+      theme: "Tema",
+      themeLight: "Chiaro",
+      themeDark: "Scuro",
     },
     common: {
       skipToMain: "Vai al contenuto principale",
@@ -132,35 +147,40 @@ const dictionaries: Record<Locale, Dictionary> = {
     home: {
       hero: {
         basedIn: "Lavoro da Milano con clienti internazionali",
-        description:
-          "Creo identità visive, interfacce digitali e siti web su misura per studi creativi e organizzazioni orientate al design.",
-        emphasizedTerms: [
-          "identità visive",
-          "interfacce digitali",
-          "siti web su misura",
-        ],
+        slogan: { before: "Dare ", accent: "colore", after: "", end: "all’ordinario." },
+        identity: {
+          lead: "Yuwei Li è communication designer e frontend developer a Milano, oggi a POLI.design.",
+          rest: " Identità visive, interfacce e siti web per studi creativi e organizzazioni orientate al design.",
+        },
         cta: "Parliamone →",
+        availability: "Disponibile per progetti freelance",
       },
       aboutPreview: {
-        title: "Dall’idea al lancio.",
+        title: "Lo disegno, poi lo costruisco.",
         body:
-          "Lavoro su sistemi visivi, interfacce e sviluppo frontend, trasformando le prime idee in esperienze digitali curate e facili da mantenere.",
+          "La maggior parte dei miei progetti passa dal primo frame in Figma al sito online restando nelle stesse mani. Tra il design e il codice non si perde niente.",
         cta: "Scopri di più →",
       },
       projects: {
         title: "Progetti",
         empty: "I progetti appariranno qui dopo la pubblicazione in Sanity.",
         countLabel: "progetti",
+        index: "Indice",
       },
     },
     about: {
       eyebrow: "Chi sono",
-      intro:
-        "Unisco design della comunicazione e sviluppo frontend per trasformare le idee in esperienze digitali chiare, espressive e facili da mantenere.",
       roleLabel: "Ruolo",
       locationLabel: "Luogo",
       languagesLabel: "Lingue",
       languages: ["Cinese — madrelingua", "Inglese — B2", "Italiano — B2"],
+      // 意大利语文案是草稿，上线前请母语者过一遍（品牌手册 09）。
+      // 句子特意写成不带性别变化的（没有 arrivato / arrivata 这类过去分词）
+      intro: {
+        lead: "Sono Yuwei Li. Dalla Cina a Firenze per dipingere, poi a Milano per progettare.",
+        body:
+          "Oggi lavoro come UX designer a POLI.design e seguo progetti freelance di communication design e sviluppo frontend. Sto completando la laurea magistrale in Communication Design al Politecnico di Milano.",
+      },
       education: "Formazione",
       experience: "Esperienza",
       capabilities: "Competenze",
@@ -170,7 +190,6 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     project: {
       back: "← Torna ai progetti",
-      eyebrow: "Progetto",
       type: "Tipologia",
       year: "Anno",
       client: "Cliente",
@@ -182,7 +201,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       roles: "I miei ruoli",
       skills: "Competenze",
       gallery: "Galleria",
-      projectCover: "Copertina del progetto",
+      links: "Link",
+      nextProject: "Prossimo progetto",
       playVideo: "Riproduci il video di copertina",
       pauseVideo: "Metti in pausa il video di copertina",
       playGalleryVideo: "Riproduci video",
@@ -220,12 +240,10 @@ const dictionaries: Record<Locale, Dictionary> = {
         "UX UI design",
         "sviluppo web",
       ],
-      aboutTitle: "Chi è Yuwei Li",
+      aboutTitle: "Chi sono",
       aboutDescription:
         "Portfolio di Yuwei Li, Communication Designer & Frontend Developer a Milano: identità visive, interfacce digitali e siti web su misura.",
       projectNotFound: "Progetto non trovato",
-      portfolio: "Portfolio",
-      basedInMilan: "A Milano",
     },
   },
   en: {
@@ -246,6 +264,9 @@ const dictionaries: Record<Locale, Dictionary> = {
       socialLinksAria: "Social links",
       language: "Language",
       switchLanguage: "Switch to Italian",
+      theme: "Theme",
+      themeLight: "Light",
+      themeDark: "Dark",
     },
     common: {
       skipToMain: "Skip to main content",
@@ -254,35 +275,38 @@ const dictionaries: Record<Locale, Dictionary> = {
     home: {
       hero: {
         basedIn: "Based in Milan, working with international clients",
-        description:
-          "I create visual identities, digital interfaces and custom websites for creative studios and design-led organisations.",
-        emphasizedTerms: [
-          "visual identities",
-          "digital interfaces",
-          "custom websites",
-        ],
+        slogan: { before: "Bring ", accent: "color", after: " to the", end: "ordinary." },
+        identity: {
+          lead: "Yuwei Li is a communication designer and frontend developer in Milan, currently at POLI.design.",
+          rest: " Visual identities, interfaces and websites for creative studios and design-led organisations.",
+        },
         cta: "Get in touch →",
+        availability: "Available for freelance",
       },
       aboutPreview: {
-        title: "From concept to launch.",
+        title: "I design it, then I build it.",
         body:
-          "I work across visual systems, interface design and frontend development, turning early ideas into polished, maintainable digital experiences.",
+          "Most of my projects go from the first Figma frame to the live site in the same hands. Nothing gets lost between the design and the code.",
         cta: "More about me →",
       },
       projects: {
         title: "Work",
         empty: "Projects will appear here once they are published in Sanity.",
         countLabel: "projects",
+        index: "Index",
       },
     },
     about: {
       eyebrow: "About me",
-      intro:
-        "I combine communication design and frontend development to turn ideas into clear, expressive and maintainable digital experiences.",
       roleLabel: "Role",
       locationLabel: "Location",
       languagesLabel: "Languages",
       languages: ["Chinese — native", "English — B2", "Italian — B2"],
+      intro: {
+        lead: "I’m Yuwei Li. I came from China to Florence to paint, then moved to Milan to design.",
+        body:
+          "Today I work as a UX designer at POLI.design and take on freelance projects in communication design and frontend development. I’m completing an MSc in Communication Design at Politecnico di Milano.",
+      },
       education: "Education",
       experience: "Experience",
       capabilities: "Capabilities",
@@ -292,7 +316,6 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     project: {
       back: "← Back to projects",
-      eyebrow: "Project",
       type: "Type",
       year: "Year",
       client: "Client",
@@ -304,7 +327,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       roles: "My roles",
       skills: "Skills",
       gallery: "Gallery",
-      projectCover: "Project cover",
+      links: "Links",
+      nextProject: "Next project",
       playVideo: "Play cover video",
       pauseVideo: "Pause cover video",
       playGalleryVideo: "Play video",
@@ -343,12 +367,10 @@ const dictionaries: Record<Locale, Dictionary> = {
         "interaction design",
         "web development",
       ],
-      aboutTitle: "About Yuwei Li",
+      aboutTitle: "About",
       aboutDescription:
         "Meet Yuwei Li, a Milan-based Communication Designer and Frontend Developer working across visual identity, digital interfaces and custom websites.",
       projectNotFound: "Project not found",
-      portfolio: "Portfolio",
-      basedInMilan: "Based in Milan",
     },
   },
 };

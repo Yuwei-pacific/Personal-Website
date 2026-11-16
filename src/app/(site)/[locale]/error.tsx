@@ -4,6 +4,8 @@
 // 保持站点视觉并给出重试入口。Sanity 取数失败也会落到这里：page 层刻意不 try/catch，
 // 以免把取数失败渲染成 200 的空页面（见 [locale]/page.tsx 的说明）。
 import { useEffect } from "react";
+
+import { textLink } from "@/components/ui/text-link";
 import { Link } from "next-view-transitions";
 import { usePathname } from "next/navigation";
 
@@ -38,7 +40,7 @@ export default function Error({
         <p className="text-label font-semibold uppercase text-design-light-text-muted">
           {dictionary.errors.errorEyebrow}
         </p>
-        <h1 className="text-balance text-3xl font-semibold tracking-tight text-design-light-text-primary sm:text-section">
+        <h1 className="text-balance font-display text-display-sm tracking-display text-design-light-text-primary sm:text-display">
           {dictionary.errors.errorTitle}
         </h1>
         <p className="max-w-xl text-body text-design-light-text-secondary">
@@ -48,7 +50,7 @@ export default function Error({
           <button
             type="button"
             onClick={reset}
-            className="border-b-2 border-current text-small font-semibold text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"
+            className={textLink("sm")}
           >
             {dictionary.errors.retry}
           </button>

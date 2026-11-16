@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { useLenis } from "lenis/react";
+import { useTheme, type Theme } from "@/hooks/use-theme";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/gsap-react";
 import {
   maskedTextHiddenVars,
@@ -39,6 +40,9 @@ type StaggeredMenuLabels = {
   socials: string;
   socialLinksAria: string;
   language: string;
+  theme: string;
+  themeLight: string;
+  themeDark: string;
 };
 
 type StaggeredMenuProps = {
@@ -61,7 +65,15 @@ type PanelElements = {
 
 const PRE_LAYER_COLORS = ["#dbe4ee", "#171717"];
 const MENU_BUTTON_COLOR = "#ffffff";
-const OPEN_MENU_BUTTON_COLOR = "#171717";
+// 打开时按钮压在面板上，用面板的文字色。面板底色随主题变（纸 / 墨），所以在动画那一刻
+// 现读 CSS 变量，而不是写死一个深色 —— 深色模式下面板是墨色，写死的深色字会看不见。
+const readOpenMenuButtonColor = () => {
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue("--color-text-primary-light")
+    .trim();
+  // 变量是 "H S% L%" 三元组；GSAP 插值需要逗号写法
+  return value ? `hsl(${value.split(/\s+/).join(", ")})` : "#0C0D12";
+};
 const OFFSCREEN_X = 100;
 
 const getPanelElements = (panel: HTMLElement): PanelElements => ({
@@ -125,6 +137,20 @@ function StaggeredMenu({
   onLanguageClick,
 }: StaggeredMenuProps) {
   const [open, setOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const themeOptions: { value: Theme; label: string }[] = [
+    { value: "light", label: labels.themeLight },
+    { value: "dark", label: labels.themeDark },
+  ];
+
+  // 菜单开着时切换主题：按钮颜色是打开那一刻读出来写进内联 style 的，面板底色一变就得重读
+  useEffect(() => {
+    if (open && toggleBtnRef.current) {
+      gsap.set(toggleBtnRef.current, { color: readOpenMenuButtonColor() });
+    }
+    // 只在主题变化时触发；open 的变化由开关动画自己处理
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [theme]);
   const [textLines, setTextLines] = useState([labels.menu, labels.close]);
   // Lenis 未启用（减弱动画偏好 / Studio）时为 undefined，滚动锁会走原生回退
   const lenis = useLenis();
@@ -356,13 +382,13 @@ function StaggeredMenu({
         colorTweenRef.current?.kill();
 
         if (reduced) {
-          gsap.set(button, { color: opening ? OPEN_MENU_BUTTON_COLOR : MENU_BUTTON_COLOR });
+          gsap.set(button, { color: opening ? readOpenMenuButtonColor() : MENU_BUTTON_COLOR });
           colorTweenRef.current = null;
           return;
         }
 
         colorTweenRef.current = gsap.to(button, {
-          color: opening ? OPEN_MENU_BUTTON_COLOR : MENU_BUTTON_COLOR,
+          color: opening ? readOpenMenuButtonColor() : MENU_BUTTON_COLOR,
           delay: 0.18,
           duration: 0.3,
           ease: "power2.out",
@@ -670,6 +696,26 @@ function StaggeredMenu({
                   </ul>
                 </div>
               )}
+
+              {/* 深浅模式：与语言同一种「并排两项、当前项加下划线」的写法。
+                  用 button + aria-pressed，因为它切换的是状态而不是跳转。 */}
+              <div className="sm-language">
+                <h3 className="sm-socials-title">{labels.theme}</h3>
+                <ul className="sm-socials-list" role="list">
+                  {themeOptions.map((option) => (
+                    <li key={option.value} className="sm-socials-item">
+                      <button
+                        type="button"
+                        aria-pressed={theme === option.value}
+                        className="sm-socials-link sm-theme-button"
+                        onClick={() => setTheme(option.value)}
+                      >
+                        {option.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           )}
         </div>

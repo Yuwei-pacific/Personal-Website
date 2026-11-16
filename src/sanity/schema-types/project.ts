@@ -25,8 +25,8 @@ export const project = defineType({
     { name: "gallery", title: "Gallery", icon: ImagesIcon },
   ],
 
-  // 列表排序选项。第一项与前台 PROJECTS_QUERY 的排序一致，
-  // 这样 Studio 里看到的顺序就是访客在作品墙上看到的顺序。
+  // 列表排序选项。第一项与首页目录（HOME_WORK_QUERY 的 index）的排序一致；
+  // 精选另按「Featured order」排。
   orderings: [
     {
       title: "Year (newest first)",
@@ -193,12 +193,36 @@ export const project = defineType({
       description: "Context, process, outcome — built from reorderable modules.",
     }),
 
+    // 首页精选：勾选的项目在 Work 区大幅展示（墨滩里显出封面），其余进目录。
+    // 不再有「可见性」开关 —— 不想公开的项目直接撤回成草稿，网站只读 published。
+    // 精选最多显示 4 个（渲染器一次最多处理 4 个焦点区域，也免得精选不再「精选」）：
+    // 超过时只提醒、不阻止保存，多出来的按顺序落进目录。
     defineField({
-      name: "visibility",
+      name: "featured",
       group: "overview",
-      title: "Project visibility",
+      title: "Feature on home page",
       type: "boolean",
-      initialValue: true,
+      initialValue: false,
+      description: "Shown large in the home Work section. Up to 4 are shown; the rest fall back to the index.",
+      validation: (Rule) =>
+        Rule.custom(async (value, context) => {
+          if (!value) return true;
+          const client = context.getClient({ apiVersion: "2024-01-01" });
+          const count = await client.fetch<number>(
+            `count(*[_type == "project" && featured == true && !(_id in path("drafts.**"))])`,
+          );
+          return count > 4
+            ? { message: `${count} projects are featured; only the first 4 (by Featured order) are shown large.`, level: "warning" }
+            : true;
+        }),
+    }),
+    defineField({
+      name: "featuredOrder",
+      group: "overview",
+      title: "Featured order",
+      type: "number",
+      description: "Lower numbers come first.",
+      hidden: ({ document }) => !document?.featured,
     }),
 
     defineField({
@@ -297,7 +321,7 @@ export const project = defineType({
       year: "year",
       projectTypeIt: "projectTypeTranslations.it",
       projectTypeEn: "projectTypeTranslations.en",
-      visibility: "visibility",
+      featured: "featured",
       sectionCount: "sections.length",
     },
     prepare({
@@ -307,21 +331,21 @@ export const project = defineType({
       year,
       projectTypeIt,
       projectTypeEn,
-      visibility,
+      featured,
       sectionCount,
     }) {
-      // 隐藏的项目在列表里本来完全看不出区别，标注出来免得改半天才发现没上线
-      const isHidden = visibility === false;
       const title = titleIt || titleEn;
       const projectType = projectTypeIt || projectTypeEn;
       const meta = [
+        // 精选的项目在列表里标出来，一眼看出首页放大了哪几个
+        featured ? "★ Featured" : null,
         year ? String(year) : null,
         projectType,
         sectionCount ? `${sectionCount} sections` : "no content",
       ].filter(Boolean);
 
       return {
-        title: isHidden ? `${title ?? "Untitled"} — hidden` : (title ?? "Untitled"),
+        title: title ?? "Untitled",
         media,
         subtitle: meta.join(" · "),
       };

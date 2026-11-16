@@ -1,146 +1,123 @@
-// 首页 Hero 区：依赖的交互点阵与入场动画
+// 首页首屏：口号 + 从标志里流出来的墨线 + 身份段，右侧是化开的 L·i 标志。
+// 版式来自用户在 Figma 里排定的第二版（1440×900 画板），换算成视口比例：
+//
+//   ┌──────────────────────────────────────────────┐
+//   │ Bring color to the                  ▄▄  ▲    │  口号：Fraunces，color 化开
+//   │ ordinary.                           █  ███   │
+//   │━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━█━━███   │  墨线：从页面左缘一直流进标志里
+//   │ Yuwei Li is a communication …       ████▄▄   │  身份段：前半句墨色、后半句淡墨
+//   │ Get in touch →                               │
+//   │                     ( ↓ )                    │  Scroll Down 徽章，半截压在底边外
+//   └──────────────────────────────────────────────┘
+//
+// 一屏里有三处化开（标志、墨线、color 一词），是品牌手册「一个画面只化开一处」的唯一例外：
+// 三者是同一滴墨 —— 墨线从标志流出来，color 是这句话里被染到的那个词。
+//
+// 标志和墨线画在同一块铺满首屏的画布上（HeroInk），排版里只放两个占位：InkMarkSlot（墨迹框）
+// 和 InkLineSlot（墨线所在的那一行）。墨线右端流进「i」的竖笔，两者的晕连成一片。
+//
+// 入场（不减弱动画时）：水落在标志上，漫开时顺着墨线往左流出去（HeroInk 自带的显影），
+// color 一词同样显影；口号先浮现，最后是身份段和联系方式。
 "use client";
 
-import dynamic from "next/dynamic";
+import { useRef } from "react";
 
-import DecryptedText from "@/components/vendor/DecryptedText";
-import { useHeroAnimation } from "@/hooks/use-hero-animation";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
+import { HeroInk, InkLineSlot, InkMarkSlot, InkWord } from "@/components/ui/ink-mark";
+import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/gsap-react";
 import type { Dictionary } from "@/i18n/dictionaries";
-import { SITE_EMAIL, SITE_ROLE } from "@/lib/site-metadata";
+import { textLink } from "@/components/ui/text-link";
+import { SITE_EMAIL } from "@/lib/site-metadata";
 
-// Hero 点阵取色图的 art direction：横屏用全景棱镜图，竖屏用竖版构图
-const HERO_IMAGE_LANDSCAPE = "/hero_mg.svg";
-const HERO_IMAGE_PORTRAIT = "/hero_mg_portrait.svg";
-// DotFieldImage 交互点阵背景（DotField 扩展版，支持按图片取色）：
-// canvas 渲染，关闭 SSR（避免内部随机 SVG id 造成水合不匹配）；
-// props 类型来自 vendor 目录的 .d.ts 声明
-const DotFieldImage = dynamic(() => import("@/components/vendor/DotFieldImage"), {
-  ssr: false,
-});
+// 标志的尺寸与位置（CSS 变量，下面几处都要用）：
+// --mark-h  墨迹高度：Figma 里 662/900 ≈ 73.5svh；窄而高的屏幕上再按宽度收（46vw），免得压到口号
+//           —— 1440×900 下两者相等，所以 Figma 的尺寸原样保留
+// --mark-w  墨迹宽度：按墨迹框 196×228 的比例
+// --mark-r  墨迹右缘到视口右缘的距离：Figma 里 19/1440 ≈ 1.3vw
+const MARK_VARS =
+  "[--mark-h:min(73.5svh,46vw)] [--mark-w:calc(var(--mark-h)*196/228)] [--mark-r:1.3vw] [--mark-hm:min(50vw,24svh,16rem)] md:[--mark-hm:min(44vw,34svh,24rem)]";
 
-// Hero 组件：首页主视觉区，包含角色标题、定位文案与联系入口
 export function Hero({ dictionary }: { dictionary: Dictionary }) {
-  const heroRef = useHeroAnimation<HTMLElement>();
   const hero = dictionary.home.hero;
+  const { before, accent, after, end } = hero.slogan;
+  const ref = useRef<HTMLElement>(null);
 
-  // 尊重"减弱动画"偏好：偏好开启时不渲染点阵（其 rAF 循环会持续运行）
-  const reducedMotion = usePrefersReducedMotion();
+  useGSAP(
+    () => {
+      if (prefersReducedMotion()) return;
 
-  // 按容器比例倾向选取色图（art direction）：比 orientation 更适合 iPad 分屏和横屏手机边界
-  const isTallViewport = useMediaQuery("(max-aspect-ratio: 4/5)");
-  const heroImage = isTallViewport ? HERO_IMAGE_PORTRAIT : HERO_IMAGE_LANDSCAPE;
+      gsap.set(".hero-slogan", { autoAlpha: 0, y: 24 });
+      gsap.set(".hero-details", { autoAlpha: 0, y: 16 });
+
+      gsap
+        .timeline({ defaults: { ease: "power2.out" } })
+        .to(".hero-slogan", { autoAlpha: 1, y: 0, duration: 0.9 }, 0.15)
+        .to(".hero-details", { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.12 }, 1.9);
+    },
+    { scope: ref },
+  );
 
   return (
     <section
-      ref={heroRef}
+      ref={ref}
       id="home"
-      className="relative isolate flex h-[100svh] w-full flex-col overflow-hidden bg-background"
+      className={`relative isolate z-20 flex min-h-[max(100svh,36rem)] w-full flex-col lg:h-[100svh] lg:min-h-[36rem] overflow-x-clip bg-background px-edge sm:px-edge-sm ${MARK_VARS}`}
     >
-      {/* 底部信息区按内容占高；点阵区自动填满 100svh 中剩余的全部空间。 */}
-      <div className="relative min-h-0 w-full flex-1 overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          {/* 交互点阵背景：颜色取自棱镜图对应位置的像素，鼠标划过时产生排斥波纹
-              （组件监听 window 事件，不受 pointer-events-none 影响） */}
-          {!reducedMotion && (
-            <DotFieldImage
-              dotRadius={4}
-              dotSpacing={6}
-              // 点数预算：整屏重绘的开销主要按点数增长。实测（M 系列 Mac，@2x）
-              // 2560px 宽约 3.2 万点、每帧 33ms；限到 1 万点后约 15ms。
-              // 1440px 笔记本本身约 1 万点，基本不受影响；更大的屏幕点径与点距等比放大
-              maxDots={10000}
-              bulgeStrength={32}
-              glowRadius={0}
-              sparkle={true}
-              waveAmplitude={0}
-              cursorRadius={500}
-              cursorForce={0.5}
-              bulgeOnly={true}
-              imageSrc={heroImage}
-              imageFit="cover"
-              fallbackColor="rgba(148, 163, 184, 0.25)"
-              glowColor="#120F17"
-            />
-          )}
-        </div>
+      {/* 化开的标志和墨线：一块画布铺满首屏，压在文字下面 */}
+      <HeroInk className="absolute inset-0" />
 
-        {/* 三行分别使用独立字号，保留 Figma 中明确的编辑式层级。 */}
-        <div className="relative z-10 flex h-full items-center px-edge pt-28 sm:px-edge-sm sm:pt-32">
-          <div className="relative w-full">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -inset-x-6 -inset-y-12 -z-10 bg-[radial-gradient(ellipse_at_32%_50%,rgba(255,255,255,0.78)_0%,rgba(255,255,255,0.58)_42%,rgba(255,255,255,0.18)_68%,transparent_82%)] blur-xl sm:-inset-x-8 sm:-inset-y-16"
-            />
-            <h1
-              aria-label={SITE_ROLE}
-              className="hero-title w-full font-semibold text-design-light-text-primary"
-            >
-              <span className="block text-[10.92vw] leading-[1] tracking-display sm:text-[clamp(2.625rem,10.92vw,6.173rem)]">
-                <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
-                  <span aria-hidden="true" className="hero-word relative inline-block">
-                    Communication
-                  </span>
-                </span>
-              </span>
-              <span className="block text-[15.9vw] leading-[0.99] tracking-display sm:text-[clamp(3.875rem,15.9vw,8.994rem)]">
-                <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
-                  <span aria-hidden="true" className="hero-word relative inline-block">
-                    Designer
-                  </span>
-                </span>{" "}
-                <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
-                  <span aria-hidden="true" className="hero-word relative inline-block">
-                    &amp;
-                  </span>
-                </span>
-              </span>
-              <span className="block text-[8.776vw] leading-[1.08] tracking-display sm:text-[clamp(2.125rem,8.776vw,4.961rem)]">
-                <span className="hero-word-mask relative inline-block overflow-clip align-bottom">
-                  <span aria-hidden="true" className="hero-word relative inline-block">
-                    Frontend Developer
-                  </span>
-                </span>
-              </span>
-            </h1>
-          </div>
+      {/* 标志的占位：lg 起贴右、垂直居中，与口号同排。
+          lg 以下（含平板竖屏）标志和口号排不下同一行：这个占位不显示，改用下面口号上方那一套小的 */}
+      <InkMarkSlot
+        className="absolute right-[var(--mark-r)] top-1/2 hidden h-[var(--mark-h)] w-[var(--mark-w)] -translate-y-1/2 lg:block"
+        label="L·i"
+      />
+
+      <div className="relative flex flex-1 flex-col justify-center pb-16 pt-24 md:pb-20 lg:pb-20 lg:pt-28">
+        {/* lg 以下：标志和墨线排在口号上面那片空白里 —— 线从屏幕左缘流进右边的小标志，和宽屏是同一个构图。
+            之前窄屏没有标志，线是口号和介绍之间一条通体发光的粗带，晕压着上下的字（用户 2026-11-16：
+            手机上装饰都没了、线不好看）。更早的决定是「标志不要挤到口号上方」，那时它会多占一屏的高度；
+            现在它用的是口号上方本来就空着的地方。--mark-hm：窄屏标志的高度 */}
+        <div className="relative mb-7 h-[var(--mark-hm)] lg:hidden">
+          <InkLineSlot className="absolute -left-edge top-[66%] h-10 w-[100vw] -translate-y-1/2 sm:-left-edge-sm" />
+          <InkMarkSlot
+            className="absolute right-[2%] top-0 h-full w-[calc(var(--mark-hm)*196/228)]"
+            label="L·i"
+          />
+        </div>
+        <h1 className="hero-slogan max-w-[12ch] font-display text-[clamp(2.75rem,min(7.3vw,11.7svh),8rem)] leading-[0.98] tracking-display text-design-light-text-primary">
+          {before}
+          {/* 化开的词按行内元素排进句子，基线对齐；视觉上是 SVG，读屏读这份真实文字 */}
+          <span className="sr-only">{accent}</span>
+          <InkWord word={accent} className="ml-[0.04em] inline-block h-[1.02em] w-auto align-[-0.06em]" />
+          {after}
+          {/* 第二行从 end 起；手机上一行放不下「Bring color to the」，强制换行会让 the 单独成行，
+              所以窄屏不强制，让句子自然折成两行 */}
+          <br className="hidden sm:inline" /> {end}
+        </h1>
+
+        {/* 墨线这一行：线画在它的竖向中线上，左端贴视口左缘、右端流进标志的「i」。
+            行高要装得下两侧的晕，晕才不会压到口号和身份段上。宽度只给 SVG 兜底用 */}
+        <InkLineSlot className="-ml-edge hidden h-[clamp(4.5rem,11svh,7rem)] w-[100vw] sm:-ml-edge-sm lg:block lg:w-[calc(100vw-var(--mark-r)-var(--mark-w)*0.56)]" />
+
+        {/* 宽度不超过标志左缘（留 3rem），中等宽度的屏幕上身份段不会钻到标志底下 */}
+        <p className="hero-details mt-6 max-w-[46ch] text-pretty lg:mt-0 lg:max-w-[min(46ch,calc(100vw-var(--mark-r)-var(--mark-w)-6rem))] text-[1.25rem] leading-snug sm:text-2xl">
+          <span className="text-design-light-text-primary">{hero.identity.lead}</span>
+          <span className="text-design-light-text-muted">{hero.identity.rest}</span>
+        </p>
+        {/* 联系方式和「接项目」并排：访客在第一屏就知道可以来找我做事。
+            这一屏已经有东西化开，不再另取强调色的圆点（手册 03），所以只是一行淡墨小字 */}
+        <div className="hero-details mt-8 flex flex-wrap items-baseline gap-x-6 gap-y-2">
+        <a
+          href={`mailto:${SITE_EMAIL}`}
+          className={textLink("lg")}
+        >
+          {hero.cta}
+        </a>
+        <p className="text-small text-design-light-text-muted">{hero.availability}</p>
         </div>
       </div>
 
-      {/* 底部信息区：一条 12 列的基线带，按重要性分成两组 ——
-          左侧是定位文案（主信息），右侧一栏只放联系入口（动作），贴右边距、与 Menu 按钮同一条线。
-          所在地标签不在这里：它跟着 About 预览里的浮动人像走（见 about-preview.tsx）。
-          文案字号刻意低于标题第三行一档，不和 h1 抢层级；CTA 放大到本区最重的一级。
-          DOM 顺序即阅读顺序，移动端直接纵向堆叠。 */}
-      <div className="relative z-10 shrink-0 bg-background px-edge pb-6 pt-5 sm:px-edge-sm sm:pb-8 sm:pt-6">
-        <div className="flex flex-col gap-5 sm:grid sm:grid-cols-12 sm:items-end sm:gap-x-4">
-          <p className="hero-description text-pretty text-[1.375rem] leading-[1.12] tracking-[-0.02em] text-design-light-text-primary sm:col-span-8 sm:text-[clamp(1.5rem,2.2vw,2rem)] sm:leading-[1.15]">
-            {/* 整句统一字重，不做关键词加粗：粗细混排叠上逐字符解码会显得杂，
-                动效留给解码，强调留给句子本身。减弱动画偏好下直接输出文字 */}
-            {reducedMotion ? (
-              hero.description
-            ) : (
-              <DecryptedText
-                text={hero.description}
-                sequential
-                revealDirection="start"
-                speed={30}
-                animateOn="view"
-                encryptedClassName="text-design-light-text-muted/50"
-              />
-            )}
-          </p>
-          <div className="flex sm:col-span-4 sm:col-start-9 sm:justify-end lg:col-span-3 lg:col-start-10">
-            <a
-              href={`mailto:${SITE_EMAIL}`}
-              className="hero-cta inline-flex min-h-11 w-fit touch-manipulation items-center border-b-2 border-current text-2xl font-semibold leading-[1.15] tracking-[-0.04em] text-design-light-text-primary transition-opacity duration-base hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 sm:min-h-0 sm:text-[clamp(1.5rem,2.2vw,2rem)]"
-            >
-              {hero.cta}
-            </a>
-          </div>
-        </div>
-      </div>
+{/* 底部不放 Scroll Down 徽章：居中旋转的圆章是全页唯一居中、唯一在转的东西，正卡在首屏和 About 的接缝上 */}
     </section>
   );
 }

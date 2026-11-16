@@ -9,6 +9,7 @@
 // 实测把边界写成 "use client" + usePathname() 会得到一个完全空白的页面。
 // 所以这里只用服务端能渲染的东西：纯标记 + 一个原生 <a>。
 import type { Locale } from "@/i18n/config";
+import { textLink } from "@/components/ui/text-link";
 import { getDictionary } from "@/i18n/dictionaries";
 import { localizedPath } from "@/i18n/routing";
 
@@ -18,12 +19,13 @@ export function NotFoundView({ locale }: { locale: Locale }) {
   return (
     <main
       id="main-content"
-      className="mx-auto flex min-h-screen w-full max-w-content flex-col items-start justify-center gap-4 px-container sm:px-container-sm"
+      // 和其他页面一样贴页边、靠左，不居中收窄
+      className="flex min-h-screen w-full flex-col items-start justify-center gap-4 px-edge sm:px-edge-sm"
     >
-      <p className="text-label font-semibold uppercase text-design-light-text-muted">
+      <p className="font-mono text-label uppercase text-design-light-text-muted">
         404
       </p>
-      <h1 className="text-balance text-3xl font-semibold tracking-tight text-design-light-text-primary sm:text-section">
+      <h1 className="text-balance font-display text-display-sm tracking-display text-design-light-text-primary sm:text-display">
         {dictionary.errors.notFoundTitle}
       </h1>
       <p className="max-w-xl text-body text-design-light-text-secondary">
@@ -32,7 +34,7 @@ export function NotFoundView({ locale }: { locale: Locale }) {
       {/* 原生 <a>：整页加载，但在没有 provider 的文档里一定可用 */}
       <a
         href={localizedPath(locale)}
-        className="mt-2 text-small font-medium text-design-light-text-secondary underline underline-offset-4 transition-colors duration-base hover:text-design-light-text-primary"
+        className={textLink("lg", "mt-4")}
       >
         {dictionary.errors.backHome}
       </a>

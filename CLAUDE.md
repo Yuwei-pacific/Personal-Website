@@ -62,7 +62,9 @@ page.tsx (Server Component)
 
 Rules that keep this from drifting:
 
-- **Filtering and ordering happen in GROQ only** (`visibility != false`, `order(coalesce(year,0) desc, …)`).
+- **Filtering and ordering happen in GROQ only** (`order(coalesce(year,0) desc, …)`, the home Work
+  section's featured / index split). There is no visibility flag: the site reads the `published`
+  perspective, so unpublishing a project to a draft is how it is hidden.
   Never re-filter or re-sort in a component or view model.
 - `src/sanity/queries.ts` is the single source of every query. Changing a query or a schema requires
   `npm run typegen` to regenerate `src/sanity/sanity.types.ts`.
@@ -102,10 +104,85 @@ reintroduce it for the public site; `api.sanity.io` is no longer in the CSP `con
 
 ### Theming and design tokens
 
-Single theme — there is no dark-mode toggle. The `design-light-*` and `design-dark-*` Tailwind
-colors are fixed **surface** tokens: light sections use `design-light-*`, the Work grid and project
-detail sections use `design-dark-*`. A dark section declares `data-overscroll-dark` so the body
-background matches during overscroll bounce.
+Two themes, light ("paper") and dark ("night"), following the system by default; the menu has a
+manual switch (`src/hooks/use-theme.ts`) that writes `<html data-theme>` and `localStorage.theme`.
+An inline script in `[locale]/layout.tsx` applies the stored choice before first paint.
+
+Colors are layered in `src/app/globals.css`:
+
+1. Raw values `--s-<surface>-*` for three surfaces — `base` (Paper / Ink), `alt` (Paper 2 / Ink 2),
+   `inv` (the inverse). **Only this layer changes between themes.**
+2. The Tailwind colors `design-light-*` and `design-dark-*`. The names are historical: they no longer
+   mean light/dark, they mean **primary surface / alternate surface**. By default `design-light-*`
+   reads `base` and `design-dark-*` reads `alt`.
+3. `.surface-base` / `.surface-alt` / `.surface-inverse` re-point both families (and `bg-background`,
+   `text-foreground`, `border-border`, `accent`) for everything inside a block. Use them on a
+   section's outermost element to arrange alternation. The footer is `surface-inverse` — the one
+   inverted block per page.
+
+Whole pages follow the theme; there are no fixed dark sections. `--color-ink` and `--color-paper`
+are theme-invariant, for things that must stay dark or light (the lightbox, text over the portrait,
+the blend-mode cursor). Colors resolved in JS (GSAP tweens) must be re-read when the theme changes.
+
+Brand rules that code must respect: Geist is used at Regular only (Tailwind's `font-medium|semibold|bold`
+are mapped to 400 on purpose), Fraunces (`font-display`) is for titles at every level (page titles, section headings, row names, menu items) but never body or labels, and `accent`
+(Cobalt in light, Coral in dark) goes on lines and dots, never on text.
+
+Design rules live in the brand manual (a Claude artifact; chapter numbers cited in code comments as 手册 NN).
+Variants that were tried and rejected, with the reason, are in `docs/decisions.md` — read it before
+reintroducing something that looks like an obvious improvement.
+
+### Ink
+
+The "inked" effect renders with WebGL2 in `src/components/ui/ink/`: `ink-gl.ts` (renderer and shader),
+`ink-surface.tsx` (sizing, theme, visibility, reduced motion), `ink-tables.ts` (mark paths, color tables,
+shared metrics). When WebGL2 is unavailable a static SVG-filter version from `ink/ink-fallback.tsx` is
+loaded on demand; never animate it — it rasterizes on the CPU.
+
+- Blur fields are computed once per layout change; per frame the shader adds flow, breathing and the
+  pointer "stir" field. The stir field lives in 8-bit ping-pong textures, so its decay must step at least
+  one quantum per frame or small offsets get stuck.
+- **Slot pattern.** Layout places empty placeholders (`data-ink="…"`); one canvas covering the section
+  reads their rects and draws the ink. The hero uses it for the mark and line (`HeroInk`, `InkMarkSlot`,
+  `InkLineSlot`; a second, smaller pair of slots below `lg`), Work for covers and the index rule.
+- **Images in ink** (`drawImage`): Work covers, the About portrait, the "next project" thumbnail. The
+  layout `<img>` only loads the file and carries the alt text; it stays transparent unless the canvas is
+  confirmed unavailable. Images and videos used as textures need `crossOrigin="anonymous"`.
+- **Focus** (`focusRegions` + `setFocus`): only the featured project nearest the viewport's middle blooms
+  and shows color; the rest collapse to an ink rim and grayscale. Max 4 regions (shader limit), so max 4
+  featured projects (`featured`, `featuredOrder` in Sanity). The focused cover's video plays in the ink.
+- **Flow** (`flow`, `flowDrops`): the Work thread's head follows the scroll at ~82% of the viewport
+  height; a pool blooms from the thread's entry point when the head reaches it. It never retracts.
+- **Windowed canvases**: a section-high canvas only draws a viewport-high sticky strip. An offscreen canvas
+  still draws one warm-up frame after each layout change, or large canvases flash blank on scroll-in.
+- Reduced motion renders one static frame: no reveal, flow, breathing, stir or video.
+
+Ink appears only where it has a job: the hero (mark, line, slogan word), Work (pools and thread), the About
+portrait, the "next project" thumbnail, the project-entry transition (`projects/ink-transition.tsx`) and
+one quiet hand-drawn circle on the home About title (`about-ink.tsx`). The footer and all dividers
+(`ui/ink-rule.tsx`) are plain strokes with no bloom.
+
+### Pages
+
+All pages scroll normally on one edge-to-edge 12-column grid: labels and section titles in columns 1–3,
+content from column 4.
+
+- **Home**: hero, About statement and Work share one paper. The About statement has no portrait; its lower
+  left is reserved for client logos.
+- **About** (`sections/about/`): paper, then paper 2. The top hangs on two verticals (page edge: portrait;
+  column 4: `h1` and statement) and two horizontals (row top; one ink rule from which the statement and the
+  facts table hang). The portrait's ink pool is normalised to fill its box, so aligning the box aligns the
+  ink. Two columns from `md`. The origin story (墨分五色) is not told on any site page.
+- **Project** (`components/projects/`): title with a "type — year" kicker → cover → summary (7 columns) and
+  facts (4 columns) → chapters → credits → gallery → next project. The cover is the whole original image at
+  its natural ratio, never cropped or put in ink.
+- **Footer**: the one inverted block per page — a solid mark and a plain line into its "i", positioned in
+  CSS (`--fm-h` / `--fm-w`).
+- Two line-art figures (`work/ink-figure.tsx`) sit on the Work thread. Dark mode inverts them; invert only
+  line art, never photos.
+
+Shared pieces: `ui/text-link.ts` (the accent-underlined link, every CTA), `ui/meta-list.tsx` (label / value
+rows on the project header and About), `ui/ink-rule.tsx` (dividers).
 
 Raw values are CSS variables in `src/app/globals.css`, mapped to utilities in `tailwind.config.ts`.
 Use the semantic tokens rather than raw Tailwind scale values: spacing (`section`/`panel` for
@@ -123,6 +200,15 @@ decision used 3+ times earns a token; one-off art direction stays inline.
 role strings. Never hardcode the domain — `absoluteUrl()` and `localizedAbsoluteUrl()` build
 canonical, sitemap, Open Graph and JSON-LD URLs. `languageAlternates()` emits the hreflang set.
 
+The share image (`[locale]/opengraph-image.tsx`) follows the brand manual: ink background, bloomed mark, the name in
+Fraunces and one mono line. It draws the bloom with an SVG filter and loads TTFs from `src/assets/fonts/`
+(`ImageResponse` cannot use next/font's woff2). The SVG is drawn larger than the image and cropped, because the
+renderer treats the canvas edge as a shape edge and blooms it. `apple-icon.tsx` is the plain mark on ink.
+
+The three site fonts are defined once in `src/app/fonts.ts` and applied by both documents that own a `<body>`:
+`[locale]/layout.tsx` and `global-not-found.tsx` (which bypasses every layout — without the variables the 404 page
+falls back to the browser's serif).
+
 `src/app/sitemap.ts` and `src/app/robots.ts` are generated; the smoke test reads the sitemap to
 discover project routes, so a project missing from the sitemap is also untested.
 
@@ -138,14 +224,12 @@ Dev-only relaxations (`unsafe-eval`, no `upgrade-insecure-requests`) are gated o
 ### Components
 
 - `src/components/ui/` — animation primitives (`ScrollReveal`, `StaggerReveal`, `RevealText`,
-  `Parallax`, `masked-*`) that respect `prefers-reduced-motion`. Reduced-motion coverage is
-  component-specific, not global: vendor, menu, media and route-transition effects each need their
+  `masked-*`) that respect `prefers-reduced-motion`. Reduced-motion coverage is
+  component-specific, not global: menu, media and route-transition effects each need their
   own guard. New animations must honor the preference explicitly. GSAP registration lives in
   `src/lib/animation/`.
-- `src/components/vendor/` — low-touch React Bits adaptations kept in JS with local `.d.ts`
-  declarations and `src/components/vendor/README.md` documenting the workflow. Import DOM-heavy
-  ones dynamically with `ssr: false`. A component that starts owning core behavior gets migrated to
-  TSX instead — `components/layout/staggered-menu.tsx` already crossed that line and is owned TSX.
+- `components/layout/staggered-menu.tsx` started as a React Bits adaptation and is now owned TSX; there is no
+  vendor folder any more.
 - Gallery uses the maintained `react-photo-album` package; lightbox uses `yet-another-react-lightbox`.
 
 ## Skills
