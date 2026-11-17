@@ -20,6 +20,7 @@ npm run typecheck      # tsc --noEmit
 npm run check          # lint + typecheck + production build — run before calling work done
 npm run smoke          # HTTP checks: locales, redirects, sitemap, every project route
 npm run typegen        # regenerate src/sanity/sanity.types.ts from schemas + queries
+npm run audit:content  # read-only: per project, which CMS fields / translations / alts are still missing (drafts included)
 ```
 
 There is no unit-test runner. `npm run smoke` is the only test, and it drives a **running** server
