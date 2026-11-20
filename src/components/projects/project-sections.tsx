@@ -85,8 +85,7 @@ function ColumnBlock({ section, priority, labels }: BlockProps) {
       );
 
     case "mediaText":
-      // 文字在上、媒体在下：小标题留在左栏吸顶，读完文字再看图。
-      // 媒体始终撑满正文栏，Media position 不改变版式
+      // 文字在上、媒体在下：小标题留在左栏吸顶，读完文字再看图。媒体始终撑满正文栏
       return (
         <div className="flex flex-col gap-10">
           <div className={`${SECTION_MEASURE} text-design-dark-text-secondary`}>
