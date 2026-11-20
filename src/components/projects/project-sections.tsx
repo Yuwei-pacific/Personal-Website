@@ -4,6 +4,9 @@
 // 小标题在桌面端沿着本章节的正文吸顶。
 // 间距分两档：章节内部贴近，章节之间拉开 —— 配图要离它所属的文字比离下一章近。
 // 模块自身不带外边距，间距统一在这里控制。
+// 媒体只有两种宽度：正文栏和通栏（Sanity 里的 Full width），都撑满到右缘。
+// 偏高的媒体坐在撑满栏宽的底板上（见 section-media.tsx），不另设「窄图」「图文并排」这类版式 ——
+// 每个项目的每一章都是同一个节奏：文字在上，一块横向的图在下。
 import type { ReactNode } from "react";
 
 import { InkRule } from "@/components/ui/ink-rule";
@@ -12,7 +15,7 @@ import type { ProjectSection } from "@/lib/view-models/types";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 import { ProjectRichText } from "./project-rich-text";
-import { SectionMedia } from "./section-media";
+import { SectionMedia, SectionMediaGroup, hasTallMedia, type MediaLabels } from "./section-media";
 
 // 12 列骨架，和 About 页同一条轴线：左 3 列放编号与小标题（桌面吸顶），正文从第 4 列起。
 // md 到 lg 之间屏幕窄，左栏给 4 列，不然小标题挤不下。头部的资料 / 简介那一行也用这一套
@@ -24,8 +27,6 @@ export const SECTION_MEASURE = "max-w-[62ch]";
 // 章节之间 / 章节内部的两档间距
 export const CHAPTER_GAP = "gap-24 sm:gap-36";
 const BLOCK_GAP = "gap-10 sm:gap-14";
-
-const TEXT_COL_SIZES = "(min-width: 768px) 58vw, 100vw";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -54,16 +55,25 @@ export function SectionLabel({ index, children }: { index?: number; children: Re
 type Labels = Dictionary["project"];
 type BlockProps = { section: ProjectSection; priority: boolean; labels: Labels };
 
-const mediaLabels = (labels: Labels) => ({
+const mediaLabels = (labels: Labels): MediaLabels => ({
   playLabel: labels.playVideo,
   pauseLabel: labels.pauseVideo,
+  zoomLabel: labels.viewGalleryImage,
 });
 
-// 落在正文栏里的模块：文字、图文、非全宽媒体。其余（全宽媒体、媒体组、引用）横跨版心。
+// 落在正文栏里的模块：文字、图文、非全宽媒体、带竖版媒体的媒体组。
+// 其余（全宽媒体、横图媒体组、引用）横跨版心。
+// 竖版媒体组限了高，给它通栏只是多出空底板，所以留在正文栏，和上面的文字同一条左缘
 const isColumnBlock = (section: ProjectSection) =>
   section.kind === "richText" ||
   section.kind === "mediaText" ||
-  (section.kind === "media" && !section.fullWidth);
+  (section.kind === "media" && !section.fullWidth) ||
+  (section.kind === "mediaGroup" && hasTallMedia(section.items));
+
+// 媒体组在两种宽度里渲染是一样的，区别只在它被放进哪一栏（见 isColumnBlock）
+function MediaGroupBlock({ section, labels }: { section: Extract<ProjectSection, { kind: "mediaGroup" }>; labels: Labels }) {
+  return <SectionMediaGroup items={section.items} caption={section.caption} labels={mediaLabels(labels)} />;
+}
 
 function ColumnBlock({ section, priority, labels }: BlockProps) {
   switch (section.kind) {
@@ -75,20 +85,22 @@ function ColumnBlock({ section, priority, labels }: BlockProps) {
       );
 
     case "mediaText":
-      // 文字在上、媒体在下：小标题留在左栏吸顶，读完文字再看图
+      // 文字在上、媒体在下：小标题留在左栏吸顶，读完文字再看图。
+      // 媒体始终撑满正文栏，Media position 不改变版式
       return (
         <div className="flex flex-col gap-10">
           <div className={`${SECTION_MEASURE} text-design-dark-text-secondary`}>
             <ProjectRichText blocks={section.content} />
           </div>
-          <SectionMedia media={section.media} priority={priority} sizes={TEXT_COL_SIZES} {...mediaLabels(labels)} />
+          <SectionMedia media={section.media} slot="column" priority={priority} labels={mediaLabels(labels)} />
         </div>
       );
 
     case "media":
-      return (
-        <SectionMedia media={section.media} priority={priority} sizes={TEXT_COL_SIZES} {...mediaLabels(labels)} />
-      );
+      return <SectionMedia media={section.media} slot="column" priority={priority} labels={mediaLabels(labels)} />;
+
+    case "mediaGroup":
+      return <MediaGroupBlock section={section} labels={labels} />;
 
     default:
       return null;
@@ -98,34 +110,10 @@ function ColumnBlock({ section, priority, labels }: BlockProps) {
 function WideBlock({ section, priority, labels }: BlockProps) {
   switch (section.kind) {
     case "media":
-      return <SectionMedia media={section.media} priority={priority} sizes="100vw" {...mediaLabels(labels)} />;
+      return <SectionMedia media={section.media} slot="full" priority={priority} labels={mediaLabels(labels)} />;
 
     case "mediaGroup":
-      return (
-        <div>
-          <div
-            className={`grid gap-3 sm:gap-4 ${
-              section.items.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"
-            }`}
-          >
-            {section.items.map((item) => (
-              <SectionMedia
-                key={item.key}
-                media={item}
-                sizes={
-                  section.items.length === 2
-                    ? "(min-width: 640px) 50vw, 100vw"
-                    : "(min-width: 640px) 33vw, 100vw"
-                }
-                {...mediaLabels(labels)}
-              />
-            ))}
-          </div>
-          {section.caption ? (
-            <p className="mt-3 text-small leading-5 text-design-dark-text-muted">{section.caption}</p>
-          ) : null}
-        </div>
-      );
+      return <MediaGroupBlock section={section} labels={labels} />;
 
     case "quote":
       return (

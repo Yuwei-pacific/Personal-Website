@@ -30,6 +30,24 @@ const client = createClient({
 
 // 体检阈值：封面超过这个大小就提示压缩
 const COVER_MAX_MB = 1.5;
+// 正文里的视频超过这个大小就提示压缩（Studio 里的说明也是这个数）
+const VIDEO_MAX_MB = 10;
+
+// 正文图片够不够大。和 src/components/projects/section-media.tsx 是同一套规则，那边改了这里要跟着改：
+// - 两种位置在 1440 宽屏幕上的显示宽度（CSS 像素）：正文栏约 1015，通栏约 1360；媒体组按个数平分
+// - 上传的图至少要有显示宽度的 1.5 倍，不然在高分屏上是糊的
+// - 宽高比小于 1.3 的算偏高，页面上限高显示，不查宽度；有偏高媒体的组排在正文栏
+const SLOT_WIDTH = { column: 1015, full: 1360 };
+const MIN_DENSITY = 1.5;
+const TALL_ASPECT = 1.3;
+
+// 一个媒体位里体检要看的东西
+const MEDIA = `{
+  "width": image.asset->metadata.dimensions.width,
+  "height": image.asset->metadata.dimensions.height,
+  "videoSize": video.asset->size,
+  "alt": altTranslations
+}`;
 
 const docs = await client.fetch(`*[_type == "project"] | order(coalesce(year, 0) desc, _id asc){
   _id, year, featured, featuredOrder, client, contributors, tags,
@@ -40,6 +58,11 @@ const docs = await client.fetch(`*[_type == "project"] | order(coalesce(year, 0)
   "cover": coverImage.asset->{ mimeType, size, "width": metadata.dimensions.width },
   "hasVideo": defined(coverVideo.asset),
   "sections": sections[]._type,
+  "sectionMedia": sections[]{
+    _type, fullWidth,
+    "media": media${MEDIA},
+    "items": items[]${MEDIA}
+  },
   "galleryCount": count(gallery),
   // length(null) 是 null，取反仍是 null，会被当成「不满足」—— 先 coalesce 成 0
   "galleryNoAlt": count(gallery[coalesce(length(altTranslations.it), 0) == 0 && coalesce(length(altTranslations.en), 0) == 0]),
@@ -70,6 +93,38 @@ function status(id) {
   return draftIds.has(id) ? "已发布 · 有未发布改动" : "已发布";
 }
 
+const isTall = (media) => media.width / media.height < TALL_ASPECT;
+
+// 正文媒体的待办：图偏小、视频偏大、没有 alt。模块序号从 1 起，和 Studio 里的顺序一致
+function sectionMediaTodos(sections) {
+  const todos = [];
+  let noAlt = 0;
+  let total = 0;
+
+  (sections ?? []).forEach((section, index) => {
+    const items = (section.items ?? [section.media]).filter((media) => media?.width && media?.height);
+    if (!items.length) return;
+
+    const isGroup = Boolean(section.items);
+    const slot = isGroup ? (items.some(isTall) ? "column" : "full") : section.fullWidth ? "full" : "column";
+    const needed = Math.round((SLOT_WIDTH[slot] / items.length) * MIN_DENSITY);
+    const where = isGroup ? `${items.length} 个一组` : slot === "full" ? "通栏" : "正文栏";
+
+    for (const media of items) {
+      total += 1;
+      if (!filled(media.alt?.it) && !filled(media.alt?.en)) noAlt += 1;
+      if (!isTall(media) && media.width < needed) {
+        todos.push(`模块 ${index + 1} 的图只有 ${media.width}px 宽（${where}至少要 ${needed}px），高分屏上会糊`);
+      }
+      const videoMb = (media.videoSize ?? 0) / 1024 / 1024;
+      if (videoMb > VIDEO_MAX_MB) todos.push(`模块 ${index + 1} 的视频 ${videoMb.toFixed(1)} MB，建议压缩`);
+    }
+  });
+
+  if (noAlt) todos.push(`正文 ${noAlt}/${total} 个媒体没有 alt`);
+  return todos;
+}
+
 let shown = 0;
 let withTodos = 0;
 for (const d of docs) {
@@ -91,6 +146,7 @@ for (const d of docs) {
   }
   const sectionCount = doc.sections?.length ?? 0;
   if (sectionCount <= 1) todos.push(`正文只有 ${sectionCount} 个模块`);
+  todos.push(...sectionMediaTodos(doc.sectionMedia));
   if (doc.galleryNoAlt) todos.push(`画廊 ${doc.galleryNoAlt}/${doc.galleryCount} 张没有 alt`);
   if (todos.length) withTodos += 1;
 

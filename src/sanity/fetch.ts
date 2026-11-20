@@ -14,7 +14,7 @@ import "server-only";
 import type { ClientReturn, QueryParams } from "next-sanity";
 import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
-import { sanityClient } from "./client";
+import { sanityClient, sanityToken } from "./client";
 
 /** 所有 Sanity 取数共用的 Next 缓存 tag；/api/revalidate 收到发布事件后失效它。 */
 export const SANITY_CACHE_TAG = "sanity";
@@ -28,6 +28,23 @@ const publishedClient = sanityClient.withConfig({
   // 本模块 server-only，可选的私有数据集 token 只会留在服务端请求里。
   useCdn: true,
 });
+
+// 本地看草稿：.env.local 里设 SANITY_PREVIEW_DRAFTS=1 后，开发服务器改读 drafts 视图
+// （有草稿的文档显示草稿，没有的照常显示已发布版本），用来在发布前检查内容改动。
+// 只在开发环境生效 —— 生产构建里即使设了这个变量也照读 published；读草稿需要 token。
+const previewDrafts =
+  process.env.NODE_ENV !== "production" &&
+  process.env.SANITY_PREVIEW_DRAFTS === "1" &&
+  Boolean(sanityToken);
+
+const draftsClient = previewDrafts
+  ? sanityClient.withConfig({
+      allowReconfigure: false,
+      perspective: "drafts",
+      stega: false,
+      useCdn: false,
+    })
+  : null;
 
 /**
  * `Result` 默认由查询字面量经 SanityQueries 映射解析出来（typegen 生成）。
@@ -47,6 +64,12 @@ export async function sanityFetch<
   query: QueryString;
   params?: QueryParams;
 }): Promise<{ data: Result }> {
+  if (draftsClient) {
+    // 草稿不进缓存：每次请求都取最新的，改完 Studio 里的内容刷新页面就能看到
+    const data = await draftsClient.fetch(query, params, { cache: "no-store" });
+    return { data: data as Result };
+  }
+
   const data = await publishedClient.fetch(query, params, {
     // noStale：让 API CDN 不返回「过期但仍在后台刷新」的旧结果，否则 webhook 触发
     // 重新生成时可能又把旧内容缓存一轮。构建期沿用 next-sanity 官方实现的做法不加。

@@ -162,7 +162,8 @@ npm run typecheck      # TypeScript without emitting files
 npm run check          # Lint + typecheck + production build
 npm run smoke          # Check redirects, locales, sitemap and every project route
 npm run typegen        # Extract schema + regenerate src/sanity/sanity.types.ts
-npm run audit:content  # Read-only report of what each project in Sanity is still missing
+npm run audit:content  # Read-only report of what each project in Sanity is still missing (fields, translations,
+                       # alts) and which section images are too small or videos too heavy
 ```
 
 ## License & Author
