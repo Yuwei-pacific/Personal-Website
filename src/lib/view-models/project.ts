@@ -119,7 +119,6 @@ const normalizeSections = (
             heading: optionalText(section.heading),
             content,
             media,
-            mediaPosition: section.mediaPosition === "right" ? "right" : "left",
           },
         ];
       }

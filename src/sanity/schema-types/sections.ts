@@ -4,9 +4,10 @@
 // 换成命名类型会失效）；sections 是全新字段，没有历史包袱，所以用命名类型 +
 // _type 判别联合——TypeGen 能生成干净的类型，以后也能复用到别的文档类型上。
 //
-// 命名原则：字段按「含义」而非「外观」命名。mediaPosition 只有 left/right
-// 两个受约束的取值，属于编辑决策；绝不引入 marginTop 之类的自由样式字段，
-// 那会让 schema 变成样式表、以后改设计就得动数据。
+// 命名原则：字段按「含义」而非「外观」命名，只留页面真的会读的字段。
+// 绝不引入 marginTop 之类的自由样式字段，那会让 schema 变成样式表、以后改设计就得动数据。
+// 版式由模板决定（见 components/projects/section-media.tsx）：图文模块里媒体始终排在文字下方，
+// 所以原来的 mediaPosition（left / right）已经删掉 —— 它从没影响过页面。
 import { defineType, defineField, defineArrayMember } from "sanity";
 // 这个版本的 @sanity/icons 只提供子路径导出，没有顶层命名导出
 import { BlockquoteIcon } from "@sanity/icons/Blockquote";
@@ -148,7 +149,7 @@ const richTextSection = defineType({
   },
 });
 
-/** 图文模块：一个媒体 + 一段文字，媒体左右由编辑者决定 */
+/** 图文模块：一段文字，下面跟一个媒体 */
 const mediaTextSection = defineType({
   name: "mediaTextSection",
   title: "Media + text",
@@ -172,33 +173,17 @@ const mediaTextSection = defineType({
       type: "localizedProjectText",
       validation: (Rule) => Rule.required(),
     }),
-    defineField({
-      name: "mediaPosition",
-      title: "Media position",
-      type: "string",
-      options: {
-        list: [
-          { title: "Left", value: "left" },
-          { title: "Right", value: "right" },
-        ],
-        layout: "radio",
-        direction: "horizontal",
-      },
-      initialValue: "left",
-      validation: (Rule) => Rule.required(),
-    }),
   ],
   preview: {
     select: {
       headingIt: "headingTranslations.it",
       headingEn: "headingTranslations.en",
       media: "media.image",
-      position: "mediaPosition",
     },
-    prepare({ headingIt, headingEn, media, position }) {
+    prepare({ headingIt, headingEn, media }) {
       return {
         title: headingIt || headingEn || "Media + text",
-        subtitle: `Media + text · media ${position ?? "left"}`,
+        subtitle: "Media + text",
         media,
       };
     },

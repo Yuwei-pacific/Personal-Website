@@ -152,7 +152,6 @@ export const PROJECT_QUERY = defineQuery(`*[_type == "project" && slug.current =
     _type == "mediaTextSection" => {
       "heading": ${localized("headingTranslations")},
       "content": ${localized("contentTranslations")},
-      mediaPosition,
       "media": media{
         ${PROJECT_MEDIA_PROJECTION}
       }

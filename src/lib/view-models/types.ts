@@ -73,7 +73,6 @@ export type ProjectSection =
       heading: string | null;
       content: PortableTextBlock[];
       media: ProjectSectionMedia;
-      mediaPosition: "left" | "right";
     }
   | {
       kind: "media";
