@@ -55,6 +55,15 @@ do not describe the current design here — that is the brand manual and `CLAUDE
 - **Shared-element cover morph into the page**: disliked; replaced by the ink transition.
 - **Ink transition with a foreground-colored core**: flipped the whole screen dark and back.
 - **Scaling the transition `<svg>` with CSS**: turned the five-color rim into fat rainbow bands.
+- **Print figures placed as they were** (thesis project): a diagram at full bleed had type three times the body
+  size, and a portrait poster ran two screens high. Figures are remade for the web and placed at reading width.
+- **Gallery on the thesis project**: three images of very different ratios made one unreadable row; they moved
+  into the chapters.
+- **Text beside a portrait clip** (media-text with phone recordings, thesis project): three rows, each a
+  screen high with three lines of text and a void under them, and unlike every other project page. The clips
+  became one media group on a shared plate.
+- **A third "narrow" media width**: one more left/right edge on the page for no gain. Two widths, both running
+  to the right edge; small figures are padded to the plate width before upload.
 
 ## Footer, menu, identity
 

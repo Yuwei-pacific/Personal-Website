@@ -8,12 +8,12 @@
 // 视频条目在网格里只显示 poster 缩略图（加播放角标），点开才在 lightbox 里播放——
 // 网格里同时自动播放多个视频对低端机器是灾难。
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useLenis } from "lenis/react";
 import { LuPlay } from "react-icons/lu";
 import { RowsPhotoAlbum } from "react-photo-album";
 import type { Photo } from "react-photo-album";
 import "react-photo-album/rows.css";
 import { InkRule } from "@/components/ui/ink-rule";
+import { useLightboxLock } from "@/hooks/use-lightbox-lock";
 import type { ProjectGalleryItem } from "@/lib/view-models/types";
 import { buildScaledUrl, buildSrcSet } from "@/lib/media";
 import Lightbox from "yet-another-react-lightbox";
@@ -132,27 +132,9 @@ export function ProjectGallery({
   // 当前打开的媒体索引；-1 表示 lightbox 关闭
   const [activeIndex, setActiveIndex] = useState(-1);
 
-  // lightbox 打开时暂停 Lenis：它虚拟化了滚轮事件，lightbox 自带的
-  // overflow 锁滚对它无效，不停掉的话滚轮缩放图片时背景页面会跟着滚
-  const lenis = useLenis();
+  // lightbox 打开时暂停 Lenis、把画布换成墨色（见 use-lightbox-lock.ts）
   const lightboxOpen = activeIndex >= 0;
-  useEffect(() => {
-    if (!lightboxOpen) return;
-
-    lenis?.stop();
-
-    // 锁滚动时滚动条消失，globals.css 里常驻的 scrollbar-gutter 会在右侧留下一条空槽，
-    // 露出 html 的浅色画布底 —— 紧挨着深色 lightbox 会看见一条白边。
-    // lightbox 期间把画布换成墨色（lightbox 在两种主题下都是深色），关闭时还原。
-    const html = document.documentElement;
-    const previousBackground = html.style.backgroundColor;
-    html.style.backgroundColor = "hsl(var(--color-ink))";
-
-    return () => {
-      lenis?.start();
-      html.style.backgroundColor = previousBackground;
-    };
-  }, [lightboxOpen, lenis]);
+  useLightboxLock(lightboxOpen);
 
   // RowsPhotoAlbum 会在客户端拿到真实容器宽度后重新排版。跨路由进入项目页时，
   // Footer 的 ScrollTrigger 可能早于这次高度变化完成初始化，继续使用旧的起止位置。

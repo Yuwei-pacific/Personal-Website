@@ -20,7 +20,8 @@ npm run typecheck      # tsc --noEmit
 npm run check          # lint + typecheck + production build — run before calling work done
 npm run smoke          # HTTP checks: locales, redirects, sitemap, every project route
 npm run typegen        # regenerate src/sanity/sanity.types.ts from schemas + queries
-npm run audit:content  # read-only: per project, which CMS fields / translations / alts are still missing (drafts included)
+npm run audit:content  # read-only: per project, which CMS fields / translations / alts are still missing, and which
+                       # section images are too small for their slot or videos too heavy (drafts included)
 ```
 
 There is no unit-test runner. `npm run smoke` is the only test, and it drives a **running** server
@@ -80,6 +81,8 @@ Rules that keep this from drifting:
   Content Lake directly but carries the same cache tag).
 - **The CMS is the only content source.** There is no in-repo fallback copy — when a query returns
   nothing, render an empty state.
+- **Previewing drafts locally:** `SANITY_PREVIEW_DRAFTS=1` in `.env.local` makes `sanityFetch` read the
+  `drafts` perspective, uncached, in `npm run dev` only. A production build ignores it.
 
 ### Cache invalidation: webhook + time fallback (no `<SanityLive />`)
 
@@ -184,6 +187,17 @@ content from column 4.
 - **Project** (`components/projects/`): title with a "type — year" kicker → cover → summary (7 columns) and
   facts (4 columns) → chapters → credits → gallery → next project. The cover is the whole original image at
   its natural ratio, never cropped or put in ink.
+  Every chapter has one rhythm: text, then a landscape block of media that runs to the right edge. Media has
+  two widths only, the text column or the full content width (`fullWidth` in Sanity); a media group is full
+  width. Media taller than about 4:3 is not shrunk and left-aligned: it sits centred and height-capped on a
+  plate that fills the slot (`section-media.tsx`), a group of such media shares one plate in the text column,
+  and below `sm` that group becomes a horizontal snap strip. Section images open in a lightbox loaded on first
+  click (`zoomable-image.tsx`). Figures made for print are re-exported for the web before upload — one plate
+  colour, landscape pieces, no posters taller than a screen.
+  All media sizing lives in `section-media.tsx` (the two slots, the CDN width caps, the tall-media threshold
+  and the plate); `project-sections.tsx` only decides chapters and which column a block sits in. The same slot
+  widths and threshold are repeated in `scripts/content-audit.mjs`, which flags uploads too small for their
+  slot — change both together. Nothing in the template is per project: a layout change is a template change.
 - **Footer**: the one inverted block per page — a solid mark and a plain line into its "i", positioned in
   CSS (`--fm-h` / `--fm-w`).
 - Two line-art figures (`work/ink-figure.tsx`) sit on the Work thread. Dark mode inverts them; invert only
