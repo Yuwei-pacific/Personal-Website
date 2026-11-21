@@ -47,6 +47,7 @@ export function InkCover({
   image,
   alt,
   video,
+  focused,
   className,
   priority = false,
   playLabel,
@@ -58,6 +59,11 @@ export function InkCover({
   image: string;
   alt: string;
   video?: string | null;
+  /**
+   * 传了就用「焦点」：false = 收拢成一圈墨边、图是黑白的，true = 化开、带彩边（和首页 Work 同一条规则：
+   * 颜色只在正在看的那一处出现）。不传 = 一直化开
+   */
+  focused?: boolean;
   className?: string;
   /** 首屏的大封面：优先加载 */
   priority?: boolean;
@@ -137,6 +143,8 @@ export function InkCover({
         replayReveal: true,
         // 小的那滩（下一个项目）细节经不起半分辨率
         blurScale: width < SMALL_BOX ? 1 : undefined,
+        // 用焦点时整个盒子是唯一的焦点区域：收拢 / 化开由 InkSurface 的 focus 切换
+        focusRegions: focused === undefined ? undefined : [{ x: 0, y: 0, width, height }],
       },
     };
   };
@@ -160,6 +168,7 @@ export function InkCover({
           tables={INK_TABLES}
           build={build}
           buildKey={`cover:${id}:${loaded ? "image" : "pending"}`}
+          focus={focused === undefined ? undefined : focused ? 0 : -1}
           video={
             canPlay && size
               ? { element: playing ? element : null, rect: { x: 0, y: 0, width: size.width, height: size.height } }

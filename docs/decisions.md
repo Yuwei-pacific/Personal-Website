@@ -33,6 +33,12 @@ do not describe the current design here — that is the brand manual and `CLAUDE
 - **Horizontal wipe revealing pools on scroll**: looked like a gradient mask cutting the cover; pools now bloom
   from the thread's entry point.
 
+- **Phone thread with the ink core scaled like its bloom** (0.62): under 2px beside the text, too thin. The core
+  is now scaled on its own (0.85); the bloom keeps the narrow scale so the line gains weight, not colour.
+- **Featured focus that ignored the Index**: the last featured cover stayed in full bloom, half off screen,
+  while the Index filled the viewport. Featured covers now all collapse once the Index heading is in the
+  upper three quarters of the viewport.
+
 - **Sticky viewport-high canvas redrawn on every scroll frame**: on iOS Safari the ink lagged behind the text
   (scrolling is off the main thread). The canvas now scrolls natively and is only repositioned near its edges.
 
@@ -55,6 +61,8 @@ do not describe the current design here — that is the brand manual and `CLAUDE
 - **Shared-element cover morph into the page**: disliked; replaced by the ink transition.
 - **Ink transition with a foreground-colored core**: flipped the whole screen dark and back.
 - **Scaling the transition `<svg>` with CSS**: turned the five-color rim into fat rainbow bands.
+- **"Next project" thumbnail always in bloom**: the coloured rim competed with the title beside it. It now rests
+  as an ink rim in greyscale and blooms on hover or keyboard focus.
 - **Print figures placed as they were** (thesis project): a diagram at full bleed had type three times the body
   size, and a portrait poster ran two screens high. Figures are remade for the web and placed at reading width.
 - **Gallery on the thesis project**: three images of very different ratios made one unreadable row; they moved

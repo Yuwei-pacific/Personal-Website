@@ -159,6 +159,10 @@ loaded on demand; never animate it — it rasterizes on the CPU.
 - **Focus** (`focusRegions` + `setFocus`): only the featured project nearest the viewport's middle blooms
   and shows color; the rest collapse to an ink rim and grayscale. Max 4 regions (shader limit), so max 4
   featured projects (`featured`, `featuredOrder` in Sanity). The focused cover's video plays in the ink.
+  Once the Index heading rises above 75% of the viewport height, every featured cover collapses (`INDEX_TAKEOVER`
+  in `work-ink.tsx`): whoever reads the Index should not have a bloom above it.
+  The "next project" thumbnail uses the same switch (`focused` on `InkCover`): collapsed at rest, blooming on
+  hover or keyboard focus; touch has no hover, so there it stays collapsed until the tap starts the transition.
 - **Flow** (`flow`, `flowDrops`): the Work thread's head follows the scroll at ~82% of the viewport
   height; a pool blooms from the thread's entry point when the head reaches it. It never retracts.
 - **Windowed canvases**: a section-high canvas is only 1.5–2 viewports tall. It is absolutely positioned inside

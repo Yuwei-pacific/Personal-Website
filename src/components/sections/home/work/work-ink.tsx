@@ -17,6 +17,7 @@ import {
   drawCover,
   POOL_PAD,
   POOL_PAD_MOBILE,
+  CORE_SCALE_MOBILE,
   STROKE_SCALE_MOBILE,
   poolBounds,
   poolPath,
@@ -28,6 +29,9 @@ import {
 
 // 焦点：离视口中线多远以内才算（视口高度的比例）；都不在范围内时全部收拢
 const FOCUS_RANGE = 0.55;
+// 目录的标题升到视口这个高度以上（从上往下量的比例），就算在看目录了：精选全部收拢。
+// 不然最后一个精选还露着半截、完整化开着，目录已经占了大半屏，颜色在抢正在读的那几行
+const INDEX_TAKEOVER = 0.75;
 
 type FeaturedMedia = { id: string; video: string | null };
 type VideoState = { element: HTMLVideoElement | null; rect?: Rect };
@@ -59,6 +63,7 @@ function buildWork(mobile: boolean) {
     const thread = threadSamples(width, rects, ruleY, mobile);
     const pad = mobile ? POOL_PAD_MOBILE : POOL_PAD;
     const stroke = mobile ? STROKE_SCALE_MOBILE : 1;
+    const core = mobile ? CORE_SCALE_MOBILE : 1;
     const pools = rects.map((rect, i) => poolPath(rect, i + 3, pad));
 
     return {
@@ -70,7 +75,7 @@ function buildWork(mobile: boolean) {
         ctx.fillStyle = "#000";
         pools.forEach((pool) => ctx.fill(pool));
       },
-      drawCore: (ctx) => strokeCore(ctx, thread, stroke),
+      drawCore: (ctx) => strokeCore(ctx, thread, core),
       // 封面：占位里那张（带 CORS 的）<img> 加载好了才画；没加载到的墨滩就是纯墨
       drawImage: (ctx) => {
         covers.forEach((cover, i) => {
@@ -145,14 +150,19 @@ export function WorkInk({ featured }: { featured: FeaturedMedia[] }) {
       const middle = window.innerHeight / 2;
       let best = -1;
       let bestDistance = window.innerHeight * FOCUS_RANGE;
-      covers.forEach((el, i) => {
-        const r = el.getBoundingClientRect();
-        const distance = Math.abs(r.top + r.height / 2 - middle);
-        if (distance < bestDistance) {
-          best = i;
-          bestDistance = distance;
-        }
-      });
+      // 目录块（标题 + 顶线 + 列表）的上沿：顶线占位的父元素
+      const indexTop = section.querySelector('[data-ink="rule"]')?.parentElement?.getBoundingClientRect().top;
+      const readingIndex = indexTop !== undefined && indexTop < window.innerHeight * INDEX_TAKEOVER;
+      if (!readingIndex) {
+        covers.forEach((el, i) => {
+          const r = el.getBoundingClientRect();
+          const distance = Math.abs(r.top + r.height / 2 - middle);
+          if (distance < bestDistance) {
+            best = i;
+            bestDistance = distance;
+          }
+        });
+      }
       if (best === current) return;
       current = best;
       covers.forEach((el, i) => (el.dataset.focused = String(i === best)));

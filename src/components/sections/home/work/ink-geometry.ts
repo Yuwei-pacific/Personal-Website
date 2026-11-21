@@ -154,7 +154,7 @@ function desktopThread(width: number, covers: Rect[], ruleY: number): Sample[] {
 // 手机上墨线走的页边距：离屏幕边缘多远；经过文字旁边时的粗细；出了墨滩往下多远之内要让到页边距里
 // （墨滩下面先是编号和标题，都短，右边空着；再往下是占满行宽的简介）
 const GUTTER = 20;
-const GUTTER_WEIGHT = 0.34;
+const GUTTER_WEIGHT = 0.5;
 const TEXT_CLEAR = 120;
 
 /**
@@ -317,8 +317,13 @@ function strokeProfile(ctx: CanvasRenderingContext2D, samples: Sample[], half: n
   }
 }
 
-/** 手机上墨线的粗细比例：同样的像素粗细放在窄屏上重得像边框，按屏幕尺度收细 */
+/** 手机上墨线的粗细比例：同样的像素粗细放在窄屏上重得像边框，按屏幕尺度收细。这一个管晕带（彩色漫开的宽度） */
 export const STROKE_SCALE_MOBILE = 0.62;
+/**
+ * 手机上墨芯（看得见的那一丝墨）的比例，比晕带放得宽：墨芯也按 0.62 收时，文字旁边那一段只剩不到 2px，
+ * 用户说过于细（2026-11-21）。现在那一段约 2.5px，靠近墨滩约 3.4px；晕带不跟着变宽，颜色不会更抢
+ */
+export const CORE_SCALE_MOBILE = 0.85;
 
 /** 墨线的晕带（画进模糊源图）。scale：整体粗细比例（窄屏、小字旁边用小于 1 的值） */
 export function strokeBand(ctx: CanvasRenderingContext2D, samples: Sample[], scale = 1) {
