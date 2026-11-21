@@ -17,6 +17,7 @@ import {
   drawCover,
   POOL_PAD,
   POOL_PAD_MOBILE,
+  CORE_SCALE_MOBILE,
   STROKE_SCALE_MOBILE,
   poolBounds,
   poolPath,
@@ -59,6 +60,7 @@ function buildWork(mobile: boolean) {
     const thread = threadSamples(width, rects, ruleY, mobile);
     const pad = mobile ? POOL_PAD_MOBILE : POOL_PAD;
     const stroke = mobile ? STROKE_SCALE_MOBILE : 1;
+    const core = mobile ? CORE_SCALE_MOBILE : 1;
     const pools = rects.map((rect, i) => poolPath(rect, i + 3, pad));
 
     return {
@@ -70,7 +72,7 @@ function buildWork(mobile: boolean) {
         ctx.fillStyle = "#000";
         pools.forEach((pool) => ctx.fill(pool));
       },
-      drawCore: (ctx) => strokeCore(ctx, thread, stroke),
+      drawCore: (ctx) => strokeCore(ctx, thread, core),
       // 封面：占位里那张（带 CORS 的）<img> 加载好了才画；没加载到的墨滩就是纯墨
       drawImage: (ctx) => {
         covers.forEach((cover, i) => {

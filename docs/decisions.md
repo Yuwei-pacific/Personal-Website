@@ -33,6 +33,9 @@ do not describe the current design here — that is the brand manual and `CLAUDE
 - **Horizontal wipe revealing pools on scroll**: looked like a gradient mask cutting the cover; pools now bloom
   from the thread's entry point.
 
+- **Phone thread with the ink core scaled like its bloom** (0.62): under 2px beside the text, too thin. The core
+  is now scaled on its own (0.85); the bloom keeps the narrow scale so the line gains weight, not colour.
+
 - **Sticky viewport-high canvas redrawn on every scroll frame**: on iOS Safari the ink lagged behind the text
   (scrolling is off the main thread). The canvas now scrolls natively and is only repositioned near its edges.
 
