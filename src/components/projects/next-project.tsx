@@ -2,7 +2,7 @@
 
 // 详情页结尾的「下一个项目」：整块可点，页面不再以死路收尾。
 // 顺序沿用首页列表（GROQ 里排好），由 fetchNextProject 取出。
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Link } from "next-view-transitions";
 
 import { buildCropUrl } from "@/lib/media";
@@ -27,6 +27,9 @@ export function NextProject({
 }) {
   const coverRef = useRef<HTMLDivElement>(null);
   const inkNavigate = useInkNavigate();
+  // 缩略图平时收拢成一圈墨边、黑白；指到这一块（或键盘聚焦）才化开、上色 —— 常亮的彩边会和标题抢。
+  // 触屏没有悬停：手指划过不算（否则滚动时一闪一闪），那里一直是收拢的，点下去由过场接上
+  const [active, setActive] = useState(false);
   if (!project.slug) return null;
   const href = localizedPath(locale, `/projects/${project.slug}`);
 
@@ -42,6 +45,12 @@ export function NextProject({
       href={href}
       // 过场：墨从缩略图那一小滩漫开（见 ink-transition.tsx）
       onClick={(event) => inkNavigate(event, href, coverRef.current)}
+      onPointerEnter={(event) => {
+        if (event.pointerType !== "touch") setActive(true);
+      }}
+      onPointerLeave={() => setActive(false)}
+      onFocus={() => setActive(true)}
+      onBlur={() => setActive(false)}
       className="group block bg-design-dark-bg px-edge py-panel text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-design-dark-text-primary sm:px-edge-sm sm:py-panel-sm"
     >
       <div className="grid grid-cols-1 items-end gap-x-4 gap-y-8 md:grid-cols-12">
@@ -70,7 +79,7 @@ export function NextProject({
         {coverUrl ? (
           <div ref={coverRef} className="mx-4 md:col-span-4 md:col-start-9 md:mx-0">
             {/* 装饰性：链接的可读名称已由标题提供 */}
-            <InkCover id={project._id} image={coverUrl} alt="" className="aspect-[16/10] w-full" />
+            <InkCover id={project._id} image={coverUrl} alt="" focused={active} className="aspect-[16/10] w-full" />
           </div>
         ) : null}
       </div>

@@ -55,6 +55,8 @@ do not describe the current design here — that is the brand manual and `CLAUDE
 - **Shared-element cover morph into the page**: disliked; replaced by the ink transition.
 - **Ink transition with a foreground-colored core**: flipped the whole screen dark and back.
 - **Scaling the transition `<svg>` with CSS**: turned the five-color rim into fat rainbow bands.
+- **"Next project" thumbnail always in bloom**: the coloured rim competed with the title beside it. It now rests
+  as an ink rim in greyscale and blooms on hover or keyboard focus.
 - **Print figures placed as they were** (thesis project): a diagram at full bleed had type three times the body
   size, and a portrait poster ran two screens high. Figures are remade for the web and placed at reading width.
 - **Gallery on the thesis project**: three images of very different ratios made one unreadable row; they moved
