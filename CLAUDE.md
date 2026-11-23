@@ -175,7 +175,9 @@ loaded on demand; never animate it — it rasterizes on the CPU.
 Ink appears only where it has a job: the hero (mark, line, slogan word), Work (pools and thread), the About
 portrait, the "next project" thumbnail, the project-entry transition (`projects/ink-transition.tsx`) and
 one quiet hand-drawn circle on the home About title (`about-ink.tsx`). The footer and all dividers
-(`ui/ink-rule.tsx`) are plain strokes with no bloom.
+(`ui/ink-rule.tsx`) are plain strokes with no bloom. The cursor (`ui/custom-cursor.tsx`) is not ink either: a
+paper-coloured dot drawn once on a 2D canvas and difference-blended, so it inverts whatever is under it (dark on
+paper, light on ink, in both themes); no bloom.
 
 ### Pages
 
