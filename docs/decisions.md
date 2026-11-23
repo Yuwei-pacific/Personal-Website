@@ -76,6 +76,11 @@ do not describe the current design here — that is the brand manual and `CLAUDE
 ## Footer, menu, identity
 
 - **Blooming, stirrable footer**: cluttered; ink only where it has a job.
+- **Square cursor with difference blending**: the old brand, and the only hard geometric shape left once the ink
+  came in. Replaced by an ink dot, still difference-blended, chosen in a side-by-side trial over the mark's slanted
+  i-dot; the trial's wide sprayed edge on the dot was dropped.
+- **Cursor dot in the surface's text colour, fading on hover**: needed its colour switched per surface (footer,
+  lightbox) and turned to a grey smudge over links; the difference-blended dot inverts by itself.
 - **Uppercase sans menu items**: the old brand; now Fraunces in sentence case.
 - **Share image with a dot-matrix prism**: the old brand.
 - **Rainbow or color-chip motifs**: rejected early in favour of a single glowing body.

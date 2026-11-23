@@ -175,7 +175,9 @@ loaded on demand; never animate it — it rasterizes on the CPU.
 Ink appears only where it has a job: the hero (mark, line, slogan word), Work (pools and thread), the About
 portrait, the "next project" thumbnail, the project-entry transition (`projects/ink-transition.tsx`) and
 one quiet hand-drawn circle on the home About title (`about-ink.tsx`). The footer and all dividers
-(`ui/ink-rule.tsx`) are plain strokes with no bloom.
+(`ui/ink-rule.tsx`) are plain strokes with no bloom. The cursor (`ui/custom-cursor.tsx`) is not ink either: a
+paper-coloured dot drawn once on a 2D canvas and difference-blended, so it inverts whatever is under it (dark on
+paper, light on ink, in both themes); no bloom.
 
 ### Pages
 
@@ -264,3 +266,13 @@ Dev-only relaxations (`unsafe-eval`, no `upgrade-insecure-requests`) are gated o
 Portable Text, TypeGen, Visual Editing), GSAP, Vercel/React performance, and SEO/AEO. Prefer them
 over general knowledge when working in those areas. `.agents/skills/` is the same set for other
 agent tooling; both are excluded from ESLint.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
