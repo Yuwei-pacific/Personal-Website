@@ -1,12 +1,12 @@
-// 社交分享图（Open Graph）：1200×630 PNG，按品牌手册 10「分享图 · 夜里 · 标志化开」。
-// 墨底，右边是化开的 L·i 标志，左边只有名字（Fraunces）和一行等宽的身份说明 —— 没有别的东西。
+// 社交分享图（Open Graph）：1200×630 PNG，按品牌手册 11「分享图 · 夜里 · 标志化开」。
+// 墨底，右边是化开的雨标志，左边只有名字（Fraunces）和一行等宽的身份说明 —— 没有别的东西。
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { ImageResponse } from "next/og";
 
 import { locales } from "@/i18n/config";
-import { MARK_PATHS } from "@/components/ui/ink/ink-tables";
+import { MARK_PATH } from "@/components/ui/ink/ink-tables";
 import { SITE_AUTHOR, SITE_ROLE, SITE_TITLE } from "@/lib/site-metadata";
 
 export const alt = SITE_TITLE;
@@ -17,6 +17,11 @@ export const contentType = "image/png";
 // 标志先被低频噪声推歪一点，糊成一紧一松两层，再按另一层噪声混合（有的地方收得紧、有的地方渗得开），
 // 加颗粒，最后查表上色 —— 表里依次是 墨芯 → Cobalt → Cyan → Amber → Coral → 夜里的纸。
 // 画在 760×399 的坐标里（手册的画板），整体放大到 1200×630。
+// 两处和手册示意稿的数不一样，都是为了「每一笔都要认得出来」（手册 04）：这里的渲染器（resvg）生成的噪声
+// 和浏览器不是同一张，照搬的话标志左半边整片落进「渗得开」的那一档，笔画被冲成一片蓝，墨芯没了。
+//   松的那档模糊取 11（手册粗颗粒那一版是 15）；
+//   权重噪声的偏移从 −1.23 调到 −1.6，整体偏向收得紧的那一档，只留几处渗开。
+// 改这两个数之前先看生成的图：/en/opengraph-image…（地址在页面的 og:image 里）。
 // 颜色和网站深色模式的标志一致（ui/ink/ink-tables.ts 的 dark 表）：纸色的芯，往外是 Cobalt → Cyan → Amber → Coral，
 // 最后落回墨色的底。
 // 这张 SVG 四周各多画 BLEED 个单位、再被外层裁掉：渲染器只在画布范围内算滤镜，画布边缘会被当成
@@ -31,9 +36,9 @@ const bloomedMark = `
         <feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="2" seed="7" result="warp"/>
         <feDisplacementMap in="SourceGraphic" in2="warp" scale="8" xChannelSelector="R" yChannelSelector="G" result="warped"/>
         <feGaussianBlur in="warped" stdDeviation="4" result="tight"/>
-        <feGaussianBlur in="warped" stdDeviation="15" result="loose"/>
+        <feGaussianBlur in="warped" stdDeviation="11" result="loose"/>
         <feTurbulence type="fractalNoise" baseFrequency="0.005" numOctaves="2" seed="58" result="weightNoise"/>
-        <feColorMatrix in="weightNoise" type="matrix" values="3.5 0 0 0 -1.23  3.5 0 0 0 -1.23  3.5 0 0 0 -1.23  0 0 0 0 1" result="weight"/>
+        <feColorMatrix in="weightNoise" type="matrix" values="3.5 0 0 0 -1.6  3.5 0 0 0 -1.6  3.5 0 0 0 -1.6  0 0 0 0 1" result="weight"/>
         <feComponentTransfer in="weight" result="weightInverse">
           <feFuncR type="table" tableValues="1 0"/><feFuncG type="table" tableValues="1 0"/><feFuncB type="table" tableValues="1 0"/>
         </feComponentTransfer>
@@ -53,7 +58,7 @@ const bloomedMark = `
     <g filter="url(#bloom)">
       <rect x="-300" y="-300" width="1600" height="1300" fill="#fff"/>
       <g transform="translate(410,22) scale(7)" fill="#000">
-        ${MARK_PATHS.map((d) => `<path d="${d}"/>`).join("")}
+        <path fill-rule="evenodd" d="${MARK_PATH}"/>
       </g>
     </g>
   </svg>

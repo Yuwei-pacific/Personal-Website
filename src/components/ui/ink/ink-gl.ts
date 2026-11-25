@@ -1,4 +1,4 @@
-// 「化开」效果的 WebGL 渲染器（品牌手册第 03、04、08 章：五色、晕、水）。
+// 「化开」效果的 WebGL 渲染器（品牌手册第 03、04、09 章：五色、晕、水）。
 //
 // 为什么不用 SVG 滤镜：滤镜链（噪声、位移、两层大半径模糊、颗粒、查找表）由浏览器在 CPU 上
 // 逐像素计算，任何动画都会让它每帧重算，掉帧。这里把同一套效果搬到 GPU 上，并把昂贵的部分拆开：
@@ -125,7 +125,7 @@ uniform float uFlow;            // 0 = 静止（减弱动画）
 uniform float uDisplacement;    // 边缘起伏的幅度（CSS px）
 uniform float uWarpFrequency;   // 起伏噪声的频率（每 CSS px）
 uniform float uWeightFrequency; // 紧 / 松混合噪声的频率（每 CSS px）
-uniform float uSpreadBias;      // 竖向偏置：> 0 时越往下越渗得开（标志的「上紧下松」）
+uniform float uSpreadBias;      // 竖向偏置：> 0 时越往下越渗得开（人像那滩墨在用；标志不用）
 uniform float uBreath;          // 呼吸改变明暗的幅度
 uniform float uBreathWeight;    // 呼吸改变紧 / 松比例的幅度
 uniform float uBreathPeriod;    // 一呼一吸的周期（秒）
@@ -461,7 +461,7 @@ const TRAIL_CUT_SETTLE = 0.55;
 const TRAIL_FULL_SPEED = 1400;
 // 拨动场的分辨率：每 4 个 CSS px 一格，场本身是平滑的
 const TRAIL_SCALE = 0.25;
-// 显影：前 18% 停顿，之后约 3.6 秒漫开（与手册第 08 章一致）
+// 显影：前 18% 停顿，之后约 3.6 秒漫开（与手册第 09 章一致）
 const REVEAL_DURATION = 4.4;
 const REVEAL_PAUSE = 0.18;
 // 画布像素密度上限：晕本来就是柔的，再高只会多算像素

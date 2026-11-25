@@ -38,8 +38,11 @@
     --s-inv-text3: 230 6.3% 62.7%;
     --s-inv-line: 233 9.7% 18.2%;
     --s-inv-line2: 230 7.8% 30.2%;
-    --s-base-accent: 228 77.6% 47.3%;
-    --s-alt-accent: 228 77.6% 47.3%;
+    /* 主色 Coral（手册 03）：化开的地方之外，画面上唯一的颜色。只落在线和点上，不染字。
+       纸上的细线和圆点用深一档的 #EC4636（#FF5A4E 画在纸上只有 2.8 : 1，不够 3 : 1）；墨上用 #FF5A4E。
+       所以反转表面（页脚）正好和主表面相反 */
+    --s-base-accent: 5.3 82.7% 56.9%;
+    --s-alt-accent: 5.3 82.7% 56.9%;
     --s-inv-accent: 4 100.0% 65.3%;
     --color-ink: 230 20.0% 5.9%;
     --color-paper: 60 9.1% 95.7%;
@@ -154,7 +157,7 @@
       --s-inv-line2: 60 3.2% 69.6%;
       --s-base-accent: 4 100.0% 65.3%;
       --s-alt-accent: 4 100.0% 65.3%;
-      --s-inv-accent: 228 77.6% 47.3%;
+      --s-inv-accent: 5.3 82.7% 56.9%;
       color-scheme: dark;
     }
   }
@@ -186,7 +189,7 @@
     --s-inv-line2: 60 3.2% 69.6%;
     --s-base-accent: 4 100.0% 65.3%;
     --s-alt-accent: 4 100.0% 65.3%;
-    --s-inv-accent: 228 77.6% 47.3%;
+    --s-inv-accent: 5.3 82.7% 56.9%;
     color-scheme: dark;
   }
 

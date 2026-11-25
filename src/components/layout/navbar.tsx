@@ -4,7 +4,6 @@
 // - 站点 Logo 独立于菜单，保持可点击
 // - toggle 按钮与 logo 用 mix-blend-difference 自适应深浅背景（hero 浅色 / work 深色）
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Link } from "next-view-transitions";
@@ -18,6 +17,7 @@ import { localeLabels, locales, type Locale, LOCALE_COOKIE, isLocale } from "@/i
 import type { Dictionary } from "@/i18n/dictionaries";
 import { localizedPath, replaceLocale } from "@/i18n/routing";
 import { SOCIAL_LINKS } from "@/lib/site-metadata";
+import { Mark } from "@/components/ui/mark";
 
 // 组件在 effect 里操作 DOM，关闭 SSR 避免 useLayoutEffect 服务端警告
 const StaggeredMenu = dynamic(() => import("@/components/layout/staggered-menu"), {
@@ -204,7 +204,7 @@ export function Navbar({
 
   return (
     <div onFocus={handleNavFocus}>
-      {/* 站点 Logo：invert 转白后配合差值混合，在深浅背景上都可读。
+      {/* 站点标志：墨迹的状态，不带底（手册 02：旁边已经有名字的地方只用图形）。纯白配合差值混合，在深浅背景上都可读。
           混合与位移分在两层：外层 fixed 只负责定位和 mix-blend，永远不动；
           收起的过渡加在内层 Link 上（与 Menu 按钮的结构一致）。
           收起时除了上移还要淡出到透明：iOS Safari 会把视口顶边以外的页面内容继续画在
@@ -219,7 +219,7 @@ export function Navbar({
             navHidden ? "-translate-y-[calc(100%+1.5rem)] opacity-0" : "translate-y-0 opacity-100"
           }`}
         >
-          <Image src="/Logo.svg" alt="Yuwei Li" width={48} height={48} className="invert" priority />
+          <Mark className="size-10 text-white" />
         </Link>
       </div>
       {/* relative z-nav 必不可少：加了混合后整组会被压平成静态层级、被页面内容盖住，

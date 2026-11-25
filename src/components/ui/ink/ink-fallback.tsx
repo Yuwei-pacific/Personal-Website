@@ -19,18 +19,28 @@
 // 两种主题各渲染一份，由 globals.css 的 .only-light / .only-dark 决定显示哪份：
 // 这样首帧就是对的主题，不必等 JS 读到主题再切（那会先闪一下另一种底色的方框）。
 //
-// 坐标系沿用手册示意稿：标志按 translate(210,27) scale(6.6) 画在 760×420 的画布上，
+// 坐标系沿用手册封面的比例：标志放大 9.3 倍（MARK_UNIT），左上角在原点，约 324 × 326 个单位。
 // 模糊半径等参数都是按这个比例调的。要放大缩小就缩放整个 <svg>，不要改这些数。
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 import { cn } from "@/lib/utils";
 
-import { COLOR_TABLES, MARK_PATHS, WORD_BASELINE, WORD_BASELINE_PAD, WORD_FONT_SIZE, estimateBox } from "./ink-tables";
+import {
+  COLOR_TABLES,
+  MARK_BOUNDS,
+  MARK_PATH,
+  MARK_UNIT,
+  MARK_USER_SIZE,
+  WORD_BASELINE,
+  WORD_BASELINE_PAD,
+  WORD_FONT_SIZE,
+  estimateBox,
+} from "./ink-tables";
 
 type Mode = keyof typeof COLOR_TABLES;
 
-// 滤镜与遮罩的作用范围：比画布大一圈，否则边缘会被裁出硬边
+// 滤镜与遮罩的作用范围：比图形大一圈，否则边缘会被裁出硬边
 const REGION = { x: -300, y: -300, width: 1600, height: 1300 };
 // 实际显示的范围：比滤镜区域再收进一圈。模糊在区域边缘会混进区域外的透明黑，
 // 那一圈算出来不是纯背景，会显出一道色带。平时被 viewBox 裁掉看不到；bleed 时要靠这里裁
@@ -63,7 +73,7 @@ const MARK_SHAPE: Shape = {
   displacement: 8,
   tight: 4,
   loose: 15,
-  reveal: { cx: 380, cy: 210, r: 460 },
+  reveal: { cx: MARK_USER_SIZE.width / 2, cy: MARK_USER_SIZE.height * 0.42, r: 460 },
 };
 
 // 实际显示时 1 个用户单位等于多少 px：按 preserveAspectRatio="meet" 的规则取较小的那个比例。
@@ -159,7 +169,7 @@ function Bloom({
           {/* 2. 两份模糊：紧（b1）与松（b2） */}
           <feGaussianBlur in="displaced" stdDeviation={tight} result="tight" />
           <feGaussianBlur in="displaced" stdDeviation={coarse ? loose : loose * 0.73} result="loose" />
-          {/* 3. 权重噪声：决定哪里收得紧、哪里渗得开。seed 58 是「上紧下松」，换之前先看效果 */}
+          {/* 3. 权重噪声：决定哪里收得紧、哪里渗得开。seed 58 和手册示意稿是同一张，换之前先看效果 */}
           <feTurbulence type="fractalNoise" baseFrequency="0.005" numOctaves="2" seed="58" result="weightNoise" />
           <feColorMatrix
             in="weightNoise"
@@ -252,10 +262,8 @@ function Bloom({
 }
 
 const markSource = (
-  <g transform="translate(210,27) scale(6.6)" fill="#000">
-    {MARK_PATHS.map((d) => (
-      <path key={d} d={d} />
-    ))}
+  <g transform={`scale(${MARK_UNIT}) translate(${-MARK_BOUNDS.x},${-MARK_BOUNDS.y})`} fill="#000">
+    <path fillRule="evenodd" d={MARK_PATH} />
   </g>
 );
 
@@ -317,9 +325,9 @@ function Ink({
   );
 }
 
-/** L·i 标志的化开状态（SVG 兜底） */
+/** 雨标志的化开状态（SVG 兜底） */
 export function InkMarkSvg({
-  viewBox = "130 0 500 420",
+  viewBox = "-88 -47 500 420",
   bleed = false,
   ...props
 }: InkProps & {
@@ -337,7 +345,7 @@ export function InkMarkSvg({
 
 // ── 化开的单词：首页口号里的 color / colore ──
 // 品牌手册的例外：首屏里口号的这个词和标志一起化开；其余地方文字都不化开。
-// 字形取之前讨论里最后停在的那一组：Fraunces 斜体、opsz 30（笔画粗细更匀，细笔不会被模糊吃断）、
+// 字形：Fraunces 正体（斜体留给口号里的 ordinary，手册 06）、opsz 30（笔画粗细更匀，细笔不会被模糊吃断）、
 // 同色圆角描边加厚。字号 208 是用户坐标，放大缩小靠缩放整个 <svg>。
 //
 // 取景 = 字形本身：左缘是第一个字母、右缘是最后一个字母、下缘是基线，上缘是字体的上沿。
@@ -400,7 +408,6 @@ export function InkWordSvg({ word, ...props }: InkProps & { word: string }) {
         style={{
           fontFamily: "var(--font-fraunces), Georgia, serif",
           fontSize: WORD_FONT_SIZE,
-          fontStyle: "italic",
           fontWeight: 600,
           fontVariationSettings: '"opsz" 30',
           letterSpacing: "-0.02em",

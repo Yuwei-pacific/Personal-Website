@@ -19,6 +19,7 @@ import { MetaItem, MetaList } from "@/components/ui/meta-list";
 import { InkRule } from "@/components/ui/ink-rule";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { StaggerReveal } from "@/components/ui/stagger-reveal";
+import { StressedText } from "@/components/ui/stress";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { SITE_LOCATIONS, SITE_ROLE } from "@/lib/site-metadata";
@@ -110,7 +111,8 @@ export function AboutPageContent({
           <div className="contents md:order-2 md:col-span-8 md:block lg:col-span-9">
             {/* 上边距收掉行高里字顶以上的那一截，大写字母的顶才和人像的顶在一条线上 */}
             <h1 className="order-1 text-pretty font-display text-[clamp(2.25rem,5vw,5.25rem)] leading-[1.06] tracking-display text-design-light-text-primary md:-mt-[0.17em]">
-              {about.intro.lead}
+              {/* 划出一个词：这一屏唯一的一道 Coral 线（手册 08） */}
+              <StressedText text={about.intro.lead} word={about.intro.leadStress} />
             </h1>
 
             <div className="order-3 grid grid-cols-1 gap-y-10 md:mt-10 lg:mt-14 lg:grid-cols-9 lg:gap-x-6 lg:gap-y-0">

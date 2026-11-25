@@ -60,9 +60,10 @@ type Dictionary = {
     /**
      * 第一屏的两层文字：intro.lead 是大标题（我是谁、从哪来）；intro.body 是现状（在哪工作、接项目、在读什么）。
      * intro.body 不重复首页那句「先设计、再自己做出来」（首屏和首页 About 已经各说过一次）。
-     * 出处「墨分五色」不在这页讲了（用户 2026-11-16）：留给将来的视觉识别案例，文案在品牌手册 09 里
+     * 出处「墨分五色」不在这页讲了（用户 2026-11-16）：留给将来的视觉识别案例，文案在品牌手册 10 里
      */
-    intro: { lead: string; body: string };
+    /** leadStress：大标题里用手画线划出来的那个词（手册 06：一个标题最多一个） */
+    intro: { lead: string; leadStress: string; body: string };
     education: string;
     experience: string;
     capabilities: string;
@@ -100,6 +101,8 @@ type Dictionary = {
   };
   errors: {
     notFoundTitle: string;
+    /** 404 标题里划线的那个词 */
+    notFoundStress: string;
     notFoundBody: string;
     backHome: string;
     errorEyebrow: string;
@@ -174,10 +177,11 @@ const dictionaries: Record<Locale, Dictionary> = {
       locationLabel: "Luogo",
       languagesLabel: "Lingue",
       languages: ["Cinese — madrelingua", "Inglese — B2", "Italiano — B2"],
-      // 意大利语文案是草稿，上线前请母语者过一遍（品牌手册 09）。
+      // 意大利语文案是草稿，上线前请母语者过一遍（品牌手册 10）。
       // 句子特意写成不带性别变化的（没有 arrivato / arrivata 这类过去分词）
       intro: {
         lead: "Sono Yuwei Li. Dalla Cina a Firenze per dipingere, poi a Milano per progettare.",
+        leadStress: "dipingere",
         body:
           "Oggi lavoro come UX designer a POLI.design e seguo progetti freelance di communication design e sviluppo frontend. Sto completando la laurea magistrale in Communication Design al Politecnico di Milano.",
       },
@@ -219,6 +223,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     errors: {
       notFoundTitle: "Pagina non trovata",
+      notFoundStress: "non",
       notFoundBody:
         "La pagina che cerchi non esiste oppure è stata spostata.",
       backHome: "← Torna alla home",
@@ -304,6 +309,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       languages: ["Chinese — native", "English — B2", "Italian — B2"],
       intro: {
         lead: "I’m Yuwei Li. I came from China to Florence to paint, then moved to Milan to design.",
+        leadStress: "paint",
         body:
           "Today I work as a UX designer at POLI.design and take on freelance projects in communication design and frontend development. I’m completing an MSc in Communication Design at Politecnico di Milano.",
       },
@@ -345,6 +351,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     errors: {
       notFoundTitle: "Page not found",
+      notFoundStress: "not",
       notFoundBody:
         "The page you are looking for doesn’t exist or may have been moved.",
       backHome: "← Back home",

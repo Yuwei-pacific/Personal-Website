@@ -132,13 +132,29 @@ Whole pages follow the theme; there are no fixed dark sections. `--color-ink` an
 are theme-invariant, for things that must stay dark or light (the lightbox, text over the portrait,
 the blend-mode cursor). Colors resolved in JS (GSAP tweens) must be re-read when the theme changes.
 
-Brand rules that code must respect: Geist is used at Regular only (Tailwind's `font-medium|semibold|bold`
+Brand rules that code must respect (manual v2): Geist is used at Regular only (Tailwind's `font-medium|semibold|bold`
 are mapped to 400 on purpose), Fraunces (`font-display`) is for titles at every level (page titles, section headings, row names, menu items) but never body or labels, and `accent`
-(Cobalt in light, Coral in dark) goes on lines and dots, never on text.
+(Coral in both themes: `#EC4636` on paper, where `#FF5A4E` would fall under 3:1, and `#FF5A4E` on ink — so the
+inverse surface takes the opposite value) goes on lines and dots, never on text. Cobalt, Cyan and Amber exist only
+inside a bloom.
 
 Design rules live in the brand manual (a Claude artifact; chapter numbers cited in code comments as 手册 NN).
 Variants that were tried and rejected, with the reason, are in `docs/decisions.md` — read it before
 reintroducing something that looks like an obvious improvement.
+
+### Mark
+
+The mark is the character 雨, stored once in `src/components/ui/ink/ink-tables.ts`: `MARK_PATH` (the ink outline —
+the everyday mark and the source shape of every bloom; a fixed path, never re-derive it) and `MARK_GEO_PATH`
+(the geometric cut, only below 20 px). `ui/mark.tsx` renders the ink outline in `currentColor` for the navbar and
+footer. `MARK_BAR` gives the position of its top stroke: the hero line and the footer line both run from the left
+screen edge into that stroke's left end, swelling to its thickness so line and stroke read as one. Bloom
+parameters are written against `MARK_UNIT` (the manual cover's scale); its strokes are thin, so a wider bloom
+washes out the ink core and the character stops being legible.
+
+`node scripts/build-icons.mjs` regenerates `src/app/favicon.ico` (geometric cut on an ink square, snapped to the
+pixel grid) and `public/Logo.svg` (JSON-LD logo) from those paths; `apple-icon.tsx` and the share image read them
+at build time.
 
 ### Ink
 
@@ -184,7 +200,9 @@ paper, light on ink, in both themes); no bloom.
 All pages scroll normally on one edge-to-edge 12-column grid: labels and section titles in columns 1–3,
 content from column 4.
 
-- **Home**: hero, About statement and Work share one paper. The About statement has no portrait; its lower
+- **Home**: hero, About statement and Work share one paper. The hero hangs on one horizontal, the ink line
+  (`--line-y`): the slogan sits on it, the identity paragraph and the mark hang below it, so the mark's position
+  follows the line. Below `lg` the mark and line sit above the slogan; a bloomed mark is never under 240 px. The About statement has no portrait; its lower
   left is reserved for client logos.
 - **About** (`sections/about/`): paper, then paper 2. The top hangs on two verticals (page edge: portrait;
   column 4: `h1` and statement) and two horizontals (row top; one ink rule from which the statement and the
@@ -204,13 +222,16 @@ content from column 4.
   and the plate); `project-sections.tsx` only decides chapters and which column a block sits in. The same slot
   widths and threshold are repeated in `scripts/content-audit.mjs`, which flags uploads too small for their
   slot — change both together. Nothing in the template is per project: a layout change is a template change.
-- **Footer**: the one inverted block per page — a solid mark and a plain line into its "i", positioned in
-  CSS (`--fm-h` / `--fm-w`).
+- **Footer**: the one inverted block per page — a plain line running into the top stroke of a solid mark that
+  hangs below it, positioned in CSS (`--fm-h` / `--fm-w` / `--fm-bar`).
 - Two line-art figures (`work/ink-figure.tsx`) sit on the Work thread. Dark mode inverts them; invert only
   line art, never photos.
 
-Shared pieces: `ui/text-link.ts` (the accent-underlined link, every CTA), `ui/meta-list.tsx` (label / value
-rows on the project header and About), `ui/ink-rule.tsx` (dividers).
+Shared pieces: `ui/text-link.ts` (the accent-underlined link, every CTA — a straight line, links never get a
+hand-drawn one), `ui/meta-list.tsx` (label / value rows on the project header and About), `ui/ink-rule.tsx`
+(dividers: a few fixed hand-drawn shapes with tapered ends, rotated by `variant` so one screen never repeats a
+line), `ui/stress.tsx` (the hand-drawn Coral line under one word of a title; the word is named in the dictionary,
+so only titles the site writes itself can carry one — currently the About headline and the 404 title).
 
 Raw values are CSS variables in `src/app/globals.css`, mapped to utilities in `tailwind.config.ts`.
 Use the semantic tokens rather than raw Tailwind scale values: spacing (`section`/`panel` for

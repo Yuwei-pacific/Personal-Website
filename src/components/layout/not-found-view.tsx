@@ -9,6 +9,7 @@
 // 实测把边界写成 "use client" + usePathname() 会得到一个完全空白的页面。
 // 所以这里只用服务端能渲染的东西：纯标记 + 一个原生 <a>。
 import type { Locale } from "@/i18n/config";
+import { StressedText } from "@/components/ui/stress";
 import { textLink } from "@/components/ui/text-link";
 import { getDictionary } from "@/i18n/dictionaries";
 import { localizedPath } from "@/i18n/routing";
@@ -26,7 +27,7 @@ export function NotFoundView({ locale }: { locale: Locale }) {
         404
       </p>
       <h1 className="text-balance font-display text-display-sm tracking-display text-design-light-text-primary sm:text-display">
-        {dictionary.errors.notFoundTitle}
+        <StressedText text={dictionary.errors.notFoundTitle} word={dictionary.errors.notFoundStress} variant={1} />
       </h1>
       <p className="max-w-xl text-body text-design-light-text-secondary">
         {dictionary.errors.notFoundBody}

@@ -1,15 +1,27 @@
 "use client";
 
-// 化开的元素：L·i 标志、首屏口号里的单词、从标志流出来的墨线（品牌手册第 02–04、08 章）。
+// 化开的元素：雨标志、首屏口号里的单词、流进标志的墨线（品牌手册第 02–04、09 章）。
 //
 // 这里是 WebGL 版（ui/ink/）：持续流动、呼吸，鼠标划过像筷子划开汤里的油，而且不掉帧。
 // 浏览器不支持 WebGL2 时换成静态的 SVG 滤镜版，它在 ui/ink/ink-fallback.tsx 里、按需加载。
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { INK_TABLES, MARK_INK_BOX, MARK_PATHS, WORD_BASELINE, WORD_BASELINE_PAD, WORD_FONT_SIZE, estimateBox } from "./ink/ink-tables";
+import {
+  INK_TABLES,
+  MARK_BAR,
+  MARK_BOUNDS,
+  MARK_INK_BOX,
+  MARK_PATH,
+  MARK_UNIT,
+  MARK_USER_SIZE,
+  WORD_BASELINE,
+  WORD_BASELINE_PAD,
+  WORD_FONT_SIZE,
+  estimateBox,
+} from "./ink/ink-tables";
 import { InkSurface, useInkSupported, type InkSpec } from "./ink/ink-surface";
 
 // SVG 兜底：只在不支持 WebGL2 时才渲染，所以不进主包
@@ -27,40 +39,41 @@ const even = (n: number) => ({ top: n, right: n, bottom: n, left: n });
 // 晕画在盒子外面要留多少：松的那档模糊约 4σ 才淡尽；鼠标划过时墨还会被推出去几十 px，至少留 56
 const bleedPadding = (loose: number) => Math.max(56, Math.ceil(loose * 4));
 
-// 标志：盒子 = 墨迹框（MARK_INK_BOX，196×228 个用户单位）。参数沿用 SVG 版、按盒子换算成 px
-const MARK_BOX = { x: 282, y: 96, width: 196, height: 228 };
-const markPaths = () => MARK_PATHS.map((d) => new Path2D(d));
+// 标志：盒子 = 墨迹的外框（约 324 × 326 个用户单位，见 ink-tables.ts 的 MARK_UNIT）。
+// 下面的 u 都是「每个用户单位多少 px」= 盒子高度 / MARK_USER_SIZE.height
+let markPath: Path2D | null = null;
 
-// 把标志画进 (x, y) 处、每个用户单位 u px 的墨迹框里
+// 把标志画进 (x, y) 处、每个用户单位 u px 的外框里
 function drawMark(ctx: CanvasRenderingContext2D, x: number, y: number, u: number) {
+  markPath ??= new Path2D(MARK_PATH);
   ctx.save();
   ctx.translate(x, y);
-  ctx.scale(u, u);
-  ctx.translate(-MARK_BOX.x, -MARK_BOX.y);
-  ctx.translate(210, 27);
-  ctx.scale(6.6, 6.6);
-  markPaths().forEach((path) => ctx.fill(path));
+  ctx.scale(u * MARK_UNIT, u * MARK_UNIT);
+  ctx.translate(-MARK_BOUNDS.x, -MARK_BOUNDS.y);
+  ctx.fill(markPath, "evenodd");
   ctx.restore();
 }
 
-// 标志化开的参数（按每个用户单位 u px 换算）
+// 标志化开的参数（按每个用户单位 u px 换算）：手册封面的那组数，只把松的那档从 15 收到 13 ——
+// 画布上的墨还在流动和呼吸，同样的数比手册里静止的那一帧渗得更开，最里面两段短弧和左腿会断。
+// 不再有竖向偏置：旧标志（L·i）是「上紧下松」，雨是左右对称、上下分量接近的字，四周一样对待
+const MARK_LOOSE = 13;
 const markParams = (u: number) => ({
   tight: 4 * u,
-  loose: 15 * u,
+  loose: MARK_LOOSE * u,
   displacement: 4 * u,
   warpFrequency: 0.011 / u,
   weightFrequency: 0.005 / u,
-  // 上紧下松：「i」的点和三角的尖清楚，底部淌开（用户确认过的化开方式）
-  spreadBias: 0.9,
+  spreadBias: 0,
 });
 
-// 显影时水落下的点：标志中部偏上（对应 SVG 版的 380,210），相对墨迹框
-const markDrop = (u: number) => ({ x: (380 - MARK_BOX.x) * u, y: (210 - MARK_BOX.y) * u });
+// 显影时水落下的点：标志中部略偏上（拱的里面），相对外框
+const markDrop = (u: number) => ({ x: MARK_USER_SIZE.width * 0.5 * u, y: MARK_USER_SIZE.height * 0.42 * u });
 
 function buildMark(width: number, height: number): InkSpec {
-  const u = height / MARK_BOX.height;
+  const u = height / MARK_USER_SIZE.height;
   return {
-    padding: even(bleedPadding(15 * u)),
+    padding: even(bleedPadding(MARK_LOOSE * u)),
     draw: (ctx) => drawMark(ctx, 0, 0, u),
     params: {
       ...markParams(u),
@@ -69,7 +82,7 @@ function buildMark(width: number, height: number): InkSpec {
   };
 }
 
-/** L·i 标志的化开状态。盒子就是墨迹本身，晕画在盒子外面 */
+/** 雨标志的化开状态。盒子就是墨迹本身，晕画在盒子外面。最小 240 px：再小最里面两段弧会化成两个圆点 */
 export function InkMark({ className, label }: { className?: string; label?: string }) {
   return (
     <InkSurface
@@ -93,7 +106,8 @@ const fontFamily = () =>
   getComputedStyle(document.body).getPropertyValue("--font-fraunces").trim() || "Georgia, serif";
 
 function wordFont(size: number) {
-  return `italic 600 ${size}px ${fontFamily()}`;
+  // 正体：口号里斜体只给 ordinary 一个词（手册 06），化开的词不再叠一层斜体 —— 重音不给两次
+  return `600 ${size}px ${fontFamily()}`;
 }
 
 function measureWord(word: string) {
@@ -173,21 +187,22 @@ export function InkWord({ word, className }: { word: string; className?: string 
 
 // ── 首屏：标志和墨线画在同一块画布上 ──────────────────────────────────
 //
-// 墨线是从标志里流出来的：两者共用一套模糊和噪声，交接处的晕自然连成一片（用户的示意图：
-// 横线流进「i」那一笔斜竖，竖笔上方是 i 的点）。墨线右端算在竖笔的中线上，藏进竖笔的墨里。
+// 墨线从页面左缘流进标志顶上那一横的左端，像同一笔写出来的（手册 11）。两者共用一套模糊和噪声，
+// 交接处的晕自然连成一片。
 //
 // 墨线的样子是用户选的 B：墨芯很细，晕和标志一样宽 —— 一道彩色光带，中间一丝细墨。
-// 所以它分两层画：
+// 所以它分三层画：
 //   晕：一条竖向渐变的灰带（中间约 Cobalt 的明暗，往两边淡到纸），模糊后给出两侧对称的彩边；
 //       不能直接画一条细黑线去模糊 —— 细于模糊半径的墨会被整体冲淡，出不来彩边。
 //   芯：一条几 px 的黑线，外面裹一圈很窄的渐变（Cobalt → Cyan），画进 core 层，不参与化开。
 //       保证中间那一丝墨始终在，而且墨芯外面先是蓝、再往外才是暖色 —— 与标志笔画的色序一致。
+//   线尾：靠近标志的最后一段由细渐粗，到头正好是那一横的粗细 —— 细线顶在粗笔画上像一根针扎进去，
+//       渐粗才像落笔往下按、写成那一横。这一段画进源图，和标志一起化开。
 //
-// 位置从页面里的两个占位元素读：[data-ink="mark"]（墨迹框）与 [data-ink="line"]（墨线所在的那一行，
-// 线画在它的竖向中线上）。画布铺满首屏，所以排版只管摆占位，形状跟着占位走。
+// 位置从页面里的两个占位元素读：[data-ink="mark"]（墨迹的外框）与 [data-ink="line"]（墨线所在的那一行）。
+// 有标志时线的高度以那一横的中线为准（排版把两者对在一起，这里再对一次，免得差出一两个像素）。
+// 画布铺满首屏，所以排版只管摆占位，形状跟着占位走。
 
-// 「i」竖笔中线（标志路径坐标）：上端 (22.8, 19.3)，每往下 1 个单位往左 0.315
-const STEM = { x: 22.8, y: 19.3, slope: -0.315, minY: 21, maxY: 43 };
 // 墨线晕带的半高（每用户单位）、中心的墨量（0–1，1 = 纯墨）与往两边淡出的曲线
 const LINE_BAND = 20;
 const LINE_PEAK = 0.68;
@@ -196,8 +211,14 @@ const LINE_FALLOFF = 1.4;
 const LINE_CORE = 4;
 const LINE_HALO = 7;
 const LINE_HALO_INNER = 0.34;
-// 窄屏不显示标志时的尺度（px / 用户单位），与 1440 宽时标志的尺度相近
-const FALLBACK_UNIT = 2.6;
+// 线尾伸进那一横里多少（外框宽度的比例）：把交接藏在墨里
+const LINE_TUCK = 0.06;
+// 线尾：粗到那一横的几成（0 = 不加粗，一路细线）；渐粗的那一段有多长（标志宽度的倍数）。
+// 用户在调参面板里定的（2026-11-25）：粗到整条横那么粗，渐粗的一段和标志一样宽
+const LINE_SWELL = 1;
+const LINE_SWELL_LENGTH = 1;
+// 量不到标志时的尺度（px / 用户单位）
+const FALLBACK_UNIT = 2;
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -211,6 +232,25 @@ function verticalGradient(ctx: CanvasRenderingContext2D, y: number, half: number
     gradient.addColorStop(t, `rgb(${gray},${gray},${gray})`);
   }
   return gradient;
+}
+
+// 线尾：从 x0 到 x1，半高由 from 渐到 to。先慢后快 —— 大半段几乎不变，临到标志才按下去
+function fillSwell(ctx: CanvasRenderingContext2D, x0: number, x1: number, y: number, from: number, to: number) {
+  const steps = 32;
+  const half = (t: number) => from + (to - from) * Math.pow(t, 2.6);
+  ctx.beginPath();
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const x = x0 + (x1 - x0) * t;
+    if (i === 0) ctx.moveTo(x, y - half(t));
+    else ctx.lineTo(x, y - half(t));
+  }
+  for (let i = steps; i >= 0; i--) {
+    const t = i / steps;
+    ctx.lineTo(x0 + (x1 - x0) * t, y + half(t));
+  }
+  ctx.closePath();
+  ctx.fill();
 }
 
 // 首屏的占位在宽屏和窄屏各有一套（位置不同，用 CSS 二选一显示）：取当前显示着的那个
@@ -228,14 +268,6 @@ function relativeRect(element: Element | null, box: DOMRect) {
   return { x: r.left - box.left, y: r.top - box.top, width: r.width, height: r.height };
 }
 
-// 「i」竖笔的中线在高度 y 处的 x（画布坐标）：墨线流进标志时，末端藏在这一笔的墨里。
-// mark 是墨迹框的位置，u 是每个用户单位多少 px
-function markStemX(mark: { x: number; y: number }, u: number, y: number) {
-  const py = clamp(((y - mark.y) / u + MARK_BOX.y - 27) / 6.6, STEM.minY, STEM.maxY);
-  const px = STEM.x + (py - STEM.y) * STEM.slope;
-  return mark.x + (210 + 6.6 * px - MARK_BOX.x) * u;
-}
-
 // 首屏墨线的晕沿线被盖掉多少：[位置 0–1（左缘 → 标志）, 盖掉的比例]
 const LINE_FADE: [number, number][] = [
   [0, 1],
@@ -248,15 +280,17 @@ const LINE_FADE: [number, number][] = [
 function buildHero(width: number, height: number, box: HTMLElement): InkSpec {
   const boxRect = box.getBoundingClientRect();
   const slots = heroSlots(box);
-  // lg 以下标志的占位是 display: none，量出来是空的
   const mark = relativeRect(slots.mark, boxRect);
   const line = relativeRect(slots.line, boxRect);
-  const u = mark ? mark.height / MARK_BOX.height : FALLBACK_UNIT;
-  const lineY = line ? line.y + line.height / 2 : null;
+  const u = mark ? mark.height / MARK_USER_SIZE.height : FALLBACK_UNIT;
+  // 线的高度：那一横的中线；没有标志时取墨线那一行的竖向中线
+  const lineY = mark ? mark.y + mark.height * MARK_BAR.y : line ? line.y + line.height / 2 : null;
 
-  // 墨线右端：「i」竖笔中线在这一高度上的 x；没有标志时一直画出右缘
-  let lineEnd = width + 200;
-  if (mark && lineY !== null) lineEnd = markStemX(mark, u, lineY);
+  // 墨线右端：伸进那一横的左端一点；没有标志时一直画出右缘
+  const lineEnd = mark ? mark.x + mark.width * (MARK_BAR.x + LINE_TUCK) : width + 200;
+  // 线尾：到头的半高（略小于那一横，藏在它的墨里）和起点
+  const tailHalf = mark ? Math.max(LINE_CORE / 2, (mark.height * MARK_BAR.thickness * 0.94 * LINE_SWELL) / 2) : 0;
+  const tailStart = mark ? lineEnd - mark.width * LINE_SWELL_LENGTH : lineEnd;
 
   // 显影：水落在标志上，漫开时顺着墨线往左流出去；没有标志时从墨线右端开始
   const drop = mark
@@ -277,14 +311,14 @@ function buildHero(width: number, height: number, box: HTMLElement): InkSpec {
   return {
     padding: even(0),
     draw: (ctx) => {
-      // 先画墨线的晕带，再画标志：交接处标志的墨盖在晕带上面
+      // 先画墨线的晕带，再画线尾和标志：交接处标志的墨盖在晕带上面
       if (lineY !== null) {
         const band = LINE_BAND * u;
         ctx.fillStyle = verticalGradient(ctx, lineY, band, (d) => 1 - LINE_PEAK * Math.pow(1 - d, LINE_FALLOFF));
         ctx.fillRect(-200, lineY - band, lineEnd + 200, band * 2);
         // 晕不是一路均匀：越往左越收，到左缘只剩墨芯和贴着它的一圈（和 Work 那根线一个样子），
         // 越靠近标志化得越开 —— 线是「流进标志才化开」的，不是一根通体发光的灯管。
-        // 做法：用一层从左（不透明）到右（透明）的纸色盖掉晕带。没有标志时（窄屏）线只是分隔，保持均匀
+        // 做法：用一层从左（不透明）到右（透明）的纸色盖掉晕带
         if (mark) {
           const fade = ctx.createLinearGradient(0, 0, lineEnd, 0);
           for (const [stop, alpha] of LINE_FADE) fade.addColorStop(stop, `rgba(255,255,255,${alpha})`);
@@ -292,6 +326,7 @@ function buildHero(width: number, height: number, box: HTMLElement): InkSpec {
           ctx.fillRect(-200, lineY - band, lineEnd + 200, band * 2);
         }
         ctx.fillStyle = "#000";
+        if (mark && tailHalf > LINE_CORE / 2) fillSwell(ctx, tailStart, lineEnd, lineY, LINE_CORE / 2, tailHalf);
       }
       if (mark) drawMark(ctx, mark.x, mark.y, u);
     },
@@ -309,12 +344,11 @@ function buildHero(width: number, height: number, box: HTMLElement): InkSpec {
       }
       ctx.fillStyle = "#000";
       ctx.fillRect(-200, lineY - LINE_CORE / 2, lineEnd + 200, LINE_CORE);
-
     },
     params: {
       ...markParams(u),
-      // 小标志（手机）化开得收紧一些：按比例缩下来的晕会把「i」的点这类小形状吃成一个空心圈
-      ...(u < 2 ? { tight: 4 * u * Math.max(0.55, u / 2), displacement: 4 * u * Math.max(0.55, u / 2) } : null),
+      // 小标志（手机）化开得收紧一些：按比例缩下来的晕会把最里面那两段短弧吃成两个圆点
+      ...(u < 1.2 ? { tight: 4 * u * Math.max(0.7, u / 1.2), displacement: 4 * u * Math.max(0.7, u / 1.2) } : null),
       reveal: { ...drop, radius: reach * 1.1 },
     },
   };
@@ -345,21 +379,21 @@ export function HeroInk({ className }: { className?: string }) {
   );
 }
 
-/** 首屏标志的占位：盒子 = 墨迹框。WebGL 画在 HeroInk 上；不支持时这里显示 SVG 兜底 */
-export function InkMarkSlot({ className, label }: { className?: string; label?: string }) {
+/** 首屏标志的占位：盒子 = 墨迹的外框。WebGL 画在 HeroInk 上；不支持时这里显示 SVG 兜底 */
+export function InkMarkSlot({ className, style, label }: { className?: string; style?: CSSProperties; label?: string }) {
   const supported = useInkSupported();
   return (
-    <div data-ink="mark" role={label ? "img" : undefined} aria-label={label} className={className}>
+    <div data-ink="mark" role={label ? "img" : undefined} aria-label={label} className={className} style={style}>
       {supported ? null : <InkMarkSvg viewBox={MARK_INK_BOX} bleed className="h-full w-full" />}
     </div>
   );
 }
 
-/** 首屏墨线的占位：线画在这一行的竖向中线上，左端贴到视口左缘、右端流进标志 */
-export function InkLineSlot({ className }: { className?: string }) {
+/** 首屏墨线的占位：线画在这一行的竖向中线上，左端贴到视口左缘、右端流进标志顶上那一横 */
+export function InkLineSlot({ className, style }: { className?: string; style?: CSSProperties }) {
   const supported = useInkSupported();
   return (
-    <div data-ink="line" aria-hidden="true" className={cn("relative", className)}>
+    <div data-ink="line" aria-hidden="true" className={cn("relative", className)} style={style}>
       {supported ? null : <InkLineSvg className="absolute inset-x-0 bottom-1/2 h-[22px]" />}
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, type CSSProperties } from "react";
 import { Link } from "next-view-transitions";
 
 import {
@@ -18,8 +18,15 @@ import {
 } from "@/lib/site-metadata";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
-import { MARK_PATHS } from "@/components/ui/ink/ink-tables";
+import { MARK_ASPECT, MARK_BAR } from "@/components/ui/ink/ink-tables";
+import { Mark } from "@/components/ui/mark";
 import { localizedPath } from "@/i18n/routing";
+
+// 页脚那道线（viewBox 1000 × 100，中线 y = 50，高度 = 标志顶上那一横的粗细）：
+// 左端是笔尖，大半段是略有起伏的细墨（约为那一横的八分之一），最后五分之一渐粗到整个高度、接进那一横。
+// 手画的固定路径，不是算出来的（手册 08）
+const FOOTER_LINE =
+  "M0 50C60 46 150 45 260 47C380 49 470 44 590 45C680 46 750 47 800 45C860 42 915 28 955 12C975 4 990 1 1000 0L1000 100C990 99 975 96 955 89C915 75 860 60 800 57C750 55 680 57 590 56C470 55 380 60 260 58C150 56 60 55 0 50Z";
 
 const footerLinkClassName =
   "group flex w-fit items-center gap-2 text-small text-design-dark-text-secondary transition-colors duration-base hover:text-design-dark-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-4 focus-visible:ring-offset-design-dark-bg";
@@ -129,12 +136,20 @@ export function Footer({
         ref={innerRef}
         className="relative z-10 px-edge pb-8 pt-16 will-change-transform sm:px-edge-sm sm:pb-10 sm:pt-28"
       >
-        {/* 封底：和首屏（封面）是一对。封面是纸上化开的大标志和一根流进「i」的墨线；封底是墨底上同一个构图的
-            「墨的状态」—— 标志实心、单色，线是同一根线去掉晕之后剩下的那一道（用户 2026-11-16：把分隔线换成
+        {/* 封底：和首屏（封面）是一对。封面是纸上化开的大标志和一根流进顶上那一横的墨线；封底是墨底上同一个构图的
+            「墨迹的状态」—— 标志实心、单色，线是同一根线去掉晕之后剩下的那一道（用户 2026-11-16：把分隔线换成
             首屏那种、去掉弥散、安静一点）。所有宽度都是这个构图。没有画布也没有交互：试过「墨线落进小标志 + 整块可划开的墨池」，
             用户觉得乱（2026-11-15）—— 化开的墨只留在首屏和 Work。
-            --fm-h / --fm-w：大标志的高和宽（标志的墨迹框 30 × 35.5） */}
-        <div className="flex w-full flex-col [--fm-h:clamp(6.75rem,22vw,23rem)] [--fm-w:calc(var(--fm-h)*30/35.5)]">
+            --fm-h / --fm-w：大标志的高和宽（墨迹的外框接近正方形）；--fm-bar：顶上那一横的粗细 */}
+        <div
+          className="flex w-full flex-col [--fm-h:clamp(6.75rem,22vw,23rem)]"
+          style={
+            {
+              "--fm-w": `calc(var(--fm-h) * ${MARK_ASPECT.toFixed(4)})`,
+              "--fm-bar": `calc(var(--fm-h) * ${MARK_BAR.thickness})`,
+            } as CSSProperties
+          }
+        >
           <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.getInTouch}</p>
           {/* 邮箱：这一屏唯一的大标题（Fraunces） */}
           <a
@@ -150,39 +165,31 @@ export function Footer({
             </span>
           </a>
 
-          {/* 分隔线这一行：首屏那根线去掉晕 —— 从视口左缘出发、略有起伏，流进标志的「i」（所有宽度都是这样，
-              窄屏只是标志小一些；上面留出的空要比标志伸上去的那截高，不然会碰到邮箱）。
-              标志挂在这一行上：线落在标志高度的 64.8% 处（墨迹框 y = 33），那里「i」竖笔的中线在宽度的 24.8% */}
-          <div className="relative mt-24 lg:mt-20">
-            {/* 外层定左右端（SVG 自己带固有比例，直接用 left/right 撑不开），里面的线拉伸铺满。
-                窄屏上线不压缩到屏幕那么窄（起伏会挤成波浪）：保持最小宽度、靠右对齐，左边多出来的裁掉 */}
+          {/* 线和标志这一行：首屏那根线去掉晕 —— 从视口左缘出发、略有起伏，流进标志顶上那一横的左端，
+              像同一笔写出来的。标志挂在线下面：那一横的中线就是这一行的顶边。
+              线画在一个和那一横一样高的盒子里（横向拉伸）：大半段是一道细墨，临到标志才按下去、粗到那一横的粗细 */}
+          <div className="relative mt-14 lg:mt-16">
+            {/* 外层定左右端（SVG 自己带固有比例，直接用 left/right 撑不开），里面的线拉伸铺满 */}
             <div
               aria-hidden="true"
-              className="absolute -left-edge right-[calc(var(--fm-w)*0.752)] top-[-7px] h-[14px] overflow-hidden text-design-dark-text-primary sm:-left-edge-sm"
+              className="absolute -left-edge h-[var(--fm-bar)] -translate-y-1/2 text-design-dark-text-primary sm:-left-edge-sm"
+              style={{ right: `calc(var(--fm-w) * ${(1 - MARK_BAR.x - 0.06).toFixed(3)})` }}
             >
-              <svg viewBox="0 0 1000 14" preserveAspectRatio="none" className="absolute right-0 top-0 h-full w-full min-w-[56rem]">
-                <path
-                  d="M0 7C80 3.5 160 3.5 250 7S420 10.5 500 7S670 3.5 750 7S920 9.5 1000 7"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  vectorEffect="non-scaling-stroke"
-                />
+              <svg viewBox="0 0 1000 100" preserveAspectRatio="none" className="block h-full w-full fill-current">
+                <path d={FOOTER_LINE} />
               </svg>
             </div>
-            <svg
-              viewBox="11 10 30 35.5"
-              role="img"
-              aria-label={SITE_AUTHOR}
-              className="absolute right-0 top-[calc(var(--fm-h)*-0.648)] h-[var(--fm-h)] w-[var(--fm-w)] fill-current text-design-dark-text-primary"
-            >
-              {MARK_PATHS.map((d) => (
-                <path key={d} d={d} />
-              ))}
-            </svg>
+            <Mark
+              label={SITE_AUTHOR}
+              className="absolute right-0 h-[var(--fm-h)] w-[var(--fm-w)] text-design-dark-text-primary"
+              style={{ top: `calc(var(--fm-h) * ${-MARK_BAR.y})` }}
+            />
           </div>
 
-          <div className="grid grid-cols-2 gap-x-6 gap-y-10 pt-14 sm:w-3/4 sm:grid-cols-3 lg:w-2/3 lg:pt-10">
+          {/* 链接三栏在左，标志挂在右：这一块至少和标志一样高，下面的版权行才不会碰到标志的脚。
+              手机上两栏链接会排到标志底下，所以先让出标志的高度 */}
+          <div className="min-h-[var(--fm-h)] pt-[calc(var(--fm-h)+1.5rem)] sm:pt-14 lg:pt-12">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:w-3/4 sm:grid-cols-3 lg:w-2/3">
 
             <nav aria-label={dictionary.footer.aria}>
               <p className="text-label uppercase text-design-dark-text-muted">{dictionary.footer.site}</p>
@@ -217,12 +224,13 @@ export function Footer({
                 <br />
                 {dictionary.footer.workingInternationally}
               </p>
-              {/* 接项目：页脚没有化开的东西，可以取一滴强调色 —— 只落在圆点上，字还是墨写的（手册 03） */}
+              {/* 接项目：页脚没有化开的东西，可以放 Coral 的圆点 —— 只落在点上，字还是墨写的（手册 03） */}
               <p className="mt-3 flex items-center gap-2 text-small text-design-dark-text-secondary">
                 <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-accent" />
                 {dictionary.home.hero.availability}
               </p>
             </div>
+          </div>
           </div>
 
           <div className="mt-16 flex flex-col gap-2 text-small text-design-dark-text-muted sm:mt-24 sm:flex-row sm:items-baseline sm:justify-between">

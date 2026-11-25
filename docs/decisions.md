@@ -12,6 +12,13 @@ do not describe the current design here — that is the brand manual and `CLAUDE
 
 ## Hero
 
+- **Mark vertically centred at 73.5svh** (the L·i mark, line entering its stem at mid-height): the 雨 mark takes
+  the line at its top stroke, so it hangs below the line instead.
+- **Thin line butting into the top stroke**: read as a needle stuck into a block. The line now swells to the
+  stroke's thickness over its last stretch.
+- **Bloom at the old mark's scale** (blur radii tuned for L·i's solid shapes): washed 雨's thin strokes to blue
+  with no ink core; inner arcs and one leg disappeared.
+- **Italic on the bloomed word** (*color*): the stress was given twice. Italic is now only on *ordinary*.
 - **Scroll Down badge** (centered rotating ring): the only centered, only rotating thing on the page, sitting on
   the seam to the next section.
 - **Narrow screens without the mark** (a glowing band between slogan and identity): the bloom pressed on the text.
@@ -75,6 +82,13 @@ do not describe the current design here — that is the brand manual and `CLAUDE
 
 ## Footer, menu, identity
 
+- **L·i mark** (L and i forming a triangle, with a small-size cut and a circular container in the navbar):
+  replaced by 雨 in manual v2. The container is not part of the mark; the navbar shows the bare outline.
+- **Cobalt accent in light mode, Coral in dark**: one identity, one colour to remember. Coral in both.
+- **Stroked sine-like dividers of constant width**: read as drawn by a formula. Dividers are fixed filled shapes
+  with tapered ends.
+- **Share image with the manual's exact filter numbers**: the server renderer's noise differs from the browser's
+  and washed out half the mark.
 - **Blooming, stirrable footer**: cluttered; ink only where it has a job.
 - **Square cursor with difference blending**: the old brand, and the only hard geometric shape left once the ink
   came in. Replaced by an ink dot, still difference-blended, chosen in a side-by-side trial over the mark's slanted
