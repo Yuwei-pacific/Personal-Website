@@ -27,7 +27,6 @@ export type CaseIdentityCopy = {
   line: {
     title: string;
     text: string;
-    divide: string;
     stress: { text: string; word: string };
     circle: { text: string; word: string };
     rows: [string, string, string];
@@ -64,7 +63,6 @@ const copy: Record<Locale, CaseIdentityCopy> = {
     line: {
       title: "La linea",
       text: "Ogni linea è disegnata a mano, salvata come tracciato e riusata: per dividere, per sottolineare una parola, per cerchiarne una.",
-      divide: "Dividere",
       stress: { text: "Un portfolio bilingue per uno studio di Milano.", word: "bilingue" },
       circle: { text: "Lo disegno, poi lo costruisco.", word: "disegno" },
       rows: ["Juno", "Urlo Creativo", "Impass"],
@@ -102,7 +100,6 @@ const copy: Record<Locale, CaseIdentityCopy> = {
     line: {
       title: "The line",
       text: "Every line is drawn by hand, saved as a path and reused: to divide, to stress one word, to circle one.",
-      divide: "Divide",
       stress: { text: "A bilingual portfolio for a Milan studio.", word: "bilingual" },
       circle: { text: "I design it, then I build it.", word: "design" },
       rows: ["Juno", "Urlo Creativo", "Impass"],
