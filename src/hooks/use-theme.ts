@@ -2,10 +2,10 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 
-export type Theme = "light" | "dark";
+import { THEME_STORAGE_KEY } from "@/lib/theme";
 
-// 与 [locale]/layout.tsx 里首帧内联脚本读取的键保持一致
-export const THEME_STORAGE_KEY = "theme";
+export type Theme = "light" | "dark";
+export { THEME_STORAGE_KEY };
 
 const THEME_CHANGE_EVENT = "themechange";
 const SYSTEM_DARK_QUERY = "(prefers-color-scheme: dark)";

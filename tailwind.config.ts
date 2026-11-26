@@ -18,7 +18,7 @@ const config: Config = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        // 强调色：五色里单取的一滴（浅色 Cobalt / 深色 Coral）。只落在线和点上，文字不染色
+        // 强调色：主色 Coral（浅色 #EC4636、深色 #FF5A4E）。只落在线和点上，文字不染色
         accent: hslVar("--color-accent"),
         // 分区色板：浅色区用 design-light-*，深色区用 design-dark-*
         design: {

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
+import { Link } from "next-view-transitions";
 import { useLenis } from "lenis/react";
 import { useTheme, type Theme } from "@/hooks/use-theme";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/gsap-react";
@@ -16,6 +17,7 @@ export type StaggeredMenuItem = {
   label: string;
   ariaLabel?: string;
   link: string;
+  current?: boolean;
 };
 
 export type StaggeredMenuSocialItem = {
@@ -63,7 +65,9 @@ type PanelElements = {
   socialLinks: HTMLElement[];
 };
 
-const PRE_LAYER_COLORS = ["#dbe4ee", "#171717"];
+// 抽屉垫层：沿用当前主题的纸 / 墨阶梯（浅色为暖灰 → 纸 2 → 纸，深色为墨 3 → 墨 2 → 墨），
+// 不再使用旧版硬编码的冷蓝灰
+const PRE_LAYER_COLORS = ["hsl(var(--s-alt-bg2))", "hsl(var(--s-alt-bg))"];
 const MENU_BUTTON_COLOR = "#ffffff";
 // 打开时按钮压在面板上，用面板的文字色。面板底色随主题变（纸 / 墨），所以在动画那一刻
 // 现读 CSS 变量，而不是写死一个深色 —— 深色模式下面板是墨色，写死的深色字会看不见。
@@ -640,15 +644,19 @@ function StaggeredMenu({
             {items.length ? (
               items.map((item, index) => (
                 <li className="sm-panel-itemWrap" key={`${item.label}-${index}`}>
-                  <a
+                  <Link
                     className="sm-panel-item"
                     href={item.link}
                     aria-label={item.ariaLabel}
+                    aria-current={item.current ? "page" : undefined}
                     data-index={index + 1}
                     onClick={(event) => handleItemClick(item, event)}
                   >
-                    <span className="sm-panel-itemLabel">{item.label}</span>
-                  </a>
+                    <span className="sm-panel-itemLabel">
+                      {item.label}
+                      {item.current ? <span aria-hidden="true" className="sm-panel-activeDot" /> : null}
+                    </span>
+                  </Link>
                 </li>
               ))
             ) : (

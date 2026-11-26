@@ -22,9 +22,10 @@
 // color 一词同样显影；口号先浮现，最后是身份段和联系方式。
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 
 import { HeroInk, InkLineSlot, InkMarkSlot, InkWord } from "@/components/ui/ink-mark";
+import { MARK_ASPECT, MARK_BAR } from "@/components/ui/ink/ink-tables";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/gsap-react";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { textLink } from "@/components/ui/text-link";
@@ -34,20 +35,24 @@ import { SITE_AUTHOR, SITE_EMAIL } from "@/lib/site-metadata";
 // 墨线 42.5svh、标志 52svh（上限 36vw）、右缘 1.75rem、窄屏标志 240px；线尾的两个数在 ui/ink-mark.tsx。lg 起：
 // --line-y    墨线离首屏顶边多远。口号的底贴着它上面，标志和身份段从它往下挂
 // --line-row  墨线那一行的高度：要装得下两侧的晕，晕才不会压到口号和身份段上
-// --mark-h    标志的高度；--mark-w 按墨迹外框的比例（接近正方形）
+// --mark-h    标志的高度；--mark-w 按墨迹外框的比例（来自 ink-tables.ts 的 MARK_ASPECT）
 //             线以下要装得下整个标志：line-y + mark-h 不超过首屏的高度
 // --mark-r    标志右缘到视口右缘：比页边（2rem）略靠外，晕的外沿才和 Menu 按钮那条竖线齐
 // lg 以下：标志和线排在口号上面，--mark-hm 是那里标志的高度。化开的标志最小 240 px（手册 02）：
 //           手机上就取这个下限，平板（md）有地方，跟着屏高放大
 const HERO_VARS =
-  "[--line-y:max(42.5svh,17rem)] [--line-row:clamp(4.5rem,11svh,7rem)] [--mark-h:min(52svh,36vw)] [--mark-w:calc(var(--mark-h)*0.9933)] [--mark-r:1.75rem] [--mark-hm:15rem] md:[--mark-hm:clamp(15rem,34svh,24rem)]";
-// 那一横的中线离标志上缘：高度的 5.4%（ink-tables.ts 的 MARK_BAR.y）
-const BAR_Y = 0.054;
+  "[--line-y:max(42.5svh,17rem)] [--line-row:clamp(4.5rem,11svh,7rem)] [--mark-h:min(52svh,36vw)] [--mark-r:1.75rem] [--mark-hm:15rem] md:[--mark-hm:clamp(15rem,34svh,24rem)]";
+const MARK_ASPECT_STR = MARK_ASPECT.toFixed(4);
+const HERO_MARK_STYLE = {
+  "--mark-w": `calc(var(--mark-h) * ${MARK_ASPECT_STR})`,
+  "--mark-wm": `calc(var(--mark-hm) * ${MARK_ASPECT_STR})`,
+} as CSSProperties;
 
 export function Hero({ dictionary }: { dictionary: Dictionary }) {
   const hero = dictionary.home.hero;
   const { before, accent, after, end } = hero.slogan;
   const ref = useRef<HTMLElement>(null);
+  const [inkUnavailable, setInkUnavailable] = useState(false);
 
   useGSAP(
     () => {
@@ -59,7 +64,8 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
       gsap
         .timeline({ defaults: { ease: "power2.out" } })
         .to(".hero-slogan", { autoAlpha: 1, y: 0, duration: 0.9 }, 0.15)
-        .to(".hero-details", { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.12 }, 1.9);
+        // 收紧入场间隔：访客不必等近 2 秒就能看到身份介绍与联系方式
+        .to(".hero-details", { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.1 }, 0.85);
     },
     { scope: ref },
   );
@@ -68,17 +74,19 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
     <section
       ref={ref}
       id="home"
+      style={HERO_MARK_STYLE}
       className={`relative isolate z-20 flex min-h-[max(100svh,36rem)] w-full flex-col lg:h-[100svh] lg:min-h-[36rem] overflow-x-clip bg-background px-edge sm:px-edge-sm ${HERO_VARS}`}
     >
       {/* 化开的标志和墨线：一块画布铺满首屏，压在文字下面 */}
-      <HeroInk className="absolute inset-0" />
+      <HeroInk className="absolute inset-0" onUnavailableChange={setInkUnavailable} />
 
       {/* 标志的占位：lg 起贴右页边，顶上那一横的中线落在墨线上，整个字挂在线下面。
           lg 以下（含平板竖屏）用下面口号上方那一套 */}
       <InkMarkSlot
         className="absolute right-[var(--mark-r)] hidden h-[var(--mark-h)] w-[var(--mark-w)] lg:block"
-        style={{ top: `calc(var(--line-y) - var(--mark-h) * ${BAR_Y})` }}
+        style={{ top: `calc(var(--line-y) - var(--mark-h) * ${MARK_BAR.y})` }}
         label={SITE_AUTHOR}
+        fallbackActive={inkUnavailable}
       />
 
       <div className="relative flex flex-1 flex-col justify-center pb-16 pt-24 md:pb-20 lg:block lg:py-0">
@@ -88,11 +96,13 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
         <div className="relative mb-7 h-[var(--mark-hm)] lg:hidden">
           <InkLineSlot
             className="absolute -left-edge h-10 w-[100vw] -translate-y-1/2 sm:-left-edge-sm"
-            style={{ top: `${BAR_Y * 100}%` }}
+            style={{ top: `${MARK_BAR.y * 100}%` }}
+            fallbackActive={inkUnavailable}
           />
           <InkMarkSlot
-            className="absolute right-0 top-0 h-full w-[calc(var(--mark-hm)*0.9933)]"
+            className="absolute right-0 top-0 h-full w-[var(--mark-wm)]"
             label={SITE_AUTHOR}
+            fallbackActive={inkUnavailable}
           />
         </div>
         {/* lg 起：口号的底贴在墨线那一行上面。这一层的高度 = 墨线以上的全部 */}
@@ -111,7 +121,10 @@ export function Hero({ dictionary }: { dictionary: Dictionary }) {
         </div>
 
         {/* 墨线这一行：线画在它的竖向中线上，左端贴视口左缘、右端流进标志顶上那一横。宽度只给 SVG 兜底用 */}
-        <InkLineSlot className="-ml-edge hidden h-[var(--line-row)] w-[100vw] sm:-ml-edge-sm lg:block lg:w-[calc(100vw-var(--mark-r)-var(--mark-w)*0.8)]" />
+        <InkLineSlot
+          className="-ml-edge hidden h-[var(--line-row)] w-[100vw] sm:-ml-edge-sm lg:block lg:w-[calc(100vw-var(--mark-r)-var(--mark-w)*0.8)]"
+          fallbackActive={inkUnavailable}
+        />
 
         {/* 宽度不超过标志左缘（留 3rem），中等宽度的屏幕上身份段不会钻到标志底下 */}
         <p className="hero-details mt-6 max-w-[46ch] text-pretty lg:mt-0 lg:max-w-[min(46ch,calc(100vw-var(--mark-r)-var(--mark-w)-6rem))] text-[1.25rem] leading-snug sm:text-2xl">

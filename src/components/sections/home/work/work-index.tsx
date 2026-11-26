@@ -3,7 +3,7 @@
 // 目录：精选之外的项目，一行一个。墨线最后落在目录顶上（data-ink="rule"），成为那道线。
 // 悬停（或键盘聚焦）某一行时，旁边落下一小滩墨显出这个项目的封面（IndexPreview）。
 // 触屏没有悬停：md 以下不出预览，点一行直接进详情页。
-import { useRef, useState, type FocusEvent, type MouseEvent } from "react";
+import { useMemo, useRef, useState, type FocusEvent, type MouseEvent } from "react";
 import { Link } from "next-view-transitions";
 
 import { useInkNavigate } from "@/components/projects/ink-transition";
@@ -32,17 +32,21 @@ export function WorkIndex({
   const [top, setTop] = useState(0);
   const inkNavigate = useInkNavigate();
 
-  const items: PreviewItem[] = projects.map((project) => ({
-    id: project._id,
-    image: project.coverImage
-      ? buildCropUrl(project.coverImage, {
-          width: PREVIEW_WIDTH * 2,
-          height: PREVIEW_HEIGHT * 2,
-          animated: project.coverImage.animated,
-        })
-      : null,
-    video: project.coverVideo?.url ?? null,
-  }));
+  const items = useMemo<PreviewItem[]>(
+    () =>
+      projects.map((project) => ({
+        id: project._id,
+        image: project.coverImage
+          ? buildCropUrl(project.coverImage, {
+              width: PREVIEW_WIDTH * 2,
+              height: PREVIEW_HEIGHT * 2,
+              animated: project.coverImage.animated,
+            })
+          : null,
+        video: project.coverVideo?.url ?? null,
+      })),
+    [projects],
+  );
 
   const show = (index: number, event: MouseEvent<HTMLElement> | FocusEvent<HTMLElement>) => {
     const list = listRef.current?.getBoundingClientRect();

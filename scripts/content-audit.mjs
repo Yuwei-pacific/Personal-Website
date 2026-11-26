@@ -49,7 +49,9 @@ const MEDIA = `{
   "alt": altTranslations
 }`;
 
-const docs = await client.fetch(`*[_type == "project"] | order(coalesce(year, 0) desc, _id asc){
+let docs;
+try {
+  docs = await client.fetch(`*[_type == "project"] | order(coalesce(year, 0) desc, _id asc){
   _id, year, featured, featuredOrder, client, contributors, tags,
   "slug": slug.current,
   titleTranslations, summaryTranslations, projectTypeTranslations,
@@ -68,6 +70,13 @@ const docs = await client.fetch(`*[_type == "project"] | order(coalesce(year, 0)
   "galleryNoAlt": count(gallery[coalesce(length(altTranslations.it), 0) == 0 && coalesce(length(altTranslations.en), 0) == 0]),
   "linkCount": count(links)
 }`);
+} catch (error) {
+  // 不直接抛出原始错误对象：@sanity/client 的网络错误里挂着完整的 ClientRequest，
+  // 未捕获打印时会把 Authorization 请求头里的 SANITY_READ_TOKEN 一起打进终端日志。
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(`读取 Sanity 内容失败：${message}`);
+  process.exit(1);
+}
 
 // 与 queries.ts 的 localized() 同一判断：空串 / 空数组算没填
 const filled = (value) => (value == null ? false : typeof value === "string" ? value.trim().length > 0 : Array.isArray(value) ? value.length > 0 : true);

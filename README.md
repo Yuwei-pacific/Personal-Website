@@ -19,24 +19,27 @@ Live at [yuweidesign.com](https://www.yuweidesign.com).
 Personal-Website/
 ├─ src/
 │  ├─ app/
-│  │  ├─ [locale]/               # Localized routes: /it and /en
-│  │  ├─ globals.css              # Design tokens + global styles
+│  │  ├─ (site)/[locale]/         # Localized public routes: /it and /en (own root layout)
+│  │  ├─ (studio)/studio/         # Embedded Sanity Studio (own root layout)
+│  │  ├─ api/revalidate/          # Sanity publish webhook → tag revalidation
+│  │  ├─ globals.css              # Design tokens + light/dark surface theming
 │  │  ├─ global-error.tsx         # Root layout error boundary
-│  │  └─ studio/[[...index]]/     # Embedded Sanity Studio
+│  │  └─ global-not-found.tsx     # Localized 404 document
 │  ├─ components/
-│  │  ├─ layout/                  # Navigation, footer
-│  │  ├─ projects/                # Project cards, detail view, gallery
-│  │  ├─ providers/               # Application providers
+│  │  ├─ layout/                  # Navigation (StaggeredMenu), footer, 404 view
+│  │  ├─ projects/                # Project detail view, sections, gallery, ink transition
+│  │  ├─ providers/               # Lenis + view transitions providers
 │  │  ├─ sections/                # Page sections, grouped by route
-│  │  │  ├─ home/                 #   hero, about preview, work grid
-│  │  │  └─ about/                #   about page content, resume list
+│  │  │  ├─ home/                 #   hero, about preview, work (featured + index)
+│  │  │  └─ about/                #   about page content, portrait drop, resume list
 │  │  ├─ seo/                     # JSON-LD
-│  │  ├─ ui/                      # Shared UI and animation primitives
-│  ├─ hooks/                      # Shared client hooks
+│  │  └─ ui/                      # Shared UI, ink WebGL2 renderer & animation primitives
+│  ├─ hooks/                      # Shared client hooks (theme, reduced motion, lightbox lock)
 │  ├─ i18n/                       # Locale config, dictionaries, path helpers
 │  ├─ lib/
 │  │  ├─ animation/               # GSAP registration boundaries
 │  │  ├─ site-metadata.ts         # Single source for URL, contact, socials
+│  │  ├─ theme.ts                 # Shared theme storage key & pre-paint init script
 │  │  └─ view-models/             # CMS normalization + stable UI types
 │  └─ sanity/
 │     ├─ client.ts                # Server-only data client
@@ -66,23 +69,25 @@ Personal-Website/
   projection shape when the generated result is not directly reusable, but it
   must stay adjacent to that normalizer and never leak into UI contracts.
   Stable, non-nullable UI contracts live in `src/lib/view-models/types.ts`.
-- **Theming**: the site is single-theme (no dark mode toggle). The
-  `design-light-*` / `design-dark-*` Tailwind colors are fixed *surface* tokens:
-  light sections use `design-light-*`, the dark Work/detail sections use
-  `design-dark-*`. Dark sections declare `data-overscroll-dark` so the body
-  background matches during overscroll bounce.
+- **Theming**: dual-theme — light ("paper") and dark ("night"), following the
+  system preference by default with a manual toggle in the menu
+  (`src/hooks/use-theme.ts`, `<html data-theme>` + `localStorage.theme`, applied
+  before first paint via `src/lib/theme.ts`). Surface classes (`.surface-base`,
+  `.surface-alt`, `.surface-inverse`) re-map the underlying surface tokens per
+  section, with the footer as the single inverted block per page.
 - **Design tokens**: raw values live as CSS variables in `src/app/globals.css`,
   mapped to Tailwind utilities in `tailwind.config.ts`
   (vertical rhythm: `section` for page-level blocks vs `panel` for padding inside a
-  block, other spacing: `container/gap-section/stack`, radius: `card/button/tag/media/panel`,
+  block, other spacing: `container/edge/gap-section/stack`, radius: `card/button/tag/media/panel`,
   motion: `duration-fast/base/slow/media`, type scale: `display/display-sm/section/lead/body/small/label`,
   display tracking: `tracking-display`,
   layout: `max-w-content`, layering: `z-nav/z-nav-logo/z-cursor/z-skip-link`).
-  Section headings share one ramp: `text-display-sm lg:text-display` + `tracking-display`.
-  The hero's three-line title keeps its own per-line `vw` sizes — it is a one-off
-  typographic composition, not a reusable scale.
+  Titles use `Fraunces` (`font-display`), body and UI copy use `Geist` (Regular
+  only — emphasis in long-form text switches to the primary ink colour instead
+  of a heavier weight), and labels/numbers use `Geist Mono`. Coral (`accent`) is used only on lines
+  and dots, never text.
   Rule of thumb: a visual decision used 3+ times becomes a token; one-off art
-  direction (portrait offsets, collage ratios) stays inline. Only *global*
+  direction (portrait offsets, hero ink geometry) stays inline. Only *global*
   layering is tokenised — inside a section keep using `z-10` / `z-20`.
   Sharp corners are the site style, but `rounded-full` stays available:
   a circle is a shape, not a corner-radius style.

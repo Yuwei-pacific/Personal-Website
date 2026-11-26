@@ -42,16 +42,20 @@ export function Navbar({
   // Lenis 未启用（减弱动画 / Studio）时为 undefined，回退到原生滚动
   const lenis = useLenis();
   const homePath = localizedPath(locale);
+  const aboutPath = localizedPath(locale, "/about");
+  const normalizedPathname = pathname?.replace(/\/+$/, "") || "";
   const menuItems: StaggeredMenuItem[] = [
     {
       label: dictionary.navigation.home,
       ariaLabel: dictionary.navigation.homeAria,
       link: `${homePath}#home`,
+      current: normalizedPathname === homePath,
     },
     {
       label: dictionary.navigation.about,
       ariaLabel: dictionary.navigation.aboutAria,
-      link: localizedPath(locale, "/about"),
+      link: aboutPath,
+      current: normalizedPathname === aboutPath,
     },
     {
       label: dictionary.navigation.work,

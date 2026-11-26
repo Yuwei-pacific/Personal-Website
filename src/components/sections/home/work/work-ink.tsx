@@ -110,19 +110,21 @@ function buildWork(mobile: boolean) {
 export function WorkInk({ featured }: { featured: FeaturedMedia[] }) {
   const anchorRef = useRef<HTMLSpanElement>(null);
   const supported = useInkSupported();
+  const [inkUnavailable, setInkUnavailable] = useState(false);
+  const inkActive = supported && !inkUnavailable;
   const reducedMotion = usePrefersReducedMotion();
   const desktop = useSyncExternalStore(subscribeDesktop, isDesktop, () => true);
   const [loaded, setLoaded] = useState(0);
   const [focus, setFocus] = useState(-1);
   const [video, setVideo] = useState<VideoState>({ element: null });
 
-  // 不支持 WebGL：给区块打标记，占位里的普通封面改为可见
+  // 不支持 WebGL 或运行期上下文丢失：给区块打标记，占位里的普通封面改为可见
   useEffect(() => {
     const section = anchorRef.current?.parentElement;
     if (!section) return;
-    if (supported) delete section.dataset.ink;
+    if (inkActive) delete section.dataset.ink;
     else section.dataset.ink = "off";
-  }, [supported]);
+  }, [inkActive]);
 
   // 封面图片加载完一张，就重画一次（重算化开）。已经加载好的直接算进去
   useEffect(() => {
@@ -170,7 +172,7 @@ export function WorkInk({ featured }: { featured: FeaturedMedia[] }) {
 
       // 焦点作品有封面视频：在墨里播放（减弱动画或不支持 WebGL 时不播）
       const media = best >= 0 ? featured[best] : undefined;
-      const element = media?.video && supported && !reducedMotion ? coverVideo(media.id, media.video) : null;
+      const element = media?.video && inkActive && !reducedMotion ? coverVideo(media.id, media.video) : null;
       playFocusVideo(element);
       if (!element) {
         setVideo({ element: null });
@@ -192,7 +194,7 @@ export function WorkInk({ featured }: { featured: FeaturedMedia[] }) {
       if (frame) cancelAnimationFrame(frame);
       playFocusVideo(null);
     };
-  }, [featured, supported, reducedMotion]);
+  }, [featured, inkActive, reducedMotion]);
 
   const watch = (box: HTMLElement) => [...(box.parentElement?.querySelectorAll("[data-ink]") ?? [])];
 
@@ -208,6 +210,7 @@ export function WorkInk({ featured }: { featured: FeaturedMedia[] }) {
           watch={watch}
           focus={focus}
           video={video}
+          onUnavailableChange={setInkUnavailable}
           fallback={null}
         />
       ) : null}

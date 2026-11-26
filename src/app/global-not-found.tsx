@@ -18,6 +18,7 @@ import { NotFoundView } from "@/components/layout/not-found-view";
 import { defaultLocale, isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { SITE_LOCALE_HEADER } from "@/proxy";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { fontVariables } from "./fonts";
 import "./globals.css";
 
@@ -29,8 +30,9 @@ export default async function GlobalNotFound() {
   const dictionary = getDictionary(locale);
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <title>{`404 | ${dictionary.errors.notFoundTitle}`}</title>
         <meta name="robots" content="noindex" />
       </head>

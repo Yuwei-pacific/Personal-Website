@@ -27,6 +27,7 @@ import {
   localizedAbsoluteUrl,
 } from "@/lib/site-metadata";
 import { fontVariables } from "../../fonts";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "lenis/dist/lenis.css";
 import "../../globals.css";
 
@@ -38,11 +39,6 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: dark)", color: "#0C0D12" },
   ],
 };
-
-// 首帧之前把手动选择的主题写到 <html data-theme>，避免先按系统主题画一帧再跳变。
-// 没有手动选择时不写属性，由 globals.css 的 prefers-color-scheme 跟随系统。
-// 存储键与 hooks/use-theme.ts 的 THEME_STORAGE_KEY 保持一致。
-const themeInitScript = `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -120,7 +116,7 @@ export default async function SiteLayout({
     // suppressHydrationWarning：data-theme 由上面的内联脚本在水合前写入，服务端渲染时没有
     <html lang={rawLocale} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <link rel="preconnect" href="https://cdn.sanity.io" />
       </head>
       <body

@@ -110,7 +110,7 @@ uniform vec4 uFocusRect[4];     // x, y, width, height（画布 CSS px）
 uniform float uFocusWeight[4];  // 0–1，随滚动缓动
 uniform float uFocusMargin;
 uniform float uFocusFeather;
-uniform float uQuietEdge;       // 焦点之外收拢到哪个明暗为止：浅色 0.36（干净的墨边），深色 0.52（留一丝连贯的 Cobalt）
+uniform float uQuietEdge;       // 焦点之外收拢到哪个明暗为止（0.36：收成干净的墨边，深浅模式共用）
 // 视频：化开时在墨芯里播放（一次只有一个）。区域与原始尺寸用于 object-fit: cover 的裁切
 uniform sampler2D uVideo;
 uniform vec4 uVideoRect;
@@ -543,6 +543,7 @@ export class InkRenderer {
   private blur: Program;
   private trailProgram: Program;
   private ink: Program;
+  private buffer: WebGLBuffer | null;
   private framebuffer: WebGLFramebuffer | null;
   private tight: WebGLTexture | null = null;
   private loose: WebGLTexture | null = null;
@@ -643,8 +644,8 @@ export class InkRenderer {
       "uVideoMix",
     ]);
     // 一个覆盖全屏的大三角形
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    this.buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
@@ -656,6 +657,7 @@ export class InkRenderer {
   /** 形状或尺寸变了：重画源图、重算模糊、重置拨动场。代价较高，只在尺寸变化时调用 */
   setLayout(layout: InkLayout) {
     const { gl } = this;
+    if (gl.isContextLost()) return;
     this.layout = layout;
     const dpr = Math.min(window.devicePixelRatio || 1, layout.params.maxDpr ?? MAX_DPR);
     this.dpr = dpr;
@@ -777,10 +779,11 @@ export class InkRenderer {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
-  /** 换主题：换查找表；dark 决定焦点之外的墨边留多少 */
+  /** 换主题：换查找表 */
   setTables(tables: InkTables, dark = false) {
     const { gl } = this;
     this.dark = dark;
+    if (gl.isContextLost()) return;
     if (this.lut) gl.deleteTexture(this.lut);
     this.lut = texture(gl, LUT_SIZE, 1, buildLut(tables));
     this.needsDraw = true;
@@ -809,7 +812,7 @@ export class InkRenderer {
 
   private updateVideo(dt: number) {
     const { gl, video } = this;
-    if (!video) return;
+    if (!video || gl.isContextLost()) return;
     const ready = video.readyState >= 2 && video.videoWidth > 0;
     // 有画面了才淡入；淡出用最后一帧
     const target = ready ? this.videoTarget : 0;
@@ -976,7 +979,7 @@ export class InkRenderer {
 
   private draw(time: number, animated: boolean) {
     const { gl, ink, layout } = this;
-    if (!layout) return;
+    if (!layout || gl.isContextLost()) return;
     this.needsDraw = false;
     const { params } = layout;
 
@@ -1020,7 +1023,7 @@ export class InkRenderer {
       gl.uniform1fv(u.uFocusWeight, weights);
       gl.uniform1f(u.uFocusMargin, FOCUS_MARGIN);
       gl.uniform1f(u.uFocusFeather, FOCUS_FEATHER);
-      // 深色模式的墨芯和夜色几乎一样黑：只留墨边就看不见了，多留一丝 Cobalt 勾出轮廓
+      // 焦点之外收拢成干净的墨边（深色模式墨芯已改为纸色，不必再用 Cobalt 勾边）
       gl.uniform1f(u.uQuietEdge, 0.36);
     }
 
@@ -1076,8 +1079,10 @@ export class InkRenderer {
   destroy() {
     this.unsubscribe?.();
     const { gl } = this;
+    if (gl.isContextLost()) return;
     [this.tight, this.loose, this.core, this.image, ...this.trail, this.lut].forEach((t) => gl.deleteTexture(t));
     gl.deleteTexture(this.videoTexture);
+    gl.deleteBuffer(this.buffer);
     gl.deleteFramebuffer(this.framebuffer);
     gl.deleteProgram(this.blur.program);
     gl.deleteProgram(this.trailProgram.program);

@@ -364,7 +364,13 @@ function heroWatch(box: HTMLElement) {
  * 首屏的化开画布：铺满父元素（首屏 section），按父元素里 InkMarkSlot / InkLineSlot 的位置
  * 画标志和墨线。不支持 WebGL 时不渲染，由两个占位自己显示 SVG 兜底。
  */
-export function HeroInk({ className }: { className?: string }) {
+export function HeroInk({
+  className,
+  onUnavailableChange,
+}: {
+  className?: string;
+  onUnavailableChange?: (unavailable: boolean) => void;
+}) {
   const supported = useInkSupported();
   if (!supported) return null;
   return (
@@ -374,27 +380,46 @@ export function HeroInk({ className }: { className?: string }) {
       build={buildHero}
       buildKey="hero"
       watch={heroWatch}
+      onUnavailableChange={onUnavailableChange}
       fallback={null}
     />
   );
 }
 
-/** 首屏标志的占位：盒子 = 墨迹的外框。WebGL 画在 HeroInk 上；不支持时这里显示 SVG 兜底 */
-export function InkMarkSlot({ className, style, label }: { className?: string; style?: CSSProperties; label?: string }) {
+/** 首屏标志的占位：盒子 = 墨迹的外框。WebGL 画在 HeroInk 上；不支持或上下文丢失时这里显示 SVG 兜底 */
+export function InkMarkSlot({
+  className,
+  style,
+  label,
+  fallbackActive = false,
+}: {
+  className?: string;
+  style?: CSSProperties;
+  label?: string;
+  fallbackActive?: boolean;
+}) {
   const supported = useInkSupported();
   return (
     <div data-ink="mark" role={label ? "img" : undefined} aria-label={label} className={className} style={style}>
-      {supported ? null : <InkMarkSvg viewBox={MARK_INK_BOX} bleed className="h-full w-full" />}
+      {supported && !fallbackActive ? null : <InkMarkSvg viewBox={MARK_INK_BOX} bleed className="h-full w-full" />}
     </div>
   );
 }
 
 /** 首屏墨线的占位：线画在这一行的竖向中线上，左端贴到视口左缘、右端流进标志顶上那一横 */
-export function InkLineSlot({ className, style }: { className?: string; style?: CSSProperties }) {
+export function InkLineSlot({
+  className,
+  style,
+  fallbackActive = false,
+}: {
+  className?: string;
+  style?: CSSProperties;
+  fallbackActive?: boolean;
+}) {
   const supported = useInkSupported();
   return (
     <div data-ink="line" aria-hidden="true" className={cn("relative", className)} style={style}>
-      {supported ? null : <InkLineSvg className="absolute inset-x-0 bottom-1/2 h-[22px]" />}
+      {supported && !fallbackActive ? null : <InkLineSvg className="absolute inset-x-0 bottom-1/2 h-[22px]" />}
     </div>
   );
 }

@@ -73,6 +73,8 @@ export function InkCover({
   const boxRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const supported = useInkSupported();
+  const [inkUnavailable, setInkUnavailable] = useState(false);
+  const inkActive = supported && !inkUnavailable;
   const reducedMotion = usePrefersReducedMotion();
   const mounted = useMounted();
   const [loaded, setLoaded] = useState(false);
@@ -104,7 +106,7 @@ export function InkCover({
     };
   }, []);
 
-  const canPlay = Boolean(video) && supported && mounted;
+  const canPlay = Boolean(video) && inkActive && mounted;
   const playing = canPlay && inView && (wanted ?? !reducedMotion);
   const element = canPlay && video && (wanted ?? !reducedMotion) ? coverVideo(id, video) : null;
 
@@ -150,7 +152,7 @@ export function InkCover({
   };
 
   return (
-    <div ref={boxRef} data-ink={supported ? "on" : "off"} className={cn("group/cover relative", className)}>
+    <div ref={boxRef} data-ink={inkActive ? "on" : "off"} className={cn("group/cover relative", className)}>
       {/* 不用 next/image：这张图要以 CORS 方式取回、原样上传成 WebGL 纹理 */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -174,6 +176,7 @@ export function InkCover({
               ? { element: playing ? element : null, rect: { x: 0, y: 0, width: size.width, height: size.height } }
               : undefined
           }
+          onUnavailableChange={setInkUnavailable}
           fallback={null}
         />
       ) : null}

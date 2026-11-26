@@ -7,25 +7,19 @@
 //
 // 视频条目在网格里只显示 poster 缩略图（加播放角标），点开才在 lightbox 里播放——
 // 网格里同时自动播放多个视频对低端机器是灾难。
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LuPlay } from "react-icons/lu";
 import { RowsPhotoAlbum } from "react-photo-album";
 import type { Photo } from "react-photo-album";
 import "react-photo-album/rows.css";
 import { InkRule } from "@/components/ui/ink-rule";
-import { useLightboxLock } from "@/hooks/use-lightbox-lock";
 import type { ProjectGalleryItem } from "@/lib/view-models/types";
 import { buildScaledUrl, buildSrcSet } from "@/lib/media";
-import Lightbox from "yet-another-react-lightbox";
-import type { SlideImage, SlideVideo } from "yet-another-react-lightbox";
-import Captions from "yet-another-react-lightbox/plugins/captions";
-import Counter from "yet-another-react-lightbox/plugins/counter";
-import Video from "yet-another-react-lightbox/plugins/video";
-import Zoom from "yet-another-react-lightbox/plugins/zoom";
-import "yet-another-react-lightbox/styles.css";
-import "yet-another-react-lightbox/plugins/captions.css";
-import "yet-another-react-lightbox/plugins/counter.css";
 import { ScrollTrigger } from "@/lib/animation/scroll-trigger";
+
+// 灯箱与视频/缩放插件在首次点击时再加载（与 zoomable-image.tsx 一致）
+const GalleryLightbox = dynamic(() => import("./gallery-lightbox"), { ssr: false });
 
 // 组件入参：
 // - items：媒体列表（图片 / GIF / 视频）
@@ -36,9 +30,6 @@ type ProjectGalleryProps = {
   playVideoLabel: string;
   viewImageLabel: string;
 };
-
-// lightbox 大图的 srcSet 档位
-const SLIDE_WIDTHS = [640, 1080, 1600, 2048];
 
 // 缩略图 srcSet 档位：覆盖单列满宽到多列窄栏，含 2x 屏
 const THUMB_WIDTHS = [320, 480, 640, 800, 1200, 1600];
@@ -82,32 +73,6 @@ const buildPhoto = (
   };
 };
 
-const buildSlide = (item: ProjectGalleryItem): SlideImage | SlideVideo => {
-  const description = item.caption || undefined;
-  const { imageUrl, imageAnimated, width, height } = item;
-
-  if (item.kind === "video") {
-    return {
-      type: "video",
-      // 同一张图在这里当封面帧；poster 是静帧用途，不需要保留 GIF 动画
-      poster: buildScaledUrl(imageUrl, { width: 1600, animated: false }),
-      width,
-      height,
-      description,
-      sources: [{ src: item.videoUrl, type: item.mimeType }],
-    };
-  }
-
-  return {
-    src: imageUrl,
-    alt: item.alt,
-    width,
-    height,
-    description,
-    srcSet: buildSrcSet({ url: imageUrl, width, height, animated: imageAnimated }, SLIDE_WIDTHS),
-  };
-};
-
 export function ProjectGallery({
   items,
   title,
@@ -127,14 +92,9 @@ export function ProjectGallery({
       ),
     [galleryItems, playVideoLabel, viewImageLabel],
   );
-  const slides = useMemo(() => galleryItems.map(buildSlide), [galleryItems]);
 
   // 当前打开的媒体索引；-1 表示 lightbox 关闭
   const [activeIndex, setActiveIndex] = useState(-1);
-
-  // lightbox 打开时暂停 Lenis、把画布换成墨色（见 use-lightbox-lock.ts）
-  const lightboxOpen = activeIndex >= 0;
-  useLightboxLock(lightboxOpen);
 
   // RowsPhotoAlbum 会在客户端拿到真实容器宽度后重新排版。跨路由进入项目页时，
   // Footer 的 ScrollTrigger 可能早于这次高度变化完成初始化，继续使用旧的起止位置。
@@ -211,21 +171,13 @@ export function ProjectGallery({
         }}
       />
 
-      <Lightbox
-        open={lightboxOpen}
-        index={activeIndex}
-        close={() => setActiveIndex(-1)}
-        slides={slides}
-        plugins={[Zoom, Captions, Counter, Video]}
-        zoom={{ maxZoomPixelRatio: 3 }}
-        counter={{ container: { style: { top: 0 } } }}
-        // 静音自动循环：符合作品集里 UI 演示片段的用法，
-        // 保留 controls 让访客能自己解除静音或暂停
-        video={{ autoPlay: true, muted: true, loop: true, controls: true, playsInline: true }}
-        // 背景色用不随主题变化的墨色：lightbox 的控件是白色，浅色模式下也必须是深底
-        styles={{ container: { backgroundColor: "hsl(var(--color-ink) / 0.95)" } }}
-        controller={{ closeOnBackdropClick: true }}
-      />
+      {activeIndex >= 0 ? (
+        <GalleryLightbox
+          items={galleryItems}
+          index={activeIndex}
+          onClose={() => setActiveIndex(-1)}
+        />
+      ) : null}
     </section>
   );
 }

@@ -249,14 +249,6 @@
   opacity: 1;
 }
 
-.sm-socials-list:hover .sm-socials-link {
-  opacity: 0.35;
-}
-
-.sm-socials-list:hover .sm-socials-link:hover {
-  opacity: 1;
-}
-
 .sm-socials-link:focus-visible {
   outline: 2px solid var(--sm-accent, hsl(var(--color-text-muted-light)));
   outline-offset: 3px;
@@ -284,8 +276,18 @@
     opacity 0.3s ease;
 }
 
-.sm-socials-link:hover {
-  color: var(--sm-accent, hsl(var(--color-text-muted-light)));
+@media (hover: hover) {
+  .sm-socials-list:hover .sm-socials-link {
+    opacity: 0.35;
+  }
+
+  .sm-socials-list:hover .sm-socials-link:hover {
+    opacity: 1;
+  }
+
+  .sm-socials-link:hover {
+    color: var(--sm-accent, hsl(var(--color-text-muted-light)));
+  }
 }
 
 .sm-panel-list {
@@ -323,27 +325,44 @@
   transition: opacity 0.3s ease;
 }
 
-.staggered-menu-panel .sm-socials-list:hover .sm-socials-link:not(:hover) {
-  opacity: 0.35;
-}
-
 .staggered-menu-panel .sm-socials-list:focus-within .sm-socials-link:not(:focus-visible) {
   opacity: 0.35;
 }
 
-.staggered-menu-panel .sm-socials-list .sm-socials-link:hover,
 .staggered-menu-panel .sm-socials-list .sm-socials-link:focus-visible {
   opacity: 1;
 }
 
 .sm-panel-itemLabel {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
   will-change: transform;
   transform-origin: 0% 100%;
 }
 
-.sm-panel-item:hover {
-  color: var(--sm-accent, hsl(var(--color-text-muted-light)));
+/* 当前页标识：一粒 Coral 圆点（手册 03：Coral 只落在线和点上，不染字） */
+.sm-panel-activeDot {
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background-color: hsl(var(--color-accent));
+  flex-shrink: 0;
+}
+
+@media (hover: hover) {
+  .staggered-menu-panel .sm-socials-list:hover .sm-socials-link:not(:hover) {
+    opacity: 0.35;
+  }
+
+  .staggered-menu-panel .sm-socials-list .sm-socials-link:hover {
+    opacity: 1;
+  }
+
+  .sm-panel-item:hover {
+    color: var(--sm-accent, hsl(var(--color-text-muted-light)));
+  }
 }
 
 .sm-panel-list[data-numbering] {

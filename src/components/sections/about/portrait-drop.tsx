@@ -52,6 +52,8 @@ const MIN_SCALE = 0.85;
 export function PortraitDrop() {
   const anchorRef = useRef<HTMLSpanElement>(null);
   const supported = useInkSupported();
+  const [inkUnavailable, setInkUnavailable] = useState(false);
+  const inkActive = supported && !inkUnavailable;
   // 照片每加载完一次就加一：用来触发重画（next/image 会按 srcset 换图）
   const [loaded, setLoaded] = useState(0);
 
@@ -59,13 +61,13 @@ export function PortraitDrop() {
     const frame = anchorRef.current?.parentElement;
     const image = frame?.querySelector("img");
     if (!frame || !image) return;
-    // 画布能用时，排版里的照片让位给墨里的那张
-    frame.dataset.ink = supported ? "on" : "off";
+    // 画布能用时，排版里的照片让位给墨里的那张；不支持或上下文丢失时显出原照片
+    frame.dataset.ink = inkActive ? "on" : "off";
     const onLoad = () => setLoaded((n) => n + 1);
     if (image.complete && image.naturalWidth) onLoad();
     image.addEventListener("load", onLoad);
     return () => image.removeEventListener("load", onLoad);
-  }, [supported]);
+  }, [inkActive]);
 
   const build = (width: number, height: number, box: HTMLElement): InkSpec => {
     const k = Math.min(1, Math.max(MIN_SCALE, width / REFERENCE_SIZE));
@@ -106,7 +108,14 @@ export function PortraitDrop() {
     <>
       <span ref={anchorRef} hidden />
       {supported ? (
-        <InkSurface className="!absolute inset-0" tables={INK_TABLES} build={build} buildKey={`portrait-drop:${loaded}`} fallback={null} />
+        <InkSurface
+          className="!absolute inset-0"
+          tables={INK_TABLES}
+          build={build}
+          buildKey={`portrait-drop:${loaded}`}
+          onUnavailableChange={setInkUnavailable}
+          fallback={null}
+        />
       ) : null}
     </>
   );

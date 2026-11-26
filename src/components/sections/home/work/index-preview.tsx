@@ -52,10 +52,12 @@ function buildPreview(item: PreviewItem, image: HTMLImageElement | null) {
 
 export function IndexPreview({ item, top }: { item: PreviewItem | null; top: number }) {
   const supported = useInkSupported();
+  const [inkUnavailable, setInkUnavailable] = useState(false);
+  const inkActive = supported && !inkUnavailable;
   const reducedMotion = usePrefersReducedMotion();
-  // 移开后保留最后一个项目，让它淡出
+  // 移开后保留最后一个项目，让它淡出；按 id 对比，避免父组件重渲染时反复同步写状态
   const [shown, setShown] = useState<PreviewItem | null>(item);
-  if (item && item !== shown) setShown(item);
+  if (item && item.id !== shown?.id) setShown(item);
   const [images, setImages] = useState<Record<string, HTMLImageElement | null>>({});
 
   // 封面按需加载（第一次悬停时），加载失败记为 null：墨滩显示为纯墨
@@ -72,7 +74,7 @@ export function IndexPreview({ item, top }: { item: PreviewItem | null; top: num
     };
   }, [url, id]);
 
-  const video = item?.video && supported && !reducedMotion ? coverVideo(item.id, item.video) : null;
+  const video = item?.video && inkActive && !reducedMotion ? coverVideo(item.id, item.video) : null;
   // 悬停期间播这个项目的视频；移开后把播放交还给焦点作品
   const active = Boolean(item);
   useEffect(() => {
@@ -104,7 +106,13 @@ export function IndexPreview({ item, top }: { item: PreviewItem | null; top: num
           buildKey={`preview:${shown.id}:${image ? "image" : "pending"}`}
           video={{ element: video, rect: { x: 0, y: 0, width: PREVIEW_WIDTH, height: PREVIEW_HEIGHT } }}
           paused={paused}
-          fallback={null}
+          onUnavailableChange={setInkUnavailable}
+          fallback={
+            shown.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={shown.image} alt="" className="size-full object-cover" />
+            ) : null
+          }
         />
       ) : null}
       {shown && !supported && shown.image ? (

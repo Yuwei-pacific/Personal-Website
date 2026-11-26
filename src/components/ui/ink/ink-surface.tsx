@@ -73,6 +73,7 @@ export function InkSurface({
   focus,
   video,
   paused = false,
+  onUnavailableChange,
   fallback,
 }: {
   className?: string;
@@ -91,6 +92,8 @@ export function InkSurface({
   paused?: boolean;
   /** 化开时在墨芯里播放的视频与它所占的区域（盒子坐标，CSS px）；element 为 null = 淡回静止封面 */
   video?: { element: HTMLVideoElement | null; rect?: { x: number; y: number; width: number; height: number } };
+  /** WebGL 不可用或上下文丢失时的回调（恢复时传 false），供父组件显隐普通图片/SVG 兜底 */
+  onUnavailableChange?: (unavailable: boolean) => void;
   fallback: ReactNode;
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
@@ -98,10 +101,16 @@ export function InkSurface({
   const rendererRef = useRef<InkRenderer | null>(null);
   const buildRef = useRef(build);
   const watchRef = useRef(watch);
+  const onUnavailableChangeRef = useRef(onUnavailableChange);
   const [padding, setPadding] = useState<Padding>(ZERO);
   // 窗口模式下画布的高度（CSS px）；null = 普通模式，画布铺满盒子
   const [windowHeight, setWindowHeight] = useState<number | null>(null);
   const failed = !useInkSupported();
+  // 运行期失败（上下文数触顶、着色器编译失败、或移动端后台切换触发 webglcontextlost）
+  const [contextUnavailable, setContextUnavailable] = useState(false);
+  // 上下文恢复计数器：webglcontextrestored 触发后递增，让渲染器/查找表/布局 effect 干净重建
+  const [restoreVersion, setRestoreVersion] = useState(0);
+  const unavailable = failed || contextUnavailable;
   const { theme } = useTheme();
   const reducedMotion = usePrefersReducedMotion();
 
@@ -111,31 +120,66 @@ export function InkSurface({
   useEffect(() => {
     buildRef.current = build;
     watchRef.current = watch;
+    onUnavailableChangeRef.current = onUnavailableChange;
   });
+
+  useEffect(() => {
+    onUnavailableChangeRef.current?.(unavailable);
+  }, [unavailable]);
 
   useEffect(() => {
     pausedRef.current = paused;
     visibilityRef.current();
   }, [paused]);
 
-  // 渲染器只建一次（不支持时画布不存在，这里什么也不做）
+  // 监听 WebGL 上下文丢失与恢复：丢失时先退回静态兜底，不留白屏；浏览器恢复后自动重建
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    // 支持探测通过但着色器仍编译失败的极少数情况：画布留空（与显影前一样），不再退回
+    if (!canvas || failed) return;
+
+    const handleContextLost = (event: Event) => {
+      event.preventDefault();
+      rendererRef.current?.destroy();
+      rendererRef.current = null;
+      setContextUnavailable(true);
+    };
+
+    const handleContextRestored = () => {
+      setContextUnavailable(false);
+      setRestoreVersion((v) => v + 1);
+    };
+
+    canvas.addEventListener("webglcontextlost", handleContextLost);
+    canvas.addEventListener("webglcontextrestored", handleContextRestored);
+    return () => {
+      canvas.removeEventListener("webglcontextlost", handleContextLost);
+      canvas.removeEventListener("webglcontextrestored", handleContextRestored);
+    };
+  }, [failed]);
+
+  // 渲染器在首次挂载或上下文恢复后创建（不支持或上下文丢失时跳过）
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || failed || contextUnavailable) return;
     const renderer = InkRenderer.create(canvas);
-    if (!renderer) return;
+    if (!renderer) {
+      setContextUnavailable(true);
+      return;
+    }
     rendererRef.current = renderer;
+    // 恢复后重建的渲染器默认是「看得见」：补报一次真实的可见状态，否则滚出视口的画布会一直画到下次滚动。
+    // 首次挂载时这里还是空函数（可见性的 effect 在后面），由 IntersectionObserver 的首次回调负责
+    visibilityRef.current();
     return () => {
       renderer.destroy();
       rendererRef.current = null;
     };
-  }, [failed]);
+  }, [failed, contextUnavailable, restoreVersion]);
 
   // 主题：只换查找表
   useEffect(() => {
     rendererRef.current?.setTables(theme === "dark" ? tables.dark : tables.light, theme === "dark");
-  }, [theme, tables]);
+  }, [theme, tables, restoreVersion, contextUnavailable]);
 
   // 尺寸：盒子（或被 watch 的元素）变了才重画源图、重算模糊（这一步较贵）
   useEffect(() => {
@@ -222,12 +266,12 @@ export function InkSurface({
       window.removeEventListener("resize", schedule);
       if (frame) cancelAnimationFrame(frame);
     };
-  }, [buildKey, failed]);
+  }, [buildKey, failed, contextUnavailable, restoreVersion]);
 
   // 焦点切换（作品区：滚到哪个作品，哪个作品化开）
   useEffect(() => {
     if (focus !== undefined) rendererRef.current?.setFocus(focus);
-  }, [focus]);
+  }, [focus, restoreVersion, contextUnavailable]);
 
   // 视频：只在化开的那一处播放
   const videoElement = video?.element ?? null;
@@ -240,12 +284,12 @@ export function InkSurface({
     );
     // videoRect 每次渲染都是新对象：按数值比较，避免每帧重设
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [videoElement, videoRect?.x, videoRect?.y, videoRect?.width, videoRect?.height, padding.left, padding.top]);
+  }, [videoElement, videoRect?.x, videoRect?.y, videoRect?.width, videoRect?.height, padding.left, padding.top, restoreVersion, contextUnavailable]);
 
   // 开始渲染；减弱动画时只画静止的一帧
   useEffect(() => {
     rendererRef.current?.start(!reducedMotion);
-  }, [reducedMotion]);
+  }, [reducedMotion, restoreVersion, contextUnavailable]);
 
   // 看不见就不画：滚出视口，或者被后面的纸整个盖住。
   // 叠纸（position: sticky 的区块，现在没有页面在用，但这个判断留着）：往下滚时首屏那张纸其实一直贴在视口顶上、
@@ -306,12 +350,14 @@ export function InkSurface({
       className={cn("pointer-events-none relative select-none", className)}
       style={style}
     >
-      {failed ? (
-        fallback
-      ) : (
+      {unavailable ? fallback : null}
+      {failed ? null : (
         <canvas
           ref={canvasRef}
-          className={windowHeight === null ? "absolute block" : "absolute left-0 top-0 block w-full will-change-transform"}
+          className={cn(
+            windowHeight === null ? "absolute block" : "absolute left-0 top-0 block w-full will-change-transform",
+            contextUnavailable && "hidden",
+          )}
           style={
             windowHeight === null
               ? {

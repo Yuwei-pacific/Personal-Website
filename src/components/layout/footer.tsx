@@ -128,7 +128,6 @@ export function Footer({
   return (
     <footer
       ref={footerRef}
-      data-overscroll-dark
       // surface-inverse：页脚是每页唯一反转的区块（浅色模式墨底、深色模式纸底），像书的封底
       className="surface-inverse relative z-10 w-full overflow-hidden bg-design-dark-bg text-design-dark-text-primary"
     >

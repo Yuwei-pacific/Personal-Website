@@ -41,7 +41,6 @@ export function NextProject({
 
   return (
     <Link
-      data-overscroll-dark
       href={href}
       // 过场：墨从缩略图那一小滩漫开（见 ink-transition.tsx）
       onClick={(event) => inkNavigate(event, href, coverRef.current)}

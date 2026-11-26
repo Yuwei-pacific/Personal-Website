@@ -76,7 +76,9 @@ function createPortableComponents(
       ),
     },
     marks: {
-      strong: ({ children }) => <strong className={`font-semibold ${t.primary}`}>{children}</strong>,
+      // 正文里的重点词只换成墨色（正文本身是中墨），不加粗：Geist 只用 Regular（品牌手册 06）。
+      // font-normal 不能省 —— 浏览器默认会把 <strong> 加粗
+      strong: ({ children }) => <strong className={`font-normal ${t.primary}`}>{children}</strong>,
       em: ({ children }) => <em className="italic">{children}</em>,
       link: ({ children, value }) => {
         const href = getSafeHref((value as { href?: string })?.href);
