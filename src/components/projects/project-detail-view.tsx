@@ -12,6 +12,7 @@ import type { Dictionary } from "@/i18n/dictionaries";
 import { localizedPath } from "@/i18n/routing";
 
 import { CoverVideo } from "./cover-video";
+import { CustomBody, hasCustomBody } from "./custom";
 import { NextProject } from "./next-project";
 import { ProjectGallery } from "./project-gallery";
 import { MetaItem, MetaList, joinMeta } from "@/components/ui/meta-list";
@@ -69,6 +70,9 @@ export function ProjectDetailView({
 
   // 标题上方那一行：类型 — 年份
   const kicker = [project.projectType, project.year].filter(Boolean).join(" — ");
+
+  // 登记了自定义正文的项目（见 custom/index.ts）：章节换成专门写的组件，画廊由它自己排
+  const custom = hasCustomBody(project.slug);
 
   const hasCredits =
     project.myContribution.length > 0 ||
@@ -201,7 +205,11 @@ export function ProjectDetailView({
       >
         <div className={`flex flex-col ${CHAPTER_GAP}`}>
           {/* 可增删排序的内容模块 */}
-          <ProjectSections sections={project.sections} labels={d} />
+          {custom ? (
+            <CustomBody project={project} locale={locale} dictionary={dictionary} />
+          ) : (
+            <ProjectSections sections={project.sections} labels={d} />
+          )}
 
           {hasCredits ? (
             <section>
@@ -245,7 +253,7 @@ export function ProjectDetailView({
             </section>
           ) : null}
 
-          {project.gallery.length ? (
+          {!custom && project.gallery.length ? (
             <ProjectGallery
               items={project.gallery}
               title={d.gallery}
