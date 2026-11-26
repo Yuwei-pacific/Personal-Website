@@ -4,6 +4,8 @@
 // 用 .env.local 里的项目配置和只读 token；没有 token 时只能看到已发布的文档。
 //
 //   npm run audit:content
+import { readFileSync } from "node:fs";
+
 import { createClient } from "@sanity/client";
 
 try {
@@ -18,6 +20,19 @@ if (!projectId || !dataset) {
   console.error("缺少 NEXT_PUBLIC_SANITY_PROJECT_ID / NEXT_PUBLIC_SANITY_DATASET");
   process.exit(1);
 }
+
+// 自定义正文的项目（见 src/components/projects/custom/index.tsx）：章节是代码里专门写的，Sanity 里的正文本来就是空的。
+// 这里用正则从那个文件里取 slug —— 脚本是 .mjs，不能直接 import TS。那边改了常量的写法，这里要跟着改。
+function customBodySlugs() {
+  try {
+    const source = readFileSync("src/components/projects/custom/index.tsx", "utf8");
+    const list = /CUSTOM_BODY_SLUGS\s*=\s*\[([^\]]*)\]/.exec(source)?.[1] ?? "";
+    return [...list.matchAll(/["']([^"']+)["']/g)].map((m) => m[1]);
+  } catch {
+    return [];
+  }
+}
+const CUSTOM_SLUGS = customBodySlugs();
 
 const client = createClient({
   projectId,
@@ -154,7 +169,8 @@ for (const d of docs) {
     if (mb > COVER_MAX_MB) todos.push(`封面 ${mb.toFixed(1)} MB，建议压缩`);
   }
   const sectionCount = doc.sections?.length ?? 0;
-  if (sectionCount <= 1) todos.push(`正文只有 ${sectionCount} 个模块`);
+  const customBody = CUSTOM_SLUGS.includes(doc.slug);
+  if (!customBody && sectionCount <= 1) todos.push(`正文只有 ${sectionCount} 个模块`);
   todos.push(...sectionMediaTodos(doc.sectionMedia));
   if (doc.galleryNoAlt) todos.push(`画廊 ${doc.galleryNoAlt}/${doc.galleryCount} 张没有 alt`);
   if (todos.length) withTodos += 1;
@@ -173,8 +189,19 @@ for (const d of docs) {
     `  client ${doc.client ?? "—"} | contributors ${doc.contributors?.length ?? 0} | skills ${doc.tags?.length ?? 0} | links ${doc.linkCount ?? 0}`,
   );
   console.log(`  封面 ${cover} | 封面视频 ${doc.hasVideo ? "有" : "—"}`);
-  console.log(`  正文 ${sectionCount} 个模块${sections ? ` [${sections}]` : ""} | 画廊 ${doc.galleryCount ?? 0} 张`);
+  console.log(
+    customBody
+      ? `  正文 自定义（代码里的专页） | 画廊 ${doc.galleryCount ?? 0} 张`
+      : `  正文 ${sectionCount} 个模块${sections ? ` [${sections}]` : ""} | 画廊 ${doc.galleryCount ?? 0} 张`,
+  );
   console.log(todos.length ? `  待办：${todos.join("；")}` : "  ✓ 没有待办");
+}
+
+// 登记了自定义正文、Sanity 里却找不到的 slug：多半是在 Studio 里改了 slug，那一页会悄悄退回空的模板正文
+const known = new Set(docs.map((d) => d.slug));
+const orphans = CUSTOM_SLUGS.filter((slug) => !known.has(slug));
+for (const slug of orphans) {
+  console.log(`\n⚠ 自定义正文找不到对应的项目：${slug}（Sanity 里没有这个 slug；改了 slug 的话，同步改 custom/index.tsx）`);
 }
 
 console.log(`\n共 ${shown} 个项目，${withTodos} 个有待办。`);

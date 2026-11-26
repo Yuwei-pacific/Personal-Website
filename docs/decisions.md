@@ -9,6 +9,14 @@ do not describe the current design here — that is the brand manual and `CLAUDE
   edge, and on project pages the next sheet covered half the cover.
 - **A root layout reading `headers()`**: made the whole tree dynamic; `revalidate` silently stopped working.
 - **`<SanityLive />`**: shipped ~33 KB and a persistent connection to every visitor for live refresh nobody needs.
+- **A hand-designed page per project** (dropping the shared template, or dropping Sanity for in-repo pages):
+  every page would need its own pass over both themes, both locales and every breakpoint on each site change, and
+  moving media out of Sanity buys visitors nothing. Per-project layout options tried on 2026-11-19 looked worse
+  than the shared rhythm. One custom body exists, for the identity case, whose material is code.
+- **Case-page copy inside `dictionaries.ts`**: that dictionary is passed whole to the navbar, so the copy (and the
+  origin story) ended up in every page's payload.
+- **The identity case cover rendered with the manual's SVG filter**: at cover size the inner arcs of the mark
+  merged into blobs; the cover is a capture of the live WebGL ink.
 
 ## Hero
 

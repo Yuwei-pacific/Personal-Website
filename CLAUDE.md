@@ -189,8 +189,10 @@ loaded on demand; never animate it — it rasterizes on the CPU.
 - Reduced motion renders one static frame: no reveal, flow, breathing, stir or video.
 
 Ink appears only where it has a job: the hero (mark, line, slogan word), Work (pools and thread), the About
-portrait, the "next project" thumbnail, the project-entry transition (`projects/ink-transition.tsx`) and
-one quiet hand-drawn circle on the home About title (`about-ink.tsx`). The footer and all dividers
+portrait, the "next project" thumbnail, the project-entry transition (`projects/ink-transition.tsx`),
+one quiet hand-drawn circle on the home About title (`about-ink.tsx`) and the bloomed mark in the "Five colors"
+chapter of the identity case page — the only live ink on that page, and the only page allowed to explain the ink
+or show Cobalt, Cyan and Amber as swatches. The footer and all dividers
 (`ui/ink-rule.tsx`) are plain strokes with no bloom. The cursor (`ui/custom-cursor.tsx`) is not ink either: a
 paper-coloured dot drawn once on a 2D canvas and difference-blended, so it inverts whatever is under it (dark on
 paper, light on ink, in both themes); no bloom.
@@ -222,6 +224,13 @@ content from column 4.
   and the plate); `project-sections.tsx` only decides chapters and which column a block sits in. The same slot
   widths and threshold are repeated in `scripts/content-audit.mjs`, which flags uploads too small for their
   slot — change both together. Nothing in the template is per project: a layout change is a template change.
+  The one exception is a **custom body** (`components/projects/custom/`): for a slug registered there, the chapters
+  between the summary and the credits are a hand-written component and the template's gallery section is skipped;
+  header, cover, facts, credits and "next project" still come from the template and Sanity. Only the identity case
+  (`ink-holds-five-colors`) has one. Its copy is in `src/i18n/case-identity.ts`, kept out of `dictionaries.ts`
+  because that dictionary is serialized into every page through the navbar; its raster images are the project's
+  Sanity gallery, laid out by aspect ratio. Ask the user before adding a second custom body — each one is another
+  page to check in both themes, both locales and every breakpoint whenever the site changes.
 - **Footer**: the one inverted block per page — a plain line running into the top stroke of a solid mark that
   hangs below it, positioned in CSS (`--fm-h` / `--fm-w` / `--fm-bar`).
 - Two line-art figures (`work/ink-figure.tsx`) sit on the Work thread. Dark mode inverts them; invert only
