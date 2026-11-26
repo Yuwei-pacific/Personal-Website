@@ -10,6 +10,7 @@ import { SITE_AUTHOR } from "@/lib/site-metadata";
 
 import { SECTION_GRID, SECTION_MEASURE, SECTION_TEXT_COL, SectionLabel, SectionRule } from "../../project-sections";
 import type { CustomBodyProps } from "../types";
+import { ColorPlates } from "./color-plates";
 import { MarkPlates } from "./mark-plates";
 
 // 一章：和模板的章节同一副骨架（顶上的墨线、左栏编号和标题、正文从第 4 栏起）
@@ -77,7 +78,9 @@ export function IdentityBody({ project, locale }: CustomBodyProps) {
         <MarkPlates copy={copy.mark} name={SITE_AUTHOR} />
       </Chapter>
 
-      <Chapter index={3} title={copy.colors.title} text={copy.colors.text} variant={2} />
+      <Chapter index={3} title={copy.colors.title} text={copy.colors.text} variant={2}>
+        <ColorPlates copy={copy.colors} />
+      </Chapter>
 
       <Chapter index={4} title={copy.line.title} text={copy.line.text} variant={3} />
 
