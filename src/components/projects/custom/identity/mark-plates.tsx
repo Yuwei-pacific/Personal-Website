@@ -28,7 +28,7 @@ export function Plate({
     <figure className={cn("flex min-w-0 flex-col gap-3", className)}>
       <div
         className={cn(
-          "flex min-h-[13rem] flex-1 items-center justify-center bg-design-dark-surface p-6 text-design-dark-text-primary sm:p-10",
+          "flex min-h-[13rem] min-w-0 flex-1 items-center justify-center bg-design-dark-surface p-6 text-design-dark-text-primary sm:p-8",
           plateClassName,
         )}
       >
@@ -74,29 +74,26 @@ function Circles({ guide }: { guide: boolean }) {
   );
 }
 
-function Step({ index, label, children }: { index: number; label: string; children: ReactNode }) {
+// 一步只有图，不配说明：四张从左到右就是顺序，章节开头那句话已经说了「六个圆、几条直线、四刀」
+function Step({ children }: { children: ReactNode }) {
   return (
-    <li className="flex min-w-0 flex-col gap-3">
+    <li className="min-w-0">
       <svg viewBox="-0.5 -0.5 23 26" aria-hidden="true" className={cn("h-auto w-full", HAIRLINES)}>
         {children}
       </svg>
-      <p className="font-mono text-small text-design-dark-text-muted">
-        <span className="mr-2 text-design-dark-text-primary">{index}</span>
-        {label}
-      </p>
     </li>
   );
 }
 
-function Construction({ steps }: { steps: CaseIdentityCopy["mark"]["steps"] }) {
+function Construction() {
   return (
     <ol className="grid w-full grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
-      <Step index={1} label={steps[0]}>
+      <Step>
         <rect width={22} height={22} {...GUIDE} />
         <Circles guide={false} />
         <path d="M10.5 14H11.5M11 13.5V14.5" {...LINE} className="stroke-accent" />
       </Step>
-      <Step index={2} label={steps[1]}>
+      <Step>
         <Circles guide />
         <g {...LINE} stroke="currentColor">
           {STROKES.map((s) => (
@@ -104,7 +101,7 @@ function Construction({ steps }: { steps: CaseIdentityCopy["mark"]["steps"] }) {
           ))}
         </g>
       </Step>
-      <Step index={3} label={steps[2]}>
+      <Step>
         <Circles guide />
         <g fill="currentColor">
           <path d={HALF_RINGS} />
@@ -119,7 +116,7 @@ function Construction({ steps }: { steps: CaseIdentityCopy["mark"]["steps"] }) {
           ))}
         </g>
       </Step>
-      <Step index={4} label={steps[3]}>
+      <Step>
         {/* 几何版的路径画在 99 个单位见方的画板上（原点 10,10）：缩到 22 格 */}
         <g transform="scale(0.222222) translate(-10 -10)" fill="currentColor">
           <path d={MARK_GEO_PATH} />
@@ -159,11 +156,13 @@ export function MarkPlates({ copy, name }: { copy: CaseIdentityCopy["mark"]; nam
     <>
       <ScrollReveal>
         <Plate caption={copy.construction}>
-          <Construction steps={copy.steps} />
+          <Construction />
         </Plate>
       </ScrollReveal>
 
-      <ScrollReveal className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+      {/* 两块并排（lg 起；再窄每块装不下一排四个尺寸，改成一列），组合单独占一行。
+          试过三块一排：中等宽度的屏幕上每块只有两百多 px，尺寸那一排和名字都顶出了底板（用户 2026-11-26） */}
+      <ScrollReveal className="grid gap-x-6 gap-y-10 lg:grid-cols-2">
         <Plate caption={copy.both}>
           {/* 线是几何，淡墨是墨迹：同一副骨架。两条路径的坐标系不同，几何版按手册里的换算放进墨迹版的画板 */}
           <svg viewBox="8 9.5 36 36.6" aria-hidden="true" className={cn("h-40 w-auto", HAIRLINES)}>
@@ -183,9 +182,11 @@ export function MarkPlates({ copy, name }: { copy: CaseIdentityCopy["mark"]; nam
             <GeoMark className="size-4" />
           </div>
         </Plate>
+      </ScrollReveal>
 
-        <Plate caption={copy.lockup} className="sm:col-span-2 lg:col-span-1">
-          <div className="flex flex-wrap items-end justify-center gap-x-10 gap-y-8">
+      <ScrollReveal>
+        <Plate caption={copy.lockup}>
+          <div className="flex flex-wrap items-end justify-center gap-x-16 gap-y-10 sm:gap-x-24">
             <Lockup name={name} />
             <Lockup name={name} stacked />
           </div>

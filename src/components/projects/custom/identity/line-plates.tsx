@@ -1,9 +1,12 @@
 "use client";
 
 // 04 线：手画线的三种用法 —— 分隔、划出一个词、圈出一个词（手册 08）。
-// 线直接画在页面的底色上，不坐底板：行间的淡墨线在底板色上几乎看不见，而且线本来就是「每一页都在」的东西。
+// 三块图版，和 02、03 章同一种写法（图版 + 下面一行图注）：分隔占一整行，划词和圈词并排。
+// 试过不用图版、把三样东西按不同字号直接排在页面上：大字折成两行还落单一个词，三块各说各的，看起来很乱（用户 2026-11-26）。
+// 这一章的底板用纸色（surface-base），不用别章的深一档底板：行间的淡墨线在深一档的底板上几乎看不见，
+// 套上 surface-base 之后线和字的颜色都按「纸」这一面取，深浅模式自动跟着变。
 // 全是普通矢量，不用墨：这一页活的墨只有 03 章一处。圈词在首页 About 是画布里的素墨，这里用同一道走法的 SVG。
-// 每一组线进入视口时从左到右露出来一次；减少动态效果时直接是画好的。
+// 每块图版进入视口时，里面的线从左到右露出来一次；减少动态效果时直接是画好的。
 import { Fragment, useRef } from "react";
 
 import { InkRule } from "@/components/ui/ink-rule";
@@ -11,12 +14,16 @@ import { StressedText } from "@/components/ui/stress";
 import type { CaseIdentityCopy } from "@/i18n/case-identity";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/animation/scroll-trigger";
 
+import { Plate } from "./mark-plates";
+
 // 圈：viewBox 200 × 60，一笔画完，收笔处和起笔错开（手册 08 的样稿）
 const CIRCLE =
   "M14 31C10 13 58 5 108 6C158 7 194 16 190 32C186 48 140 55 96 54C52 53 12 47 15 27C16 19 28 12 44 9";
 
-// 大字的样稿行：Fraunces（标题用字），和首页 About 那句同一种写法
-const SAMPLE = "font-display text-[clamp(1.75rem,4.2vw,3.5rem)] leading-[1.2] tracking-display text-design-dark-text-primary";
+// 纸色的底板，内容靠左上排（别章的图版是居中的图形，这里是字）
+const PAPER = "surface-base bg-background items-stretch justify-start text-design-light-text-primary";
+// 三块图版里的字同一个字号：Fraunces（标题用字）。划词和圈词那两句各折成两行，用 balance 折匀，不落单
+const SAMPLE = "font-display text-[clamp(1.375rem,2.3vw,2rem)] leading-[1.25] tracking-display";
 
 function Circled({ text, word }: { text: string; word: string }) {
   const at = text.indexOf(word);
@@ -74,29 +81,42 @@ export function LinePlates({ copy }: { copy: CaseIdentityCopy["line"] }) {
   );
 
   return (
-    <div ref={ref} className="flex flex-col gap-16 sm:gap-24">
-      {/* 分隔：主线墨色，行间淡墨线。InkRule 自己只有 1 px 高、线画在它外面，
-          所以裁切加在外面这层有上下留白的盒子上，不然线会被整条裁掉 */}
-      <ul data-draw className="font-display text-2xl text-design-dark-text-primary sm:text-3xl">
-        {copy.rows.map((row, i) => (
-          <li key={row}>
-            <div data-line className="-my-1.5 py-1.5">
-              <InkRule variant={i} tone={i === 0 ? "strong" : "soft"} />
-            </div>
-            <p className="py-4 sm:py-5">{row}</p>
-          </li>
-        ))}
-      </ul>
+    <div ref={ref} className="flex flex-col gap-10 sm:gap-14">
+      <div data-draw>
+        <Plate caption={copy.divide} plateClassName={PAPER}>
+          {/* 主线墨色，行间淡墨线。InkRule 自己只有 1 px 高、线画在它外面，
+              所以裁切加在外面这层有上下留白的盒子上，不然线会被整条裁掉 */}
+          <ul className={`w-full ${SAMPLE}`}>
+            {copy.rows.map((row, i) => (
+              <li key={row}>
+                <div data-line className="-my-1.5 py-1.5">
+                  <InkRule variant={i} tone={i === 0 ? "strong" : "soft"} />
+                </div>
+                <p className="py-4 sm:py-5">{row}</p>
+              </li>
+            ))}
+          </ul>
+        </Plate>
+      </div>
 
-      <p data-draw className={SAMPLE}>
-        <span data-line-host>
-          <StressedText text={copy.stress.text} word={copy.stress.word} />
-        </span>
-      </p>
-
-      <p data-draw className={SAMPLE}>
-        <Circled text={copy.circle.text} word={copy.circle.word} />
-      </p>
+      <div className="grid gap-x-6 gap-y-10 md:grid-cols-2">
+        <div data-draw className="flex">
+          <Plate caption={copy.stress.label} className="flex-1" plateClassName={`${PAPER} items-center`}>
+            <p className={`text-balance ${SAMPLE}`}>
+              <span data-line-host>
+                <StressedText text={copy.stress.text} word={copy.stress.word} />
+              </span>
+            </p>
+          </Plate>
+        </div>
+        <div data-draw className="flex">
+          <Plate caption={copy.circle.label} className="flex-1" plateClassName={`${PAPER} items-center`}>
+            <p className={`text-balance ${SAMPLE}`}>
+              <Circled text={copy.circle.text} word={copy.circle.word} />
+            </p>
+          </Plate>
+        </div>
+      </div>
     </div>
   );
 }
