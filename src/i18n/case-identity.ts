@@ -69,7 +69,7 @@ const copy: Record<Locale, CaseIdentityCopy> = {
     },
     inUse: {
       title: "In uso",
-      text: "Un biglietto da visita, un’immagine di profilo, le copertine social e l’immagine di condivisione.",
+      text: "Un biglietto da visita, una copertina social, un’immagine di profilo e l’immagine di condivisione.",
     },
   },
   en: {
@@ -106,7 +106,7 @@ const copy: Record<Locale, CaseIdentityCopy> = {
     },
     inUse: {
       title: "In use",
-      text: "A business card, a profile picture, the social headers and the share image.",
+      text: "A business card, a social header, a profile picture and the share image.",
     },
   },
 };
