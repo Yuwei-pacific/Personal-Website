@@ -10,6 +10,7 @@ import { SITE_AUTHOR } from "@/lib/site-metadata";
 
 import { SECTION_GRID, SECTION_MEASURE, SECTION_TEXT_COL, SectionLabel, SectionRule } from "../../project-sections";
 import type { CustomBodyProps } from "../types";
+import { ApplicationPlates } from "./application-plates";
 import { ColorPlates } from "./color-plates";
 import { LinePlates } from "./line-plates";
 import { MarkPlates } from "./mark-plates";
@@ -89,7 +90,9 @@ export function IdentityBody({ project, locale }: CustomBodyProps) {
 
       {/* 位图都在画廊里：一张都没有时这一章不出现，不留一个只有标题的空章 */}
       {project.gallery.length ? (
-        <Chapter index={5} title={copy.inUse.title} text={copy.inUse.text} variant={0} />
+        <Chapter index={5} title={copy.inUse.title} text={copy.inUse.text} variant={0}>
+          <ApplicationPlates items={project.gallery} />
+        </Chapter>
       ) : null}
     </>
   );
