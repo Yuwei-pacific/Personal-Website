@@ -6,9 +6,11 @@ import type { ReactNode } from "react";
 
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { getCaseIdentityCopy } from "@/i18n/case-identity";
+import { SITE_AUTHOR } from "@/lib/site-metadata";
 
 import { SECTION_GRID, SECTION_MEASURE, SECTION_TEXT_COL, SectionLabel, SectionRule } from "../../project-sections";
 import type { CustomBodyProps } from "../types";
+import { MarkPlates } from "./mark-plates";
 
 // 一章：和模板的章节同一副骨架（顶上的墨线、左栏编号和标题、正文从第 4 栏起）
 function Chapter({
@@ -71,7 +73,9 @@ export function IdentityBody({ project, locale }: CustomBodyProps) {
         </ScrollReveal>
       </Chapter>
 
-      <Chapter index={2} title={copy.mark.title} text={copy.mark.text} variant={1} />
+      <Chapter index={2} title={copy.mark.title} text={copy.mark.text} variant={1}>
+        <MarkPlates copy={copy.mark} name={SITE_AUTHOR} />
+      </Chapter>
 
       <Chapter index={3} title={copy.colors.title} text={copy.colors.text} variant={2} />
 
