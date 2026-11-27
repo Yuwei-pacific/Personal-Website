@@ -67,7 +67,8 @@ const INK_TO_GRID = `scale(${CELL_PER_INK}) translate(${-INK_ORIGIN.x} ${-INK_OR
 
 // ── 行程和手感 ──
 // 钉住以后再滚多远（视口高度的倍数），其中前多少用来走完动画（剩下的画面停住）
-const TRAVEL_SCREENS = 2.2;
+// 起初是 2.2 屏，用户嫌太长（2026-11-27）
+const TRAVEL_SCREENS = 1.5;
 const TRAVEL_USED = 0.82;
 // 画面追滚动的滞后：0 = 贴着滚动，越接近 1 越滞后、越顺。按时间算，不同刷新率手感一样
 const SMOOTH = 0.82;
