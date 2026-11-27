@@ -26,6 +26,7 @@ export type CaseIdentityCopy = {
   line: {
     title: string;
     text: string;
+    type: { label: string; roles: [string, string, string] };
     divide: string;
     stress: { label: string; text: string; word: string };
     circle: { label: string; text: string; word: string };
@@ -60,8 +61,9 @@ const copy: Record<Locale, CaseIdentityCopy> = {
       atNight: "Di notte",
     },
     line: {
-      title: "La linea",
-      text: "Ogni linea è disegnata a mano, salvata come tracciato e riusata: per dividere, per sottolineare una parola, per cerchiarne una.",
+      title: "Caratteri e linea",
+      text: "Tre caratteri, ognuno con un solo compito. Ogni linea è disegnata a mano, salvata come tracciato e riusata: per dividere, per sottolineare una parola, per cerchiarne una.",
+      type: { label: "Caratteri", roles: ["Titoli", "Testo", "Etichette e numeri"] },
       divide: "Dividere",
       stress: { label: "Sottolineare una parola", text: "Un portfolio bilingue per uno studio di Milano.", word: "bilingue" },
       circle: { label: "Cerchiare una parola", text: "Lo disegno, poi lo costruisco.", word: "disegno" },
@@ -97,8 +99,9 @@ const copy: Record<Locale, CaseIdentityCopy> = {
       atNight: "At night",
     },
     line: {
-      title: "The line",
-      text: "Every line is drawn by hand, saved as a path and reused: to divide, to stress one word, to circle one.",
+      title: "Type and line",
+      text: "Three typefaces, each with one job. Every line is drawn by hand, saved as a path and reused: to divide, to stress one word, to circle one.",
+      type: { label: "Typefaces", roles: ["Titles", "Text", "Labels and numbers"] },
       divide: "Divide",
       stress: { label: "Stress one word", text: "A bilingual portfolio for a Milan studio.", word: "bilingual" },
       circle: { label: "Circle one word", text: "I design it, then I build it.", word: "design" },

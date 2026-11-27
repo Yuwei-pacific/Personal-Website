@@ -1,11 +1,13 @@
 "use client";
 
-// 04 线：手画线的三种用法 —— 分隔、划出一个词、圈出一个词（手册 08）。
-// 三块图版，和 02、03 章同一种写法（图版 + 下面一行图注）：分隔占一整行，划词和圈词并排。
+// 04 字与线：三种字体各管一件事（手册 06），和手画线的三种用法 —— 分隔、划出一个词、圈出一个词（手册 08）。
+// 四块图版，和 02、03 章同一种写法（图版 + 下面一行图注）：字体和分隔各占一整行，划词和圈词并排。
+// 字体原先不在这一页：一套识别讲了标志、颜色、线，没讲字（2026-11-27 补上）。它放在这一章而不单开一章 ——
+// 线都是画在字上的，下面三块图版本身就是 Fraunces 的样张。
 // 试过不用图版、把三样东西按不同字号直接排在页面上：大字折成两行还落单一个词，三块各说各的，看起来很乱（用户 2026-11-26）。
 // 这一章的底板用纸色（surface-base），不用别章的深一档底板：行间的淡墨线在深一档的底板上几乎看不见，
 // 套上 surface-base 之后线和字的颜色都按「纸」这一面取，深浅模式自动跟着变。
-// 全是普通矢量，不用墨：这一页活的墨只有 03 章一处。圈词在首页 About 是画布里的素墨，这里用同一道走法的 SVG。
+// 全是普通矢量，不用墨。圈词在首页 About 是画布里的素墨，这里用同一道走法的 SVG。
 // 每块图版进入视口时，里面的线从左到右露出来一次；减少动态效果时直接是画好的。
 import { Fragment, useRef } from "react";
 
@@ -24,6 +26,32 @@ const CIRCLE =
 const PAPER = "surface-base bg-background items-stretch justify-start text-design-light-text-primary";
 // 三块图版里的字同一个字号：Fraunces（标题用字）。划词和圈词那两句各折成两行，用 balance 折匀，不落单
 const SAMPLE = "font-display text-[clamp(1.375rem,2.3vw,2rem)] leading-[1.25] tracking-display";
+
+// 三种字体：样张用各自的字，名字和用途的排法跟「五色」的色块一样（上面是样，下面是名字和一行等宽的说明）。
+// 等宽的样张用数字：它的 Aa 和 Geist 几乎一样（本来就是一家），并排看不出是两种字；数字是它管的事，零也有自己的样子
+const FACES = [
+  { name: "Fraunces", sample: "Aa", className: "font-display tracking-display" },
+  { name: "Geist", sample: "Aa", className: "font-sans tracking-[-0.03em]" },
+  { name: "Geist Mono", sample: "01", className: "font-mono tracking-[-0.04em]" },
+] as const;
+
+function Typefaces({ roles }: { roles: CaseIdentityCopy["line"]["type"]["roles"] }) {
+  return (
+    <ul className="grid w-full grid-cols-3 gap-x-4 sm:gap-x-6">
+      {FACES.map((face, i) => (
+        <li key={face.name} className="flex min-w-0 flex-col gap-3">
+          <span aria-hidden="true" className={`text-[clamp(3rem,7.5vw,6rem)] leading-none ${face.className}`}>
+            {face.sample}
+          </span>
+          <span className="flex flex-col text-small leading-snug">
+            {face.name}
+            <span className="font-mono text-xs text-design-light-text-muted">{roles[i]}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 function Circled({ text, word }: { text: string; word: string }) {
   const at = text.indexOf(word);
@@ -82,6 +110,10 @@ export function LinePlates({ copy }: { copy: CaseIdentityCopy["line"] }) {
 
   return (
     <div ref={ref} className="flex flex-col gap-10 sm:gap-14">
+      <Plate caption={copy.type.label} plateClassName={`${PAPER} items-center`}>
+        <Typefaces roles={copy.type.roles} />
+      </Plate>
+
       <div data-draw>
         <Plate caption={copy.divide} plateClassName={PAPER}>
           {/* 主线墨色，行间淡墨线。InkRule 自己只有 1 px 高、线画在它外面，

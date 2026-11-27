@@ -84,16 +84,37 @@ function buildMark(width: number, height: number): InkSpec {
   };
 }
 
-/** 雨标志的化开状态。盒子就是墨迹本身，晕画在盒子外面。最小 240 px：再小最里面两段弧会化成两个圆点 */
-export function InkMark({ className, label }: { className?: string; label?: string }) {
+// 固定一种色表的两份：样稿的底色不跟主题走时用
+const MARK_TABLES_FIXED = {
+  light: { light: INK_TABLES.light, dark: INK_TABLES.light },
+  dark: { light: INK_TABLES.dark, dark: INK_TABLES.dark },
+};
+
+/**
+ * 雨标志的化开状态。盒子就是墨迹本身，晕画在盒子外面。最小 240 px：再小最里面两段弧会化成两个圆点。
+ * mode：固定用纸上（light）或夜里（dark）的色表，不跟主题走 —— 底色固定的样稿用。
+ * still：只画静止的一帧，不流动、不能搅。
+ */
+export function InkMark({
+  className,
+  label,
+  mode,
+  still,
+}: {
+  className?: string;
+  label?: string;
+  mode?: "light" | "dark";
+  still?: boolean;
+}) {
   return (
     <InkSurface
       className={className}
       label={label}
-      tables={MARK_TABLES}
+      tables={mode ? MARK_TABLES_FIXED[mode] : MARK_TABLES}
       build={buildMark}
       buildKey="mark"
-      fallback={<InkMarkSvg viewBox={MARK_INK_BOX} bleed className="h-full w-full" />}
+      still={still}
+      fallback={<InkMarkSvg mode={mode} viewBox={MARK_INK_BOX} bleed className="h-full w-full" />}
     />
   );
 }

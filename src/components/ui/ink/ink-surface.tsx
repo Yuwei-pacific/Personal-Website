@@ -73,6 +73,7 @@ export function InkSurface({
   focus,
   video,
   paused = false,
+  still = false,
   onUnavailableChange,
   onRelayout,
   fallback,
@@ -91,6 +92,8 @@ export function InkSurface({
   focus?: number;
   /** 暂停：不再每帧画（如目录预览淡出之后）。画布保留最后一帧，渲染器与纹理都留着，恢复时不用重建 */
   paused?: boolean;
+  /** 只画静止的一帧，和减弱动画时一样：不显影、不流动、不能搅。给样稿用（识别案例页「五色」的两块） */
+  still?: boolean;
   /** 化开时在墨芯里播放的视频与它所占的区域（盒子坐标，CSS px）；element 为 null = 淡回静止封面 */
   video?: { element: HTMLVideoElement | null; rect?: { x: number; y: number; width: number; height: number } };
   /** WebGL 不可用或上下文丢失时的回调（恢复时传 false），供父组件显隐普通图片/SVG 兜底 */
@@ -303,8 +306,8 @@ export function InkSurface({
 
   // 开始渲染；减弱动画时只画静止的一帧
   useEffect(() => {
-    rendererRef.current?.start(!reducedMotion);
-  }, [reducedMotion, restoreVersion, contextUnavailable]);
+    rendererRef.current?.start(!reducedMotion && !still);
+  }, [reducedMotion, still, restoreVersion, contextUnavailable]);
 
   // 看不见就不画：滚出视口，或者被后面的纸整个盖住。
   // 叠纸（position: sticky 的区块，现在没有页面在用，但这个判断留着）：往下滚时首屏那张纸其实一直贴在视口顶上、

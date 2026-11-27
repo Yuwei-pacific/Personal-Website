@@ -2,7 +2,7 @@
 
 // 化开效果的 SVG 兜底：只在浏览器不支持 WebGL2 时出现（ui/ink-mark.tsx 按需加载这个文件，
 // 绝大多数访客不会下载它）。静态的 —— SVG 滤镜在 CPU 上算，任何动画都会让它每帧重算，所以兜底时不显影、不流动。
-//
+// 识别案例页「五色」一章的两块样稿（纸上、夜里）底色固定，兜底时用 mode 固定色表，不跟主题走。
 //
 // 原理：源图是「白底 + 黑色标志」，经过
 //   位移（让边缘不规则）→ 两份不同程度的模糊按一张低频噪声逐像素混合（有的地方收得紧、
@@ -277,6 +277,11 @@ type InkProps = {
   seep?: boolean;
   /** 给读屏的名称；纯装饰时不传 */
   label?: string;
+  /**
+   * 固定用哪张色表（light = 纸上，dark = 夜里），不跟主题走。给底色固定的样稿用（识别案例页的「五色」）。
+   * 不传时两种主题各渲染一份，由主题决定显示哪份。
+   */
+  mode?: Mode;
 };
 
 function Ink({
@@ -287,6 +292,7 @@ function Ink({
   reveal = true,
   seep = false,
   label,
+  mode,
   children,
   style,
   bleed = false,
@@ -315,12 +321,20 @@ function Ink({
 
   return (
     <div ref={ref} className={cn("pointer-events-none select-none", className)} style={style}>
-      <Bloom {...shared} mode="light" className="only-light h-full w-full">
-        {children}
-      </Bloom>
-      <Bloom {...shared} mode="dark" className="only-dark h-full w-full">
-        {children}
-      </Bloom>
+      {mode ? (
+        <Bloom {...shared} mode={mode} className="h-full w-full">
+          {children}
+        </Bloom>
+      ) : (
+        <>
+          <Bloom {...shared} mode="light" className="only-light h-full w-full">
+            {children}
+          </Bloom>
+          <Bloom {...shared} mode="dark" className="only-dark h-full w-full">
+            {children}
+          </Bloom>
+        </>
+      )}
     </div>
   );
 }

@@ -195,7 +195,9 @@ animation in "The mark" chapter of the identity case page (`custom/identity/mark
 plate that draws the six circles, fills the strokes, then morphs the geometric cut into the ink outline while it
 blooms — the source shape is redrawn every frame through `InkSurface`'s `onRelayout`, then left alone so the ink
 flows and can be stirred). It is the only live ink on that page, and that is the only page allowed to explain the
-ink or show Cobalt, Cyan and Amber as swatches. The footer and all dividers
+ink or show Cobalt, Cyan and Amber as swatches. The two bloomed marks in its "Five colors" chapter are specimens, not
+live ink: `InkMark` with `still` (one frame, no flow, no stir) and `mode` (a fixed color table, because their plates
+keep paper and ink colors in both themes). The footer and all dividers
 (`ui/ink-rule.tsx`) are plain strokes with no bloom. The cursor (`ui/custom-cursor.tsx`) is not ink either: a
 paper-coloured dot drawn once on a 2D canvas and difference-blended, so it inverts whatever is under it (dark on
 paper, light on ink, in both themes); no bloom.
