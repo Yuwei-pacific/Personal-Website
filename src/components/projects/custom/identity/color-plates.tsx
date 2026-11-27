@@ -1,6 +1,5 @@
-// 03 五色：五个色块、一个真的在化开的标志、纸上和夜里两块静态样稿。
-// 这一章里的 InkMark 是全页唯一活的墨（「下一个项目」的缩略图平时是收拢的）。
-import { InkMark } from "@/components/ui/ink-mark";
+// 03 五色：五个色块，纸上和夜里两块静态样稿。
+// 化开的标志不在这一章：它是上一章作图动画的结尾（mark-motion.tsx），全页活的墨只有那一处。
 import { Mark } from "@/components/ui/mark";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import type { CaseIdentityCopy } from "@/i18n/case-identity";
@@ -27,17 +26,6 @@ export function ColorPlates({ copy }: { copy: CaseIdentityCopy["colors"] }) {
             </li>
           ))}
         </ol>
-      </ScrollReveal>
-
-      <ScrollReveal>
-        {/* 化开的标志最小 240 px（手册 02）；晕画在盒子外面，四周至少留 56 px（见 ui/ink-mark.tsx）。
-            盒子就是墨迹的外框：只给高度，宽度按外框的比例（ink-tables.ts 的 MARK_BOUNDS） */}
-        <Plate plateClassName="min-h-[26rem] flex-col gap-10 px-0 py-20 sm:py-24">
-          <InkMark className="aspect-[34.865/35.099] h-[min(22rem,60vw)]" label={copy.markLabel} />
-          <p className="hidden font-mono text-small text-design-dark-text-muted [@media(hover:hover)]:block">
-            {copy.hint}
-          </p>
-        </Plate>
       </ScrollReveal>
 
       <ScrollReveal className="grid gap-x-6 gap-y-10 sm:grid-cols-2">

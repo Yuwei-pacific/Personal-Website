@@ -1,5 +1,6 @@
-// 02 标志：四步作图，和三块图版（几何与墨迹叠看、尺寸、和名字的组合）。
-// 全是矢量，直接读 ink-tables.ts 里的两条路径；颜色跟主题走，切口用 Coral。
+// 02 标志：作图动画（mark-motion.tsx），和三块图版（几何与墨迹叠看、尺寸、和名字的组合）。
+// 图版全是矢量，直接读 ink-tables.ts 里的两条路径；颜色跟主题走。
+// 作图原先是四张并排的静态图，2026-11-27 换成一段跟着滚动走的动画，一路画到化开（用户定的）。
 import type { CSSProperties, ReactNode } from "react";
 
 import { MARK_GEO_PATH, MARK_GEO_VIEWBOX, MARK_PATH } from "@/components/ui/ink/ink-tables";
@@ -7,6 +8,8 @@ import { Mark } from "@/components/ui/mark";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import type { CaseIdentityCopy } from "@/i18n/case-identity";
 import { cn } from "@/lib/utils";
+
+import { MarkMotion } from "./mark-motion";
 
 /**
  * 一块图版：坐在比纸面深一档的底板上（和模板里偏高媒体用的底板同一个 token），下面一行等宽的图注。
@@ -41,90 +44,10 @@ export function Plate({
   );
 }
 
-// ── 四步作图 ──
-// 画在 22 × 22 的方格上，一格是半个笔画；圆心在 (11, 14)，六个同心圆的半径是 3、5、6、8、9、11 格
-// （手册 02「怎么切出来的」）。最外的圆会探到方格下面，所以画板比方格高。
-const RADII = [3, 5, 6, 8, 9, 11];
-// 一横、一竖、两条腿
-const STROKES = [
-  { x: 3, y: 0, width: 16, height: 2 },
-  { x: 10, y: 0, width: 2, height: 22 },
-  { x: 0, y: 14, width: 2, height: 8 },
-  { x: 20, y: 14, width: 2, height: 8 },
-];
-// 三圈环的上半边
-const HALF_RINGS =
-  "M0 14A11 11 0 0 1 22 14H20A9 9 0 0 0 2 14ZM3 14A8 8 0 0 1 19 14H17A6 6 0 0 0 5 14ZM6 14A5 5 0 0 1 16 14H14A3 3 0 0 0 8 14Z";
-// 四道切口：从圆心出发的半径
-const CUTS = ["M11 14L2.733 4.758", "M11 14L19.267 4.758", "M11 14L6.867 2.309", "M11 14L15.133 2.309"];
-
 // 线宽按屏幕像素算，图放大缩小线都是 1 px。vector-effect 不继承，写在 <g> 上没用：
 // 用 HAIRLINES 这个类在 <svg> 上一次给到里面每个图形
 const HAIRLINES = "[&_*]:[vector-effect:non-scaling-stroke]";
 const LINE = { fill: "none", strokeWidth: 1 } as const;
-const GUIDE = { ...LINE, strokeDasharray: "3 3", className: "stroke-design-dark-text-muted" } as const;
-
-function Circles({ guide }: { guide: boolean }) {
-  return (
-    <g {...(guide ? GUIDE : { ...LINE, stroke: "currentColor" })}>
-      {RADII.map((r) => (
-        <circle key={r} cx={11} cy={14} r={r} />
-      ))}
-    </g>
-  );
-}
-
-// 一步只有图，不配说明：四张从左到右就是顺序，章节开头那句话已经说了「六个圆、几条直线、四刀」
-function Step({ children }: { children: ReactNode }) {
-  return (
-    <li className="min-w-0">
-      <svg viewBox="-0.5 -0.5 23 26" aria-hidden="true" className={cn("h-auto w-full", HAIRLINES)}>
-        {children}
-      </svg>
-    </li>
-  );
-}
-
-function Construction() {
-  return (
-    <ol className="grid w-full grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
-      <Step>
-        <rect width={22} height={22} {...GUIDE} />
-        <Circles guide={false} />
-        <path d="M10.5 14H11.5M11 13.5V14.5" {...LINE} className="stroke-accent" />
-      </Step>
-      <Step>
-        <Circles guide />
-        <g {...LINE} stroke="currentColor">
-          {STROKES.map((s) => (
-            <rect key={`${s.x}-${s.y}`} {...s} />
-          ))}
-        </g>
-      </Step>
-      <Step>
-        <Circles guide />
-        <g fill="currentColor">
-          <path d={HALF_RINGS} />
-          {/* 两条腿往上多搭 0.1 格，盖住它和拱相接处的抗锯齿细缝 */}
-          {STROKES.map((s) => (
-            <rect key={`${s.x}-${s.y}`} {...s} y={s.y ? s.y - 0.1 : 0} height={s.y ? s.height + 0.1 : s.height} />
-          ))}
-        </g>
-        <g {...LINE} className="stroke-accent">
-          {CUTS.map((d) => (
-            <path key={d} d={d} />
-          ))}
-        </g>
-      </Step>
-      <Step>
-        {/* 几何版的路径画在 99 个单位见方的画板上（原点 10,10）：缩到 22 格 */}
-        <g transform="scale(0.222222) translate(-10 -10)" fill="currentColor">
-          <path d={MARK_GEO_PATH} />
-        </g>
-      </Step>
-    </ol>
-  );
-}
 
 // 几何版（20 px 以下用的那一版）
 function GeoMark({ className, style }: { className?: string; style?: CSSProperties }) {
@@ -154,11 +77,8 @@ function Lockup({ name, stacked = false }: { name: string; stacked?: boolean }) 
 export function MarkPlates({ copy, name }: { copy: CaseIdentityCopy["mark"]; name: string }) {
   return (
     <>
-      <ScrollReveal>
-        <Plate caption={copy.construction}>
-          <Construction />
-        </Plate>
-      </ScrollReveal>
+      {/* 不包 ScrollReveal：它自己跟着滚动走，而且要钉在屏幕上，外面不能再有位移动画 */}
+      <MarkMotion caption={copy.construction} hint={copy.hint} label={copy.markLabel} />
 
       {/* 两块并排（lg 起；再窄每块装不下一排四个尺寸，改成一列），组合单独占一行。
           试过三块一排：中等宽度的屏幕上每块只有两百多 px，尺寸那一排和名字都顶出了底板（用户 2026-11-26） */}

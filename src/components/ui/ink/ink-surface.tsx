@@ -1,4 +1,4 @@
-// 不是客户端入口：只由 ink-mark.tsx（"use client"）引入，props 里有函数。
+// 不是客户端入口：只由客户端组件引入（ink-mark.tsx，和案例页的作图动画 mark-motion.tsx），props 里有函数。
 // 一块化开的画布：负责尺寸、主题、可见性、减弱动画，把形状和参数交给 InkRenderer（ink-gl.ts）。
 //
 // 盒子（外层 div）就是排版用的那个框 —— 标志是墨迹的框、单词是字形的框。
@@ -74,6 +74,7 @@ export function InkSurface({
   video,
   paused = false,
   onUnavailableChange,
+  onRelayout,
   fallback,
 }: {
   className?: string;
@@ -94,6 +95,11 @@ export function InkSurface({
   video?: { element: HTMLVideoElement | null; rect?: { x: number; y: number; width: number; height: number } };
   /** WebGL 不可用或上下文丢失时的回调（恢复时传 false），供父组件显隐普通图片/SVG 兜底 */
   onUnavailableChange?: (unavailable: boolean) => void;
+  /**
+   * 逐帧改形状用（案例页的作图动画）：交给父组件一个函数，调用它就按 build 此刻的结果重画源图并立刻画一帧，
+   * 不经过 React 渲染、不等下一帧。画布卸载或重建时传 null
+   */
+  onRelayout?: (relayout: (() => void) | null) => void;
   fallback: ReactNode;
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
@@ -102,6 +108,7 @@ export function InkSurface({
   const buildRef = useRef(build);
   const watchRef = useRef(watch);
   const onUnavailableChangeRef = useRef(onUnavailableChange);
+  const onRelayoutRef = useRef(onRelayout);
   const [padding, setPadding] = useState<Padding>(ZERO);
   // 窗口模式下画布的高度（CSS px）；null = 普通模式，画布铺满盒子
   const [windowHeight, setWindowHeight] = useState<number | null>(null);
@@ -121,6 +128,7 @@ export function InkSurface({
     buildRef.current = build;
     watchRef.current = watch;
     onUnavailableChangeRef.current = onUnavailableChange;
+    onRelayoutRef.current = onRelayout;
   });
 
   useEffect(() => {
@@ -210,7 +218,8 @@ export function InkSurface({
 
       const spec = buildRef.current(width, height, box);
       const { top, right, bottom, left } = spec.padding;
-      setPadding(spec.padding);
+      // 数值没变就不换对象：逐帧重画时（onRelayout）不必每帧触发一次渲染
+      setPadding((p) => (p.top === top && p.right === right && p.bottom === bottom && p.left === left ? p : spec.padding));
       windowed = Boolean(spec.windowed);
       // 窗口模式的画布高度：比视口高出一截（触屏两个视口，其余一个半），留给浏览器自己滚动的余量 ——
       // 触屏的惯性滚动快，脚本又慢一拍，余量要大一些（见 ink-gl.ts 的 viewOffset）
@@ -260,8 +269,14 @@ export function InkSurface({
       if (!cancelled) schedule();
     });
     schedule();
+    onRelayoutRef.current?.(() => {
+      last = "";
+      update();
+      rendererRef.current?.drawNow();
+    });
     return () => {
       cancelled = true;
+      onRelayoutRef.current?.(null);
       observer.disconnect();
       window.removeEventListener("resize", schedule);
       if (frame) cancelAnimationFrame(frame);

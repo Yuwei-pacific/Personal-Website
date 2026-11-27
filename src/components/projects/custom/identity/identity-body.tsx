@@ -1,7 +1,7 @@
 // 识别案例页的正文：出处 → 标志 → 五色 → 线 → 应用。
 // 以图版为主，每章最多两句话（全页正文每种语言不超过约 200 词）—— 这一页是给人看的，不是给人读的。
 // 文案在 i18n/case-identity.ts；位图来自这个项目的 Sanity 画廊；其余图版直接画。
-// 全页活的墨只有 03 章那一个标志：一屏最多一处化开（手册 07）。
+// 全页活的墨只有 02 章作图动画结尾的那个标志：一屏最多一处化开（手册 07）。
 import type { ReactNode } from "react";
 
 import { ScrollReveal } from "@/components/ui/scroll-reveal";

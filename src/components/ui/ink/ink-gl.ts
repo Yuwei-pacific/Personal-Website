@@ -844,6 +844,15 @@ export class InkRenderer {
     if (visible) this.needsDraw = true;
   }
 
+  /**
+   * 立刻画一帧，不等帧循环。setLayout 会清空画布；逐帧改形状时（案例页的作图动画）改完紧跟着调用，
+   * 否则帧循环要是这一帧已经跑过了，画布就空着上屏，看起来在闪
+   */
+  drawNow() {
+    if (!this.layout || !this.lut) return;
+    this.draw(performance.now() / 1000, this.animated);
+  }
+
   /** 开始渲染。animated = false（减弱动画）时：不显影、不流动、不呼吸、不响应鼠标，只画静止画面 */
   start(animated: boolean) {
     this.animated = animated;

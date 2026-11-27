@@ -38,6 +38,8 @@ const WORD_TABLES = INK_TABLES;
 const even = (n: number) => ({ top: n, right: n, bottom: n, left: n });
 // 晕画在盒子外面要留多少：松的那档模糊约 4σ 才淡尽；鼠标划过时墨还会被推出去几十 px，至少留 56
 const bleedPadding = (loose: number) => Math.max(56, Math.ceil(loose * 4));
+/** 标志四周给晕留的余量（每个用户单位 u px）。案例页的作图动画用同一个数，画布才和这里的一样大 */
+export const markPadding = (u: number) => even(bleedPadding(MARK_LOOSE * u));
 
 // 标志：盒子 = 墨迹的外框（约 324 × 326 个用户单位，见 ink-tables.ts 的 MARK_UNIT）。
 // 下面的 u 都是「每个用户单位多少 px」= 盒子高度 / MARK_USER_SIZE.height
@@ -58,7 +60,7 @@ function drawMark(ctx: CanvasRenderingContext2D, x: number, y: number, u: number
 // 画布上的墨还在流动和呼吸，同样的数比手册里静止的那一帧渗得更开，最里面两段短弧和左腿会断。
 // 不再有竖向偏置：旧标志（L·i）是「上紧下松」，雨是左右对称、上下分量接近的字，四周一样对待
 const MARK_LOOSE = 13;
-const markParams = (u: number) => ({
+export const markParams = (u: number) => ({
   tight: 4 * u,
   loose: MARK_LOOSE * u,
   displacement: 4 * u,

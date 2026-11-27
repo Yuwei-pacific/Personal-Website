@@ -13,6 +13,8 @@ export type CaseIdentityCopy = {
     both: string;
     sizes: string;
     lockup: string;
+    hint: string;
+    markLabel: string;
   };
   colors: {
     title: string;
@@ -20,8 +22,6 @@ export type CaseIdentityCopy = {
     names: [string, string, string, string, string];
     onPaper: string;
     atNight: string;
-    hint: string;
-    markLabel: string;
   };
   line: {
     title: string;
@@ -49,6 +49,8 @@ const copy: Record<Locale, CaseIdentityCopy> = {
       both: "Geometrico e a inchiostro",
       sizes: "Dimensioni",
       lockup: "Con il nome",
+      hint: "Passaci sopra con il puntatore.",
+      markLabel: "Il marchio, costruito con sei cerchi e poi aperto dall’acqua",
     },
     colors: {
       title: "Cinque colori",
@@ -56,8 +58,6 @@ const copy: Record<Locale, CaseIdentityCopy> = {
       names: ["Core", "Cobalt", "Cyan", "Amber", "Coral"],
       onPaper: "Sulla carta",
       atNight: "Di notte",
-      hint: "Passaci sopra con il puntatore.",
-      markLabel: "Il marchio, aperto dall’acqua",
     },
     line: {
       title: "La linea",
@@ -86,6 +86,8 @@ const copy: Record<Locale, CaseIdentityCopy> = {
       both: "Geometric and ink",
       sizes: "Sizes",
       lockup: "With the name",
+      hint: "Move the pointer across it.",
+      markLabel: "The mark, built from six circles, then opened by water",
     },
     colors: {
       title: "Five colors",
@@ -93,8 +95,6 @@ const copy: Record<Locale, CaseIdentityCopy> = {
       names: ["Core", "Cobalt", "Cyan", "Amber", "Coral"],
       onPaper: "On paper",
       atNight: "At night",
-      hint: "Move the pointer across it.",
-      markLabel: "The mark, opened by water",
     },
     line: {
       title: "The line",
