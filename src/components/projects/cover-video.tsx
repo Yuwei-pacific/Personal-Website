@@ -80,12 +80,14 @@ export function CoverVideo({
         type="button"
         onClick={togglePlayback}
         aria-label={isPlaying ? pauseLabel : playLabel}
-        className="absolute bottom-4 right-4 inline-flex h-10 w-10 items-center justify-center border border-design-dark-text-primary/40 bg-design-dark-bg/60 text-design-dark-text-primary backdrop-blur-md transition-colors duration-base hover:bg-design-dark-bg/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-2 focus-visible:ring-offset-design-dark-bg"
+        // 手机上封面只有三百多 px 宽，40 px 的键太抢：缩到 32 px、贴近角落；
+        // 能点的范围用 ::before 往外撑到 44 px，手指照样好按
+        className="absolute bottom-2 right-2 inline-flex h-8 w-8 items-center justify-center before:absolute before:-inset-[7px] before:content-[''] sm:bottom-4 sm:right-4 sm:h-10 sm:w-10 sm:before:hidden border border-design-dark-text-primary/40 bg-design-dark-bg/60 text-design-dark-text-primary backdrop-blur-md transition-colors duration-base hover:bg-design-dark-bg/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-design-dark-text-primary focus-visible:ring-offset-2 focus-visible:ring-offset-design-dark-bg"
       >
         {isPlaying ? (
-          <LuPause className="h-4 w-4" aria-hidden />
+          <LuPause className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
         ) : (
-          <LuPlay className="h-4 w-4" aria-hidden />
+          <LuPlay className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
         )}
       </button>
     </div>
